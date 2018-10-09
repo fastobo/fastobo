@@ -4,7 +4,11 @@
 #![allow(unused_imports)]
 
 #[macro_use]
+extern crate failure;
+#[macro_use]
 extern crate nom;
+
 extern crate chrono;
 
+pub mod errors;
 pub mod obo;

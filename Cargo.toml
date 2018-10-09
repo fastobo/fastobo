@@ -4,6 +4,12 @@ version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 
-[dependencies]
-nom = "*"
-chrono = { version  = "*", default-features = false }
+[dependencies.chrono]
+version = "*"
+default-features = false
+
+[dependencies.failure]
+version = "*"
+
+[dependencies.nom]
+version = "*"

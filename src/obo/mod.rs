@@ -6,3 +6,6 @@
 //! - [The OBO Flat File Format Syntax and Semantics, version 1.4](http://purl.obolibrary.org/obo/oboformat/spec.html)
 
 pub mod ast;
+mod parser;
+
+use super::errors;

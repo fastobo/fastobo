@@ -8,7 +8,7 @@ mod clause;
 
 pub use self::clause::HeaderClause;
 
-/// A header frame, beginning an OBO file.
+/// A header frame, found at the beginning of an OBO file.
 #[derive(Debug, PartialEq)]
 pub struct HeaderFrame {
     pub clauses: Vec<HeaderClause>,

@@ -1,10 +1,13 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Write;
+use std::str::FromStr;
 
 use chrono::naive::NaiveDateTime;
 use chrono::Datelike;
 use chrono::Timelike;
+
+use crate::errors;
 
 use super::super::ClassId;
 use super::super::Id;
@@ -183,6 +186,21 @@ impl Display for HeaderClause {
         }
     }
 }
+
+// FIXME
+// impl FromStr for HeaderClause {
+//     type Err = crate::errors::ParseError;
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         use crate::obo::parser::header::header_clause;
+//         match super::super::super::parser::header::header_clause(s) {
+//             Ok(("", clause)) => Ok(clause),
+//             Ok((r, _)) => Err(self::errors::ParseError::RemainingInput {
+//                 remainer: r.to_string(),
+//             }),
+//             Err(e) => Err(e.into_error_kind().into()),
+//         }
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
@@ -370,4 +388,138 @@ mod tests {
             );
         }
     }
+
+    // FIXME
+    // mod from_str {
+    //     use super::*;
+    //     use nom::types::CompleteStr;
+    //
+    //     #[test]
+    //     fn ontology() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("ontology: go"),
+    //             Ok(HeaderClause::Ontology("go".to_string())),
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn date() {
+    //         let dt = NaiveDate::from_ymd(2018, 9, 14).and_hms(23, 2, 0);
+    //         assert_eq!(
+    //             HeaderClause::from_str("date: 14:09:2018 23:02"),
+    //             Ok(HeaderClause::Date(dt))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn subsetdef() {
+    //         let s = HeaderClause::Subsetdef(
+    //             self::Id::Unprefixed("GO_SLIM".to_string()),
+    //             "GO Slim".to_string(),
+    //         );
+    //         assert_eq!(s.to_string(), "subsetdef: GO_SLIM \"GO Slim\"")
+    //     }
+    //
+    //     #[test]
+    //     fn import() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("import: http://purl.obolibrary.org/obo/go.owl"),
+    //             Ok(HeaderClause::Import(
+    //                 "http://purl.obolibrary.org/obo/go.owl".to_string()
+    //             ))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn synonym_typedef() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("synonymtypedef: UK_SPELLING \"British spelling\" EXACT"),
+    //             Ok(HeaderClause::SynonymTypedef(
+    //                 self::Id::Unprefixed("UK_SPELLING".to_string()),
+    //                 "British spelling".to_string(),
+    //                 Some(self::SynonymScope::Exact),
+    //             ))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn id_space() {
+    //         assert_eq!(
+    //             HeaderClause::from_str(
+    //                 "idspace: GO urn:lsid:bioontology.org:GO: \"gene ontology terms\""
+    //             ),
+    //             Ok(HeaderClause::IdSpace(
+    //                 "GO".to_string(),
+    //                 "urn:lsid:bioontology.org:GO:".to_string(),
+    //                 Some("gene ontology terms".to_string()),
+    //             ))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn format_version() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("format-version: 1.2"),
+    //             Ok(HeaderClause::FormatVersion("1.2".to_string()))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn default_relationship_id_prefix() {
+    //         let d = HeaderClause::DefaultRelationshipIdPrefix("OBO_REL".to_string());
+    //         assert_eq!(d.to_string(), "default-relationship-id-prefix: OBO_REL");
+    //     }
+    //
+    //     #[test]
+    //     fn id_mapping() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("id-mapping: part_of OBO_REL:part_of"),
+    //             Ok(HeaderClause::IdMapping(
+    //                 self::Id::Unprefixed("part_of".to_string()),
+    //                 self::Id::Prefixed("OBO_REL".to_string(), "part_of".to_string())
+    //             )),
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn treat_xrefs_as_equivalent() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("treat-xrefs-as-equivalent: CL"),
+    //             Ok(HeaderClause::TreatXrefsAsEquivalent("CL".to_string()))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn treat_xrefs_as_genus_differentia() {
+    //         assert_eq!(
+    //             HeaderClause::from_str(
+    //                 "treat-xrefs-as-genus-differentia: CL part_of NCBITaxon:7955"
+    //             ),
+    //             Ok(HeaderClause::TreatXrefsAsGenusDifferentia(
+    //                 "CL".to_string(),
+    //                 self::Id::Unprefixed("part_of".to_string()).into(),
+    //                 self::Id::Prefixed("NCBITaxon".to_string(), "7955".to_string()).into(),
+    //             ))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn treat_xrefs_as_relationship() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("treat-xrefs-as-relationship: MA homologuous_to"),
+    //             Ok(HeaderClause::TreatXrefsAsRelationship(
+    //                 "MA".to_string(),
+    //                 self::Id::Unprefixed("homologuous_to".to_string()).into(),
+    //             ))
+    //         );
+    //     }
+    //
+    //     #[test]
+    //     fn treat_xrefs_as_is_a() {
+    //         assert_eq!(
+    //             HeaderClause::from_str("treat-xrefs-as-is_a: CL"),
+    //             Ok(HeaderClause::TreatXrefsAsIsA("CL".to_string()))
+    //         );
+    //     }
+    // }
 }

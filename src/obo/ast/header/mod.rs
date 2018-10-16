@@ -3,6 +3,9 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Write;
+use std::str::FromStr;
+
+use crate::errors;
 
 mod clause;
 
@@ -24,6 +27,19 @@ impl Display for HeaderFrame {
         {
             Some(err) => Err(err),
             None => Ok(()),
+        }
+    }
+}
+
+impl FromStr for HeaderFrame {
+    type Err = crate::errors::ParseError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match super::super::parser::header::header_frame(s) {
+            Ok(("", frame)) => Ok(frame),
+            Ok((r, _)) => Err(self::errors::ParseError::RemainingInput {
+                remainer: r.to_string(),
+            }),
+            Err(e) => Err(e.into_error_kind().into()),
         }
     }
 }

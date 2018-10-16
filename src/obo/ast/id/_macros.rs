@@ -1,7 +1,7 @@
 macro_rules! id_subclass {
-    (#[doc($docstring:literal)], $name:ident) => {
-        #[doc($docstring)]
+    (#[doc = $docstring:literal] $name:ident) => {
         #[derive(Debug, PartialEq)]
+        #[doc=$docstring]
         pub struct $name(pub Id);
 
         impl ::std::convert::From<Id> for $name {

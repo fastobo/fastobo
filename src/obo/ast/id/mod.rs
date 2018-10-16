@@ -13,13 +13,15 @@ use std::str::FromStr;
 #[macro_use]
 mod _macros;
 
-use super::errors;
+// --- ID Types ----------------------------------------------------------------
 
 /// The prefix of a prefixed identifier.
 pub type IdPrefix = String;
 
 /// An OBO namespace (not an ID space).
 pub type OboNamespace = String;
+
+// --- ID ----------------------------------------------------------------------
 
 /// An entity identifier.
 #[derive(Debug, PartialEq)]
@@ -32,12 +34,14 @@ pub enum Id {
     Prefixed(IdPrefix, String),
 }
 
+// --- Traits ------------------------------------------------------------------
+
 impl Display for Id {
     fn fmt(&self, f: &mut Formatter) -> ::std::fmt::Result {
-        match *self {
-            Id::Unprefixed(ref s) => write_escaped!(f, s, + ':' => "\\:"),
-            Id::Url(ref s) => write_escaped!(f, s),
-            Id::Prefixed(ref p, ref s) => {
+        match self {
+            Id::Unprefixed(s) => write_escaped!(f, s, + ':' => "\\:"),
+            Id::Url(s) => write_escaped!(f, s),
+            Id::Prefixed(p, s) => {
                 write_escaped!(f, p, + ':' => "\\:")?;
                 f.write_char(':')?;
                 write_escaped!(f, s)
@@ -47,11 +51,11 @@ impl Display for Id {
 }
 
 impl FromStr for Id {
-    type Err = self::errors::ParseError;
+    type Err = crate::errors::ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match super::super::parser::id::id(s) {
             Ok(("", id)) => Ok(id),
-            Ok((r, _)) => Err(self::errors::ParseError::RemainingInput {
+            Ok((r, _)) => Err(crate::errors::ParseError::RemainingInput {
                 remainer: r.to_string(),
             }),
             Err(e) => Err(e.into_error_kind().into()),
@@ -59,10 +63,29 @@ impl FromStr for Id {
     }
 }
 
-id_subclass!(#[doc("The identifier of a typedef")], RelationId);
-id_subclass!(#[doc("The identifier of a person")], PersonId);
-id_subclass!(#[doc("The identifier of a term")], ClassId);
-id_subclass!(#[doc("The identifier of an instance")], InstanceId);
+// --- Independent ID classes --------------------------------------------------
+
+id_subclass!(
+    ///The identifier of a typedef.
+    RelationId
+);
+
+id_subclass!(
+    ///The identifier of a person.
+    PersonId
+);
+
+id_subclass!(
+    /// The identifier of a term.
+    ClassId
+);
+
+id_subclass!(
+    /// The identifier of an instance.
+    InstanceId
+);
+
+// --- Tests -------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {

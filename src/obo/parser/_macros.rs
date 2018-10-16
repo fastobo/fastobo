@@ -31,9 +31,6 @@ macro_rules! bt {
                     tag!($tag)                                        >>
                     opt!(ws)                                          >>
                 b:  boolean                                           >>
-                    // Trim right because we don't want any extra
-                    // space but the greedy `unquoted` parser will
-                    // get them anyway
                     ($clause(b))
             )
         }

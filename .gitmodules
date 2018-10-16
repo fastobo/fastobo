@@ -1,3 +1,9 @@
 [submodule "extern/hupo-psi"]
 	path = extern/hupo-psi
 	url = https://github.com/HUPO-PSI/psi-ms-CV
+[submodule "tests/data/stato"]
+	path = tests/data/stato
+	url = https://github.com/ISA-tools/stato
+[submodule "extern/obo-relations"]
+	path = extern/obo-relations
+	url = https://github.com/oborel/obo-relations

@@ -13,3 +13,7 @@ version = "*"
 
 [dependencies.nom]
 version = "*"
+
+[[test]]
+path = "tests/lib.rs"
+name = "tests"

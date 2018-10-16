@@ -4,3 +4,6 @@
 [submodule "extern/obo-relations"]
 	path = extern/obo-relations
 	url = https://github.com/oborel/obo-relations
+[submodule "extern/pato-ontology"]
+	path = extern/pato-ontology
+	url = https://github.com/pato-ontology/pato

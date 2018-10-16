@@ -30,8 +30,7 @@ pub fn quoted_unescape(i: &str) -> nom::IResult<&str, String> {
         tag!("\""),
         many0!(verify!(obo_char, |c| c != OboChar::Unescaped('"'))),
         tag!("\"")
-    )
-    .map(|(r, v)| (r, v.iter().collect()))
+    ).map(|(r, v)| (r, v.iter().collect()))
 }
 
 /// Parse an unquoted string and unescape it.

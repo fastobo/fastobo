@@ -1,29 +1,13 @@
 //! Parsers for OBO header clauses.
 
-pub mod clauses;
+#[macro_use]
+mod _macros;
+mod clauses;
 
 use super::ast;
-use super::spacing::is_newline;
-use super::spacing::is_whitespace;
 use super::spacing::nl;
-use super::spacing::ws;
 
-/// Parse a header clause into the appropriate [`HeaderClause`] enum value.
-pub fn header_clause(i: &str) -> nom::IResult<&str, ast::HeaderClause> {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
-    alt_complete!(i,
-            clauses::date
-        |   clauses::format_version
-        |   clauses::data_version
-        |   clauses::saved_by
-        |   clauses::auto_generated_by
-        |   clauses::remark
-        |   clauses::ontology
-
-        // NB: MUST REMAIN LAST
-        |   clauses::unreserved
-    )
-}
+pub use self::clauses::header_clause;
 
 /// Parse a header frame into an [`HeaderFrame`] struct.
 pub fn header_frame(i: &str) -> nom::IResult<&str, ast::HeaderFrame> {

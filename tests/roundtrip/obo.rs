@@ -24,4 +24,5 @@ pub mod header {
     test_roundtrip_header!(psi_ms, "../data/psi-ms.obo");
     test_roundtrip_header!(ro, "../data/ro.obo");
     test_roundtrip_header!(pato, "../data/pato.obo");
+    test_roundtrip_header!(plant_ontology, "../data/plant-ontology.obo");
 }

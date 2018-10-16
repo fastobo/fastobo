@@ -45,6 +45,8 @@ mod scope;
 mod term;
 mod typedef;
 
+use super::errors;
+
 pub use self::dbxref::*;
 pub use self::header::*;
 pub use self::id::*;

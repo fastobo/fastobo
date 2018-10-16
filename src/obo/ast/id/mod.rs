@@ -8,16 +8,12 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Write;
+use std::str::FromStr;
 
-mod class;
-mod instance;
-mod person;
-mod relation;
+#[macro_use]
+mod _macros;
 
-pub use self::class::*;
-pub use self::instance::*;
-pub use self::person::*;
-pub use self::relation::*;
+use super::errors;
 
 /// The prefix of a prefixed identifier.
 pub type IdPrefix = String;
@@ -50,6 +46,24 @@ impl Display for Id {
     }
 }
 
+impl FromStr for Id {
+    type Err = self::errors::ParseError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match super::super::parser::id::id(s) {
+            Ok(("", id)) => Ok(id),
+            Ok((r, _)) => Err(self::errors::ParseError::RemainingInput {
+                remainer: r.to_string(),
+            }),
+            Err(e) => Err(e.into_error_kind().into()),
+        }
+    }
+}
+
+id_subclass!(#[doc("The identifier of a typedef")], RelationId);
+id_subclass!(#[doc("The identifier of a person")], PersonId);
+id_subclass!(#[doc("The identifier of a term")], ClassId);
+id_subclass!(#[doc("The identifier of an instance")], InstanceId);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -75,6 +89,31 @@ mod tests {
         fn url() {
             let id = self::Id::Url("https://dx.doi.org/".into());
             assert_eq!(id.to_string(), "https://dx.doi.org/");
+        }
+    }
+
+    mod from_str {
+        use super::*;
+
+        #[test]
+        fn url() {
+            let id = "http://purl.obolibrary.org/obo/MS_1000031";
+            assert_eq!(Id::from_str(id), Ok(Id::Url(id.to_string())))
+        }
+
+        #[test]
+        fn prefixed() {
+            let id = "MS:1000031";
+            assert_eq!(
+                Id::from_str(id),
+                Ok(Id::Prefixed("MS".to_string(), "1000031".to_string()))
+            )
+        }
+
+        #[test]
+        fn unprefixed() {
+            let id = "has_subclass";
+            assert_eq!(Id::from_str(id), Ok(Id::Unprefixed(id.to_string())));
         }
     }
 }

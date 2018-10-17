@@ -5,8 +5,6 @@
 
 #[macro_use]
 extern crate failure;
-#[macro_use]
-extern crate nom;
 
 extern crate chrono;
 

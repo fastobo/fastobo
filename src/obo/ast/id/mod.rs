@@ -53,13 +53,7 @@ impl Display for Id {
 impl FromStr for Id {
     type Err = crate::errors::ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match super::super::parser::id::id(s) {
-            Ok(("", id)) => Ok(id),
-            Ok((r, _)) => Err(crate::errors::ParseError::RemainingInput {
-                remainer: r.to_string(),
-            }),
-            Err(e) => Err(e.into_error_kind().into()),
-        }
+        unimplemented!("Id::from_str")
     }
 }
 

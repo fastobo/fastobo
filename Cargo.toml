@@ -4,13 +4,26 @@ version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 
-[dependencies]
-failure = "*"
+[dependencies.pest]
+version = "2.1.0"
+[dependencies.pest_derive]
+version = "2.1.0"
+[dependencies.failure]
+version = "*"
 
+# Used for obo14::IRI
+[dependencies.iri-string]
+version = "*"
+default-features = false
+
+# Used for obo14::IsoDate
 [dependencies.chrono]
 version = "*"
 default-features = false
 
-[[test]]
-path = "tests/lib.rs"
-name = "tests"
+
+
+
+# [[test]]
+# path = "tests/lib.rs"
+# name = "tests"

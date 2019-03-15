@@ -1,5 +1,3 @@
-use failure::Error;
-
 /// Error type for `FromStr` result.
 #[derive(Debug, PartialEq, Fail)]
 pub enum ParseError {

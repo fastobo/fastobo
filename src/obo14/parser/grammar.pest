@@ -1,0 +1,169 @@
+//! A PEG copy of the OBO format 1.4 syntax.
+//!
+//! # See also
+//!
+//! - [OBO Flat File Format 1.4 syntax](http://purl.obolibrary.org/obo/oboformat/spec.html)
+//! - [IRI syntax (IETF RFC 3987)](https://tools.ietf.org/html/rfc3987#section-2.2)
+
+
+// 2.1 BNF Notation
+
+Boolean = { "true" | "false" }
+
+// 2.2 Characters
+
+// 2.2.0 Basic Characters
+
+AlphaChar = @{ ASCII_ALPHA }
+Digit     = @{ ASCII_DIGIT }
+
+// 2.2.1 Spacing Characters
+
+WhitespaceChar = _{ " " | "\t" | "\u{0020}" }
+NewlineChar    = _{ "\r" | "\n" | "\u{000c}"}
+ws             = _{ WhitespaceChar+ }
+nl             = _{ WhitespaceChar* ~ NewlineChar}
+
+// 2.2.2 Special Characters
+
+UniCodeChar = { ANY }
+OboChar     = {
+    // escaped character
+    ("\\" ~ ("\\" | " " | "f" | "n" | "r" | "t" | "'"))
+    // unescaped character
+  | (!("\\") ~ !("\n") ~ ANY)
+}
+NonWsChar   = { !(WhitespaceChar) ~ OboChar }
+
+// FIXME
+Iri = { (NonWsChar)+ }
+
+
+// 2.3 Line Termination
+
+EOL = { WhitespaceChar* ~ QualifierBlock? ~ WhitespaceChar* ~ HiddenComment? ~ nl  }
+
+HiddenComment  = { "!" ~ ( !NewlineChar ~ UniCodeChar )* }
+
+Qualifier      = { Id ~ "=" ~ QuotedString }
+QualifierList  = { Qualifier ~ ("," ~ ws ~ Qualifier)* }
+QualifierBlock = { "[" ~ QualifierList ~ "]" }
+
+
+// 2.4 Clause Values
+
+QuotedString   = @{ "\"" ~ ( !"\"" ~ OboChar )* ~ "\"" }
+UnquotedString = @{ OboChar+ }
+
+
+// 2.5 Identifiers
+
+ClassId    = @{ Id }
+RelationId = @{ Id }
+InstanceId = @{ Id }
+
+Id           = { UrlId | PrefixedId | UnprefixedId }
+UrlId        = @{ ("http" | "https") ~ ":" ~ (NonWsChar)* }
+UnprefixedId = @{ ( !(":") ~ NonWsChar )+ }
+PrefixedId   = {  IdPrefix ~ ":" ~ LocalId }
+
+IdPrefix     = @{ ( !(":") ~ NonWsChar )+ }
+LocalId      = { NonWsChar+ }
+
+// 2.6 Xref Lists
+
+Xref         = { Id ~ (ws ~ QuotedString)? }
+XrefNoComma  = { XrefChar+ ~ (ws ~ QuotedString)? }
+XrefChar     = { !"," ~ NonWsChar }
+XrefList     = { "[" ~ XrefNoComma ~ WhitespaceChar* ~ ("," ~ WhitespaceChar* ~ XrefNoComma)* ~ "]" }
+
+// 3 Obo Grammar
+
+// 3.1 Obo Document Structure
+
+OboDoc      = { HeaderFrame ~ (EntityFrame)* ~ nl* }
+EntityFrame = { TermFrame | InstanceFrame | TypedefFrame }
+
+
+// 3.2 Obo Headers
+
+HeaderFrame = {
+    (HeaderClause ~ nl*)*
+}
+
+HeaderDate = @{ Digit{2} ~ ":" ~ Digit{2} ~ ":" ~ Digit{4} }
+HeaderTime = @{ Digit{2} ~ ":" ~ Digit{2} }
+
+// TODO
+HeaderClause = {
+    "format-version:" ~ ws ~ UnquotedString
+|   "data-version:" ~ ws ~ UnquotedString
+|   "date:" ~ ws ~ HeaderDate ~ ws ~ HeaderTime
+|   "saved-by:" ~ ws ~ UnquotedString
+|   "auto-generated-by:" ~ ws ~ UnquotedString
+|   "import:" ~ ws ~ UnquotedString
+|   "subsetdef:" ~ ws ~ Id ~ ws ~ QuotedString
+|   "synonymtypedef:" ~ ws ~ Id ~ ws ~ QuotedString ~ (ws ~ SynonymScope)?
+|   "default-namespace:" ~ ws ~ IdPrefix
+|   "idspace:" ~ ws ~ IdPrefix ~ ws ~ Iri ~ (ws ~ QuotedString)?
+|   "treat-xrefs-as-equivalent:" ~ ws ~ IdPrefix
+|   "treat-xrefs-as-genus-differentia:" ~ ws ~ IdPrefix ~ ws ~ RelationId ~ ws ~ ClassId
+|   "treat-xrefs-as-reverse-genus-differentia:" ~ ws ~ IdPrefix ~ ws ~ RelationId ~ ws ~ ClassId
+|   "treat-xrefs-as-relationship:" ~ ws ~ IdPrefix ~ ws ~ RelationId
+|   "treat-xrefs-as-is_a:" ~ ws ~ IdPrefix
+|   "treat-xrefs-as-has-subclass:" ~ ws ~ IdPrefix
+// FIXME: "property_value:"
+|   "remark:" ~ ws ~ UnquotedString
+|   "ontology:" ~ ws ~ UnquotedString
+|   "owl-axioms:" ~ ws ~ UnquotedString
+// Unreserved
+|   IdPrefix ~ ":" ~ ws ~ UnquotedString
+}
+
+
+// 3.3 Term Frames
+
+TermFrame = { nl*
+    ~ "[Term]" ~ nl
+    ~ "id:" ~ ws ~ ClassId ~ EOL
+    ~ (TermFrameClause ~ EOL)*
+}
+
+// TODO
+TermFrameClause = {
+    "is_anonymous:" ~ ws ~ Boolean
+}
+
+
+// 3.4 Typedef Frames
+
+TypedefFrame = { nl*
+    ~ "[Typedef]" ~ nl
+    ~ "id:" ~ ws ~ ClassId ~ EOL
+    ~ (TypedefFrameClause ~ EOL)*
+}
+
+// TODO
+TypedefFrameClause = {
+    "is_anonymous:" ~ ws ~ Boolean
+}
+
+
+// 3.5 Instance Frames
+
+InstanceFrame = { nl*
+    ~ "[Instance]" ~ nl
+    ~ "id:" ~ ws ~ ClassId ~ EOL
+    ~ (InstanceFrameClause ~ EOL)*
+}
+
+// TODO
+InstanceFrameClause = {
+    "is_anonymous:" ~ ws ~ Boolean
+}
+
+
+
+// 3.6 Synonym scope
+
+SynonymScope = { "EXACT" | "BROAD" | "NARROW" | "RELATED" }

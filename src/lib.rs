@@ -12,5 +12,5 @@ extern crate chrono;
 extern crate iri_string;
 extern crate pest;
 
-pub mod errors;
+pub mod error;
 pub mod obo14;

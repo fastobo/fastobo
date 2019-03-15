@@ -1,4 +1,3 @@
-
 mod date;
 mod header;
 mod id;
@@ -32,4 +31,22 @@ pub enum EntityFrame {
     Term(TermFrame),
     Typedef(TypedefFrame),
     Instance(InstanceFrame),
+}
+
+impl From<TermFrame> for EntityFrame {
+    fn from(frame: TermFrame) -> Self {
+        EntityFrame::Term(frame)
+    }
+}
+
+impl From<TypedefFrame> for EntityFrame {
+    fn from(frame: TypedefFrame) -> Self {
+        EntityFrame::Typedef(frame)
+    }
+}
+
+impl From<InstanceFrame> for EntityFrame {
+    fn from(frame: InstanceFrame) -> Self {
+        EntityFrame::Instance(frame)
+    }
 }

@@ -1,4 +1,3 @@
-
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! id_subclass {
     (#[doc = $docstring:literal] pub struct $name:ident;) => {
@@ -26,21 +25,27 @@ macro_rules! id_subclass {
             }
         }
 
-        // impl ::std::fmt::Display for $name {
-        //     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        //         self.0.fmt(f)
-        //     }
-        // }
+        impl ::std::fmt::Display for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                self.id.fmt(f)
+            }
+        }
 
-        // impl ::std::str::FromStr for $name {
-        //     type Err = $crate::errors::ParseError;
-        //     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        //         Id::from_str(s).map(Self::from)
-        //     }
-        // }
+        impl $crate::obo14::parser::FromPair for $name {
+            const RULE: Rule = <Id as FromPair>::RULE;
+            unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+                Id::from_pair_unchecked(pair).map(From::from)
+            }
+        }
+
+        impl ::std::str::FromStr for $name {
+            type Err = $crate::error::Error;
+            fn from_str(s: &str) -> Result<Self> {
+                Id::from_str(s).map(Self::from)
+            }
+        }
     };
 }
-
 
 macro_rules! id_subclasses {
     ($(#[doc = $docstring:literal] pub struct $name:ident;)*) => {

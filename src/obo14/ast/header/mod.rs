@@ -9,9 +9,9 @@ use super::PropertyValue;
 use super::QuotedString;
 use super::RelationId;
 use super::SubsetId;
-use super::UnquotedString;
 use super::SynonymScope;
 use super::SynonymTypeId;
+use super::UnquotedString;
 
 /// The header frame, containing metadata about an OBO document.
 pub struct HeaderFrame {
@@ -42,6 +42,7 @@ pub enum HeaderClause {
     Unreserved(UnquotedString, UnquotedString),
 }
 
+/// A reference to another document to be imported.
 pub enum Import {
     Iri(Iri),
     Abbreviated(Id), // QUESTION(@althonos): UnprefixedID ?

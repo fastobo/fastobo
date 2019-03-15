@@ -11,6 +11,18 @@ pub enum Iri {
     Relative(RelativeIriString),
 }
 
+impl From<AbsoluteIriString> for Iri {
+    fn from(abs: AbsoluteIriString) -> Self {
+        Iri::Absolute(abs)
+    }
+}
+
+impl From<RelativeIriString> for Iri {
+    fn from(rel: RelativeIriString) -> Self {
+        Iri::Relative(rel)
+    }
+}
+
 /// A clause value binding a property to a value in the relevant entity.
 pub enum PropertyValue {
     Identified(RelationId, Id),

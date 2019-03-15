@@ -33,7 +33,7 @@ OboChar     = {
     // unescaped character
   | (!("\\") ~ !("\n") ~ ANY)
 }
-NonWsChar   = { !(WhitespaceChar) ~ OboChar }
+NonWsChar   = { !(WhitespaceChar) ~ !(NewlineChar) ~ OboChar }
 
 // FIXME
 Iri = { (NonWsChar)+ }
@@ -64,11 +64,17 @@ InstanceId = @{ Id }
 
 Id           = { UrlId | PrefixedId | UnprefixedId }
 UrlId        = @{ ("http" | "https") ~ ":" ~ (NonWsChar)* }
-UnprefixedId = @{ ( !(":") ~ NonWsChar )+ }
-PrefixedId   = {  IdPrefix ~ ":" ~ LocalId }
+UnprefixedId = @{ ( !":" ~ NonWsChar )+ }
+PrefixedId   = {  IdPrefix ~ ":" ~ IdLocal }
 
-IdPrefix     = @{ ( !(":") ~ NonWsChar )+ }
-LocalId      = { NonWsChar+ }
+IdPrefix             = { CanonicalIdPrefix | NonCanonicalIdPrefix }
+CanonicalIdPrefix    = @{ AlphaChar ~ (AlphaChar | "_")* }
+NonCanonicalIdPrefix = @{ (!":" ~ NonWsChar)* }
+
+IdLocal             = { CanonicalIdLocal | NonCanonicalIdLocal }
+CanonicalIdLocal    = @{ ASCII_DIGIT+ }
+NonCanonicalIdLocal = @{ NonWsChar* }
+
 
 // 2.6 Xref Lists
 
@@ -81,7 +87,7 @@ XrefList     = { "[" ~ XrefNoComma ~ WhitespaceChar* ~ ("," ~ WhitespaceChar* ~ 
 
 // 3.1 Obo Document Structure
 
-OboDoc      = { HeaderFrame ~ (EntityFrame)* ~ nl* }
+OboDoc      = { HeaderFrame ~ (EntityFrame)* ~ nl* ~ EOI }
 EntityFrame = { TermFrame | InstanceFrame | TypedefFrame }
 
 

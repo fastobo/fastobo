@@ -10,14 +10,14 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
+use crate::error::Error;
+use crate::error::Result;
 use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
-use crate::error::Error;
-use crate::error::Result;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 pub enum Id {
     Prefixed(PrefixedId),
     Unprefixed(UnprefixedId),
@@ -69,9 +69,16 @@ impl FromPair for Id {
 impl_fromstr!(Id);
 
 /// An identifier without a prefix.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 pub struct UnprefixedId {
     value: String,
+}
+
+impl UnprefixedId {
+    /// Create a new unprefixed identifier.
+    pub fn new<S: Into<String>>(id: S) -> Self {
+        Self { value: id.into() }
+    }
 }
 
 impl Display for UnprefixedId {
@@ -82,6 +89,7 @@ impl Display for UnprefixedId {
             '\u{000c}' => f.write_str("\\f"),
             ' ' => f.write_str("\\ "),
             '\t' => f.write_str("\\t"),
+            ':' => f.write_str("\\:"),
             _ => f.write_char(char),
         })
     }
@@ -107,23 +115,22 @@ impl FromPair for UnprefixedId {
             }
         }
 
-        Ok(UnprefixedId { value: local })
+        Ok(UnprefixedId::new(local))
     }
 }
 impl_fromstr!(UnprefixedId);
 
 /// An identifier with a prefix.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 pub struct PrefixedId {
     prefix: IdPrefix,
     local: IdLocal,
 }
 
 impl PrefixedId {
-
     /// Create a new `PrefixedId` from a prefix and a local identifier.
     pub fn new(prefix: IdPrefix, local: IdLocal) -> Self {
-        Self {prefix, local}
+        Self { prefix, local }
     }
 
     /// Check if the prefixed identifier is canonical or not.
@@ -161,7 +168,7 @@ impl FromPair for PrefixedId {
         let mut inners = pair.into_inner();
         let prefix = IdPrefix::from_pair_unchecked(inners.next().unwrap())?;
         let local = IdLocal::from_pair_unchecked(inners.next().unwrap())?;
-        Ok(PrefixedId { prefix, local })
+        Ok(PrefixedId::new(prefix, local))
     }
 }
 impl_fromstr!(PrefixedId);
@@ -171,18 +178,45 @@ impl_fromstr!(PrefixedId);
 /// * A canonical ID prefix only contains alphabetic characters (`[a-zA-Z]`)
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 pub enum IdPrefix {
     Canonical(String),
     NonCanonical(String),
 }
 
 impl IdPrefix {
+    /// Create a new identifier prefix.
+    pub fn new<S>(s: S) -> Self
+    where
+        S: Into<String>,
+    {
+        let string = s.into();
+        let mut chars = string.chars();
+
+        if let Some(char) = chars.next() {
+            match char {
+                'A'...'Z' | 'a'...'z' => (),
+                _ => return IdPrefix::NonCanonical(string),
+            };
+        } else {
+            return IdPrefix::NonCanonical(string);
+        }
+
+        for char in chars {
+            match char {
+                'A'...'Z' | 'a'...'z' | '_' => (),
+                _ => return IdPrefix::NonCanonical(string),
+            }
+        }
+
+        IdPrefix::Canonical(string)
+    }
+
     /// Check if the identifier prefix is canonical or not.
     pub fn is_canonical(&self) -> bool {
         match self {
             IdPrefix::Canonical(_) => true,
-            IdPrefix::NonCanonical(_) => false
+            IdPrefix::NonCanonical(_) => false,
         }
     }
 }
@@ -235,45 +269,43 @@ impl FromPair for IdPrefix {
         Ok(IdPrefix::NonCanonical(local))
     }
 }
-impl_fromstr!(IdPrefix);
 
+impl_fromstr!(IdPrefix);
 
 /// A local identifier, preceded by a prefix in prefixed IDs.
 ///
 /// * A canonical local ID only contains digits (`[0-9]`).
 /// * A non-canonical local ID can contain any character excepting
 ///   whitespaces and newlines.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 pub enum IdLocal {
     Canonical(String),
     NonCanonical(String),
 }
 
 impl IdLocal {
-
     /// Create a new local identifier.
     pub fn new<S>(s: S) -> Self
     where
-        S: AsRef<str> + Into<String>
+        S: Into<String>,
     {
-        for char in s.as_ref().chars() {
+        let string = s.into();
+        for char in string.chars() {
             match char {
                 '0'...'9' => (),
-                _ => return IdLocal::NonCanonical(s.into()),
+                _ => return IdLocal::NonCanonical(string),
             }
         }
-        IdLocal::Canonical(s.into())
+        IdLocal::Canonical(string)
     }
 
     /// Check if the local identifier is canonical or not.
     pub fn is_canonical(&self) -> bool {
         match self {
             IdLocal::Canonical(_) => true,
-            IdLocal::NonCanonical(_) => false
+            IdLocal::NonCanonical(_) => false,
         }
     }
-
-
 }
 
 impl Display for IdLocal {
@@ -325,7 +357,6 @@ impl FromPair for IdLocal {
 }
 impl_fromstr!(IdLocal);
 
-
 // NB(@althonos): All identifiers are defined as separate typedefs so that
 //                `PartialEq` is not implemented and trying to compare a
 //                `ClassId` with a `RelationId` would fail at compile-time.
@@ -355,19 +386,59 @@ id_subclasses! {
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
     use super::*;
+    use std::str::FromStr;
+    use std::string::ToString;
 
-    mod prefixed {
+    mod id {}
+
+    mod prefixed_id {
 
         use super::*;
 
         #[test]
         fn from_str() {
+            let actual = PrefixedId::from_str("GO:0046154").unwrap();
+            let expected = PrefixedId::new(
+                IdPrefix::Canonical("GO".into()),
+                IdLocal::Canonical("0046154".into()),
+            );
+            assert_eq!(actual, expected);
 
-            let actual = PrefixedId::from_str("GO:0046154");
-            // let expected = PrefixedId::new();
+            assert!(PrefixedId::from_str("[Term]").is_err());
+            assert!(PrefixedId::from_str("").is_err());
+            assert!(PrefixedId::from_str("Some\nthing:spanning").is_err());
+            assert!(PrefixedId::from_str("GO:0046154 remaining").is_err());
         }
+
+        #[test]
+        fn to_string() {
+
+        }
+    }
+
+    mod unprefixed_id {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = UnprefixedId::from_str("biological_process").unwrap();
+            let expected = UnprefixedId::new("biological_process");
+            assert_eq!(actual, expected);
+
+            assert!(PrefixedId::from_str("[Term]").is_err());
+            assert!(PrefixedId::from_str("").is_err());
+            assert!(PrefixedId::from_str("Some\nthing:spanning").is_err());
+            assert!(PrefixedId::from_str("GO:0046154 remaining").is_err());
+        }
+
+        #[test]
+        fn to_string() {
+            let id = UnprefixedId::new("something:with:colons");
+            assert_eq!(id.to_string(), "something\\:with\\:colons");
+        }
+
     }
 
 }

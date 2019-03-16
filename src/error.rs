@@ -2,7 +2,7 @@ use pest::error::Error as PestError;
 
 use crate::obo14::parser::Rule;
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, PartialEq, Eq, Hash)]
 pub enum Error {
     #[fail(display = "invalid character: {}", c)]
     InvalidCharacter { c: char },

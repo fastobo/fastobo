@@ -56,10 +56,20 @@ macro_rules! impl_fromstr {
         impl std::str::FromStr for $type {
             type Err = $crate::error::Error;
             fn from_str(s: &str) -> Result<Self> {
+                use $crate::error::Error;
+                use $crate::obo14::parser::Parser as OboParser;
                 use $crate::pest::Parser;
-                let mut pairs = $crate::obo14::parser::Parser::parse(Self::RULE, s)?;
-                // FIXME: check for EOF ?
-                unsafe { <Self as FromPair>::from_pair_unchecked(pairs.next().unwrap()) }
+                // Parse the input string
+                let mut pairs = OboParser::parse(Self::RULE, s)?;
+                let pair = pairs.next().unwrap();
+                // Check EOI was reached
+                if pair.as_span().end() != s.len() {
+                    Err(Error::RemainingInput {
+                        i: s[pair.as_span().end()..].into(),
+                    })
+                } else {
+                    unsafe { <Self as FromPair>::from_pair_unchecked(pair) }
+                }
             }
         }
     };

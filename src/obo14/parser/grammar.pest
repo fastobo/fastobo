@@ -29,7 +29,7 @@ nl             = _{ WhitespaceChar* ~ NewlineChar}
 UniCodeChar = { ANY }
 OboChar     = {
     // escaped character
-    ("\\" ~ ("\\" | " " | "f" | "n" | "r" | "t" | "'"))
+    ("\\" ~ ("\\" | " " | "f" | "n" | "r" | "t" | "\""))
     // unescaped character
   | (!("\\") ~ !("\n") ~ ANY)
 }
@@ -41,7 +41,7 @@ Iri = { (NonWsChar)+ }
 
 // 2.3 Line Termination
 
-EOL = { WhitespaceChar* ~ QualifierBlock? ~ WhitespaceChar* ~ HiddenComment? ~ nl  }
+EOL = { WhitespaceChar* ~ (QualifierBlock ~ ws)? ~ HiddenComment? ~ nl  }
 
 HiddenComment  = { "!" ~ ( !NewlineChar ~ UniCodeChar )* }
 
@@ -97,8 +97,8 @@ HeaderFrame = {
     (HeaderClause ~ nl*)*
 }
 
-HeaderDate = @{ Digit{2} ~ ":" ~ Digit{2} ~ ":" ~ Digit{4} }
-HeaderTime = @{ Digit{2} ~ ":" ~ Digit{2} }
+HeaderDate = { Digit{2} ~ ":" ~ Digit{2} ~ ":" ~ Digit{4} }
+HeaderTime = { Digit{2} ~ ":" ~ Digit{2} }
 
 // TODO
 HeaderClause = {

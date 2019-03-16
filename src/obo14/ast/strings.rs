@@ -3,7 +3,15 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-/// A string enclosed by quotes.
+use pest::iterators::Pair;
+
+use crate::error::Error;
+use crate::error::Result;
+use super::super::parser::FromPair;
+use super::super::parser::Parser;
+use super::super::parser::Rule;
+
+/// A string enclosed by quotes, used for definitions.
 ///
 /// # Example
 /// ```rust
@@ -13,6 +21,7 @@ use std::fmt::Write;
 /// assert_eq!(s.as_ref(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct QuotedString {
     value: String,
 }
@@ -40,6 +49,7 @@ impl Display for QuotedString {
                 '\r' => f.write_str("\\r"),
                 '\n' => f.write_str("\\n"),
                 '\u{000c}' => f.write_str("\\f"),
+                '\\' => f.write_str("\\"),
                 '"' => f.write_str("\\\""),
                 _ => f.write_char(char),
             }))
@@ -47,7 +57,35 @@ impl Display for QuotedString {
     }
 }
 
+impl FromPair for QuotedString {
+    const RULE: Rule = Rule::QuotedString;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>)  -> Result<Self> {
+
+        let s = pair.as_str();
+        let mut local = String::with_capacity(s.len());
+        let mut chars = s.get_unchecked(1..s.len()-1).chars();
+        while let Some(char) = chars.next() {
+            if char == '\\' {
+                match chars.next() {
+                    Some('r') => local.push('\r'),
+                    Some('n') => local.push('\n'),
+                    Some('f') => local.push('\u{000c}'),
+                    Some('t') => local.push('\t'),
+                    Some(other) => local.push(other),
+                    None => panic!("missing stuff"), // FIXME(@althonos)
+                }
+            } else {
+                local.push(char);
+            }
+        }
+
+        Ok(QuotedString::new(local))
+    }
+}
+impl_fromstr!(QuotedString);
+
 /// A string without delimiters, used as values in different clauses.
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct UnquotedString {
     value: String,
 }
@@ -77,4 +115,68 @@ impl Display for UnquotedString {
             _ => f.write_char(char),
         })
     }
+}
+
+impl FromPair for UnquotedString {
+    const RULE: Rule = Rule::UnquotedString;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>)  -> Result<Self> {
+
+        let s = pair.as_str();
+        let mut local = String::with_capacity(s.len());
+        let mut chars = s.chars();
+        while let Some(char) = chars.next() {
+            if char == '\\' {
+                match chars.next() {
+                    Some('r') => local.push('\r'),
+                    Some('n') => local.push('\n'),
+                    Some('f') => local.push('\u{000c}'),
+                    Some('t') => local.push('\t'),
+                    Some(other) => local.push(other),
+                    None => panic!("missing stuff"), // FIXME(@althonos)
+                }
+            } else {
+                local.push(char);
+            }
+        }
+
+        Ok(UnquotedString::new(local))
+    }
+}
+impl_fromstr!(UnquotedString);
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use std::str::FromStr;
+    use std::string::ToString;
+
+    mod quoted {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = QuotedString::from_str("\"something in quotes\"");
+            let expected = QuotedString::new("something in quotes");
+            assert_eq!(expected, actual.unwrap());
+
+            let actual = QuotedString::from_str("\"something in \\\"escaped\\\" quotes\"");
+            let expected = QuotedString::new("something in \"escaped\" quotes");
+            assert_eq!(expected, actual.unwrap());
+        }
+    }
+
+    mod unquoted {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = UnquotedString::from_str("something\\ttabbed");
+            let expected = UnquotedString::new("something\ttabbed");
+            assert_eq!(expected, actual.unwrap());
+        }
+    }
+
 }

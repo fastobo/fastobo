@@ -35,8 +35,10 @@ OboChar     = {
 }
 NonWsChar   = { !(WhitespaceChar) ~ !(NewlineChar) ~ OboChar }
 
-// FIXME
-Iri = { (NonWsChar)+ }
+// NB(@althonos): Does not cover the complete IRI syntax, but it's hopefully
+//                enough to discriminate between an IRI and a "normal" import.
+Iri = { IriScheme ~ ":" ~ (NonWsChar)+ }
+IriScheme = { AlphaChar ~ (AlphaChar | Digit | "+" | "-" | ".") }
 
 
 // 2.3 Line Termination
@@ -107,7 +109,7 @@ HeaderClause = {
 |   "date:" ~ ws ~ HeaderDate ~ ws ~ HeaderTime
 |   "saved-by:" ~ ws ~ UnquotedString
 |   "auto-generated-by:" ~ ws ~ UnquotedString
-|   "import:" ~ ws ~ UnquotedString
+|   "import:" ~ ws ~ Import
 |   "subsetdef:" ~ ws ~ Id ~ ws ~ QuotedString
 |   "synonymtypedef:" ~ ws ~ Id ~ ws ~ QuotedString ~ (ws ~ SynonymScope)?
 |   "default-namespace:" ~ ws ~ IdPrefix
@@ -125,6 +127,8 @@ HeaderClause = {
 // Unreserved
 |   IdPrefix ~ ":" ~ ws ~ UnquotedString
 }
+
+Import = { Iri | Id }
 
 
 // 3.3 Term Frames

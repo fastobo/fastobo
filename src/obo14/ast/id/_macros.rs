@@ -32,9 +32,9 @@ macro_rules! id_subclass {
         }
 
         impl $crate::obo14::parser::FromPair for $name {
-            const RULE: Rule = <Id as FromPair>::RULE;
+            const RULE: Rule = Rule::$name;
             unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-                Id::from_pair_unchecked(pair).map(From::from)
+                Id::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
             }
         }
 

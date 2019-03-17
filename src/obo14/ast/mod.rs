@@ -21,7 +21,7 @@ pub use self::term::*;
 pub use self::typedef::*;
 
 /// A complete OBO document in format version 1.4.
-pub struct Obo14Doc {
+pub struct OboDoc {
     header: HeaderFrame,
     entities: Vec<EntityFrame>,
 }

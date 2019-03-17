@@ -1,3 +1,15 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
+use std::fmt::Write;
+
+use pest::iterators::Pair;
+
+use crate::error::Error;
+use crate::error::Result;
+use super::super::parser::FromPair;
+use super::super::parser::Parser;
+use super::super::parser::Rule;
 use super::ClassId;
 use super::Id;
 use super::IdPrefix;
@@ -12,6 +24,8 @@ use super::SubsetId;
 use super::SynonymScope;
 use super::SynonymTypeId;
 use super::UnquotedString;
+
+
 
 /// The header frame, containing metadata about an OBO document.
 pub struct HeaderFrame {
@@ -47,4 +61,38 @@ pub enum HeaderClause {
 pub enum Import {
     Iri(Iri),
     Abbreviated(Id), // QUESTION(@althonos): UnprefixedID ?
+}
+
+impl From<Iri> for Import {
+    fn from(iri: Iri) -> Self {
+        Import::Iri(iri)
+    }
+}
+
+impl From<Id> for Import {
+    fn from(id: Id) -> Self {
+        Import::Abbreviated(id)
+    }
+}
+
+impl Display for Import {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use self::Import::*;
+        match self {
+            Iri(iri) => iri.fmt(f),
+            Abbreviated(id) => id.fmt(f),
+        }
+    }
+}
+
+impl FromPair for Import {
+    const RULE: Rule = Rule::Import;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let inner = pair.into_inner().next().unwrap();
+        match inner.as_rule() {
+            Rule::Iri => Iri::from_pair_unchecked(inner).map(From::from),
+            Rule::Id => Id::from_pair_unchecked(inner).map(From::from),
+            _ => unreachable!(),
+        }
+    }
 }

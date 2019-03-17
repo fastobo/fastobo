@@ -10,11 +10,11 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
-use crate::error::Error;
-use crate::error::Result;
 use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
+use crate::error::Error;
+use crate::error::Result;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
 #[derive(Debug, PartialEq, Hash, Eq)]
@@ -146,10 +146,7 @@ impl PrefixedId {
     /// let noncanonical_id = PrefixedId::from_str("PATO:something").unwrap();
     /// assert!(!noncanonical_id.is_canonical());
     pub fn is_canonical(&self) -> bool {
-        match (&self.prefix, &self.local) {
-            (IdPrefix::Canonical(_), IdLocal::Canonical(_)) => true,
-            (_, _) => false,
-        }
+        self.prefix.is_canonical() && self.local.is_canonical()
     }
 }
 
@@ -179,9 +176,9 @@ impl_fromstr!(PrefixedId);
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
 #[derive(Debug, PartialEq, Hash, Eq)]
-pub enum IdPrefix {
-    Canonical(String),
-    NonCanonical(String),
+pub struct IdPrefix {
+    value: String,
+    canonical: bool,
 }
 
 impl IdPrefix {
@@ -193,40 +190,42 @@ impl IdPrefix {
         let string = s.into();
         let mut chars = string.chars();
 
-        if let Some(char) = chars.next() {
-            match char {
-                'A'...'Z' | 'a'...'z' => (),
-                _ => return IdPrefix::NonCanonical(string),
-            };
-        } else {
-            return IdPrefix::NonCanonical(string);
-        }
-
-        for char in chars {
-            match char {
-                'A'...'Z' | 'a'...'z' | '_' => (),
-                _ => return IdPrefix::NonCanonical(string),
+        let canonical = if let Some(c) = chars.next() {
+            match c {
+                'A'...'Z' | 'a'...'z' => chars.all(|c| match c {
+                    'A'...'Z' | 'a'...'z' | '_' => true,
+                    _ => false,
+                }),
+                _ => false
             }
-        }
+        } else {
+            false
+        };
 
-        IdPrefix::Canonical(string)
+        IdPrefix {
+            value: string,
+            canonical: canonical,
+        }
     }
 
     /// Check if the identifier prefix is canonical or not.
     pub fn is_canonical(&self) -> bool {
-        match self {
-            IdPrefix::Canonical(_) => true,
-            IdPrefix::NonCanonical(_) => false,
-        }
+        self.canonical
+    }
+}
+
+impl AsRef<str> for IdPrefix {
+    fn as_ref(&self) -> &str {
+        &self.value
     }
 }
 
 impl Display for IdPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        use self::IdPrefix::*;
-        match self {
-            Canonical(s) => f.write_str(s),
-            NonCanonical(s) => s.chars().try_for_each(|char| match char {
+        if self.canonical {
+            f.write_str(&self.value)
+        } else {
+            self.value.chars().try_for_each(|char| match char {
                 '\r' => f.write_str("\\r"),
                 '\n' => f.write_str("\\n"),
                 '\u{000c}' => f.write_str("\\f"),
@@ -234,7 +233,7 @@ impl Display for IdPrefix {
                 '\t' => f.write_str("\\t"),
                 ':' => f.write_str("\\:"), // FIXME(@althonos) ?
                 _ => f.write_char(char),
-            }),
+            })
         }
     }
 }
@@ -245,7 +244,10 @@ impl FromPair for IdPrefix {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
-            return Ok(IdPrefix::Canonical(inner.as_str().to_string()));
+            return Ok(IdPrefix {
+                value: inner.as_str().to_string(),
+                canonical: true
+            })
         }
 
         // Unescape the prefix if is non canonical.
@@ -266,10 +268,12 @@ impl FromPair for IdPrefix {
             }
         }
 
-        Ok(IdPrefix::NonCanonical(local))
+        Ok(IdPrefix {
+            value: inner.as_str().to_string(),
+            canonical: false
+        })
     }
 }
-
 impl_fromstr!(IdPrefix);
 
 /// A local identifier, preceded by a prefix in prefixed IDs.
@@ -278,9 +282,9 @@ impl_fromstr!(IdPrefix);
 /// * A non-canonical local ID can contain any character excepting
 ///   whitespaces and newlines.
 #[derive(Debug, PartialEq, Hash, Eq)]
-pub enum IdLocal {
-    Canonical(String),
-    NonCanonical(String),
+pub struct IdLocal {
+    value: String,
+    canonical: bool,
 }
 
 impl IdLocal {
@@ -290,37 +294,33 @@ impl IdLocal {
         S: Into<String>,
     {
         let string = s.into();
-        for char in string.chars() {
-            match char {
-                '0'...'9' => (),
-                _ => return IdLocal::NonCanonical(string),
-            }
+        let canonical = string.chars().all(|c| c.is_digit(10));
+
+        IdLocal {
+            value: string,
+            canonical: canonical
         }
-        IdLocal::Canonical(string)
     }
 
     /// Check if the local identifier is canonical or not.
     pub fn is_canonical(&self) -> bool {
-        match self {
-            IdLocal::Canonical(_) => true,
-            IdLocal::NonCanonical(_) => false,
-        }
+        self.canonical
     }
 }
 
 impl Display for IdLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        use self::IdLocal::*;
-        match self {
-            Canonical(s) => f.write_str(s),
-            NonCanonical(s) => s.chars().try_for_each(|char| match char {
+        if self.canonical {
+            f.write_str(&self.value)
+        } else {
+            self.value.chars().try_for_each(|char| match char {
                 '\r' => f.write_str("\\r"),
                 '\n' => f.write_str("\\n"),
                 '\u{000c}' => f.write_str("\\f"),
                 ' ' => f.write_str("\\ "),
                 '\t' => f.write_str("\\t"),
                 _ => f.write_char(char),
-            }),
+            })
         }
     }
 }
@@ -331,7 +331,10 @@ impl FromPair for IdLocal {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {
-            return Ok(IdLocal::Canonical(inner.as_str().to_string()));
+            return Ok(IdLocal {
+                value: inner.as_str().to_string(),
+                canonical: true,
+            })
         }
 
         // Unescape the local ID if it is non canonical.
@@ -352,7 +355,10 @@ impl FromPair for IdLocal {
             }
         }
 
-        Ok(IdLocal::NonCanonical(local))
+        Ok(IdLocal {
+            value: inner.as_str().to_string(),
+            canonical: false,
+        })
     }
 }
 impl_fromstr!(IdLocal);
@@ -390,7 +396,25 @@ mod tests {
     use std::str::FromStr;
     use std::string::ToString;
 
-    mod id {}
+    mod id {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = Id::from_str("http://purl.obolibrary.org/obo/po.owl").unwrap();
+            let expected = Id::Url(Url::parse("http://purl.obolibrary.org/obo/po.owl").unwrap());
+            assert_eq!(actual, expected);
+
+            let actual = Id::from_str("GO:0046154").unwrap();
+            let expected = Id::Prefixed(PrefixedId::new(
+                IdPrefix::new("GO"),
+                IdLocal::new("0046154"),
+            ));
+            assert_eq!(actual, expected);
+        }
+
+    }
 
     mod prefixed_id {
 
@@ -400,8 +424,8 @@ mod tests {
         fn from_str() {
             let actual = PrefixedId::from_str("GO:0046154").unwrap();
             let expected = PrefixedId::new(
-                IdPrefix::Canonical("GO".into()),
-                IdLocal::Canonical("0046154".into()),
+                IdPrefix::new("GO"),
+                IdLocal::new("0046154"),
             );
             assert_eq!(actual, expected);
 
@@ -413,7 +437,11 @@ mod tests {
 
         #[test]
         fn to_string() {
-
+            let id = PrefixedId::new(
+                IdPrefix::new("GO"),
+                IdLocal::new("0046154"),
+            );
+            assert_eq!(id.to_string(), "GO:0046154")
         }
     }
 

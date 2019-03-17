@@ -55,9 +55,13 @@ UnquotedString = @{ OboChar+ }
 
 // 2.5 Identifiers
 
-ClassId    = @{ Id }
-RelationId = @{ Id }
-InstanceId = @{ Id }
+ClassId       = { Id }
+RelationId    = { Id }
+InstanceId    = { Id }
+SynonymTypeId = { Id }
+NamespaceId   = { Id }
+PersonId      = { Id }
+SubsetId      = { Id }
 
 Id           = { UrlId | PrefixedId | UnprefixedId }
 UrlId        = @{ ("http" | "https") ~ ":" ~ (NonWsChar)* }
@@ -123,7 +127,6 @@ HeaderClause = {
 |   IdPrefix ~ ":" ~ ws ~ UnquotedString
 }
 
-Import = { Iri | Id }
 
 
 // 3.3 Term Frames
@@ -174,6 +177,12 @@ InstanceFrameClause = {
 SynonymScope = { "EXACT" | "BROAD" | "NARROW" | "RELATED" }
 
 
+// 4.0 Misc
+
+Import = { Iri | Id }
+
+PropertyValue = { RelationId ~ ws ~ ((QuotedString ~ ws ~ XsdDatatype) | Id) }
+XsdDatatype   = { "xsd:" ~ ASCII_ALPHANUMERIC+ }
 
 
 // Annex I: Iri Grammar from [RFC3987]

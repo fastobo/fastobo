@@ -1,7 +1,7 @@
 // #![feature(macro_literal_matcher)]
 // #![feature(specialization)]
 // #![feature(try_from)]
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
 #[macro_use]
 extern crate failure;

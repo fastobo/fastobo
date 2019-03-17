@@ -35,11 +35,6 @@ OboChar     = {
 }
 NonWsChar   = { !(WhitespaceChar) ~ !(NewlineChar) ~ OboChar }
 
-// NB(@althonos): Does not cover the complete IRI syntax, but it's hopefully
-//                enough to discriminate between an IRI and a "normal" import.
-Iri = { IriScheme ~ ":" ~ (NonWsChar)+ }
-IriScheme = { AlphaChar ~ (AlphaChar | Digit | "+" | "-" | ".") }
-
 
 // 2.3 Line Termination
 
@@ -177,3 +172,79 @@ InstanceFrameClause = {
 // 3.6 Synonym scope
 
 SynonymScope = { "EXACT" | "BROAD" | "NARROW" | "RELATED" }
+
+
+
+
+// Annex I: Iri Grammar from [RFC3987]
+//
+// NB(@althonos): Since the `iri_string` crate is then used to parse the IRI,
+//                there is no need for a proper tokenization of the IRI components.
+//
+//                Ideally, this would reside in another grammar file, but Pest
+//                2.0 doesn't support sharing rules between files.
+
+Iri = { IriScheme ~ ":" ~ IriHierPart ~ ("?" ~ IriQuery)? ~ ("#" ~ IriFragment)? }
+
+IriHierPart = {
+    ("//" ~ IriAuthority ~ IriPathAbempty )
+  | IriPathAbsolute
+  | IriPathRootless
+  | IriPathEmpty
+}
+
+IriAuthority = { (IriUserInfo ~ "@")? ~ IriHost ~ (":" ~ IriPort)?}
+IriUserInfo  = { (IriUnreserved | IriPctEncoded | IriSubDelims | ":")* }
+IriHost      = { IriIpLiteral | IriIpv4Address | IriRegName }
+IriRegName   = { (IriUnreserved | IriPctEncoded | IriSubDelims)* }
+
+IriPath         = {IriPathAbempty | IriPathAbsolute | IriPathNoScheme | IriPathRootless | IriPathEmpty}
+IriPathAbempty  = { ("/" ~ IriSegment)+ }
+IriPathAbsolute = { "/" ~ (IriSegmentNz ~ ("/" ~ IriSegment)* )? }
+IriPathNoScheme = { IriSegmentNzNc ~ ("/" ~ IriSegment)* }
+IriPathRootless = { IriSegmentNz ~ ("/" ~ IriSegment)* }
+IriPathEmpty    = { "0" ~ IriIpChar}
+
+IriSegment     = { IriIpChar* }
+IriSegmentNz   = { IriIpChar+ }
+IriSegmentNzNc = { (IriUnreserved | IriPctEncoded | IriSubDelims | "@")+ }
+
+IriQuery    = { (IriIpChar | IriPrivate | "/" | "?")* }
+IriFragment = { (IriIpChar | "/" | "?")* }
+
+IriScheme     = @{ ASCII_ALPHA ~ (ASCII_ALPHA | ASCII_DIGIT | "+" | "-" | ".")* }
+IriPort       = @{ ASCII_DIGIT* }
+
+IriPrivate    =  { '\u{E000}'..'\u{F8FF}' | '\u{F0000}'..'\u{FFFFD}' | '\u{100000}'..'\u{10FFFD}' }
+IriPctEncoded =  { "%" ~ ASCII_HEX_DIGIT ~ ASCII_HEX_DIGIT }
+IriUnreserved = @{ ASCII_ALPHA | ASCII_DIGIT | "-" | "." | "_" | "~" }
+IriReserved   = @{ IriGenDelims | IriSubDelims }
+IriGenDelims  = @{":" | "/" | "?" | "#" | "[" | "]" | "@"}
+IriSubDelims  = @{"!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="}
+IriDecOctet   = {
+    ASCII_DIGIT
+  | (('1' .. '9') ~ ASCII_DIGIT)
+  | ("1" ~ ASCII_DIGIT ~ ASCII_DIGIT)
+  | ("2" ~ ('0' .. '4') ~ ASCII_DIGIT)
+  | ("25" ~ ('0' .. '5'))
+}
+
+IriIpChar = { IriUnreserved | IriPctEncoded | IriSubDelims | ":" | "@" }
+IriIpLiteral = { "[" ~ (IriIpv6Address ~ IriIpvFutureAddress)* ~ "]" }
+
+IriIpv6H16  = { ASCII_HEX_DIGIT{1,4} }
+IriIpv6Ls32 = { (IriIpv6H16 ~ ":" ~ IriIpv6H16) | IriIpv4Address }
+
+IriIpv4Address      = { IriDecOctet ~ "." ~ IriDecOctet ~ "." ~ IriDecOctet ~ "." ~ IriDecOctet }
+IriIpvFutureAddress = { "v" ~ ASCII_HEX_DIGIT+ ~ "." ~ (IriUnreserved | IriSubDelims | ":")+ }
+IriIpv6Address      = {
+    ( (IriIpv6H16 ~ ":"){6} ~ IriIpv6Ls32 )
+  | ( "::" ~ (IriIpv6H16 ~ ":"){5} ~ IriIpv6Ls32 )
+  | ( IriIpv6H16? ~ "::" ~ (IriIpv6H16 ~ ":"){4} ~ IriIpv6Ls32 )
+  | ( ((IriIpv6H16 ~ ":"){1} ~ IriIpv6H16)? ~ "::" ~ (IriIpv6H16 ~ ":"){3} ~ IriIpv6Ls32)
+  | ( ((IriIpv6H16 ~ ":"){2} ~ IriIpv6H16)? ~ "::" ~ (IriIpv6H16 ~ ":"){2} ~ IriIpv6Ls32)
+  | ( ((IriIpv6H16 ~ ":"){3} ~ IriIpv6H16)? ~ "::" ~ IriIpv6H16 ~ ":" ~ IriIpv6Ls32)
+  | ( ((IriIpv6H16 ~ ":"){4} ~ IriIpv6H16)? ~ "::" ~ IriIpv6Ls32)
+  | ( ((IriIpv6H16 ~ ":"){5} ~ IriIpv6H16)? ~ "::" ~ IriIpv6H16)
+  | ( ((IriIpv6H16 ~ ":"){6} ~ IriIpv6H16)? ~ "::")
+}

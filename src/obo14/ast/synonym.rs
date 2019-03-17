@@ -3,6 +3,14 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
+use iri_string::Url;
+use pest::iterators::Pair;
+
+use crate::error::Error;
+use crate::error::Result;
+use super::super::parser::FromPair;
+use super::super::parser::Parser;
+use super::super::parser::Rule;
 use super::QuotedString;
 use super::SynonymTypeId;
 use super::Xref;
@@ -23,6 +31,19 @@ impl Display for SynonymScope {
             Broad => f.write_str("BROAD"),
             Narrow => f.write_str("NARROW"),
             Related => f.write_str("RELATED"),
+        }
+    }
+}
+
+impl FromPair for SynonymScope {
+    const RULE: Rule = Rule::SynonymScope;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        match pair.as_str() {
+            "EXACT" => Ok(SynonymScope::Exact),
+            "BROAD" => Ok(SynonymScope::Broad),
+            "NARROW" => Ok(SynonymScope::Narrow),
+            "RELATED" => Ok(SynonymScope::Related),
+            _ => unreachable!(),
         }
     }
 }

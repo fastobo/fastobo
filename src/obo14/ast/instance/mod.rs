@@ -2,6 +2,7 @@ use super::ClassId;
 use super::Id;
 use super::InstanceId;
 use super::IsoDate;
+use super::Line;
 use super::NamespaceId;
 use super::PersonId;
 use super::QuotedString;
@@ -14,8 +15,8 @@ use super::Xref;
 
 /// An instance frame, describing a particular individual.
 pub struct InstanceFrame {
-    id: InstanceId,
-    clauses: Vec<InstanceClause>,
+    id: Line<InstanceId>,
+    clauses: Vec<Line<InstanceClause>>,
 }
 
 /// A clause appearing in an instance frame.

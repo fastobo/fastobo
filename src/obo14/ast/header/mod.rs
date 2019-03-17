@@ -5,8 +5,6 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
-use crate::error::Error;
-use crate::error::Result;
 use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
@@ -24,8 +22,8 @@ use super::SubsetId;
 use super::SynonymScope;
 use super::SynonymTypeId;
 use super::UnquotedString;
-
-
+use crate::error::Error;
+use crate::error::Result;
 
 /// The header frame, containing metadata about an OBO document.
 pub struct HeaderFrame {
@@ -96,3 +94,4 @@ impl FromPair for Import {
         }
     }
 }
+impl_fromstr!(Import);

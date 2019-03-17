@@ -4,19 +4,19 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
-use pest::iterators::Pair;
 use iri_string::AbsoluteIriStr;
 use iri_string::AbsoluteIriString;
 use iri_string::RelativeIriString;
+use pest::iterators::Pair;
 
-use crate::error::Error;
-use crate::error::Result;
 use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
 use super::Id;
 use super::QuotedString;
 use super::RelationId;
+use crate::error::Error;
+use crate::error::Result;
 
 /// An Internationalized Resource Identifier, either absolute or relative.
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -100,7 +100,6 @@ impl FromPair for PropertyValue {
             }
             _ => unreachable!(),
         }
-
     }
 }
 impl_fromstr!(PropertyValue);
@@ -127,7 +126,7 @@ impl FromPair for Qualifier {
         let mut inner = pair.into_inner();
         let key = RelationId::from_pair_unchecked(inner.next().unwrap())?;
         let value = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-        Ok(Qualifier {key, value})
+        Ok(Qualifier { key, value })
     }
 }
 impl_fromstr!(Qualifier);
@@ -157,21 +156,19 @@ impl FromPair for Xref {
             Some(pair) => Some(QuotedString::from_pair_unchecked(pair)?),
             None => None,
         };
-        Ok(Xref {id, desc})
+        Ok(Xref { id, desc })
     }
 }
 impl_fromstr!(Xref);
 
-
-
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-    use super::super::UnprefixedId;
-    use super::super::PrefixedId;
-    use super::super::IdPrefix;
     use super::super::IdLocal;
+    use super::super::IdPrefix;
+    use super::super::PrefixedId;
+    use super::super::UnprefixedId;
+    use super::*;
 
     mod property_value {
 
@@ -190,12 +187,14 @@ mod tests {
             let expected = PropertyValue::Typed(
                 RelationId::from(Id::Unprefixed(UnprefixedId::new("shoe_size"))),
                 QuotedString::new("8"),
-                Id::Prefixed(PrefixedId::new(IdPrefix::new("xsd"), IdLocal::new("positiveInteger")))
+                Id::Prefixed(PrefixedId::new(
+                    IdPrefix::new("xsd"),
+                    IdLocal::new("positiveInteger"),
+                )),
             );
             assert_eq!(actual, expected);
         }
 
     }
-
 
 }

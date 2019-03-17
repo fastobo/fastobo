@@ -47,6 +47,7 @@ impl FromPair for SynonymScope {
         }
     }
 }
+impl_fromstr!(SynonymScope);
 
 /// A synonym, denoting an alternative name for the embedding entity.
 pub struct Synonym {
@@ -54,4 +55,31 @@ pub struct Synonym {
     scope: SynonymScope,
     syntype: Option<SynonymTypeId>,
     xrefs: Option<Vec<Xref>>,
+}
+
+impl Display for Synonym {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.text
+            .fmt(f)
+            .and(f.write_char(' '))
+            .and(self.scope.fmt(f))?;
+
+        if let Some(ref syntype) = self.syntype {
+            f.write_char(' ').and(syntype.fmt(f))?;
+        }
+
+        if let Some(ref xrefs) = self.xrefs {
+            f.write_str(" [")?;
+            let mut it = xrefs.iter().peekable();
+            while let Some(xref) = it.next() {
+                xref.fmt(f)?;
+                if it.peek().is_some() {
+                    f.write_str(", ")?;
+                }
+            }
+            f.write_char(']')?;
+        }
+
+        Ok(())
+    }
 }

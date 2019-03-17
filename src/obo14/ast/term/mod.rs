@@ -1,6 +1,7 @@
 use super::ClassId;
 use super::Id;
 use super::IsoDate;
+use super::Line;
 use super::NamespaceId;
 use super::PersonId;
 use super::PropertyValue;
@@ -14,8 +15,8 @@ use super::Xref;
 
 /// A term frame, describing a class.
 pub struct TermFrame {
-    id: ClassId,
-    clauses: Vec<TermClause>,
+    id: Line<ClassId>,
+    clauses: Vec<Line<TermClause>>,
 }
 
 /// A clause appearing in a term frame.

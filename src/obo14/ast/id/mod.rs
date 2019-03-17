@@ -196,7 +196,7 @@ impl IdPrefix {
                     'A'...'Z' | 'a'...'z' | '_' => true,
                     _ => false,
                 }),
-                _ => false
+                _ => false,
             }
         } else {
             false
@@ -246,8 +246,8 @@ impl FromPair for IdPrefix {
         if inner.as_rule() == Rule::CanonicalIdPrefix {
             return Ok(IdPrefix {
                 value: inner.as_str().to_string(),
-                canonical: true
-            })
+                canonical: true,
+            });
         }
 
         // Unescape the prefix if is non canonical.
@@ -270,7 +270,7 @@ impl FromPair for IdPrefix {
 
         Ok(IdPrefix {
             value: inner.as_str().to_string(),
-            canonical: false
+            canonical: false,
         })
     }
 }
@@ -298,7 +298,7 @@ impl IdLocal {
 
         IdLocal {
             value: string,
-            canonical: canonical
+            canonical: canonical,
         }
     }
 
@@ -334,7 +334,7 @@ impl FromPair for IdLocal {
             return Ok(IdLocal {
                 value: inner.as_str().to_string(),
                 canonical: true,
-            })
+            });
         }
 
         // Unescape the local ID if it is non canonical.
@@ -423,10 +423,7 @@ mod tests {
         #[test]
         fn from_str() {
             let actual = PrefixedId::from_str("GO:0046154").unwrap();
-            let expected = PrefixedId::new(
-                IdPrefix::new("GO"),
-                IdLocal::new("0046154"),
-            );
+            let expected = PrefixedId::new(IdPrefix::new("GO"), IdLocal::new("0046154"));
             assert_eq!(actual, expected);
 
             assert!(PrefixedId::from_str("[Term]").is_err());
@@ -437,10 +434,7 @@ mod tests {
 
         #[test]
         fn to_string() {
-            let id = PrefixedId::new(
-                IdPrefix::new("GO"),
-                IdLocal::new("0046154"),
-            );
+            let id = PrefixedId::new(IdPrefix::new("GO"), IdLocal::new("0046154"));
             assert_eq!(id.to_string(), "GO:0046154")
         }
     }

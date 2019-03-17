@@ -1,4 +1,5 @@
 use super::Id;
+use super::Line;
 use super::NamespaceId;
 use super::QuotedString;
 use super::RelationId;
@@ -10,8 +11,8 @@ use super::Xref;
 
 /// A typedef clause, describing a relationship.
 pub struct TypedefFrame {
-    id: RelationId,
-    clauses: Vec<TypedefClause>,
+    id: Line<RelationId>,
+    clauses: Vec<Line<TypedefClause>>,
 }
 
 /// A clause appearing in a typedef frame.

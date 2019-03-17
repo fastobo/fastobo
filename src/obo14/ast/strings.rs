@@ -5,11 +5,11 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
-use crate::error::Error;
-use crate::error::Result;
 use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
+use crate::error::Error;
+use crate::error::Result;
 
 /// A string enclosed by quotes, used for definitions.
 ///
@@ -59,11 +59,10 @@ impl Display for QuotedString {
 
 impl FromPair for QuotedString {
     const RULE: Rule = Rule::QuotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>)  -> Result<Self> {
-
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let s = pair.as_str();
         let mut local = String::with_capacity(s.len());
-        let mut chars = s.get_unchecked(1..s.len()-1).chars();
+        let mut chars = s.get_unchecked(1..s.len() - 1).chars();
         while let Some(char) = chars.next() {
             if char == '\\' {
                 match chars.next() {
@@ -119,8 +118,7 @@ impl Display for UnquotedString {
 
 impl FromPair for UnquotedString {
     const RULE: Rule = Rule::UnquotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>)  -> Result<Self> {
-
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let s = pair.as_str();
         let mut local = String::with_capacity(s.len());
         let mut chars = s.chars();

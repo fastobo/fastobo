@@ -4,7 +4,6 @@
 
 #[macro_use]
 pub mod parser;
-
 pub mod ast;
 
 pub use self::ast::*;

@@ -6,14 +6,14 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
-use crate::error::Error;
-use crate::error::Result;
 use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
 use super::QuotedString;
 use super::SynonymTypeId;
 use super::Xref;
+use crate::error::Error;
+use crate::error::Result;
 
 /// A synonym scope specifier.
 pub enum SynonymScope {

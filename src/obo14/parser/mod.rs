@@ -25,6 +25,7 @@ pub trait FromPair: Sized {
     /// `pair.as_rule() != <Self as FromPair>::RULE`.
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self>;
 
+    /// Create a new instance from a `Pair`.
     #[inline]
     fn from_pair(pair: Pair<Rule>) -> Result<Self> {
         if pair.as_rule() != Self::RULE {

@@ -8,6 +8,7 @@ use super::SynonymScope;
 use super::SynonymTypeId;
 use super::UnquotedString;
 use super::Xref;
+use super::XrefList;
 
 /// A typedef clause, describing a relationship.
 pub struct TypedefFrame {

@@ -1,3 +1,12 @@
+use std::str::FromStr;
+
+use pest::iterators::Pair;
+
+use crate::obo14::ast::Id;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Rule;
+use crate::error::Result;
+
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! id_subclass {
     (#[doc = $docstring:literal] pub struct $name:ident;) => {
@@ -31,7 +40,7 @@ macro_rules! id_subclass {
             }
         }
 
-        impl $crate::obo14::parser::FromPair for $name {
+        impl FromPair for $name {
             const RULE: Rule = Rule::$name;
             unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
                 Id::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
@@ -51,4 +60,30 @@ macro_rules! id_subclasses {
     ($(#[doc = $docstring:literal] pub struct $name:ident;)*) => {
         $(id_subclass!(#[doc = $docstring] pub struct $name;);)*
     }
+}
+
+// NB(@althonos): All identifiers are defined as separate typedefs so that
+//                `PartialEq` is not implemented and trying to compare a
+//                `ClassId` with a `RelationId` would fail at compile-time.
+id_subclasses! {
+    /// A unique identifier for a class (*i.e.* a term).
+    pub struct ClassId;
+
+    /// A unique identifier for an instance.
+    pub struct InstanceId;
+
+    /// An OBO namespace identifier.
+    pub struct NamespaceId;
+
+    /// A unique identifier for a person (used in the `created_by` clause).
+    pub struct PersonId;
+
+    /// A unique identifier for a typedef (*i.e.* a relation).
+    pub struct RelationId;
+
+    /// A unique identifier for a subset
+    pub struct SubsetId;
+
+    /// A unique identifier for a synonym type.
+    pub struct SynonymTypeId;
 }

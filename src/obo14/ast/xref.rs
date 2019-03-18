@@ -30,7 +30,7 @@ impl Display for Xref {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.id.fmt(f)?;
         match &self.desc {
-            Some(desc) => f.write_char(' ')).and(desc.fmt(f)),
+            Some(desc) => f.write_char(' ').and(desc.fmt(f)),
             None => Ok(()),
         }
     }
@@ -52,8 +52,25 @@ impl_fromstr!(Xref);
 
 
 /// A list of containing zero or more `Xref`s.
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct XrefList {
     xrefs: Vec<Xref>,
 }
 
-impl Display
+impl Display for XrefList {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        f.write_char('[')?;
+        let mut xrefs = self.xrefs.iter().peekable();
+        while let Some(xref) = xrefs.next() {
+            // FIXME(@althonos): commas in id need escaping.
+            xref.id.fmt(f)?;
+            if let Some(ref desc) = xref.desc {
+                f.write_char(' ').and(desc.fmt(f))?;
+            }
+            if xrefs.peek().is_some() {
+                f.write_str(", ")?;
+            }
+        }
+        f.write_char(']')
+    }
+}

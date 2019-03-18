@@ -8,6 +8,7 @@ mod strings;
 mod synonym;
 mod term;
 mod typedef;
+mod qualifier;
 mod xref;
 
 pub use self::date::*;
@@ -20,6 +21,7 @@ pub use self::strings::*;
 pub use self::synonym::*;
 pub use self::term::*;
 pub use self::typedef::*;
+pub use self::qualifier::*;
 pub use self::xref::*;
 
 /// A complete OBO document in format version 1.4.

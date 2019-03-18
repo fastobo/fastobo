@@ -4,6 +4,11 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::ops::Deref;
 
+use pest::iterators::Pair;
+
+use crate::error::Result;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Rule;
 use super::Qualifier;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
@@ -57,6 +62,41 @@ where
         Ok(())
     }
 }
+
+impl FromPair for Line<()> {
+    const RULE: Rule = Rule::EOL;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut inner = pair.into_inner();
+        let opt1 = inner.next();
+        let opt2 = inner.next();
+        if let Some(pair2) = opt2 {
+            let comment = Comment::from_pair_unchecked(pair2)?;
+            // let qualifier = QualifierList::from_pair_unchecked(pair1)?;
+            unimplemented!()
+        } else if opt1.is_none() {
+            Ok(Line {
+                inner: (),
+                qualifiers: None,
+                comment: None,
+            })
+        } else {
+            let pair1 = opt1.unwrap();
+            unimplemented!()
+        }
+    }
+}
+
+impl Line<()> {
+    pub fn with_content<T>(self, content: T) -> Line<T> {
+        Line {
+            inner: content,
+            qualifiers: self.qualifiers,
+            comment: self.comment,
+        }
+    }
+}
+
+
 
 /// An inline comment without semantic value.
 #[derive(Debug, Eq, Hash, PartialEq)]

@@ -188,7 +188,6 @@ impl FromPair for HeaderClause {
                 Ok(HeaderClause::Subsetdef(subset, desc))
             }
             Rule::SynonymTypedefTag => {
-                println!("{:?}", inner);
                 let id = SynonymTypeId::from_pair_unchecked(inner.next().unwrap())?;
                 let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
                 let scope = match inner.next() {
@@ -257,8 +256,8 @@ impl FromPair for HeaderClause {
                 let axioms = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(HeaderClause::OwlAxioms(axioms))
             }
-            Rule::UnquotedString => {
-                let tag = UnquotedString::from_pair_unchecked(tag)?;
+            Rule::Unreserved => {
+                let tag = UnquotedString::from_str(tag.as_str())?;
                 let value = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(HeaderClause::Unreserved(tag, value))
             }
@@ -369,6 +368,16 @@ mod tests {
             let actual = HeaderClause::from_str("date: 17:03:2019 20:16").unwrap();
             let expected = HeaderClause::Date(NaiveDate::new(17, 3, 2019, 20, 16));
             assert_eq!(actual, expected);
+
+
+            let actual = HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
+            let expected = HeaderClause::Unreserved(
+                UnquotedString::new("namespace-id-rule"),
+                UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"),
+            );
+            assert_eq!(actual, expected);
+
+
         }
 
     }

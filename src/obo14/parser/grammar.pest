@@ -129,8 +129,7 @@ HeaderClause = {
 |   RemarkTag ~ ws ~ UnquotedString
 |   OntologyTag ~ ws ~ UnquotedString
 |   OwlAxiomsTag ~ ws ~ UnquotedString
-// Unreserved
-|   UnquotedString ~ ":" ~ ws ~ UnquotedString
+|   Unreserved ~ ":" ~ ws ~ UnquotedString
 }
 
 FormatVersionTag                       = { "format-version:" }
@@ -153,7 +152,7 @@ RemarkTag                              = { "remark:" }
 OntologyTag                            = { "ontology:" }
 OwlAxiomsTag                           = { "owl-axioms:" }
 PropertyValueTag                       = { "property_value:" }
-
+Unreserved                             = { (!":" ~ OboChar)+ }
 
 
 

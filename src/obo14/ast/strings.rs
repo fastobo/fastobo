@@ -174,6 +174,10 @@ mod tests {
             let actual = UnquotedString::from_str("something\\ttabbed");
             let expected = UnquotedString::new("something\ttabbed");
             assert_eq!(expected, actual.unwrap());
+
+            let actual = UnquotedString::from_str("namespace-id-rule").unwrap();
+            let expected = UnquotedString::new("namespace-id-rule");
+            assert_eq!(expected, actual);
         }
     }
 

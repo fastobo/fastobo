@@ -24,7 +24,8 @@ default-features = false
 
 [dev-dependencies.textwrap]
 version = "*"
-
+[dev-dependencies.difference]
+version = "*"
 
 
 # [[test]]

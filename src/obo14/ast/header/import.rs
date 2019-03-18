@@ -47,9 +47,6 @@ impl Display for Import {
 impl FromPair for Import {
     const RULE: Rule = Rule::Import;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-
-        println!("{:?}", pair);
-
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iri => Iri::from_pair_unchecked(inner).map(From::from),

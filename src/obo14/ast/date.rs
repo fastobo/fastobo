@@ -69,6 +69,12 @@ pub struct IsoDate {
     inner: DateTime<FixedOffset>,
 }
 
+impl Display for IsoDate {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.inner.fmt(f)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

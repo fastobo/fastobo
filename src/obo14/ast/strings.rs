@@ -111,6 +111,11 @@ impl Display for UnquotedString {
             '\r' => f.write_str("\\r"),
             '\n' => f.write_str("\\n"),
             '\u{000c}' => f.write_str("\\f"),
+
+            // QUESTION(@althonos): Not required in the spec, but most do it.
+            '"' => f.write_str("\\\""),
+            '\\' => f.write_str("\\\\"),
+
             _ => f.write_char(char),
         })
     }

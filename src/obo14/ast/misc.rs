@@ -131,36 +131,6 @@ impl FromPair for Qualifier {
 }
 impl_fromstr!(Qualifier);
 
-/// A database cross-reference definition.
-#[derive(Debug, Hash, Eq, PartialEq)]
-pub struct Xref {
-    id: Id,
-    desc: Option<QuotedString>,
-}
-
-impl Display for Xref {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        match &self.desc {
-            Some(desc) => self.id.fmt(f).and(f.write_char(' ')).and(desc.fmt(f)),
-            None => self.id.fmt(f),
-        }
-    }
-}
-
-impl FromPair for Xref {
-    const RULE: Rule = Rule::Xref;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-        let mut inner = pair.into_inner();
-        let id = Id::from_pair_unchecked(inner.next().unwrap())?;
-        let desc = match inner.next() {
-            Some(pair) => Some(QuotedString::from_pair_unchecked(pair)?),
-            None => None,
-        };
-        Ok(Xref { id, desc })
-    }
-}
-impl_fromstr!(Xref);
-
 #[cfg(test)]
 mod tests {
 

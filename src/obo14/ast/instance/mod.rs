@@ -12,6 +12,7 @@ use super::SynonymScope;
 use super::SynonymTypeId;
 use super::UnquotedString;
 use super::Xref;
+use super::XrefList;
 
 /// An instance frame, describing a particular individual.
 pub struct InstanceFrame {
@@ -28,7 +29,7 @@ pub enum InstanceClause {
     Def(QuotedString, Vec<Xref>),
     Comment(UnquotedString),
     Subset(SubsetId),
-    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, Vec<Xref>),
+    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
     Xref(Id),
     PropertyValue(RelationId, Id),
     InstanceOf(ClassId),

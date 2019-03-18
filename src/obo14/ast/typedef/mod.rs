@@ -21,8 +21,8 @@ pub enum TypedefClause {
     Name(UnquotedString),
     Namespace(NamespaceId),
     AltId(Id),
-    Def(QuotedString, Vec<Xref>),
+    Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
-    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, Vec<Xref>),
+    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
 }

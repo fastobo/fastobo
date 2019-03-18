@@ -7,6 +7,7 @@ use std::ops::Deref;
 use super::Qualifier;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct Line<T> {
     inner: T,
     qualifiers: Option<Vec<Qualifier>>, // FIXME(@althonos): use an `IndexMap` ?
@@ -58,6 +59,7 @@ where
 }
 
 /// An inline comment without semantic value.
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct Comment {
     value: String,
 }

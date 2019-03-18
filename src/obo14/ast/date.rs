@@ -61,9 +61,31 @@ impl FromPair for NaiveDate {
         })
     }
 }
+impl_fromstr!(NaiveDate);
 
 /// A comprehensive ISO-8601 date, as found in `creation_date` clauses.
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct IsoDate {
     inner: DateTime<FixedOffset>,
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use std::str::FromStr;
+
+    mod naive {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let naive = NaiveDate::from_str("12:06:2018 17:13").unwrap();
+            assert_eq!(naive, NaiveDate::new(12, 6, 2018, 17, 13));
+        }
+
+    }
+
+
 }

@@ -22,6 +22,9 @@ version = "*"
 default-features = false
 
 
+[dev-dependencies.textwrap]
+version = "*"
+
 
 
 # [[test]]

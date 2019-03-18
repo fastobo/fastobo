@@ -27,9 +27,32 @@ use crate::error::Error;
 use crate::error::Result;
 
 /// The header frame, containing metadata about an OBO document.
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub struct HeaderFrame {
-    clauses: Vec<HeaderClause>,
+    pub clauses: Vec<HeaderClause>,
 }
+
+impl Display for HeaderFrame {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let mut clauses = self.clauses.iter().peekable();
+        while let Some(clause) = clauses.next() {
+            clause.fmt(f).and(f.write_char('\n'))?;
+        }
+        Ok(())
+    }
+}
+
+impl FromPair for HeaderFrame {
+    const RULE: Rule = Rule::HeaderFrame;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut clauses = Vec::new();
+        for inner in pair.into_inner() {
+            clauses.push(HeaderClause::from_pair_unchecked(inner)?)
+        }
+        Ok(HeaderFrame { clauses })
+    }
+}
+impl_fromstr!(HeaderFrame);
 
 /// An clause appearing in a header frame.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -50,7 +73,8 @@ pub enum HeaderClause {
     TreatXrefsAsRelationship(IdPrefix, RelationId),
     TreatXrefsAsIsA(IdPrefix),
     TreatXrefsAsHasSubclass(IdPrefix),
-    PropertyValue(Line<PropertyValue>),
+    // FIXME(@althonos): Add support for hidden comment and qualifiers.
+    PropertyValue(PropertyValue),
     Remark(UnquotedString),
     Ontology(UnquotedString),
     OwlAxioms(UnquotedString),
@@ -119,7 +143,7 @@ impl Display for HeaderClause {
             TreatXrefsAsHasSubclass(prefix) => f
                 .write_str("treat-xrefs-as-has-subclass")
                 .and(prefix.fmt(f)),
-            PropertyValue(line) => f.write_str("property_value: ").and(line.fmt(f)),
+            PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
             Remark(remark) => f.write_str("remark: ").and(remark.fmt(f)),
             Ontology(ont) => f.write_str("ontology: ").and(ont.fmt(f)),
             OwlAxioms(axioms) => f.write_str("owl-axioms: ").and(axioms.fmt(f)),
@@ -164,6 +188,7 @@ impl FromPair for HeaderClause {
                 Ok(HeaderClause::Subsetdef(subset, desc))
             }
             Rule::SynonymTypedefTag => {
+                println!("{:?}", inner);
                 let id = SynonymTypeId::from_pair_unchecked(inner.next().unwrap())?;
                 let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
                 let scope = match inner.next() {
@@ -217,37 +242,8 @@ impl FromPair for HeaderClause {
                 Ok(HeaderClause::TreatXrefsAsHasSubclass(prefix))
             }
             Rule::PropertyValueTag => {
-                // Parse the property value
-                let relid = RelationId::from_pair_unchecked(inner.next().unwrap())?;
-                let second = inner.next().unwrap();
-                let property_value = match second.as_rule() {
-                    Rule::Id => {
-                        let id = Id::from_pair_unchecked(second)?;
-                        PropertyValue::Identified(relid, id)
-                    }
-                    Rule::QuotedString => {
-                        let desc = QuotedString::from_pair_unchecked(second)?;
-                        let datatype = Id::from_str(inner.next().unwrap().as_str())?;
-                        PropertyValue::Typed(relid, desc, datatype)
-                    }
-                    _ => unreachable!(),
-                };
-
-                // Parse the rest of the line
-                let pair1 = inner.next();
-                let pair2 = inner.next();
-                // if let Some(pair) = pair2 {
-                //     let comment = Comment::from_pair_unchecked(pair)?;
-                //     let qualifiers = Vec<Qualifiers>::from_pair_unchecked(pair1.unwrap())?;
-                //
-                //     unimplem
-                //
-                // } else {
-                //     match pair
-                //
-                //
-                // }
-                unimplemented!()
+                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(HeaderClause::PropertyValue(pv))
             }
             Rule::RemarkTag => {
                 let remark = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
@@ -304,6 +300,9 @@ impl Display for Import {
 impl FromPair for Import {
     const RULE: Rule = Rule::Import;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+
+        println!("{:?}", pair);
+
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iri => Iri::from_pair_unchecked(inner).map(From::from),
@@ -320,6 +319,35 @@ mod tests {
     use super::super::UnprefixedId;
     use super::*;
     use std::str::FromStr;
+
+    mod frame {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = HeaderFrame::from_str(
+                "format-version: 1.2
+                data-version: releases/2019-03-17
+                subsetdef: gocheck_do_not_annotate \"Term not to be used for direct annotation\"
+                synonymtypedef: syngo_official_label \"label approved by the SynGO project\"
+                synonymtypedef: systematic_synonym \"Systematic synonym\" EXACT
+                default-namespace: gene_ontology
+                remark: cvs version: $Revision: 38972$
+                remark: Includes Ontology(OntologyID(OntologyIRI(<http://purl.obolibrary.org/obo/go/never_in_taxon.owl>))) [Axioms: 18 Logical Axioms: 0]
+                ontology: go
+                property_value: http://purl.org/dc/elements/1.1/license http://creativecommons.org/licenses/by/4.0/"
+            ).unwrap();
+
+            assert_eq!(
+                actual.clauses[0],
+                HeaderClause::FormatVersion(UnquotedString::new("1.2")),
+            );
+
+
+        }
+
+    }
 
     mod clause {
 

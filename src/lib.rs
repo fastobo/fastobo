@@ -12,5 +12,9 @@ extern crate chrono;
 extern crate iri_string;
 extern crate pest;
 
+#[cfg(test)]
+extern crate textwrap;
+
+
 pub mod error;
 pub mod obo14;

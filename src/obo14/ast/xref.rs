@@ -26,6 +26,22 @@ pub struct Xref {
     desc: Option<QuotedString>,
 }
 
+impl Xref {
+    pub fn new(id: Id) -> Self {
+        Self {
+            id,
+            desc: None
+        }
+    }
+
+    pub fn with_desc(id: Id, desc: QuotedString) -> Self {
+        Self {
+            id,
+            desc: Some(desc),
+        }
+    }
+}
+
 impl Display for Xref {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.id.fmt(f)?;
@@ -57,6 +73,12 @@ pub struct XrefList {
     xrefs: Vec<Xref>,
 }
 
+impl From<Vec<Xref>> for XrefList {
+    fn from(v: Vec<Xref>) -> XrefList {
+        Self { xrefs: v }
+    }
+}
+
 impl Display for XrefList {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_char('[')?;
@@ -72,5 +94,58 @@ impl Display for XrefList {
             }
         }
         f.write_char(']')
+    }
+}
+
+impl FromPair for XrefList {
+    const RULE: Rule = Rule::XrefList;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut xrefs = Vec::new();
+        for inner in pair.into_inner() {
+            // FIXME(@althonos): avoid using FromStr: maybe duplicate rules ?
+            let xref = Xref::from_str(inner.as_str())?;
+            xrefs.push(xref);
+        }
+        Ok(Self { xrefs })
+    }
+}
+impl_fromstr!(XrefList);
+
+
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    mod list {
+
+        use crate::obo14::ast::IdPrefix;
+        use crate::obo14::ast::IdLocal;
+        use crate::obo14::ast::PrefixedId;
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = XrefList::from_str("[]").unwrap();
+            let expected = XrefList::from(vec![]);
+            assert_eq!(actual, expected);
+
+            let actual = XrefList::from_str("[PSI:MS]").unwrap();
+            let expected = XrefList::from(vec![
+                Xref::new(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into())
+            ]);
+            assert_eq!(actual, expected);
+
+            let actual = XrefList::from_str("[PSI:MS, reactome:R-HSA-8983680 \"OAS1 produces oligoadenylates\"]").unwrap();
+            let expected = XrefList::from(vec![
+                Xref::new(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into()),
+                Xref::with_desc(
+                    PrefixedId::new(IdPrefix::new("reactome"), IdLocal::new("R-HSA-8983680")).into(),
+                    QuotedString::new("OAS1 produces oligoadenylates"),
+                )
+            ]);
+            assert_eq!(actual, expected);
+        }
     }
 }

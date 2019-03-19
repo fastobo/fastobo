@@ -272,7 +272,11 @@ mod tests {
         let actual = PrefixedId::from_str("PSI:MS").unwrap();
         let expected = PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS"));
         assert_eq!(actual, expected);
-        
+
+        let actual = PrefixedId::from_str("CAS:22325-47-9").unwrap();
+        let expected = PrefixedId::new(IdPrefix::new("CAS"), IdLocal::new("22325-47-9"));
+        assert_eq!(actual, expected);
+
         assert!(PrefixedId::from_str("[Term]").is_err());
         assert!(PrefixedId::from_str("").is_err());
         assert!(PrefixedId::from_str("Some\nthing:spanning").is_err());

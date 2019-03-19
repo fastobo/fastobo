@@ -24,11 +24,35 @@ pub use self::typedef::*;
 pub use self::qualifier::*;
 pub use self::xref::*;
 
+use pest::iterators::Pair;
+
+use crate::error::Result;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
+
+
 /// A complete OBO document in format version 1.4.
 pub struct OboDoc {
     header: HeaderFrame,
     entities: Vec<EntityFrame>,
 }
+
+impl FromPair for OboDoc {
+    const RULE: Rule = Rule::OboDoc;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut inner = pair.into_inner();
+
+        let mut header = HeaderFrame::from_pair_unchecked(inner.next().unwrap())?;
+        let mut entities = Vec::new();
+        for pair in inner {
+            entities.push(EntityFrame::from_pair_unchecked(pair)?);
+        }
+
+        Ok(OboDoc { header, entities })
+    }
+}
+impl_fromstr!(OboDoc);
 
 /// An entity frame, either for a term, an instance, or a typedef.
 pub enum EntityFrame {
@@ -54,3 +78,17 @@ impl From<InstanceFrame> for EntityFrame {
         EntityFrame::Instance(frame)
     }
 }
+
+impl FromPair for EntityFrame {
+    const RULE: Rule = Rule::EntityFrame;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let inner = pair.into_inner().next().unwrap();
+        match inner.as_rule() {
+            Rule::TermFrame => Ok(EntityFrame::Term(TermFrame::from_pair_unchecked(inner)?)),
+            Rule::TypedefFrame => unimplemented!(),
+            Rule::InstanceFrame => unimplemented!(),
+            _ => unreachable!()
+        }
+    }
+}
+impl_fromstr!(EntityFrame);

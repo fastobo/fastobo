@@ -1,0 +1,13 @@
+[package]
+name = "obofoundry"
+version = "0.1.0"
+authors = ["Martin Larralde <martin.larralde@ens-cachan.fr>"]
+edition = "2018"
+
+[dependencies]
+serde = { version = "*", features = ["derive"] }
+
+[dev-dependencies]
+serde_yaml = "*"
+serde_json = "*"
+reqwest = "*"

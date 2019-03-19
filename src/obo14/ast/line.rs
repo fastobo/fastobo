@@ -19,6 +19,12 @@ pub struct Line<T> {
     comment: Option<Comment>,
 }
 
+impl<T> AsRef<T> for Line<T> {
+    fn as_ref(&self) -> &T {
+        &self.inner
+    }
+}
+
 impl<T> From<T> for Line<T> {
     fn from(inner: T) -> Self {
         Line {
@@ -59,7 +65,7 @@ where
             f.write_char(' ').and(comment.fmt(f))?;
         }
 
-        Ok(())
+        f.write_char('\n')
     }
 }
 
@@ -81,7 +87,15 @@ impl FromPair for Line<()> {
             })
         } else {
             let pair1 = opt1.unwrap();
-            unimplemented!()
+            match pair1.as_rule() {
+                Rule::QualifierList => unimplemented!(),
+                Rule::HiddenComment => Ok(Line {
+                    inner: (),
+                    qualifiers: None,
+                    comment: Some(Comment::from_pair_unchecked(pair1)?),
+                }),
+                _ => unreachable!(),
+            }
         }
     }
 }
@@ -104,8 +118,25 @@ pub struct Comment {
     value: String,
 }
 
+impl Comment {
+    pub fn new<S>(s: S) -> Self
+    where
+        S: Into<String>
+    {
+        Comment { value: s.into() }
+    }
+}
+
 impl Display for Comment {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        f.write_str("! ").and(self.value.fmt(f))
+        f.write_str("! ").and(self.value.fmt(f)) // FIXME(@althonos): escape newlines
+    }
+}
+
+impl FromPair for Comment {
+    const RULE: Rule = Rule::HiddenComment;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        // FIXME(@althonos): Check for trailing spaces ?
+        Ok(Comment::new(pair.as_str()[1..].to_string()))
     }
 }

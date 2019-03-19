@@ -69,9 +69,33 @@ pub struct IsoDate {
     inner: DateTime<FixedOffset>,
 }
 
+impl AsRef<DateTime<FixedOffset>> for IsoDate {
+    fn as_ref(&self) -> &DateTime<FixedOffset> {
+        &self.inner
+    }
+}
+
+impl From<DateTime<FixedOffset>> for IsoDate {
+    fn from(dt: DateTime<FixedOffset>) -> Self {
+        Self {
+            inner: dt
+        }
+    }
+}
+
 impl Display for IsoDate {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.inner.fmt(f)
+    }
+}
+
+impl FromPair for IsoDate {
+    const RULE: Rule = Rule::Iso8601DateTime;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        // FIXME(@althonos): we could probably create the DateTime ourselves
+        //                   using the tokenization from the Obo14 grammar.
+        let dt = chrono::DateTime::parse_from_rfc3339(pair.as_str()).unwrap();
+        Ok(IsoDate::from(dt))
     }
 }
 

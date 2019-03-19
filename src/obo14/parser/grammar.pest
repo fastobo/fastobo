@@ -84,9 +84,9 @@ EOL = { WhitespaceChar* ~ (QualifierBlock ~ ws)? ~ HiddenComment? ~ nl  }
 
 HiddenComment  = { "!" ~ ( !NewlineChar ~ UniCodeChar )* }
 
-Qualifier      = { Id ~ "=" ~ QuotedString }
+Qualifier      = { !"}" ~ Id ~ "=" ~ QuotedString }
 QualifierList  = { Qualifier ~ ("," ~ ws ~ Qualifier)* }
-QualifierBlock = { "[" ~ QualifierList ~ "]" }
+QualifierBlock = { "{" ~ QualifierList ~ "}" }
 
 
 // 2.4 Clause Values
@@ -97,10 +97,18 @@ UnquotedString = @{ OboChar+ }
 
 // 2.5 Identifiers
 
+// NB(@althonos): Since PEG are non-greedy, we sometimes have to make use of
+//                positive predicates to turn non-greedy rules into greedy ones.
+//
+//                For instance, '00-01' parsed by the `IdLocal` rule can result
+//                in the `CanonicalIdLocal` rule with `-01` as a remaining output,
+//                but we actually want it as a `NonCanonicalIdLocal` without
+//                remaining output.
+
 ClassId       = { Id }
 RelationId    = { Id }
 InstanceId    = { Id }
-SynonymTypeId = { Id }
+SynonymTypeId = { !"[" ~ Id }   // NB(@althonos): Hackish.
 NamespaceId   = { Id }
 PersonId      = { Id }
 SubsetId      = { Id }
@@ -111,11 +119,11 @@ UnprefixedId = @{ ( !":" ~ NonWsChar )+ }
 PrefixedId   = {  IdPrefix ~ ":" ~ IdLocal }
 
 IdPrefix             = { (CanonicalIdPrefix | NonCanonicalIdPrefix) }
-CanonicalIdPrefix    = @{ AlphaChar ~ (AlphaChar | "_")* }
+CanonicalIdPrefix    = @{ AlphaChar ~ (AlphaChar | "_")* ~ &(":") }
 NonCanonicalIdPrefix = @{ (!":" ~ NonWsChar)* }
 
 IdLocal             = { (CanonicalIdLocal | NonCanonicalIdLocal) }
-CanonicalIdLocal    = @{ ASCII_DIGIT+ }
+CanonicalIdLocal    = @{ ASCII_DIGIT+ ~ &(EOI | WhitespaceChar | NewlineChar) }
 NonCanonicalIdLocal = @{ NonWsChar* }
 
 
@@ -123,7 +131,8 @@ NonCanonicalIdLocal = @{ NonWsChar* }
 
 Xref         = { Id ~ (ws ~ QuotedString)? }
 
-XrefChar     = { !"," ~ !"]" ~ !"[" ~ OboChar }
+// FIXME(@althonos): doing like QualifierBlock might be a better option.
+XrefChar     = { !"," ~ !"]" ~ !"[" ~ NonWsChar }
 XrefId       = { XrefChar+ }
 XrefListItem = { XrefId ~ (ws ~ QuotedString)? }
 XrefList     = {"[" ~ (XrefListItem ~ ws?)? ~ ("," ~ ws ~ XrefListItem)* ~ ws? ~ "]"}
@@ -189,7 +198,6 @@ TermFrame = { nl*
 
 TermClauseLine = { ws? ~ TermClause ~ EOL }
 
-// TODO
 TermClause = {
     IsAnonymousTag ~ ws ~ Boolean
   | NameTag ~ ws ~ UnquotedString
@@ -198,7 +206,7 @@ TermClause = {
   | DefTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | CommentTag ~ ws ~ UnquotedString
   | SubsetTag ~ ws ~ SubsetId
-  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ XrefList
+  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ ws ~ XrefList
   | XrefTag ~ ws ~ Xref
   | BuiltinTag ~ ws ~ Boolean
   | PropertyValueTag ~ ws ~ PropertyValue

@@ -15,8 +15,8 @@ use crate::error::Result;
 ///
 /// # Example
 /// ```rust
-/// # extern crate ontology;
-/// # use ontology::obo14::QuotedString;
+/// # extern crate fastobo;
+/// # use fastobo::obo14::QuotedString;
 /// let s = QuotedString::new("Hello, world!");
 /// assert_eq!(s.as_ref(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");

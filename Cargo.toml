@@ -1,5 +1,5 @@
 [package]
-name = "ontology"
+name = "fastobo"
 version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
@@ -26,8 +26,3 @@ default-features = false
 version = "*"
 [dev-dependencies.difference]
 version = "*"
-
-
-# [[test]]
-# path = "tests/lib.rs"
-# name = "tests"

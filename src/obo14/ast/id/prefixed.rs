@@ -30,8 +30,8 @@ impl PrefixedId {
     ///
     /// # Example
     /// ```rust
-    /// # extern crate ontology;
-    /// # use ontology::obo14::*;
+    /// # extern crate fastobo;
+    /// # use fastobo::obo14::*;
     /// # use std::str::FromStr;
     /// let canonical_id = PrefixedId::from_str("GO:0046154").unwrap();
     /// assert!(canonical_id.is_canonical());

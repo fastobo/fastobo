@@ -36,6 +36,7 @@ pub enum TermClause {
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
+    // FIXME(@althonos): use `Synonym` struct here.
     Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
     Xref(Xref),
     Builtin(bool),
@@ -245,6 +246,7 @@ mod tests {
     use crate::obo14::ast::IdPrefix;
     use crate::obo14::ast::IdLocal;
     use crate::obo14::ast::Xref;
+    use crate::obo14::ast::UnprefixedId;
     use super::*;
 
     #[test]
@@ -258,7 +260,27 @@ mod tests {
             QuotedString::new("A reference string relevant to the sample under study."),
             XrefList::from(vec![Xref::new(Id::Prefixed(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS"))))])
         );
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
+
+        let actual = TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
+        let expected = TermClause::Synonym(
+            QuotedString::new("chemical entity"),
+            SynonymScope::Exact,
+            None,
+            XrefList::from(vec![
+                Xref::new(Id::from(UnprefixedId::new("UniProt")))
+            ])
+        );
+        assert_eq!(actual, expected);
+
+        let actual = TermClause::from_str("xref: CAS:22325-47-9 \"NIST Chemistry WebBook\"").unwrap();
+        let expected = TermClause::Xref(
+            Xref::with_desc(
+                Id::from(PrefixedId::new(IdPrefix::new("CAS"), IdLocal::new("22325-47-9"))),
+                QuotedString::new("NIST Chemistry WebBook"),
+            )
+        );
+        assert_eq!(actual, expected);
     }
 
 }

@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::str::FromStr;
 
 use chrono::DateTime;
 use chrono::FixedOffset;
@@ -11,6 +12,7 @@ use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
 use crate::error::Result;
+use crate::error::Error;
 
 /// A naive date, as found in header frames.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -94,7 +96,15 @@ impl FromPair for IsoDate {
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         // FIXME(@althonos): we could probably create the DateTime ourselves
         //                   using the tokenization from the Obo14 grammar.
-        let dt = chrono::DateTime::parse_from_rfc3339(pair.as_str()).unwrap();
+        let dt = chrono::DateTime::from_str(pair.as_str()).unwrap();
+        Ok(IsoDate::from(dt))
+    }
+}
+
+impl FromStr for IsoDate {
+    type Err = Error;
+    fn from_str(s: &str) -> Result<Self> {
+        let dt = chrono::DateTime::from_str(s).unwrap();
         Ok(IsoDate::from(dt))
     }
 }
@@ -113,6 +123,37 @@ mod tests {
         fn from_str() {
             let naive = NaiveDate::from_str("12:06:2018 17:13").unwrap();
             assert_eq!(naive, NaiveDate::new(12, 6, 2018, 17, 13));
+        }
+
+    }
+
+    mod iso {
+
+        use super::*;
+        use chrono::Utc;
+        use chrono::TimeZone;
+
+        #[test]
+        fn from_str() {
+            match IsoDate::from_str("2017-1-24T14:41:36Z") {
+                Ok(_) => (),
+                Err(e) => panic!("{}", e),
+            }
+
+            match IsoDate::from_str("2015-08-11T15:05:12Z") {
+                Ok(_) => (),
+                Err(e) => panic!("{}", e),
+            }
+
+            match IsoDate::from_str("2016-10-26T10:51:48Z") {
+                Ok(_) => (),
+                Err(e) => panic!("{}", e),
+            }
+
+            match IsoDate::from_str("2017-1-24T14:41:36Z") {
+                Ok(_) => (),
+                Err(e) => panic!("{}", e),
+            }
         }
 
     }

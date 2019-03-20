@@ -71,23 +71,23 @@ nl             = _{ WhitespaceChar* ~ NewlineChar}
 UniCodeChar = { ANY }
 OboChar     = {
     // escaped character
-    ("\\" ~ ("\\" | " " | "f" | "n" | "r" | "t" | "\""))
+    ("\\" ~ ANY)
     // unescaped character
-  | (!("\\") ~ !("\n") ~ ANY)
+  | (!"\\" ~ !"\n" ~ !"!" ~ ANY)
 }
 NonWsChar   = { !(WhitespaceChar) ~ !(NewlineChar) ~ OboChar }
 
 
 // 2.3 Line Termination
 
-EOL = { WhitespaceChar* ~ (QualifierBlock ~ ws)? ~ HiddenComment? ~ nl  }
+EOL = { ws? ~ (QualifierList)? ~ ws? ~ HiddenComment? ~ nl  }
 
 HiddenComment  = { "!" ~ ( !NewlineChar ~ UniCodeChar )* }
 
-Qualifier      = { !"}" ~ Id ~ "=" ~ QuotedString }
-QualifierList  = { Qualifier ~ ("," ~ ws ~ Qualifier)* }
-QualifierBlock = { "{" ~ QualifierList ~ "}" }
-
+QualifierChar   = { !("=" | "," | "}" | "{" | "\"") ~ NonWsChar }
+QualifierId    = @{ QualifierChar+ }
+Qualifier      = { QualifierId ~ "=" ~ QuotedString }
+QualifierList  = { "{" ~ Qualifier ~ ("," ~ ws ~ Qualifier)* ~ "}" }
 
 // 2.4 Clause Values
 
@@ -131,7 +131,6 @@ NonCanonicalIdLocal = @{ NonWsChar* }
 
 Xref         = { Id ~ (ws ~ QuotedString)? }
 
-// FIXME(@althonos): doing like QualifierBlock might be a better option.
 XrefChar     = { !"," ~ !"]" ~ !"[" ~ NonWsChar }
 XrefId       = { XrefChar+ }
 XrefListItem = { XrefId ~ (ws ~ QuotedString)? }
@@ -211,8 +210,7 @@ TermClause = {
   | BuiltinTag ~ ws ~ Boolean
   | PropertyValueTag ~ ws ~ PropertyValue
   | IsATag ~ ws ~ ClassId
-  | IntersectionOfTag ~ ws ~ ClassId
-  | IntersectionOfTag ~ ws ~ RelationId ~ ws ~ ClassId
+  | IntersectionOfTag ~ ws ~ ((RelationId ~ ws ~ ClassId) | ClassId)
   | UnionOfTag ~ ws ~ ClassId
   | EquivalentToTag ~ ws ~ ClassId
   | DisjointFromTag ~ ws ~ ClassId
@@ -342,22 +340,21 @@ IriIpv6Address      = {
 
 
 // Annex II: ISO-8601 Grammar for DateTime w/ Timezone
-Iso8601DateTime = {Iso8601Date ~ "T" ~ Iso8601Time ~ Iso8601TimeZone }
+Iso8601DateTime = @{Iso8601Date ~ "T" ~ Iso8601Time ~ Iso8601TimeZone }
 
-Iso8601Date  = {
-    Iso8601Year ~ Iso8601Month ~ Iso8601Day
-  | Iso8601Year ~ "-" ~ Iso8601Month ~ "-" ~ Iso8601Day
-}
-Iso8601Year  = { ASCII_DIGIT{4} }
-Iso8601Month = { "0" ~ '1'..'9' | "1" ~ '0'..'2' }
-Iso8601Day   = { "0" ~ '1'..'9' | '1'..'2' ~ '0'..'9' | "30" | "31" }
 
-Iso8601Time   = {
-    Iso8601Hour ~ Iso8601Minute ~ Iso8601Second
-  | Iso8601Hour ~ ":" ~ Iso8601Minute ~ ":" ~ Iso8601Second
-}
-Iso8601Hour   = { '0'..'1' ~ '0'..'9' | "2" ~ '0'..'3' }
-Iso8601Minute = { '0'..'5' ~ '0'..'9' }
-Iso8601Second = { '0'..'5' ~ '0'..'9' }
+// Iso8601DateTime = @{("T" | "+" | "-" | "Z" | ":" | '0'..'9')+}
 
-Iso8601TimeZone = { "Z" | ("+" | "-") ~ Iso8601Hour ~ ":"? ~ Iso8601Minute  }
+
+
+Iso8601Date  = ${ Iso8601Year ~ "-"? ~ Iso8601Month ~ "-"? ~ Iso8601Day }
+Iso8601Year  = @{ ASCII_DIGIT{4} }
+Iso8601Month = @{ ASCII_DIGIT{1,2} }
+Iso8601Day   = @{ ASCII_DIGIT{1,2} }
+
+Iso8601Time   = ${ Iso8601Hour ~ ":"? ~ Iso8601Minute ~ ":"? ~ Iso8601Second }
+Iso8601Hour   = @{ (('0'..'1') ~ ('0'..'9')) | "2" ~ '0'..'3' }
+Iso8601Minute = @{ ('0'..'5') ~ ('0'..'9') }
+Iso8601Second = @{ ('0'..'5') ~ ('0'..'9') }
+
+Iso8601TimeZone = @{ "Z" }

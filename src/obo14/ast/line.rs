@@ -10,12 +10,13 @@ use crate::error::Result;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Rule;
 use super::Qualifier;
+use super::QualifierList;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct Line<T> {
     inner: T,
-    qualifiers: Option<Vec<Qualifier>>, // FIXME(@althonos): use an `IndexMap` ?
+    qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
     comment: Option<Comment>,
 }
 
@@ -50,15 +51,7 @@ where
         self.inner.fmt(f)?;
 
         if let Some(ref qualifiers) = self.qualifiers {
-            f.write_str(" {")?;
-            let mut quals = qualifiers.iter().peekable();
-            while let Some(qual) = quals.next() {
-                qual.fmt(f)?;
-                if quals.peek().is_some() {
-                    f.write_str(", ")?;
-                }
-            }
-            f.write_char('}')?;
+            f.write_char(' ').and(qualifiers.fmt(f))?;
         }
 
         if let Some(ref comment) = self.comment {
@@ -75,35 +68,45 @@ impl FromPair for Line<()> {
         let mut inner = pair.into_inner();
         let opt1 = inner.next();
         let opt2 = inner.next();
-        if let Some(pair2) = opt2 {
-            let comment = Comment::from_pair_unchecked(pair2)?;
-            // let qualifier = QualifierList::from_pair_unchecked(pair1)?;
-            unimplemented!()
-        } else if opt1.is_none() {
-            Ok(Line {
-                inner: (),
-                qualifiers: None,
-                comment: None,
-            })
-        } else {
-            let pair1 = opt1.unwrap();
-            match pair1.as_rule() {
-                Rule::QualifierList => unimplemented!(),
-                Rule::HiddenComment => Ok(Line {
+        match (opt1, opt2) {
+            (Some(pair1), Some(pair2)) => {
+                let comment = Comment::from_pair_unchecked(pair2)?;
+                let qualifiers = QualifierList::from_pair_unchecked(pair1)?;
+                Ok(Line::new(qualifiers, comment))
+            }
+            (Some(pair1), None) => {
+                match pair1.as_rule() {
+                    Rule::QualifierList =>
+                        QualifierList::from_pair_unchecked(pair1).map(Line::with_qualifiers),
+                    Rule::HiddenComment =>
+                        Comment::from_pair_unchecked(pair1).map(Line::with_comment),
+                    _ => unreachable!(),
+                }
+            }
+            (None, _) => {
+                Ok(Line {
                     inner: (),
                     qualifiers: None,
-                    comment: Some(Comment::from_pair_unchecked(pair1)?),
-                }),
-                _ => unreachable!(),
+                    comment: None,
+                })
             }
         }
     }
 }
 
-impl Line<()> {
-
-    pub fn new() -> Self {
+impl Default for Line<()> {
+    fn default() -> Self {
         Line { inner: (), qualifiers: None, comment: None }
+    }
+}
+
+impl Line<()> {
+    pub fn new(qualifiers: QualifierList, comment: Comment) -> Self {
+        Line {
+            inner: (),
+            qualifiers: Some(qualifiers),
+            comment: Some(comment),
+        }
     }
 
     pub fn with_comment(comment: Comment) -> Self {
@@ -111,6 +114,14 @@ impl Line<()> {
             inner: (),
             qualifiers: None,
             comment: Some(comment),
+        }
+    }
+
+    pub fn with_qualifiers(qualifiers: QualifierList) -> Self {
+        Line {
+            inner: (),
+            qualifiers: Some(qualifiers),
+            comment: None
         }
     }
 
@@ -122,8 +133,6 @@ impl Line<()> {
         }
     }
 }
-
-
 
 /// An inline comment without semantic value.
 #[derive(Debug, Eq, Hash, PartialEq)]

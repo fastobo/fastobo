@@ -20,22 +20,38 @@ CreationDateTag                        = { "creation_date:" }
 DataVersionTag                         = { "data-version:" }
 DateTag                                = { "date:" }
 DisjointFromTag                        = { "disjoint_from:" }
+DisjointOverTag                        = { "disjoint_over:" }
 DefTag                                 = { "def:" }
 DefaultNamespaceTag                    = { "default-namespace:" }
+DomainTag                              = { "domain:" }
 EquivalentToTag                        = { "equivalent_to:" }
+EquivalentToChainTag                   = { "equivalent_to_chain:" }
+ExpandAssertionToTag                   = { "expand_assertion_to:" }
+ExpandExpressionToTag                  = { "expand_expression_to:" }
 FormatVersionTag                       = { "format-version:" }
+HoldsOverChainTag                      = { "holds_over_chain:" }
 IdspaceTag                             = { "idspace:" }
+ImportTag                              = { "import:" }
 IntersectionOfTag                      = { "intersection_of:" }
+InverseOfTag                           = { "inverse_of:"}
 IsATag                                 = { "is_a:" }
 IsAnonymousTag                         = { "is_anonymous:"}
+IsAntiSymmetricTag                     = { "is_anti_symmetric:" }
+IsClassLevelTag                        = { "is_class_level:"}
+IsCyclicTag                            = { "is_cyclic:" }
+IsFunctionalTag                        = { "is_functional:" }
+IsInverseFunctionalTag                 = { "is_inverse_functional:" }
+IsMetadataTag                          = { "is_metadata:" }
 IsObsoleteTag                          = { "is_obsolete:" }
-ImportTag                              = { "import:" }
+IsReflexiveTag                         = { "is_reflexive:" }
+IsTransitiveTag                        = { "is_transitive:" }
 NameTag                                = { "name:" }
 NamespaceTag                           = { "namespace:" }
 OntologyTag                            = { "ontology:" }
 OwlAxiomsTag                           = { "owl-axioms:" }
 PropertyValueTag                       = { "property_value:" }
 RelationshipTag                        = { "relationship:" }
+RangeTag                               = { "range:" }
 RemarkTag                              = { "remark:" }
 ReplacedByTag                          = { "replaced_by:" }
 SavedByTag                             = { "saved-by:" }
@@ -43,6 +59,7 @@ SubsetTag                              = { "subset:" }
 SubsetdefTag                           = { "subsetdef:" }
 SynonymTypedefTag                      = { "synonymtypedef:" }
 SynonymTag                             = { "synonym:" }
+TransitiveOverTag                      = { "transitive_over:" }
 TreatXrefsAsEquivalentTag              = { "treat-xrefs-as-equivalent:" }
 TreatXrefsAsGenusDifferentiaTag        = { "treat-xrefs-as-reverse-genus-differentia:" }
 TreatXrefsAsHasSubclassTag             = { "treat-xrefs-as-has-subclass:" }
@@ -119,7 +136,7 @@ UnprefixedId = @{ ( !":" ~ NonWsChar )+ }
 PrefixedId   = {  IdPrefix ~ ":" ~ IdLocal }
 
 IdPrefix             = { (CanonicalIdPrefix | NonCanonicalIdPrefix) }
-CanonicalIdPrefix    = @{ AlphaChar ~ (AlphaChar | "_")* ~ &(":") }
+CanonicalIdPrefix    = @{ AlphaChar ~ (AlphaChar | "_")* ~ &(":" | EOI) }
 NonCanonicalIdPrefix = @{ (!":" ~ NonWsChar)* }
 
 IdLocal             = { (CanonicalIdLocal | NonCanonicalIdLocal) }
@@ -233,7 +250,45 @@ TypedefFrame = { nl*
 
 // TODO
 TypedefFrameClause = {
-  IsAnonymousTag ~ ws ~ Boolean
+    IsAnonymousTag ~ ws ~ Boolean
+  | NameTag ~ ws ~ UnquotedString
+  | NamespaceTag ~ ws ~ NamespaceId
+  | AltIdTag ~ ws ~ Id
+  | DefTag ~ ws ~ QuotedString ~ ws ~ XrefList
+  | CommentTag ~ ws ~ UnquotedString
+  | SubsetTag ~ ws ~ SubsetId
+  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ ws ~ (SynonymTypeId ~ ws)? ~ XrefList
+  | XrefTag ~ ws ~ Xref
+  | PropertyValueTag ~ ws ~ PropertyValue
+  | DomainTag ~ ws ~ ClassId
+  | RangeTag ~ ws ~ ClassId
+  | BuiltinTag ~ ws ~ Boolean
+  | HoldsOverChainTag ~ ws ~ RelationId ~ ws ~ RelationId
+  | IsAntiSymmetricTag ~ ws ~ Boolean
+  | IsCyclicTag ~ ws ~ Boolean
+  | IsReflexiveTag ~ ws ~ Boolean
+  | IsTransitiveTag ~ ws ~ Boolean
+  | IsFunctionalTag ~ ws ~ Boolean
+  | IsInverseFunctionalTag ~ ws ~ Boolean
+  | IsATag ~ ws ~ RelationId
+  | IntersectionOfTag ~ ws ~ RelationId
+  | UnionOfTag ~ ws ~ RelationId
+  | EquivalentToTag ~ ws ~ RelationId
+  | DisjointFromTag ~ ws ~ RelationId
+  | InverseOfTag ~ ws ~ RelationId
+  | TransitiveOverTag ~ ws ~ RelationId
+  | EquivalentToChainTag ~ ws ~ RelationId ~ ws ~ RelationId
+  | DisjointOverTag ~ ws ~ RelationId
+  | RelationshipTag ~ ws ~ RelationId ~ ws ~ RelationId
+  | IsObsoleteTag ~ ws ~ Boolean
+  | ReplacedByTag ~ ws ~ RelationId
+  | ConsiderTag ~ ws ~ Id
+  | CreatedByTag ~ ws ~ PersonId
+  | CreationDateTag ~ ws ~ Iso8601DateTime
+  | ExpandAssertionToTag ~ ws ~ QuotedString ~ ws ~ XrefList
+  | ExpandExpressionToTag ~ ws ~ QuotedString ~ ws ~ XrefList
+  | IsMetadataTag ~ ws ~ Boolean
+  | IsClassLevelTag ~ ws ~ Boolean
 }
 
 

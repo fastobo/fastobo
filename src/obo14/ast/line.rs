@@ -101,6 +101,19 @@ impl FromPair for Line<()> {
 }
 
 impl Line<()> {
+
+    pub fn new() -> Self {
+        Line { inner: (), qualifiers: None, comment: None }
+    }
+
+    pub fn with_comment(comment: Comment) -> Self {
+        Line {
+            inner: (),
+            qualifiers: None,
+            comment: Some(comment),
+        }
+    }
+
     pub fn with_content<T>(self, content: T) -> Line<T> {
         Line {
             inner: content,

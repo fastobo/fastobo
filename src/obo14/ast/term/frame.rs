@@ -69,6 +69,19 @@ mod tests {
             actual.id.as_ref(),
             &ClassId::from(Id::from(PrefixedId::new(IdPrefix::new("MS"), IdLocal::new("1000008"))))
         );
+
+        let actual = TermFrame::from_str(
+            "[Term]
+            id: PO:0000067
+            name: proteoid root
+            namespace: plant_anatomy
+            xref: PO_GIT:588
+            is_a: PO:0009005 ! root
+            created_by: austinmeier
+            creation_date: 2015-08-11T15:05:12Z\n"
+        ).unwrap();
+
+
     }
 
 }

@@ -247,6 +247,7 @@ mod tests {
     use crate::obo14::ast::IdLocal;
     use crate::obo14::ast::Xref;
     use crate::obo14::ast::UnprefixedId;
+    use crate::obo14::ast::Comment;
     use super::*;
 
     #[test]
@@ -281,6 +282,30 @@ mod tests {
             )
         );
         assert_eq!(actual, expected);
+
+        let actual = Line::<TermClause>::from_str("intersection_of: part_of PO:0020039 ! leaf lamina\n").unwrap();
+        let expected = Line::with_comment(Comment::new(" leaf lamina")).with_content(
+            TermClause::IntersectionOf(
+                Some(RelationId::from(Id::from(UnprefixedId::new("part_of")))),
+                ClassId::from(Id::from(PrefixedId::new(IdPrefix::new("PO"), IdLocal::new("0020039")))),
+            )
+        );
+        assert_eq!(actual, expected);
+
+        let actual = Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n").unwrap();
+        let expected = Line::with_comment(Comment::new(" leaf epidermis")).with_content(
+            TermClause::IntersectionOf(
+                None,
+                ClassId::from(Id::from(PrefixedId::new(IdPrefix::new("PO"), IdLocal::new("0006016")))),
+            )
+        );
+        assert_eq!(actual, expected);
+
+        // let actual = Line::<TermClause>::from_str("def: \"A higher order inflorescence axis (PO:0009081) that develops from an inflorescence axillary meristem (PO:0009105) of a second order inflorescence axis (PO:0006322).\" [] {comment=\"NYBG:Dario_Cavaliere\", comment=\"NYBG:Brandon_Sinn\"}\n").unwrap();
+        // match Line::<TermClause>::from_str("property_value: http://purl.org/dc/elements/1.1/date 2018-02-15T17:24:36Z xsd:dateTime\n") {
+        //     Err(e) => panic!("{}", e),
+        //     Ok(_) => (),
+        // };
     }
 
 }

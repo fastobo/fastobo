@@ -88,7 +88,7 @@ nl             = _{ WhitespaceChar* ~ NewlineChar}
 UniCodeChar = { ANY }
 OboChar     = {
     // escaped character
-    ("\\" ~ ("\\" | " " | "f" | "n" | "r" | "t" | "\"" | ":"))
+    ("\\" ~ ANY)
     // unescaped character
   | (!"\\" ~ !"\n" ~ !"!" ~ ANY)
 }
@@ -108,7 +108,7 @@ QualifierList  = { "{" ~ Qualifier ~ ("," ~ ws ~ Qualifier)* ~ "}" }
 
 // 2.4 Clause Values
 
-QuotedString   = @{ "\"" ~ ( !"\"" ~ OboChar )* ~ "\"" }
+QuotedString   = @{ "\"" ~ (!"\"" ~ ("!" | OboChar))* ~ "\"" }
 UnquotedString = @{ OboChar+ }
 
 

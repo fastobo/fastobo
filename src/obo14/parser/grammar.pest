@@ -37,13 +37,14 @@ InverseOfTag                           = { "inverse_of:"}
 IsATag                                 = { "is_a:" }
 IsAnonymousTag                         = { "is_anonymous:"}
 IsAntiSymmetricTag                     = { "is_anti_symmetric:" }
-IsClassLevelTagTag                     = { "is_class_level_tag:"}
+IsClassLevelTag                        = { "is_class_level:"}
 IsCyclicTag                            = { "is_cyclic:" }
 IsFunctionalTag                        = { "is_functional:" }
 IsInverseFunctionalTag                 = { "is_inverse_functional:" }
 IsMetadataTagTag                       = { "is_metadata_tag:" }
 IsObsoleteTag                          = { "is_obsolete:" }
 IsReflexiveTag                         = { "is_reflexive:" }
+IsSymmetricTag                         = { "is_symmetric:" }
 IsTransitiveTag                        = { "is_transitive:" }
 NameTag                                = { "name:" }
 NamespaceTag                           = { "namespace:" }
@@ -148,7 +149,7 @@ NonCanonicalIdLocal = @{ NonWsChar* }
 
 Xref         = { Id ~ (ws ~ QuotedString)? }
 
-XrefChar     = { !"," ~ !"]" ~ !"[" ~ NonWsChar }
+XrefChar     = { !"," ~ !"]" ~ NonWsChar }
 XrefId       = { XrefChar+ }
 XrefListItem = { XrefId ~ (ws ~ QuotedString)? }
 XrefList     = {"[" ~ (XrefListItem ~ ws?)? ~ ("," ~ ws ~ XrefListItem)* ~ ws? ~ "]"}
@@ -268,6 +269,7 @@ TypedefClause = {
   | IsAntiSymmetricTag ~ ws ~ Boolean
   | IsCyclicTag ~ ws ~ Boolean
   | IsReflexiveTag ~ ws ~ Boolean
+  | IsSymmetricTag ~ ws ~ Boolean
   | IsTransitiveTag ~ ws ~ Boolean
   | IsFunctionalTag ~ ws ~ Boolean
   | IsInverseFunctionalTag ~ ws ~ Boolean
@@ -289,7 +291,7 @@ TypedefClause = {
   | ExpandAssertionToTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | ExpandExpressionToTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | IsMetadataTagTag ~ ws ~ Boolean
-  | IsClassLevelTagTag ~ ws ~ Boolean
+  | IsClassLevelTag ~ ws ~ Boolean
 }
 
 

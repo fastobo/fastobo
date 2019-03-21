@@ -47,7 +47,7 @@ pub enum TypedefClause {
     ExpandAssertionTo(QuotedString, XrefList),
     ExpandExpressionTo(QuotedString, XrefList),
     IsMetadataTag(bool),
-    IsClassLevelTag(bool),
+    IsClassLevel(bool),
 }
 
 impl Display for TypedefClause {
@@ -106,7 +106,7 @@ impl Display for TypedefClause {
             ExpandExpressionTo(desc, xrefs) => f.write_str("expand_expression_to: ")
                 .and(desc.fmt(f)).and(f.write_char(' ')).and(xrefs.fmt(f)),
             IsMetadataTag(b) => f.write_str("is_metadata_tag: ").and(b.fmt(f)),
-            IsClassLevelTag(b) => f.write_str("is_class_level_tag: ").and(b.fmt(f)),
+            IsClassLevel(b) => f.write_str("is_class_level: ").and(b.fmt(f)),
         }
     }
 }

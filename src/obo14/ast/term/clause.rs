@@ -308,6 +308,13 @@ mod tests {
         ))));
         assert_eq!(actual, expected);
 
+        let actual = TermClause::from_str("def: \"OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms.\" [PSI:PI]").unwrap();
+        let expected = TermClause::Def(
+            QuotedString::new("OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms."),
+            XrefList::from(vec![Xref::new(Id::from(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("PI"))))])
+        );
+        assert_eq!(actual, expected);
+
         // let actual = Line::<TermClause>::from_str("def: \"A higher order inflorescence axis (PO:0009081) that develops from an inflorescence axillary meristem (PO:0009105) of a second order inflorescence axis (PO:0006322).\" [] {comment=\"NYBG:Dario_Cavaliere\", comment=\"NYBG:Brandon_Sinn\"}\n").unwrap();
         // match Line::<TermClause>::from_str("property_value: http://purl.org/dc/elements/1.1/date 2018-02-15T17:24:36Z xsd:dateTime\n") {
         //     Err(e) => panic!("{}", e),

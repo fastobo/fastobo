@@ -301,6 +301,13 @@ mod tests {
         );
         assert_eq!(actual, expected);
 
+        let actual = TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
+        let expected = TermClause::Xref(Xref::new(Id::from(PrefixedId::new(
+            IdPrefix::new("Wikipedia"),
+            IdLocal::new("https://en.wikipedia.org/wiki/Gas"),
+        ))));
+        assert_eq!(actual, expected);
+
         // let actual = Line::<TermClause>::from_str("def: \"A higher order inflorescence axis (PO:0009081) that develops from an inflorescence axillary meristem (PO:0009105) of a second order inflorescence axis (PO:0006322).\" [] {comment=\"NYBG:Dario_Cavaliere\", comment=\"NYBG:Brandon_Sinn\"}\n").unwrap();
         // match Line::<TermClause>::from_str("property_value: http://purl.org/dc/elements/1.1/date 2018-02-15T17:24:36Z xsd:dateTime\n") {
         //     Err(e) => panic!("{}", e),

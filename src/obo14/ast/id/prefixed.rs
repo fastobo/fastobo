@@ -249,7 +249,7 @@ impl FromPair for IdLocal {
         }
 
         Ok(IdLocal {
-            value: inner.as_str().to_string(),
+            value: local,
             canonical: false,
         })
     }
@@ -275,6 +275,10 @@ mod tests {
 
         let actual = PrefixedId::from_str("CAS:22325-47-9").unwrap();
         let expected = PrefixedId::new(IdPrefix::new("CAS"), IdLocal::new("22325-47-9"));
+        assert_eq!(actual, expected);
+
+        let actual = PrefixedId::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
+        let expected = PrefixedId::new(IdPrefix::new("Wikipedia"), IdLocal::new("https://en.wikipedia.org/wiki/Gas"));
         assert_eq!(actual, expected);
 
         assert!(PrefixedId::from_str("[Term]").is_err());

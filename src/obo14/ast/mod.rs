@@ -41,14 +41,17 @@ pub struct OboDoc {
 impl FromPair for OboDoc {
     const RULE: Rule = Rule::OboDoc;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+
         let mut inner = pair.into_inner();
 
-        let mut header = HeaderFrame::from_pair_unchecked(inner.next().unwrap())?;
         let mut entities = Vec::new();
-        for pair in inner {
-            entities.push(EntityFrame::from_pair_unchecked(pair)?);
-        }
+        let header = HeaderFrame::from_pair_unchecked(inner.next().unwrap())?;
 
+        let mut pair = inner.next().unwrap();
+        while pair.as_rule() != Rule::EOI {
+            entities.push(EntityFrame::from_pair_unchecked(pair)?);
+            pair = inner.next().unwrap();
+        }
         Ok(OboDoc { header, entities })
     }
 }
@@ -84,8 +87,8 @@ impl FromPair for EntityFrame {
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::TermFrame => Ok(EntityFrame::Term(TermFrame::from_pair_unchecked(inner)?)),
-            Rule::TypedefFrame => unimplemented!(),
+            Rule::TermFrame => TermFrame::from_pair_unchecked(inner).map(From::from),
+            Rule::TypedefFrame => TypedefFrame::from_pair_unchecked(inner).map(From::from),
             Rule::InstanceFrame => unimplemented!(),
             _ => unreachable!()
         }

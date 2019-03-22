@@ -10,7 +10,6 @@ pub use self::subclasses::ClassId;
 pub use self::subclasses::RelationId;
 pub use self::subclasses::InstanceId;
 pub use self::subclasses::SubsetId;
-pub use self::subclasses::PersonId;
 pub use self::subclasses::SynonymTypeId;
 pub use self::subclasses::NamespaceId;
 

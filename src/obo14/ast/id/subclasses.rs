@@ -75,9 +75,6 @@ id_subclasses! {
     /// An OBO namespace identifier.
     pub struct NamespaceId;
 
-    /// A unique identifier for a person (used in the `created_by` clause).
-    pub struct PersonId;
-
     /// A unique identifier for a typedef (*i.e.* a relation).
     pub struct RelationId;
 

@@ -62,6 +62,8 @@ where
     }
 }
 
+pub type Eol = Line<()>;
+
 impl FromPair for Line<()> {
     const RULE: Rule = Rule::EOL;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {

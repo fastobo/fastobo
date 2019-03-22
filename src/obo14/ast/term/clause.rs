@@ -14,7 +14,6 @@ use crate::obo14::ast::Id;
 use crate::obo14::ast::IsoDate;
 use crate::obo14::ast::Line;
 use crate::obo14::ast::NamespaceId;
-use crate::obo14::ast::PersonId;
 use crate::obo14::ast::PropertyValue;
 use crate::obo14::ast::QuotedString;
 use crate::obo14::ast::RelationId;
@@ -50,7 +49,7 @@ pub enum TermClause {
     IsObsolete(bool),
     ReplacedBy(ClassId),
     Consider(ClassId),
-    CreatedBy(PersonId),
+    CreatedBy(UnquotedString),
     CreationDate(IsoDate),
     // FIXME(@althonos): in the guide but not in the syntax.
     // ExpandAssertionTo(QuotedString, XrefList),
@@ -97,7 +96,7 @@ impl Display for TermClause {
             IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
             ReplacedBy(id) => f.write_str("replaced_by: ").and(id.fmt(f)),
             Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
-            CreatedBy(id) => f.write_str("created_by: ").and(id.fmt(f)),
+            CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
             CreationDate(date) => f.write_str("creation_date: ").and(date.fmt(f)),
         }
     }
@@ -223,8 +222,8 @@ impl FromPair for TermClause {
                 Ok(TermClause::Consider(id))
             }
             Rule::CreatedByTag => {
-                let id = PersonId::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::CreatedBy(id))
+                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TermClause::CreatedBy(s))
             }
             Rule::CreationDateTag => {
                 let dt = IsoDate::from_pair_unchecked(inner.next().unwrap())?;

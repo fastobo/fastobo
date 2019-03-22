@@ -42,7 +42,7 @@ pub enum TypedefClause {
     IsObsolete(bool),
     ReplacedBy(RelationId),
     Consider(Id),
-    CreatedBy(PersonId),
+    CreatedBy(UnquotedString),
     CreationDate(IsoDate),
     ExpandAssertionTo(QuotedString, XrefList),
     ExpandExpressionTo(QuotedString, XrefList),
@@ -99,7 +99,7 @@ impl Display for TypedefClause {
             IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
             ReplacedBy(r) => f.write_str("replaced_by: ").and(r.fmt(f)),
             Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
-            CreatedBy(person) => f.write_str("created_by: ").and(person.fmt(f)),
+            CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
             CreationDate(date) => f.write_str("creation_date: ").and(date.fmt(f)),
             ExpandAssertionTo(desc, xrefs) => f.write_str("expand_assertion_to: ")
                 .and(desc.fmt(f)).and(f.write_char(' ')).and(xrefs.fmt(f)),

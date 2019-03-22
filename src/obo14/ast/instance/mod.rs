@@ -4,7 +4,6 @@ use super::InstanceId;
 use super::IsoDate;
 use super::Line;
 use super::NamespaceId;
-use super::PersonId;
 use super::QuotedString;
 use super::RelationId;
 use super::SubsetId;
@@ -34,7 +33,7 @@ pub enum InstanceClause {
     PropertyValue(RelationId, Id),
     InstanceOf(ClassId),
     Relationship(RelationId, Id),
-    CreatedBy(PersonId),
+    CreatedBy(UnquotedString),
     CreationDate(IsoDate),
     IsObsolete(bool),
     ReplacedBy(InstanceId),

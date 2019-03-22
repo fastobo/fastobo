@@ -126,9 +126,8 @@ UnquotedString = @{ OboChar+ }
 ClassId       = { Id }
 RelationId    = { Id }
 InstanceId    = { Id }
-SynonymTypeId = { !"[" ~ Id }   // FIXME(@althonos): Hackish.
+SynonymTypeId = { !"[" ~ Id }
 NamespaceId   = { Id }
-PersonId      = { Id }
 SubsetId      = { Id }
 
 Id           = { UrlId | PrefixedId | UnprefixedId }
@@ -236,7 +235,7 @@ TermClause = {
   | IsObsoleteTag ~ ws ~ Boolean
   | ReplacedByTag ~ ws ~ ClassId
   | ConsiderTag ~ ws ~ ClassId
-  | CreatedByTag ~ ws ~ PersonId
+  | CreatedByTag ~ ws ~ UnquotedString
   | CreationDateTag ~ ws ~ Iso8601DateTime
 }
 
@@ -286,7 +285,7 @@ TypedefClause = {
   | IsObsoleteTag ~ ws ~ Boolean
   | ReplacedByTag ~ ws ~ RelationId
   | ConsiderTag ~ ws ~ Id
-  | CreatedByTag ~ ws ~ PersonId
+  | CreatedByTag ~ ws ~ UnquotedString
   | CreationDateTag ~ ws ~ Iso8601DateTime
   | ExpandAssertionToTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | ExpandExpressionToTag ~ ws ~ QuotedString ~ ws ~ XrefList

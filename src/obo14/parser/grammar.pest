@@ -32,6 +32,7 @@ FormatVersionTag                       = { "format-version:" }
 HoldsOverChainTag                      = { "holds_over_chain:" }
 IdspaceTag                             = { "idspace:" }
 ImportTag                              = { "import:" }
+InstanceOfTag                          = { "instance_of:" }
 IntersectionOfTag                      = { "intersection_of:" }
 InverseOfTag                           = { "inverse_of:"}
 IsATag                                 = { "is_a:" }
@@ -159,6 +160,8 @@ XrefList     = {"[" ~ (XrefListItem ~ ws?)? ~ ("," ~ ws ~ XrefListItem)* ~ ws? ~
 
 OboDoc      = { HeaderFrame ~ (EntityFrame)* ~ nl* ~ EOI }
 EntityFrame = { TermFrame | InstanceFrame | TypedefFrame }
+
+EntitySingle = { nl* ~ EntityFrame ~ nl* ~ EOI }  // NB(@althonos): for iterative parsers.
 
 
 // 3.2 Obo Headers
@@ -305,7 +308,23 @@ InstanceClauseLine = {
     ws? ~ InstanceClause ~ EOL
 }
 InstanceClause = {
-    "is_anonymous:" ~ ws ~ Boolean
+    IsAnonymousTag ~ ws ~ Boolean
+  | NameTag ~ ws ~ UnquotedString
+  | NamespaceTag ~ ws ~ NamespaceId
+  | AltIdTag ~ ws ~ Id
+  | DefTag ~ ws ~ QuotedString ~ ws ~ XrefList
+  | CommentTag ~ ws ~ UnquotedString
+  | SubsetTag ~ ws ~ SubsetId
+  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ ws ~ XrefList
+  | XrefTag ~ ws ~ Xref
+  | PropertyValueTag ~ ws ~ PropertyValue
+  | InstanceOfTag ~ ws ~ ClassId
+  | RelationshipTag ~ ws ~ RelationId ~ ws ~ InstanceId
+  | CreatedByTag ~ ws ~ UnquotedString
+  | CreationDateTag ~ ws ~ Iso8601DateTime
+  | IsObsoleteTag ~ ws ~ Boolean
+  | ReplacedByTag ~ ws ~ InstanceId
+  | ConsiderTag ~ ws ~ Id
 }
 
 

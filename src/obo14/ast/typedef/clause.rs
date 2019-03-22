@@ -26,6 +26,7 @@ pub enum TypedefClause {
     IsAntiSymmetric(bool),
     IsCyclic(bool),
     IsReflexive(bool),
+    IsSymmetric(bool),
     IsTransitive(bool),
     IsFunctional(bool),
     IsInverseFunctional(bool),
@@ -36,7 +37,7 @@ pub enum TypedefClause {
     DisjointFrom(RelationId),
     InverseOf(RelationId),
     TransitiveOver(RelationId),
-    EquivalentToChain(RelationId),
+    EquivalentToChain(RelationId, RelationId),
     DisjointOver(RelationId),
     Relationship(RelationId, RelationId),
     IsObsolete(bool),
@@ -81,6 +82,7 @@ impl Display for TypedefClause {
             IsAntiSymmetric(b) => f.write_str("is_anti_symmetric: ").and(b.fmt(f)),
             IsCyclic(b) => f.write_str("is_cyclic: ").and(b.fmt(f)),
             IsReflexive(b) => f.write_str("is_reflexive: ").and(b.fmt(f)),
+            IsSymmetric(b) => f.write_str("is_symmetric: ").and(b.fmt(f)),
             IsTransitive(b) => f.write_str("is_transitive: ").and(b.fmt(f)),
             IsFunctional(b) => f.write_str("is_functional: ").and(b.fmt(f)),
             IsInverseFunctional(b) => f.write_str("is_inverse_functional: ")
@@ -92,7 +94,8 @@ impl Display for TypedefClause {
             DisjointFrom(r) => f.write_str("disjoint_from: ").and(r.fmt(f)),
             InverseOf(r) => f.write_str("inverse_of: ").and(r.fmt(f)),
             TransitiveOver(r) => f.write_str("transitive_over: ").and(r.fmt(f)),
-            EquivalentToChain(r) => f.write_str("equivalent_to_chain: ").and(r.fmt(f)),
+            EquivalentToChain(r1, r2) => f.write_str("equivalent_to_chain: ")
+                .and(r1.fmt(f)).and(f.write_char(' ')).and(r2.fmt(f)),
             DisjointOver(r) => f.write_str("disjoint_over: ").and(r.fmt(f)),
             Relationship(r1, r2) => f.write_str("relationship: ").and(r1.fmt(f))
                 .and(f.write_char(' ')).and(r2.fmt(f)),
@@ -125,9 +128,192 @@ impl_fromstr!(Line<TypedefClause>);
 impl FromPair for TypedefClause {
     const RULE: Rule = Rule::TypedefClause;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-        // FIXME
+        let mut inner = pair.into_inner();
+        match inner.next().unwrap().as_rule() {
+            Rule::IsAnonymousTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsAnonymous(b))
+            }
+            Rule::NameTag => {
+                let n = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Name(n))
+            }
+            Rule::NamespaceTag => {
+                let ns = NamespaceId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Namespace(ns))
+            }
+            Rule::AltIdTag => {
+                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::AltId(id))
+            }
+            Rule::DefTag => {
+                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Def(desc, xrefs))
+            }
+            Rule::CommentTag => {
+                let comment = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Comment(comment))
+            }
+            Rule::SubsetTag => {
+                let id = SubsetId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Subset(id))
+            }
+            Rule::SynonymTag => {
+                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
 
-        Ok(TypedefClause::IsAnonymous(false))
+                let pair = inner.next().unwrap();
+                match pair.as_rule() {
+                    Rule::SynonymTypeId => {
+                        let ty = SynonymTypeId::from_pair_unchecked(pair)?;
+                        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                        Ok(TypedefClause::Synonym(desc, scope, Some(ty), xrefs))
+                    }
+                    Rule::XrefList => {
+                        let xrefs = XrefList::from_pair_unchecked(pair)?;
+                        Ok(TypedefClause::Synonym(desc, scope, None, xrefs))
+                    }
+                    _ => unreachable!()
+                }
+            }
+            Rule::XrefTag => {
+                let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Xref(xref))
+            }
+            Rule::PropertyValueTag => {
+                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::PropertyValue(pv))
+            }
+            Rule::DomainTag => {
+                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Domain(id))
+            }
+            Rule::RangeTag => {
+                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Range(id))
+            }
+            Rule::BuiltinTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Builtin(b))
+            }
+            Rule::HoldsOverChainTag => {
+                let r1 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let r2 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::HoldsOverChain(r1, r2))
+            }
+            Rule::IsAntiSymmetricTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsAntiSymmetric(b))
+            }
+            Rule::IsCyclicTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsCyclic(b))
+            }
+            Rule::IsReflexiveTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsReflexive(b))
+            }
+            Rule::IsSymmetricTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsSymmetric(b))
+            }
+            Rule::IsTransitiveTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsTransitive(b))
+            }
+            Rule::IsFunctionalTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsFunctional(b))
+            }
+            Rule::IsInverseFunctionalTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsInverseFunctional(b))
+            }
+            Rule::IsATag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsA(id))
+            }
+            Rule::IntersectionOfTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IntersectionOf(id))
+            }
+            Rule::UnionOfTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::UnionOf(id))
+            }
+            Rule::EquivalentToTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::EquivalentTo(id))
+            }
+            Rule::DisjointFromTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::DisjointFrom(id))
+            }
+            Rule::InverseOfTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::InverseOf(id))
+            }
+            Rule::TransitiveOverTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::TransitiveOver(id))
+            }
+            Rule::EquivalentToChainTag => {
+                let r1 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let r2 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::EquivalentToChain(r1, r2))
+            }
+            Rule::DisjointOverTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::DisjointOver(id))
+            }
+            Rule::RelationshipTag => {
+                let r1 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let r2 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Relationship(r1, r2))
+            }
+            Rule::IsObsoleteTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsObsolete(b))
+            }
+            Rule::ReplacedByTag => {
+                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::ReplacedBy(id))
+            }
+            Rule::ConsiderTag => {
+                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Consider(id))
+            }
+            Rule::CreatedByTag => {
+                let person = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::CreatedBy(person))
+            }
+            Rule::CreationDateTag => {
+                let date = IsoDate::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::CreationDate(date))
+            }
+            Rule::ExpandAssertionToTag => {
+                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::ExpandAssertionTo(desc, xrefs))
+            }
+            Rule::ExpandExpressionToTag => {
+                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::ExpandExpressionTo(desc, xrefs))
+            }
+            Rule::IsMetadataTagTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsMetadataTag(b))
+            }
+            Rule::IsClassLevelTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsClassLevel(b))
+            }
+            _ => unreachable!(),
+        }
+
+
     }
 }
 impl_fromstr!(TypedefClause);

@@ -54,7 +54,7 @@ pub enum TermClause {
     // FIXME(@althonos): in the guide but not in the syntax.
     // ExpandAssertionTo(QuotedString, XrefList),
     // ExpandExpressionTO(QuotedString, XrefList),
-    // IsMetadata(bool),
+    // IsMetadataTag(bool),
     // IsClassLevel(bool),
 }
 
@@ -170,7 +170,7 @@ impl FromPair for TermClause {
                 Ok(TermClause::Xref(xref))
             }
             Rule::BuiltinTag => {
-                let b = bool::from_str(inner.next().unwrap().as_str()).unwrap();
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::Builtin(b))
             }
             Rule::PropertyValueTag => {
@@ -210,7 +210,7 @@ impl FromPair for TermClause {
                 Ok(TermClause::Relationship(rel, id))
             }
             Rule::IsObsoleteTag => {
-                let b = bool::from_str(inner.next().unwrap().as_str()).unwrap();
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::IsObsolete(b))
             }
             Rule::ReplacedByTag => {

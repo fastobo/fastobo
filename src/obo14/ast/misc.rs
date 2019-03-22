@@ -104,6 +104,15 @@ impl FromPair for PropertyValue {
 }
 impl_fromstr!(PropertyValue);
 
+
+impl FromPair for bool {
+    const RULE: Rule = Rule::Boolean;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
 

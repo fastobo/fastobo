@@ -7,11 +7,11 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
+use crate::error::Error;
+use crate::error::Result;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-use crate::error::Error;
-use crate::error::Result;
 
 /// An identifier with a prefix.
 #[derive(Debug, PartialEq, Hash, Eq)]
@@ -259,9 +259,9 @@ impl_fromstr!(IdLocal);
 #[cfg(test)]
 mod tests {
 
+    use super::*;
     use std::str::FromStr;
     use std::string::ToString;
-    use super::*;
 
     #[test]
     fn from_str() {
@@ -278,7 +278,10 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = PrefixedId::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
-        let expected = PrefixedId::new(IdPrefix::new("Wikipedia"), IdLocal::new("https://en.wikipedia.org/wiki/Gas"));
+        let expected = PrefixedId::new(
+            IdPrefix::new("Wikipedia"),
+            IdLocal::new("https://en.wikipedia.org/wiki/Gas"),
+        );
         assert_eq!(actual, expected);
 
         assert!(PrefixedId::from_str("[Term]").is_err());

@@ -6,14 +6,12 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
-use super::super::parser::FromPair;
-use super::super::parser::Parser;
-use super::super::parser::Rule;
-use super::QuotedString;
-use super::SynonymTypeId;
-use super::Xref;
 use crate::error::Error;
 use crate::error::Result;
+use crate::obo14::ast::*;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
 
 /// A synonym scope specifier.
 #[derive(Debug, Eq, Hash, PartialEq)]

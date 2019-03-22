@@ -4,12 +4,14 @@ mod id;
 mod instance;
 mod line;
 mod misc;
+mod qualifier;
 mod strings;
 mod synonym;
 mod term;
 mod typedef;
-mod qualifier;
 mod xref;
+
+use pest::iterators::Pair;
 
 pub use self::date::*;
 pub use self::header::*;
@@ -17,20 +19,17 @@ pub use self::id::*;
 pub use self::instance::*;
 pub use self::line::*;
 pub use self::misc::*;
+pub use self::qualifier::*;
 pub use self::strings::*;
 pub use self::synonym::*;
 pub use self::term::*;
 pub use self::typedef::*;
-pub use self::qualifier::*;
 pub use self::xref::*;
-
-use pest::iterators::Pair;
 
 use crate::error::Result;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-
 
 /// A complete OBO document in format version 1.4.
 pub struct OboDoc {
@@ -41,7 +40,6 @@ pub struct OboDoc {
 impl FromPair for OboDoc {
     const RULE: Rule = Rule::OboDoc;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-
         let mut inner = pair.into_inner();
 
         let mut entities = Vec::new();
@@ -90,7 +88,7 @@ impl FromPair for EntityFrame {
             Rule::TermFrame => TermFrame::from_pair_unchecked(inner).map(From::from),
             Rule::TypedefFrame => TypedefFrame::from_pair_unchecked(inner).map(From::from),
             Rule::InstanceFrame => unimplemented!(),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }

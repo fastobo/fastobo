@@ -9,15 +9,12 @@ use iri_string::AbsoluteIriString;
 use iri_string::RelativeIriString;
 use pest::iterators::Pair;
 
-use super::super::parser::FromPair;
-use super::super::parser::Parser;
-use super::super::parser::Rule;
-use super::Id;
-use super::QuotedString;
-use super::RelationId;
 use crate::error::Error;
 use crate::error::Result;
-
+use crate::obo14::ast::*;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
 
 /// A database cross-reference definition.
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -28,10 +25,7 @@ pub struct Xref {
 
 impl Xref {
     pub fn new(id: Id) -> Self {
-        Self {
-            id,
-            desc: None
-        }
+        Self { id, desc: None }
     }
 
     pub fn with_desc(id: Id, desc: QuotedString) -> Self {
@@ -65,7 +59,6 @@ impl FromPair for Xref {
     }
 }
 impl_fromstr!(Xref);
-
 
 /// A list of containing zero or more `Xref`s.
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -111,8 +104,6 @@ impl FromPair for XrefList {
 }
 impl_fromstr!(XrefList);
 
-
-
 #[cfg(test)]
 mod tests {
 
@@ -120,10 +111,10 @@ mod tests {
 
     mod list {
 
-        use crate::obo14::ast::IdPrefix;
-        use crate::obo14::ast::IdLocal;
-        use crate::obo14::ast::PrefixedId;
         use super::*;
+        use crate::obo14::ast::IdLocal;
+        use crate::obo14::ast::IdPrefix;
+        use crate::obo14::ast::PrefixedId;
 
         #[test]
         fn from_str() {
@@ -132,18 +123,22 @@ mod tests {
             assert_eq!(actual, expected);
 
             let actual = XrefList::from_str("[PSI:MS]").unwrap();
-            let expected = XrefList::from(vec![
-                Xref::new(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into())
-            ]);
+            let expected = XrefList::from(vec![Xref::new(
+                PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into(),
+            )]);
             assert_eq!(actual, expected);
 
-            let actual = XrefList::from_str("[PSI:MS, reactome:R-HSA-8983680 \"OAS1 produces oligoadenylates\"]").unwrap();
+            let actual = XrefList::from_str(
+                "[PSI:MS, reactome:R-HSA-8983680 \"OAS1 produces oligoadenylates\"]",
+            )
+            .unwrap();
             let expected = XrefList::from(vec![
                 Xref::new(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into()),
                 Xref::with_desc(
-                    PrefixedId::new(IdPrefix::new("reactome"), IdLocal::new("R-HSA-8983680")).into(),
+                    PrefixedId::new(IdPrefix::new("reactome"), IdLocal::new("R-HSA-8983680"))
+                        .into(),
                     QuotedString::new("OAS1 produces oligoadenylates"),
-                )
+                ),
             ]);
             assert_eq!(actual, expected);
         }

@@ -5,11 +5,11 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
-use super::super::parser::FromPair;
-use super::super::parser::Parser;
-use super::super::parser::Rule;
 use crate::error::Error;
 use crate::error::Result;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
 
 /// A string enclosed by quotes, used for definitions.
 ///

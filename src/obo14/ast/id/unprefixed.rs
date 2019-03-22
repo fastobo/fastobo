@@ -7,11 +7,11 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
+use crate::error::Error;
+use crate::error::Result;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-use crate::error::Error;
-use crate::error::Result;
 
 /// An identifier without a prefix.
 #[derive(Debug, PartialEq, Hash, Eq)]
@@ -68,9 +68,9 @@ impl_fromstr!(UnprefixedId);
 #[cfg(test)]
 mod tests {
 
+    use super::*;
     use std::str::FromStr;
     use std::string::ToString;
-    use super::*;
 
     #[test]
     fn from_str() {

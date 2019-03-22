@@ -6,24 +6,11 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::error::Result;
+use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-use crate::obo14::ast::ClassId;
-use crate::obo14::ast::Id;
-use crate::obo14::ast::IsoDate;
-use crate::obo14::ast::Line;
-use crate::obo14::ast::NamespaceId;
-use crate::obo14::ast::PropertyValue;
-use crate::obo14::ast::QuotedString;
-use crate::obo14::ast::RelationId;
-use crate::obo14::ast::SubsetId;
-use crate::obo14::ast::SynonymScope;
-use crate::obo14::ast::SynonymTypeId;
-use crate::obo14::ast::UnquotedString;
-use crate::obo14::ast::Xref;
-use crate::obo14::ast::XrefList;
-use crate::error::Result;
 
 /// A clause appearing in a term frame.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -66,13 +53,13 @@ impl Display for TermClause {
             Name(name) => f.write_str("name: ").and(name.fmt(f)),
             Namespace(id) => f.write_str("namespace: ").and(id.fmt(f)),
             AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xreflist) =>
-                f.write_str("def: ").and(desc.fmt(f)).and(xreflist.fmt(f)),
-            Comment(comment) =>
-                f.write_str("comment: ").and(comment.fmt(f)),
+            Def(desc, xreflist) => f.write_str("def: ").and(desc.fmt(f)).and(xreflist.fmt(f)),
+            Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
             Subset(subset) => f.write_str("subset: ").and(subset.fmt(f)),
             Synonym(desc, scope, opttype, xreflist) => {
-                f.write_str("synonym: ").and(desc.fmt(f)).and(f.write_char(' '))
+                f.write_str("synonym: ")
+                    .and(desc.fmt(f))
+                    .and(f.write_char(' '))
                     .and(scope.fmt(f))?;
                 if let Some(syntype) = opttype {
                     f.write_char(' ').and(syntype.fmt(f))?;
@@ -83,16 +70,20 @@ impl Display for TermClause {
             Builtin(b) => f.write_str("builtin: ").and(b.fmt(f)),
             PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
             IsA(id) => f.write_str("is_a: ").and(id.fmt(f)),
-            IntersectionOf(Some(rel), id) =>
-                f.write_str("intersection_of: ").and(rel.fmt(f)).and(f.write_char(' '))
-                    .and(id.fmt(f)),
-            IntersectionOf(None, id) =>
-                f.write_str("intersection_of: ").and(id.fmt(f)),
+            IntersectionOf(Some(rel), id) => f
+                .write_str("intersection_of: ")
+                .and(rel.fmt(f))
+                .and(f.write_char(' '))
+                .and(id.fmt(f)),
+            IntersectionOf(None, id) => f.write_str("intersection_of: ").and(id.fmt(f)),
             UnionOf(id) => f.write_str("union_of: ").and(id.fmt(f)),
             EquivalentTo(id) => f.write_str("equivalent_to: ").and(id.fmt(f)),
             DisjointFrom(id) => f.write_str("disjoint_from: ").and(id.fmt(f)),
-            Relationship(rel, id) => f.write_str("relationship: ").and(rel.fmt(f))
-                .and(f.write_char(' ')).and(id.fmt(f)),
+            Relationship(rel, id) => f
+                .write_str("relationship: ")
+                .and(rel.fmt(f))
+                .and(f.write_char(' '))
+                .and(id.fmt(f)),
             IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
             ReplacedBy(id) => f.write_str("replaced_by: ").and(id.fmt(f)),
             Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
@@ -162,7 +153,7 @@ impl FromPair for TermClause {
                         let xrefs = XrefList::from_pair_unchecked(pair)?;
                         Ok(TermClause::Synonym(desc, scope, None, xrefs))
                     }
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
             Rule::XrefTag => {
@@ -235,19 +226,18 @@ impl FromPair for TermClause {
 }
 impl_fromstr!(TermClause);
 
-
 #[cfg(test)]
 mod tests {
 
     use std::str::FromStr;
 
-    use crate::obo14::ast::PrefixedId;
-    use crate::obo14::ast::IdPrefix;
-    use crate::obo14::ast::IdLocal;
-    use crate::obo14::ast::Xref;
-    use crate::obo14::ast::UnprefixedId;
-    use crate::obo14::ast::Comment;
     use super::*;
+    use crate::obo14::ast::Comment;
+    use crate::obo14::ast::IdLocal;
+    use crate::obo14::ast::IdPrefix;
+    use crate::obo14::ast::PrefixedId;
+    use crate::obo14::ast::UnprefixedId;
+    use crate::obo14::ast::Xref;
 
     #[test]
     fn from_str() {
@@ -255,10 +245,16 @@ mod tests {
         let expected = TermClause::Name(UnquotedString::new("sample name"));
         assert_eq!(actual, expected);
 
-        let actual = TermClause::from_str("def: \"A reference string relevant to the sample under study.\" [PSI:MS]").unwrap();
+        let actual = TermClause::from_str(
+            "def: \"A reference string relevant to the sample under study.\" [PSI:MS]",
+        )
+        .unwrap();
         let expected = TermClause::Def(
             QuotedString::new("A reference string relevant to the sample under study."),
-            XrefList::from(vec![Xref::new(Id::Prefixed(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS"))))])
+            XrefList::from(vec![Xref::new(Id::Prefixed(PrefixedId::new(
+                IdPrefix::new("PSI"),
+                IdLocal::new("MS"),
+            )))]),
         );
         assert_eq!(actual, expected);
 
@@ -267,40 +263,50 @@ mod tests {
             QuotedString::new("chemical entity"),
             SynonymScope::Exact,
             None,
-            XrefList::from(vec![
-                Xref::new(Id::from(UnprefixedId::new("UniProt")))
-            ])
+            XrefList::from(vec![Xref::new(Id::from(UnprefixedId::new("UniProt")))]),
         );
         assert_eq!(actual, expected);
 
-        let actual = TermClause::from_str("xref: CAS:22325-47-9 \"NIST Chemistry WebBook\"").unwrap();
-        let expected = TermClause::Xref(
-            Xref::with_desc(
-                Id::from(PrefixedId::new(IdPrefix::new("CAS"), IdLocal::new("22325-47-9"))),
-                QuotedString::new("NIST Chemistry WebBook"),
-            )
-        );
+        let actual =
+            TermClause::from_str("xref: CAS:22325-47-9 \"NIST Chemistry WebBook\"").unwrap();
+        let expected = TermClause::Xref(Xref::with_desc(
+            Id::from(PrefixedId::new(
+                IdPrefix::new("CAS"),
+                IdLocal::new("22325-47-9"),
+            )),
+            QuotedString::new("NIST Chemistry WebBook"),
+        ));
         assert_eq!(actual, expected);
 
-        let actual = Line::<TermClause>::from_str("intersection_of: part_of PO:0020039 ! leaf lamina\n").unwrap();
+        let actual =
+            Line::<TermClause>::from_str("intersection_of: part_of PO:0020039 ! leaf lamina\n")
+                .unwrap();
         let expected = Line::with_comment(Comment::new(" leaf lamina")).with_content(
             TermClause::IntersectionOf(
                 Some(RelationId::from(Id::from(UnprefixedId::new("part_of")))),
-                ClassId::from(Id::from(PrefixedId::new(IdPrefix::new("PO"), IdLocal::new("0020039")))),
-            )
+                ClassId::from(Id::from(PrefixedId::new(
+                    IdPrefix::new("PO"),
+                    IdLocal::new("0020039"),
+                ))),
+            ),
         );
         assert_eq!(actual, expected);
 
-        let actual = Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n").unwrap();
+        let actual =
+            Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n").unwrap();
         let expected = Line::with_comment(Comment::new(" leaf epidermis")).with_content(
             TermClause::IntersectionOf(
                 None,
-                ClassId::from(Id::from(PrefixedId::new(IdPrefix::new("PO"), IdLocal::new("0006016")))),
-            )
+                ClassId::from(Id::from(PrefixedId::new(
+                    IdPrefix::new("PO"),
+                    IdLocal::new("0006016"),
+                ))),
+            ),
         );
         assert_eq!(actual, expected);
 
-        let actual = TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
+        let actual =
+            TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
         let expected = TermClause::Xref(Xref::new(Id::from(PrefixedId::new(
             IdPrefix::new("Wikipedia"),
             IdLocal::new("https://en.wikipedia.org/wiki/Gas"),

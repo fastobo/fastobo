@@ -7,10 +7,9 @@ use std::ops::Deref;
 use pest::iterators::Pair;
 
 use crate::error::Result;
+use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Rule;
-use super::Qualifier;
-use super::QualifierList;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -76,29 +75,29 @@ impl FromPair for Line<()> {
                 let qualifiers = QualifierList::from_pair_unchecked(pair1)?;
                 Ok(Line::new(qualifiers, comment))
             }
-            (Some(pair1), None) => {
-                match pair1.as_rule() {
-                    Rule::QualifierList =>
-                        QualifierList::from_pair_unchecked(pair1).map(Line::with_qualifiers),
-                    Rule::HiddenComment =>
-                        Comment::from_pair_unchecked(pair1).map(Line::with_comment),
-                    _ => unreachable!(),
+            (Some(pair1), None) => match pair1.as_rule() {
+                Rule::QualifierList => {
+                    QualifierList::from_pair_unchecked(pair1).map(Line::with_qualifiers)
                 }
-            }
-            (None, _) => {
-                Ok(Line {
-                    inner: (),
-                    qualifiers: None,
-                    comment: None,
-                })
-            }
+                Rule::HiddenComment => Comment::from_pair_unchecked(pair1).map(Line::with_comment),
+                _ => unreachable!(),
+            },
+            (None, _) => Ok(Line {
+                inner: (),
+                qualifiers: None,
+                comment: None,
+            }),
         }
     }
 }
 
 impl Default for Line<()> {
     fn default() -> Self {
-        Line { inner: (), qualifiers: None, comment: None }
+        Line {
+            inner: (),
+            qualifiers: None,
+            comment: None,
+        }
     }
 }
 
@@ -123,7 +122,7 @@ impl Line<()> {
         Line {
             inner: (),
             qualifiers: Some(qualifiers),
-            comment: None
+            comment: None,
         }
     }
 
@@ -145,7 +144,7 @@ pub struct Comment {
 impl Comment {
     pub fn new<S>(s: S) -> Self
     where
-        S: Into<String>
+        S: Into<String>,
     {
         Comment { value: s.into() }
     }

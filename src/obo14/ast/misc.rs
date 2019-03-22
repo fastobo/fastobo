@@ -9,14 +9,11 @@ use iri_string::AbsoluteIriString;
 use iri_string::RelativeIriString;
 use pest::iterators::Pair;
 
-use super::super::parser::FromPair;
-use super::super::parser::Parser;
-use super::super::parser::Rule;
-use super::Id;
-use super::QuotedString;
-use super::RelationId;
-use crate::error::Error;
 use crate::error::Result;
+use crate::obo14::ast::*;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
 
 /// An Internationalized Resource Identifier, either absolute or relative.
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -104,14 +101,12 @@ impl FromPair for PropertyValue {
 }
 impl_fromstr!(PropertyValue);
 
-
 impl FromPair for bool {
     const RULE: Rule = Rule::Boolean;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
     }
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -7,13 +7,10 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 
 use crate::error::Result;
-use crate::obo14::ast::HeaderClause;
-use crate::obo14::ast::Iri;
-use crate::obo14::ast::Id;
+use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-
 
 /// A reference to another document to be imported.
 #[derive(Debug, Eq, Hash, PartialEq)]

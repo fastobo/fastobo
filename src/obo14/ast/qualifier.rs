@@ -1,14 +1,13 @@
-use std::fmt::Write;
+use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Display;
+use std::fmt::Write;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
 
-use crate::obo14::ast::RelationId;
-use crate::obo14::ast::QuotedString;
 use crate::error::Result;
+use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Rule;
 
@@ -45,7 +44,6 @@ impl FromPair for Qualifier {
 }
 impl_fromstr!(Qualifier);
 
-
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct QualifierList {
     qualifiers: Vec<Qualifier>,
@@ -77,14 +75,12 @@ impl FromPair for QualifierList {
 }
 impl_fromstr!(QualifierList);
 
-
-
 #[cfg(test)]
 mod tests {
 
     use super::*;
-    use crate::obo14::ast::UnprefixedId;
     use crate::obo14::ast::Id;
+    use crate::obo14::ast::UnprefixedId;
 
     #[test]
     fn from_str() {
@@ -103,7 +99,9 @@ mod tests {
         #[test]
         fn from_str() {
             // FIXME(@althonos)
-            match QualifierList::from_str("{comment=\"NYBG:Dario_Cavaliere\", comment=\"NYBG:Brandon_Sinn\"}") {
+            match QualifierList::from_str(
+                "{comment=\"NYBG:Dario_Cavaliere\", comment=\"NYBG:Brandon_Sinn\"}",
+            ) {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }

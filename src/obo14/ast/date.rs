@@ -8,11 +8,11 @@ use chrono::DateTime;
 use chrono::FixedOffset;
 use pest::iterators::Pair;
 
-use super::super::parser::FromPair;
 use super::super::parser::Parser;
 use super::super::parser::Rule;
-use crate::error::Result;
 use crate::error::Error;
+use crate::error::Result;
+use crate::obo14::parser::FromPair;
 
 /// A naive date, as found in header frames.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -28,7 +28,11 @@ impl NaiveDate {
     // FIXME(@althonos): check for date
     pub fn new(day: u8, month: u8, year: u16, hour: u8, minute: u8) -> Self {
         NaiveDate {
-            day, month, year, hour, minute
+            day,
+            month,
+            year,
+            hour,
+            minute,
         }
     }
 }
@@ -79,9 +83,7 @@ impl AsRef<DateTime<FixedOffset>> for IsoDate {
 
 impl From<DateTime<FixedOffset>> for IsoDate {
     fn from(dt: DateTime<FixedOffset>) -> Self {
-        Self {
-            inner: dt
-        }
+        Self { inner: dt }
     }
 }
 
@@ -130,8 +132,8 @@ mod tests {
     mod iso {
 
         use super::*;
-        use chrono::Utc;
         use chrono::TimeZone;
+        use chrono::Utc;
 
         #[test]
         fn from_str() {
@@ -157,6 +159,5 @@ mod tests {
         }
 
     }
-
 
 }

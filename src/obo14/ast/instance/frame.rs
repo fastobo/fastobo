@@ -5,11 +5,11 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
+use crate::error::Result;
 use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-use crate::error::Result;
 
 /// An instance frame, describing a particular individual.
 pub struct InstanceFrame {
@@ -29,8 +29,7 @@ impl FromPair for InstanceFrame {
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let iid = InstanceId::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?
-            .with_content(iid);
+        let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(iid);
 
         let mut clauses = Vec::new();
         for pair in inner {

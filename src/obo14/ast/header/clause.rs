@@ -6,26 +6,12 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::error::Error;
+use crate::error::Result;
+use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-use crate::obo14::ast::ClassId;
-use crate::obo14::ast::Id;
-use crate::obo14::ast::Import;
-use crate::obo14::ast::IdPrefix;
-use crate::obo14::ast::Iri;
-use crate::obo14::ast::Line;
-use crate::obo14::ast::NaiveDate;
-use crate::obo14::ast::NamespaceId;
-use crate::obo14::ast::PropertyValue;
-use crate::obo14::ast::QuotedString;
-use crate::obo14::ast::RelationId;
-use crate::obo14::ast::SubsetId;
-use crate::obo14::ast::SynonymScope;
-use crate::obo14::ast::SynonymTypeId;
-use crate::obo14::ast::UnquotedString;
-use crate::error::Error;
-use crate::error::Result;
 
 /// A clause appearing in a header frame.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -240,14 +226,12 @@ impl FromPair for HeaderClause {
 }
 impl_fromstr!(HeaderClause);
 
-
-
 #[cfg(test)]
 mod tests {
 
-    use crate::obo14::ast::UnquotedString;
-    use crate::obo14::ast::UnprefixedId;
     use super::*;
+    use crate::obo14::ast::UnprefixedId;
+    use crate::obo14::ast::UnquotedString;
 
     #[test]
     fn from_str() {
@@ -266,8 +250,8 @@ mod tests {
         let expected = HeaderClause::Date(NaiveDate::new(17, 3, 2019, 20, 16));
         assert_eq!(actual, expected);
 
-
-        let actual = HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
+        let actual =
+            HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
         let expected = HeaderClause::Unreserved(
             UnquotedString::new("namespace-id-rule"),
             UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"),

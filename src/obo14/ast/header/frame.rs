@@ -7,12 +7,10 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 
 use crate::error::Result;
-use crate::obo14::ast::HeaderClause;
+use crate::obo14::ast::*;
 use crate::obo14::parser::FromPair;
 use crate::obo14::parser::Parser;
 use crate::obo14::parser::Rule;
-
-
 
 /// The header frame, containing metadata about an OBO document.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -42,7 +40,6 @@ impl FromPair for HeaderFrame {
 }
 impl_fromstr!(HeaderFrame);
 
-
 #[cfg(test)]
 mod tests {
 
@@ -68,7 +65,5 @@ mod tests {
             actual.clauses[0],
             HeaderClause::FormatVersion(UnquotedString::new("1.2")),
         );
-
-
     }
 }

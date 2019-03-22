@@ -2,17 +2,6 @@ mod prefixed;
 mod subclasses;
 mod unprefixed;
 
-pub use self::prefixed::IdPrefix;
-pub use self::prefixed::IdLocal;
-pub use self::prefixed::PrefixedId;
-pub use self::unprefixed::UnprefixedId;
-pub use self::subclasses::ClassId;
-pub use self::subclasses::RelationId;
-pub use self::subclasses::InstanceId;
-pub use self::subclasses::SubsetId;
-pub use self::subclasses::SynonymTypeId;
-pub use self::subclasses::NamespaceId;
-
 use std::convert::TryFrom;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -22,11 +11,21 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
-use super::super::parser::FromPair;
-use super::super::parser::Parser;
-use super::super::parser::Rule;
-use crate::error::Error;
+pub use self::prefixed::IdLocal;
+pub use self::prefixed::IdPrefix;
+pub use self::prefixed::PrefixedId;
+pub use self::subclasses::ClassId;
+pub use self::subclasses::InstanceId;
+pub use self::subclasses::NamespaceId;
+pub use self::subclasses::RelationId;
+pub use self::subclasses::SubsetId;
+pub use self::subclasses::SynonymTypeId;
+pub use self::unprefixed::UnprefixedId;
+
 use crate::error::Result;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
 #[derive(Debug, PartialEq, Hash, Eq)]

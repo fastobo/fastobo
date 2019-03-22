@@ -4,7 +4,11 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
+use crate::error::Result;
 use crate::obo14::ast::*;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
 
 /// A clause appearing in a typedef frame.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -19,8 +23,8 @@ pub enum TypedefClause {
     Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
     Xref(Xref),
     PropertyValue(PropertyValue),
-    Domain(ClassId),    // QUESTION(@althonos): Should be ID ?
-    Range(ClassId),     // QUESTION(@althonos): same.
+    Domain(ClassId), // QUESTION(@althonos): Should be ID ?
+    Range(ClassId),  // QUESTION(@althonos): same.
     Builtin(bool),
     HoldsOverChain(RelationId, RelationId),
     IsAntiSymmetric(bool),
@@ -59,13 +63,18 @@ impl Display for TypedefClause {
             Name(name) => f.write_str("name: ").and(name.fmt(f)),
             Namespace(ns) => f.write_str("namespace: ").and(ns.fmt(f)),
             AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xrefs) => f.write_str("def: ").and(desc.fmt(f))
-                .and(f.write_char(' ')).and(xrefs.fmt(f)),
+            Def(desc, xrefs) => f
+                .write_str("def: ")
+                .and(desc.fmt(f))
+                .and(f.write_char(' '))
+                .and(xrefs.fmt(f)),
             Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
             Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
             Synonym(desc, scope, optid, xrefs) => {
-                f.write_str("synonym: ").and(desc.fmt(f))
-                    .and(f.write_char(' ')).and(scope.fmt(f))
+                f.write_str("synonym: ")
+                    .and(desc.fmt(f))
+                    .and(f.write_char(' '))
+                    .and(scope.fmt(f))
                     .and(f.write_char(' '))?;
                 if let Some(tyid) = optid {
                     tyid.fmt(f).and(f.write_char(' '))?;
@@ -77,16 +86,18 @@ impl Display for TypedefClause {
             Domain(id) => f.write_str("domain: ").and(id.fmt(f)),
             Range(id) => f.write_str("range: ").and(id.fmt(f)),
             Builtin(b) => f.write_str("builtin: ").and(b.fmt(f)),
-            HoldsOverChain(r1, r2) => f.write_str("holds_over_chain: ")
-                .and(r1.fmt(f)).and(f.write_char(' ')).and(r2.fmt(f)),
+            HoldsOverChain(r1, r2) => f
+                .write_str("holds_over_chain: ")
+                .and(r1.fmt(f))
+                .and(f.write_char(' '))
+                .and(r2.fmt(f)),
             IsAntiSymmetric(b) => f.write_str("is_anti_symmetric: ").and(b.fmt(f)),
             IsCyclic(b) => f.write_str("is_cyclic: ").and(b.fmt(f)),
             IsReflexive(b) => f.write_str("is_reflexive: ").and(b.fmt(f)),
             IsSymmetric(b) => f.write_str("is_symmetric: ").and(b.fmt(f)),
             IsTransitive(b) => f.write_str("is_transitive: ").and(b.fmt(f)),
             IsFunctional(b) => f.write_str("is_functional: ").and(b.fmt(f)),
-            IsInverseFunctional(b) => f.write_str("is_inverse_functional: ")
-                .and(b.fmt(f)),
+            IsInverseFunctional(b) => f.write_str("is_inverse_functional: ").and(b.fmt(f)),
             IsA(r) => f.write_str("is_a: ").and(r.fmt(f)),
             IntersectionOf(r) => f.write_str("intersection_of: ").and(r.fmt(f)),
             UnionOf(r) => f.write_str("union_of: ").and(r.fmt(f)),
@@ -94,20 +105,32 @@ impl Display for TypedefClause {
             DisjointFrom(r) => f.write_str("disjoint_from: ").and(r.fmt(f)),
             InverseOf(r) => f.write_str("inverse_of: ").and(r.fmt(f)),
             TransitiveOver(r) => f.write_str("transitive_over: ").and(r.fmt(f)),
-            EquivalentToChain(r1, r2) => f.write_str("equivalent_to_chain: ")
-                .and(r1.fmt(f)).and(f.write_char(' ')).and(r2.fmt(f)),
+            EquivalentToChain(r1, r2) => f
+                .write_str("equivalent_to_chain: ")
+                .and(r1.fmt(f))
+                .and(f.write_char(' '))
+                .and(r2.fmt(f)),
             DisjointOver(r) => f.write_str("disjoint_over: ").and(r.fmt(f)),
-            Relationship(r1, r2) => f.write_str("relationship: ").and(r1.fmt(f))
-                .and(f.write_char(' ')).and(r2.fmt(f)),
+            Relationship(r1, r2) => f
+                .write_str("relationship: ")
+                .and(r1.fmt(f))
+                .and(f.write_char(' '))
+                .and(r2.fmt(f)),
             IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
             ReplacedBy(r) => f.write_str("replaced_by: ").and(r.fmt(f)),
             Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
             CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
             CreationDate(date) => f.write_str("creation_date: ").and(date.fmt(f)),
-            ExpandAssertionTo(desc, xrefs) => f.write_str("expand_assertion_to: ")
-                .and(desc.fmt(f)).and(f.write_char(' ')).and(xrefs.fmt(f)),
-            ExpandExpressionTo(desc, xrefs) => f.write_str("expand_expression_to: ")
-                .and(desc.fmt(f)).and(f.write_char(' ')).and(xrefs.fmt(f)),
+            ExpandAssertionTo(desc, xrefs) => f
+                .write_str("expand_assertion_to: ")
+                .and(desc.fmt(f))
+                .and(f.write_char(' '))
+                .and(xrefs.fmt(f)),
+            ExpandExpressionTo(desc, xrefs) => f
+                .write_str("expand_expression_to: ")
+                .and(desc.fmt(f))
+                .and(f.write_char(' '))
+                .and(xrefs.fmt(f)),
             IsMetadataTag(b) => f.write_str("is_metadata_tag: ").and(b.fmt(f)),
             IsClassLevel(b) => f.write_str("is_class_level: ").and(b.fmt(f)),
         }
@@ -174,7 +197,7 @@ impl FromPair for TypedefClause {
                         let xrefs = XrefList::from_pair_unchecked(pair)?;
                         Ok(TypedefClause::Synonym(desc, scope, None, xrefs))
                     }
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
             Rule::XrefTag => {
@@ -312,8 +335,6 @@ impl FromPair for TypedefClause {
             }
             _ => unreachable!(),
         }
-
-
     }
 }
 impl_fromstr!(TypedefClause);

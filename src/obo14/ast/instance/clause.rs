@@ -24,7 +24,7 @@ pub enum InstanceClause {
     Xref(Xref),
     PropertyValue(PropertyValue),
     InstanceOf(ClassId),
-    Relationship(RelationId, Id),  // QUESTION(@althonos): InstanceId ?
+    Relationship(RelationId, Id), // QUESTION(@althonos): InstanceId ?
     CreatedBy(UnquotedString),
     CreationDate(IsoDate),
     IsObsolete(bool),
@@ -40,12 +40,17 @@ impl Display for InstanceClause {
             Name(n) => f.write_str("name: ").and(n.fmt(f)),
             Namespace(ns) => f.write_str("namespace: ").and(ns.fmt(f)),
             AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xrefs) => f.write_str("def: ").and(desc.fmt(f))
-                .and(f.write_char(' ')).and(xrefs.fmt(f)),
+            Def(desc, xrefs) => f
+                .write_str("def: ")
+                .and(desc.fmt(f))
+                .and(f.write_char(' '))
+                .and(xrefs.fmt(f)),
             Comment(s) => f.write_str("comment: ").and(s.fmt(f)),
             Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
             Synonym(desc, scope, opttype, xreflist) => {
-                f.write_str("synonym: ").and(desc.fmt(f)).and(f.write_char(' '))
+                f.write_str("synonym: ")
+                    .and(desc.fmt(f))
+                    .and(f.write_char(' '))
                     .and(scope.fmt(f))?;
                 if let Some(syntype) = opttype {
                     f.write_char(' ').and(syntype.fmt(f))?;
@@ -55,8 +60,11 @@ impl Display for InstanceClause {
             Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
             PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
             InstanceOf(id) => f.write_str("instance_of: ").and(id.fmt(f)),
-            Relationship(r, id) => f.write_str("relationship: ").and(r.fmt(f))
-                .and(f.write_char(' ')).and(id.fmt(f)),
+            Relationship(r, id) => f
+                .write_str("relationship: ")
+                .and(r.fmt(f))
+                .and(f.write_char(' '))
+                .and(id.fmt(f)),
             CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
             CreationDate(dt) => f.write_str("creation_date: ").and(dt.fmt(f)),
             IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
@@ -115,7 +123,7 @@ impl FromPair for InstanceClause {
                         let xrefs = XrefList::from_pair_unchecked(pair)?;
                         Ok(InstanceClause::Synonym(desc, scope, None, xrefs))
                     }
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
             Rule::XrefTag => {
@@ -166,8 +174,7 @@ impl FromPair for Line<InstanceClause> {
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clause = InstanceClause::from_pair_unchecked(inner.next().unwrap())?;
-        Line::<()>::from_pair_unchecked(inner.next().unwrap())
-            .map(|line| line.with_content(clause))
+        Line::<()>::from_pair_unchecked(inner.next().unwrap()).map(|line| line.with_content(clause))
     }
 }
 impl_fromstr!(Line<InstanceClause>);

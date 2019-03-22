@@ -1,0 +1,173 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
+use std::fmt::Write;
+
+use pest::iterators::Pair;
+
+use crate::error::Result;
+use crate::obo14::ast::*;
+use crate::obo14::parser::FromPair;
+use crate::obo14::parser::Parser;
+use crate::obo14::parser::Rule;
+
+/// A clause appearing in an instance frame.
+pub enum InstanceClause {
+    IsAnonymous(bool),
+    Name(UnquotedString),
+    Namespace(NamespaceId),
+    AltId(Id),
+    Def(QuotedString, XrefList),
+    Comment(UnquotedString),
+    Subset(SubsetId),
+    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
+    Xref(Xref),
+    PropertyValue(PropertyValue),
+    InstanceOf(ClassId),
+    Relationship(RelationId, Id),  // QUESTION(@althonos): InstanceId ?
+    CreatedBy(UnquotedString),
+    CreationDate(IsoDate),
+    IsObsolete(bool),
+    ReplacedBy(InstanceId),
+    Consider(Id),
+}
+
+impl Display for InstanceClause {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use self::InstanceClause::*;
+        match self {
+            IsAnonymous(b) => f.write_str("is_anonymous: ").and(b.fmt(f)),
+            Name(n) => f.write_str("name: ").and(n.fmt(f)),
+            Namespace(ns) => f.write_str("namespace: ").and(ns.fmt(f)),
+            AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
+            Def(desc, xrefs) => f.write_str("def: ").and(desc.fmt(f))
+                .and(f.write_char(' ')).and(xrefs.fmt(f)),
+            Comment(s) => f.write_str("comment: ").and(s.fmt(f)),
+            Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
+            Synonym(desc, scope, opttype, xreflist) => {
+                f.write_str("synonym: ").and(desc.fmt(f)).and(f.write_char(' '))
+                    .and(scope.fmt(f))?;
+                if let Some(syntype) = opttype {
+                    f.write_char(' ').and(syntype.fmt(f))?;
+                }
+                f.write_char(' ').and(xreflist.fmt(f))
+            }
+            Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
+            PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
+            InstanceOf(id) => f.write_str("instance_of: ").and(id.fmt(f)),
+            Relationship(r, id) => f.write_str("relationship: ").and(r.fmt(f))
+                .and(f.write_char(' ')).and(id.fmt(f)),
+            CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
+            CreationDate(dt) => f.write_str("creation_date: ").and(dt.fmt(f)),
+            IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
+            ReplacedBy(id) => f.write_str("replaced_by: ").and(id.fmt(f)),
+            Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
+        }
+    }
+}
+
+impl FromPair for InstanceClause {
+    const RULE: Rule = Rule::InstanceClause;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut inner = pair.into_inner();
+        match inner.next().unwrap().as_rule() {
+            Rule::IsAnonymousTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::IsAnonymous(b))
+            }
+            Rule::NameTag => {
+                let n = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Name(n))
+            }
+            Rule::NamespaceTag => {
+                let ns = NamespaceId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Namespace(ns))
+            }
+            Rule::AltIdTag => {
+                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::AltId(id))
+            }
+            Rule::DefTag => {
+                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Def(desc, xrefs))
+            }
+            Rule::CommentTag => {
+                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Comment(s))
+            }
+            Rule::SubsetTag => {
+                let id = SubsetId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Subset(id))
+            }
+            Rule::SynonymTag => {
+                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
+
+                let pair = inner.next().unwrap();
+                match pair.as_rule() {
+                    Rule::SynonymTypeId => {
+                        let ty = SynonymTypeId::from_pair_unchecked(pair)?;
+                        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                        Ok(InstanceClause::Synonym(desc, scope, Some(ty), xrefs))
+                    }
+                    Rule::XrefList => {
+                        let xrefs = XrefList::from_pair_unchecked(pair)?;
+                        Ok(InstanceClause::Synonym(desc, scope, None, xrefs))
+                    }
+                    _ => unreachable!()
+                }
+            }
+            Rule::XrefTag => {
+                let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Xref(xref))
+            }
+            Rule::PropertyValueTag => {
+                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::PropertyValue(pv))
+            }
+            Rule::InstanceOfTag => {
+                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::InstanceOf(id))
+            }
+            Rule::RelationshipTag => {
+                let r = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Relationship(r, id))
+            }
+            Rule::CreatedByTag => {
+                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::CreatedBy(s))
+            }
+            Rule::CreationDateTag => {
+                let dt = IsoDate::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::CreationDate(dt))
+            }
+            Rule::IsObsoleteTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::IsObsolete(b))
+            }
+            Rule::ReplacedByTag => {
+                let id = InstanceId::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::ReplacedBy(id))
+            }
+            Rule::ConsiderTag => {
+                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Consider(id))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+impl_fromstr!(InstanceClause);
+
+impl FromPair for Line<InstanceClause> {
+    const RULE: Rule = Rule::InstanceClauseLine;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut inner = pair.into_inner();
+        let clause = InstanceClause::from_pair_unchecked(inner.next().unwrap())?;
+        Line::<()>::from_pair_unchecked(inner.next().unwrap())
+            .map(|line| line.with_content(clause))
+    }
+}
+impl_fromstr!(Line<InstanceClause>);

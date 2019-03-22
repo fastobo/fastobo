@@ -19,8 +19,8 @@ pub enum TypedefClause {
     Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
     Xref(Xref),
     PropertyValue(PropertyValue),
-    Domain(ClassId),
-    Range(ClassId),
+    Domain(ClassId),    // QUESTION(@althonos): Should be ID ?
+    Range(ClassId),     // QUESTION(@althonos): same.
     Builtin(bool),
     HoldsOverChain(RelationId, RelationId),
     IsAntiSymmetric(bool),

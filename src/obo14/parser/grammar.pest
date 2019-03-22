@@ -301,7 +301,7 @@ TypedefClause = {
 
 InstanceFrame = { nl*
     ~ "[Instance]" ~ nl
-    ~ "id:" ~ ws ~ ClassId ~ EOL
+    ~ ws? ~ "id:" ~ ws ~ InstanceId ~ EOL
     ~ InstanceClauseLine*
 }
 InstanceClauseLine = {

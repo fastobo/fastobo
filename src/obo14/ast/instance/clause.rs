@@ -20,7 +20,7 @@ pub enum InstanceClause {
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
-    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
+    Synonym(Synonym),
     Xref(Xref),
     PropertyValue(PropertyValue),
     InstanceOf(ClassId),
@@ -47,16 +47,7 @@ impl Display for InstanceClause {
                 .and(xrefs.fmt(f)),
             Comment(s) => f.write_str("comment: ").and(s.fmt(f)),
             Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
-            Synonym(desc, scope, opttype, xreflist) => {
-                f.write_str("synonym: ")
-                    .and(desc.fmt(f))
-                    .and(f.write_char(' '))
-                    .and(scope.fmt(f))?;
-                if let Some(syntype) = opttype {
-                    f.write_char(' ').and(syntype.fmt(f))?;
-                }
-                f.write_char(' ').and(xreflist.fmt(f))
-            }
+            Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),
             Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
             PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
             InstanceOf(id) => f.write_str("instance_of: ").and(id.fmt(f)),
@@ -109,22 +100,8 @@ impl FromPair for InstanceClause {
                 Ok(InstanceClause::Subset(id))
             }
             Rule::SynonymTag => {
-                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-                let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
-
-                let pair = inner.next().unwrap();
-                match pair.as_rule() {
-                    Rule::SynonymTypeId => {
-                        let ty = SynonymTypeId::from_pair_unchecked(pair)?;
-                        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                        Ok(InstanceClause::Synonym(desc, scope, Some(ty), xrefs))
-                    }
-                    Rule::XrefList => {
-                        let xrefs = XrefList::from_pair_unchecked(pair)?;
-                        Ok(InstanceClause::Synonym(desc, scope, None, xrefs))
-                    }
-                    _ => unreachable!(),
-                }
+                let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Synonym(syn))
             }
             Rule::XrefTag => {
                 let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;

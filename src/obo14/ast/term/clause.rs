@@ -22,8 +22,7 @@ pub enum TermClause {
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
-    // FIXME(@althonos): use `Synonym` struct here.
-    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
+    Synonym(Synonym),
     Xref(Xref),
     Builtin(bool),
     PropertyValue(PropertyValue),
@@ -56,16 +55,7 @@ impl Display for TermClause {
             Def(desc, xreflist) => f.write_str("def: ").and(desc.fmt(f)).and(xreflist.fmt(f)),
             Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
             Subset(subset) => f.write_str("subset: ").and(subset.fmt(f)),
-            Synonym(desc, scope, opttype, xreflist) => {
-                f.write_str("synonym: ")
-                    .and(desc.fmt(f))
-                    .and(f.write_char(' '))
-                    .and(scope.fmt(f))?;
-                if let Some(syntype) = opttype {
-                    f.write_char(' ').and(syntype.fmt(f))?;
-                }
-                f.write_char(' ').and(xreflist.fmt(f))
-            }
+            Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),
             Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
             Builtin(b) => f.write_str("builtin: ").and(b.fmt(f)),
             PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
@@ -139,22 +129,8 @@ impl FromPair for TermClause {
                 Ok(TermClause::Subset(id))
             }
             Rule::SynonymTag => {
-                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-                let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
-
-                let pair = inner.next().unwrap();
-                match pair.as_rule() {
-                    Rule::SynonymTypeId => {
-                        let ty = SynonymTypeId::from_pair_unchecked(pair)?;
-                        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                        Ok(TermClause::Synonym(desc, scope, Some(ty), xrefs))
-                    }
-                    Rule::XrefList => {
-                        let xrefs = XrefList::from_pair_unchecked(pair)?;
-                        Ok(TermClause::Synonym(desc, scope, None, xrefs))
-                    }
-                    _ => unreachable!(),
-                }
+                let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TermClause::Synonym(syn))
             }
             Rule::XrefTag => {
                 let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
@@ -260,10 +236,11 @@ mod tests {
 
         let actual = TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
         let expected = TermClause::Synonym(
-            QuotedString::new("chemical entity"),
-            SynonymScope::Exact,
-            None,
-            XrefList::from(vec![Xref::new(Id::from(UnprefixedId::new("UniProt")))]),
+            Synonym::new(
+                QuotedString::new("chemical entity"),
+                SynonymScope::Exact,
+                XrefList::from(vec![Xref::new(Id::from(UnprefixedId::new("UniProt")))]),
+            )
         );
         assert_eq!(actual, expected);
 

@@ -51,35 +51,69 @@ impl_fromstr!(SynonymScope);
 /// A synonym, denoting an alternative name for the embedding entity.
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub struct Synonym {
-    text: QuotedString,
+    desc: QuotedString,
     scope: SynonymScope,
-    syntype: Option<SynonymTypeId>,
-    xrefs: Option<Vec<Xref>>,
+    ty: Option<SynonymTypeId>,
+    xrefs: XrefList,
+}
+
+impl Synonym {
+    pub fn new(desc: QuotedString, scope: SynonymScope, xrefs: XrefList) -> Self {
+        Self {
+            desc,
+            scope,
+            ty: None,
+            xrefs
+        }
+    }
+
+    pub fn with_type(desc: QuotedString, scope: SynonymScope, ty: SynonymTypeId, xrefs: XrefList) -> Self {
+        Self {
+            desc,
+            scope,
+            ty: Some(ty),
+            xrefs
+        }
+    }
 }
 
 impl Display for Synonym {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.text
+        self.desc
             .fmt(f)
             .and(f.write_char(' '))
-            .and(self.scope.fmt(f))?;
+            .and(self.scope.fmt(f))
+            .and(f.write_char(' '))?;
 
-        if let Some(ref syntype) = self.syntype {
-            f.write_char(' ').and(syntype.fmt(f))?;
+        if let Some(ref syntype) = self.ty {
+            syntype.fmt(f).and(f.write_char(' '))?;
         }
 
-        if let Some(ref xrefs) = self.xrefs {
-            f.write_str(" [")?;
-            let mut it = xrefs.iter().peekable();
-            while let Some(xref) = it.next() {
-                xref.fmt(f)?;
-                if it.peek().is_some() {
-                    f.write_str(", ")?;
-                }
+        self.xrefs.fmt(f)
+    }
+}
+
+impl FromPair for Synonym {
+    const RULE: Rule = Rule::Synonym;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        let mut inner = pair.into_inner();
+
+        let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+        let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
+
+        let nxt = inner.next().unwrap();
+        match nxt.as_rule() {
+            Rule::SynonymTypeId => {
+                let ty = Some(SynonymTypeId::from_pair_unchecked(nxt)?);
+                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(Synonym { desc, scope, ty, xrefs })
             }
-            f.write_char(']')?;
+            Rule::XrefList => {
+                let ty = None;
+                let xrefs = XrefList::from_pair_unchecked(nxt)?;
+                Ok(Synonym { desc, scope, ty, xrefs })
+            }
+            _ => unreachable!(),
         }
-
-        Ok(())
     }
 }

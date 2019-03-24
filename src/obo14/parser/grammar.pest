@@ -225,7 +225,7 @@ TermClause = {
   | DefTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | CommentTag ~ ws ~ UnquotedString
   | SubsetTag ~ ws ~ SubsetId
-  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ ws ~ XrefList
+  | SynonymTag ~ ws ~ Synonym
   | XrefTag ~ ws ~ Xref
   | BuiltinTag ~ ws ~ Boolean
   | PropertyValueTag ~ ws ~ PropertyValue
@@ -261,7 +261,7 @@ TypedefClause = {
   | DefTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | CommentTag ~ ws ~ UnquotedString
   | SubsetTag ~ ws ~ SubsetId
-  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ ws ~ (SynonymTypeId ~ ws)? ~ XrefList
+  | SynonymTag ~ ws ~ Synonym
   | XrefTag ~ ws ~ Xref
   | PropertyValueTag ~ ws ~ PropertyValue
   | DomainTag ~ ws ~ ClassId
@@ -315,7 +315,7 @@ InstanceClause = {
   | DefTag ~ ws ~ QuotedString ~ ws ~ XrefList
   | CommentTag ~ ws ~ UnquotedString
   | SubsetTag ~ ws ~ SubsetId
-  | SynonymTag ~ ws ~ QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ ws ~ XrefList
+  | SynonymTag ~ ws ~ Synonym
   | XrefTag ~ ws ~ Xref
   | PropertyValueTag ~ ws ~ PropertyValue
   | InstanceOfTag ~ ws ~ ClassId
@@ -331,7 +331,7 @@ InstanceClause = {
 // 3.6 Synonym scope
 
 SynonymScope = { "EXACT" | "BROAD" | "NARROW" | "RELATED" }
-
+Synonym = { QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ ws ~ XrefList }
 
 // 4.0 Misc
 

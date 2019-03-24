@@ -20,7 +20,7 @@ pub enum TypedefClause {
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
-    Synonym(QuotedString, SynonymScope, Option<SynonymTypeId>, XrefList),
+    Synonym(Synonym),
     Xref(Xref),
     PropertyValue(PropertyValue),
     Domain(ClassId), // QUESTION(@althonos): Should be ID ?
@@ -70,17 +70,7 @@ impl Display for TypedefClause {
                 .and(xrefs.fmt(f)),
             Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
             Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
-            Synonym(desc, scope, optid, xrefs) => {
-                f.write_str("synonym: ")
-                    .and(desc.fmt(f))
-                    .and(f.write_char(' '))
-                    .and(scope.fmt(f))
-                    .and(f.write_char(' '))?;
-                if let Some(tyid) = optid {
-                    tyid.fmt(f).and(f.write_char(' '))?;
-                }
-                xrefs.fmt(f)
-            }
+            Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),
             Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
             PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
             Domain(id) => f.write_str("domain: ").and(id.fmt(f)),
@@ -183,22 +173,8 @@ impl FromPair for TypedefClause {
                 Ok(TypedefClause::Subset(id))
             }
             Rule::SynonymTag => {
-                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-                let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
-
-                let pair = inner.next().unwrap();
-                match pair.as_rule() {
-                    Rule::SynonymTypeId => {
-                        let ty = SynonymTypeId::from_pair_unchecked(pair)?;
-                        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                        Ok(TypedefClause::Synonym(desc, scope, Some(ty), xrefs))
-                    }
-                    Rule::XrefList => {
-                        let xrefs = XrefList::from_pair_unchecked(pair)?;
-                        Ok(TypedefClause::Synonym(desc, scope, None, xrefs))
-                    }
-                    _ => unreachable!(),
-                }
+                let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Synonym(syn))
             }
             Rule::XrefTag => {
                 let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;

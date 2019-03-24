@@ -124,7 +124,7 @@ UnquotedString = @{ OboChar+ }
 //                but we actually want it as a `NonCanonicalIdLocal` without
 //                remaining output.
 
-ClassId       = { Id }
+ClassId       = { !"{" ~ Id }
 RelationId    = { Id }
 InstanceId    = { Id }
 SynonymTypeId = { !"[" ~ Id }

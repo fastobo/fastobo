@@ -6,12 +6,12 @@ use std::fmt::Write;
 use iri_string::Url;
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Error;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// A synonym scope specifier.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -63,16 +63,21 @@ impl Synonym {
             desc,
             scope,
             ty: None,
-            xrefs
+            xrefs,
         }
     }
 
-    pub fn with_type(desc: QuotedString, scope: SynonymScope, ty: SynonymTypeId, xrefs: XrefList) -> Self {
+    pub fn with_type(
+        desc: QuotedString,
+        scope: SynonymScope,
+        ty: SynonymTypeId,
+        xrefs: XrefList,
+    ) -> Self {
         Self {
             desc,
             scope,
             ty: Some(ty),
-            xrefs
+            xrefs,
         }
     }
 }
@@ -106,12 +111,22 @@ impl FromPair for Synonym {
             Rule::SynonymTypeId => {
                 let ty = Some(SynonymTypeId::from_pair_unchecked(nxt)?);
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(Synonym { desc, scope, ty, xrefs })
+                Ok(Synonym {
+                    desc,
+                    scope,
+                    ty,
+                    xrefs,
+                })
             }
             Rule::XrefList => {
                 let ty = None;
                 let xrefs = XrefList::from_pair_unchecked(nxt)?;
-                Ok(Synonym { desc, scope, ty, xrefs })
+                Ok(Synonym {
+                    desc,
+                    scope,
+                    ty,
+                    xrefs,
+                })
             }
             _ => unreachable!(),
         }

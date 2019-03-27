@@ -12,7 +12,7 @@ use super::super::parser::Parser;
 use super::super::parser::Rule;
 use crate::error::Error;
 use crate::error::Result;
-use crate::obo14::parser::FromPair;
+use crate::parser::FromPair;
 
 /// A naive date, as found in header frames.
 #[derive(Debug, Eq, Hash, PartialEq)]

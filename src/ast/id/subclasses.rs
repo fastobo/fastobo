@@ -2,10 +2,10 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Rule;
 
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! id_subclass {

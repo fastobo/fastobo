@@ -6,11 +6,11 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// The header frame, containing metadata about an OBO document.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -44,7 +44,7 @@ impl_fromstr!(HeaderFrame);
 mod tests {
 
     use super::*;
-    use crate::obo14::ast::UnquotedString;
+    use crate::ast::UnquotedString;
 
     #[test]
     fn from_str() {

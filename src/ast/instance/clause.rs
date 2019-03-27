@@ -5,11 +5,11 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// A clause appearing in an instance frame.
 pub enum InstanceClause {

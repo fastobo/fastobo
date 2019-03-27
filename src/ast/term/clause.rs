@@ -6,11 +6,11 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// A clause appearing in a term frame.
 #[derive(Debug, Eq, Hash, PartialEq)]
@@ -208,12 +208,12 @@ mod tests {
     use std::str::FromStr;
 
     use super::*;
-    use crate::obo14::ast::Comment;
-    use crate::obo14::ast::IdLocal;
-    use crate::obo14::ast::IdPrefix;
-    use crate::obo14::ast::PrefixedId;
-    use crate::obo14::ast::UnprefixedId;
-    use crate::obo14::ast::Xref;
+    use crate::ast::Comment;
+    use crate::ast::IdLocal;
+    use crate::ast::IdPrefix;
+    use crate::ast::PrefixedId;
+    use crate::ast::UnprefixedId;
+    use crate::ast::Xref;
 
     #[test]
     fn from_str() {
@@ -235,13 +235,11 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
-        let expected = TermClause::Synonym(
-            Synonym::new(
-                QuotedString::new("chemical entity"),
-                SynonymScope::Exact,
-                XrefList::from(vec![Xref::new(Id::from(UnprefixedId::new("UniProt")))]),
-            )
-        );
+        let expected = TermClause::Synonym(Synonym::new(
+            QuotedString::new("chemical entity"),
+            SynonymScope::Exact,
+            XrefList::from(vec![Xref::new(Id::from(UnprefixedId::new("UniProt")))]),
+        ));
         assert_eq!(actual, expected);
 
         let actual =

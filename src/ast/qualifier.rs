@@ -6,10 +6,10 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Rule;
 
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -79,8 +79,8 @@ impl_fromstr!(QualifierList);
 mod tests {
 
     use super::*;
-    use crate::obo14::ast::Id;
-    use crate::obo14::ast::UnprefixedId;
+    use crate::ast::Id;
+    use crate::ast::UnprefixedId;
 
     #[test]
     fn from_str() {

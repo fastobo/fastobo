@@ -1,6 +1,7 @@
-// #![feature(macro_literal_matcher)]
-// #![feature(specialization)]
-// #![feature(try_from)]
+//! Syntax tree and parser for the [OBO format version 1.4].
+//!
+//! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.
+//!
 #![allow(dead_code, unused_imports)]
 
 #[macro_use]
@@ -12,8 +13,7 @@ extern crate chrono;
 extern crate iri_string;
 extern crate pest;
 
-#[cfg(test)]
-extern crate textwrap;
-
+#[macro_use]
+pub mod parser;
+pub mod ast;
 pub mod error;
-pub mod obo14;

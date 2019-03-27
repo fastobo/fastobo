@@ -6,10 +6,10 @@ use std::ops::Deref;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Rule;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
 #[derive(Debug, Eq, Hash, PartialEq)]

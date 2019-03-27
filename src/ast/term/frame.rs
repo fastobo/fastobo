@@ -5,11 +5,11 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// A term frame, describing a class.
 pub struct TermFrame {
@@ -47,10 +47,10 @@ mod tests {
     use std::str::FromStr;
 
     use super::*;
-    use crate::obo14::ast::Id;
-    use crate::obo14::ast::IdLocal;
-    use crate::obo14::ast::IdPrefix;
-    use crate::obo14::ast::PrefixedId;
+    use crate::ast::Id;
+    use crate::ast::IdLocal;
+    use crate::ast::IdPrefix;
+    use crate::ast::PrefixedId;
 
     #[test]
     fn from_str() {

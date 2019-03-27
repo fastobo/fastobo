@@ -27,9 +27,9 @@ pub use self::typedef::*;
 pub use self::xref::*;
 
 use crate::error::Result;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// A complete OBO document in format version 1.4.
 pub struct OboDoc {

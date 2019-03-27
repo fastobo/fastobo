@@ -9,7 +9,7 @@ use crate::error::Result;
 
 /// The OBO format version 1.4 parser.
 #[derive(Debug, Parser)]
-#[grammar = "obo14/parser/grammar.pest"]
+#[grammar = "parser/grammar.pest"]
 pub struct Parser;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
@@ -58,7 +58,7 @@ macro_rules! impl_fromstr {
             type Err = $crate::error::Error;
             fn from_str(s: &str) -> Result<Self> {
                 use $crate::error::Error;
-                use $crate::obo14::parser::Parser as OboParser;
+                use $crate::parser::Parser as OboParser;
                 use $crate::pest::Parser;
                 // Parse the input string
                 let mut pairs = OboParser::parse(Self::RULE, s)?;

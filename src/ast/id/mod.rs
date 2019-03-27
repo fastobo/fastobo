@@ -23,9 +23,9 @@ pub use self::subclasses::SynonymTypeId;
 pub use self::unprefixed::UnprefixedId;
 
 use crate::error::Result;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
 #[derive(Debug, PartialEq, Hash, Eq)]

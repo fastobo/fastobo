@@ -9,12 +9,12 @@ use iri_string::AbsoluteIriString;
 use iri_string::RelativeIriString;
 use pest::iterators::Pair;
 
+use crate::ast::*;
 use crate::error::Error;
 use crate::error::Result;
-use crate::obo14::ast::*;
-use crate::obo14::parser::FromPair;
-use crate::obo14::parser::Parser;
-use crate::obo14::parser::Rule;
+use crate::parser::FromPair;
+use crate::parser::Parser;
+use crate::parser::Rule;
 
 /// A database cross-reference definition.
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -112,9 +112,9 @@ mod tests {
     mod list {
 
         use super::*;
-        use crate::obo14::ast::IdLocal;
-        use crate::obo14::ast::IdPrefix;
-        use crate::obo14::ast::PrefixedId;
+        use crate::ast::IdLocal;
+        use crate::ast::IdPrefix;
+        use crate::ast::PrefixedId;
 
         #[test]
         fn from_str() {

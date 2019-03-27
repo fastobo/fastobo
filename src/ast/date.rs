@@ -180,8 +180,6 @@ mod tests {
     mod iso {
 
         use super::*;
-        use chrono::TimeZone;
-        use chrono::Utc;
 
         #[test]
         fn from_str() {

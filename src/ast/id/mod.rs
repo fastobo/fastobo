@@ -8,7 +8,7 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-use iri_string::Url;
+use url::Url;
 use pest::iterators::Pair;
 
 pub use self::prefixed::IdLocal;

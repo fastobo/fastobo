@@ -4,9 +4,6 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
-use iri_string::AbsoluteIriStr;
-use iri_string::AbsoluteIriString;
-use iri_string::RelativeIriString;
 use pest::iterators::Pair;
 
 use crate::ast::*;

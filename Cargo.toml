@@ -10,11 +10,8 @@ version = "2.1.0"
 version = "2.1.0"
 [dependencies.failure]
 version = "*"
-
-# Used for obo14::IRI
-[dependencies.iri-string]
+[dependencies.url]
 version = "*"
-default-features = false
 
 [dev-dependencies.textwrap]
 version = "*"

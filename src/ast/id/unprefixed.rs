@@ -4,7 +4,6 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-use iri_string::Url;
 use pest::iterators::Pair;
 
 use crate::error::Error;

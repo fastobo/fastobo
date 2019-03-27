@@ -4,6 +4,7 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
+use url::Url;
 use pest::iterators::Pair;
 
 use crate::ast::*;
@@ -25,7 +26,7 @@ pub enum HeaderClause {
     Subsetdef(SubsetId, QuotedString),
     SynonymTypedef(SynonymTypeId, QuotedString, Option<SynonymScope>),
     DefaultNamespace(NamespaceId),
-    Idspace(IdPrefix, Iri, Option<QuotedString>),
+    Idspace(IdPrefix, Url, Option<QuotedString>),
     TreatXrefsAsEquivalent(IdPrefix),
     TreatXrefsAsGenusDifferentia(IdPrefix, RelationId, ClassId),
     TreatXrefsAsReverseGenusDifferentia(IdPrefix, RelationId, ClassId),
@@ -66,11 +67,11 @@ impl Display for HeaderClause {
                 }
             }
             DefaultNamespace(ns) => f.write_str("default-namespace: ").and(ns.fmt(f)),
-            Idspace(prefix, iri, optdesc) => {
+            Idspace(prefix, url, optdesc) => {
                 f.write_str("idspace: ")
                     .and(prefix.fmt(f))
                     .and(f.write_char(' '))
-                    .and(iri.fmt(f))?;
+                    .and(url.fmt(f))?;
                 match optdesc {
                     Some(desc) => f.write_char(' ').and(desc.fmt(f)),
                     None => Ok(()),
@@ -161,12 +162,12 @@ impl FromPair for HeaderClause {
             }
             Rule::IdspaceTag => {
                 let prefix = IdPrefix::from_pair_unchecked(inner.next().unwrap())?;
-                let iri = Iri::from_pair_unchecked(inner.next().unwrap())?;
+                let url = Url::from_pair_unchecked(inner.next().unwrap())?;
                 let desc = match inner.next() {
                     Some(pair) => Some(QuotedString::from_pair_unchecked(pair)?),
                     None => None,
                 };
-                Ok(HeaderClause::Idspace(prefix, iri, desc))
+                Ok(HeaderClause::Idspace(prefix, url, desc))
             }
             Rule::TreatXrefsAsEquivalentTag => {
                 let prefix = IdPrefix::from_pair_unchecked(inner.next().unwrap())?;
@@ -247,7 +248,7 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = HeaderClause::from_str("date: 17:03:2019 20:16").unwrap();
-        let expected = HeaderClause::Date(NaiveDate::new(17, 3, 2019, 20, 16));
+        let expected = HeaderClause::Date(NaiveDateTime::new(17, 3, 2019, 20, 16));
         assert_eq!(actual, expected);
 
         let actual =

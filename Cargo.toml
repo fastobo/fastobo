@@ -16,13 +16,15 @@ version = "*"
 version = "*"
 default-features = false
 
-# Used for obo14::IsoDate
-[dependencies.chrono]
-version = "*"
-default-features = false
-
-
 [dev-dependencies.textwrap]
 version = "*"
 [dev-dependencies.difference]
 version = "*"
+[dev-dependencies.tests-macros]
+path = "./tests-macros"
+
+
+[dependencies.pyo3]
+version  = "0.6.0-alpha.4"
+optional = true
+features = ["extension-module"]

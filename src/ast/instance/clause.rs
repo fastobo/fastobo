@@ -26,7 +26,7 @@ pub enum InstanceClause {
     InstanceOf(ClassId),
     Relationship(RelationId, Id), // QUESTION(@althonos): InstanceId ?
     CreatedBy(UnquotedString),
-    CreationDate(IsoDate),
+    CreationDate(IsoDateTime),
     IsObsolete(bool),
     ReplacedBy(InstanceId),
     Consider(Id),
@@ -125,7 +125,7 @@ impl FromPair for InstanceClause {
                 Ok(InstanceClause::CreatedBy(s))
             }
             Rule::CreationDateTag => {
-                let dt = IsoDate::from_pair_unchecked(inner.next().unwrap())?;
+                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(InstanceClause::CreationDate(dt))
             }
             Rule::IsObsoleteTag => {

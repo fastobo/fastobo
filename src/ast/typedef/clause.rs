@@ -48,7 +48,7 @@ pub enum TypedefClause {
     ReplacedBy(RelationId),
     Consider(Id),
     CreatedBy(UnquotedString),
-    CreationDate(IsoDate),
+    CreationDate(IsoDateTime),
     ExpandAssertionTo(QuotedString, XrefList),
     ExpandExpressionTo(QuotedString, XrefList),
     IsMetadataTag(bool),
@@ -288,7 +288,7 @@ impl FromPair for TypedefClause {
                 Ok(TypedefClause::CreatedBy(person))
             }
             Rule::CreationDateTag => {
-                let date = IsoDate::from_pair_unchecked(inner.next().unwrap())?;
+                let date = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::CreationDate(date))
             }
             Rule::ExpandAssertionToTag => {

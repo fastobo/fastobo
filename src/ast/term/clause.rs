@@ -36,7 +36,7 @@ pub enum TermClause {
     ReplacedBy(ClassId),
     Consider(ClassId),
     CreatedBy(UnquotedString),
-    CreationDate(IsoDate),
+    CreationDate(IsoDateTime),
     // FIXME(@althonos): in the guide but not in the syntax.
     // ExpandAssertionTo(QuotedString, XrefList),
     // ExpandExpressionTO(QuotedString, XrefList),
@@ -193,7 +193,7 @@ impl FromPair for TermClause {
                 Ok(TermClause::CreatedBy(s))
             }
             Rule::CreationDateTag => {
-                let dt = IsoDate::from_pair_unchecked(inner.next().unwrap())?;
+                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::CreationDate(dt))
             }
             _ => unreachable!(),

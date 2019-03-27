@@ -4,8 +4,6 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
-use chrono::DateTime;
-use chrono::FixedOffset;
 use pest::iterators::Pair;
 
 use super::super::parser::Parser;
@@ -14,9 +12,9 @@ use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 
-/// A naive date, as found in header frames.
+/// A naive datetime, as found in header frames.
 #[derive(Debug, Eq, Hash, PartialEq)]
-pub struct NaiveDate {
+pub struct NaiveDateTime {
     day: u8,
     month: u8,
     year: u16,
@@ -24,10 +22,10 @@ pub struct NaiveDate {
     minute: u8,
 }
 
-impl NaiveDate {
+impl NaiveDateTime {
     // FIXME(@althonos): check for date
     pub fn new(day: u8, month: u8, year: u16, hour: u8, minute: u8) -> Self {
-        NaiveDate {
+        NaiveDateTime {
             day,
             month,
             year,
@@ -37,7 +35,7 @@ impl NaiveDate {
     }
 }
 
-impl Display for NaiveDate {
+impl Display for NaiveDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
             f,
@@ -47,8 +45,7 @@ impl Display for NaiveDate {
     }
 }
 
-// FIXME(@althonos): ensure the date is somewhat realistic.
-impl FromPair for NaiveDate {
+impl FromPair for NaiveDateTime {
     const RULE: Rule = Rule::NaiveDateTime;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
@@ -58,7 +55,7 @@ impl FromPair for NaiveDate {
         let datestr = date.as_str();
         let timestr = time.as_str();
 
-        Ok(NaiveDate {
+        Ok(NaiveDateTime {
             day: u8::from_str_radix(&datestr[..2], 10).unwrap(),
             month: u8::from_str_radix(&datestr[3..5], 10).unwrap(),
             year: u16::from_str_radix(&datestr[6..10], 10).unwrap(),
@@ -67,49 +64,100 @@ impl FromPair for NaiveDate {
         })
     }
 }
-impl_fromstr!(NaiveDate);
+impl_fromstr!(NaiveDateTime);
 
-/// A comprehensive ISO-8601 date, as found in `creation_date` clauses.
+/// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
 #[derive(Debug, Eq, Hash, PartialEq)]
-pub struct IsoDate {
-    inner: DateTime<FixedOffset>,
+pub struct IsoDateTime {
+    day: u8,
+    month: u8,
+    year: u16,
+    hour: u8,
+    minute: u8,
+    second: u8,
+    timezone: IsoTimezone,
 }
 
-impl AsRef<DateTime<FixedOffset>> for IsoDate {
-    fn as_ref(&self) -> &DateTime<FixedOffset> {
-        &self.inner
-    }
-}
-
-impl From<DateTime<FixedOffset>> for IsoDate {
-    fn from(dt: DateTime<FixedOffset>) -> Self {
-        Self { inner: dt }
-    }
-}
-
-impl Display for IsoDate {
+impl Display for IsoDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.inner.fmt(f)
+        write!(
+            f,
+            "{:02}-{:02}-{:04}T{:02}:{:02}:{:02}{}",
+            self.day,
+            self.month,
+            self.year,
+            self.hour,
+            self.minute,
+            self.second,
+            self.timezone,
+        )
     }
 }
 
-impl FromPair for IsoDate {
+impl FromPair for IsoDateTime {
     const RULE: Rule = Rule::Iso8601DateTime;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-        // FIXME(@althonos): we could probably create the DateTime ourselves
-        //                   using the tokenization from the Obo14 grammar.
-        let dt = chrono::DateTime::from_str(pair.as_str()).unwrap();
-        Ok(IsoDate::from(dt))
+
+        let mut inner = pair.into_inner();
+        let mut date = inner.next().unwrap().into_inner();
+        let mut time = inner.next().unwrap().into_inner();
+
+        let year = u16::from_str_radix(date.next().unwrap().as_str(), 10).unwrap();
+        let month = u8::from_str_radix(date.next().unwrap().as_str(), 10).unwrap();
+        let day = u8::from_str_radix(date.next().unwrap().as_str(), 10).unwrap();
+
+        let hour = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
+        let minute = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
+        let second = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
+
+        let timezone = IsoTimezone::from_pair_unchecked(inner.next().unwrap())?;
+
+        Ok(IsoDateTime {day, month, year, hour, minute, second, timezone})
+    }
+}
+impl_fromstr!(IsoDateTime);
+
+/// An ISO-8601 timezone.
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub enum IsoTimezone {
+    Utc,
+    Plus(u8, u8),
+    Minus(u8, u8)
+}
+
+impl Display for IsoTimezone {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use self::IsoTimezone::*;
+        match self {
+            Utc => f.write_char('Z'),
+            Plus(hh, mm) => write!(f, "+{:02}:{:02}", hh, mm),
+            Minus(hh, mm) => write!(f, "-{:02}:{:02}", hh, mm),
+        }
     }
 }
 
-impl FromStr for IsoDate {
-    type Err = Error;
-    fn from_str(s: &str) -> Result<Self> {
-        let dt = chrono::DateTime::from_str(s).unwrap();
-        Ok(IsoDate::from(dt))
+impl FromPair for IsoTimezone {
+    const RULE: Rule = Rule::Iso8601TimeZone;
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+        use self::IsoTimezone::*;
+
+        let tag = pair.as_str().chars().next().unwrap();
+        if tag == 'Z' {
+            return Ok(Utc);
+        }
+
+        let mut inner = pair.into_inner();
+        let hh = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
+        let mm = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
+
+        match tag {
+            '+' => Ok(Plus(hh, mm)),
+            '-' => Ok(Minus(hh, mm)),
+            _ => unreachable!(),
+        }
     }
 }
+impl_fromstr!(IsoTimezone);
 
 #[cfg(test)]
 mod tests {
@@ -123,8 +171,8 @@ mod tests {
 
         #[test]
         fn from_str() {
-            let naive = NaiveDate::from_str("12:06:2018 17:13").unwrap();
-            assert_eq!(naive, NaiveDate::new(12, 6, 2018, 17, 13));
+            let naive = NaiveDateTime::from_str("12:06:2018 17:13").unwrap();
+            assert_eq!(naive, NaiveDateTime::new(12, 6, 2018, 17, 13));
         }
 
     }
@@ -137,22 +185,22 @@ mod tests {
 
         #[test]
         fn from_str() {
-            match IsoDate::from_str("2017-1-24T14:41:36Z") {
+            match IsoDateTime::from_str("2017-1-24T14:41:36Z") {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }
 
-            match IsoDate::from_str("2015-08-11T15:05:12Z") {
+            match IsoDateTime::from_str("2015-08-11T15:05:12Z") {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }
 
-            match IsoDate::from_str("2016-10-26T10:51:48Z") {
+            match IsoDateTime::from_str("2016-10-26T10:51:48Z") {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }
 
-            match IsoDate::from_str("2017-1-24T14:41:36Z") {
+            match IsoDateTime::from_str("2017-1-24T14:41:36Z") {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }

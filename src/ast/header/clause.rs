@@ -14,7 +14,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in a header frame.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum HeaderClause {
     FormatVersion(UnquotedString),
     DataVersion(UnquotedString),

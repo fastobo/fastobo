@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in a term frame.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TermClause {
     IsAnonymous(bool),
     Name(UnquotedString),

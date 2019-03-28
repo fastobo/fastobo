@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A qualifier, possibly used as a trailing modifier.
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Qualifier {
     key: RelationId,
     value: QuotedString,
@@ -44,7 +44,7 @@ impl FromPair for Qualifier {
 }
 impl_fromstr!(Qualifier);
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct QualifierList {
     qualifiers: Vec<Qualifier>,
 }

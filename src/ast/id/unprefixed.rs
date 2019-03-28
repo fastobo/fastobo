@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// An identifier without a prefix.
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct UnprefixedId {
     value: String,
 }

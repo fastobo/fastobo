@@ -13,7 +13,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A database cross-reference definition.
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Xref {
     id: Id,
     desc: Option<QuotedString>,
@@ -57,7 +57,7 @@ impl FromPair for Xref {
 impl_fromstr!(Xref);
 
 /// A list of containing zero or more `Xref`s.
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct XrefList {
     xrefs: Vec<Xref>,
 }

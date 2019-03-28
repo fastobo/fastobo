@@ -10,6 +10,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A typedef clause, describing a relationship.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypedefFrame {
     id: Line<RelationId>,
     clauses: Vec<Line<TypedefClause>>,

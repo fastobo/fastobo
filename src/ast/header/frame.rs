@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// The header frame, containing metadata about an OBO document.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct HeaderFrame {
     pub clauses: Vec<HeaderClause>,
 }

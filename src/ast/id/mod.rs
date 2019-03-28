@@ -27,7 +27,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub enum Id {
     Prefixed(PrefixedId),
     Unprefixed(UnprefixedId),

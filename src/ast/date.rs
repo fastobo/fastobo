@@ -12,7 +12,7 @@ use crate::parser::Rule;
 use crate::parser::FromPair;
 
 /// A naive datetime, as found in header frames.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct NaiveDateTime {
     day: u8,
     month: u8,
@@ -66,7 +66,7 @@ impl FromPair for NaiveDateTime {
 impl_fromstr!(NaiveDateTime);
 
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IsoDateTime {
     day: u8,
     month: u8,
@@ -117,7 +117,7 @@ impl FromPair for IsoDateTime {
 impl_fromstr!(IsoDateTime);
 
 /// An ISO-8601 timezone.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum IsoTimezone {
     Utc,
     Plus(u8, u8),

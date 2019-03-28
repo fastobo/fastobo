@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Line<T> {
     inner: T,
     qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
@@ -136,7 +136,7 @@ impl Line<()> {
 }
 
 /// An inline comment without semantic value.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Comment {
     value: String,
 }

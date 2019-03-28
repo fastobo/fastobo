@@ -13,7 +13,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A reference to another document to be imported.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Import {
     Url(Url),
     Abbreviated(Id), // QUESTION(@althonos): UnprefixedID ?

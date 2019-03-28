@@ -53,7 +53,7 @@ use crate::parser::Rule;
 // impl_fromstr!(Iri);
 
 /// A clause value binding a property to a value in the relevant entity.
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum PropertyValue {
     Identified(RelationId, Id),
     // FIXME(@althonos): maybe replaced `String` with `DatatypeId` newtype.

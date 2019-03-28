@@ -10,7 +10,7 @@ use crate::parser::Rule;
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! id_subclass {
     (#[doc = $docstring:literal] pub struct $name:ident;) => {
-        #[derive(Debug, PartialEq, Hash, Eq)]
+        #[derive(Clone, Debug, PartialEq, Hash, Eq)]
         #[doc=$docstring]
         pub struct $name {
             id: Id,

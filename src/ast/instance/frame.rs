@@ -11,6 +11,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// An instance frame, describing a particular individual.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct InstanceFrame {
     id: Line<InstanceId>,
     clauses: Vec<Line<InstanceClause>>,

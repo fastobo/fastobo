@@ -106,6 +106,19 @@ impl OboDoc {
         let mut f = File::open(path).map(BufReader::new)?;
         Self::from_stream(f)
     }
+
+
+    pub fn header(&self) -> &HeaderFrame {
+        &self.header
+    }
+
+    pub fn header_mut(&mut self) -> &mut HeaderFrame {
+        &mut self.header
+    }
+
+    pub fn set_header(&mut self, header: HeaderFrame) {
+        self.header = header
+    }
 }
 
 impl FromPair for OboDoc {

@@ -20,7 +20,7 @@ use crate::parser::Rule;
 /// assert_eq!(s.as_ref(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct QuotedString {
     value: String,
 }
@@ -83,7 +83,7 @@ impl FromPair for QuotedString {
 impl_fromstr!(QuotedString);
 
 /// A string without delimiters, used as values in different clauses.
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct UnquotedString {
     value: String,
 }

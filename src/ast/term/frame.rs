@@ -11,6 +11,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A term frame, describing a class.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TermFrame {
     id: Line<ClassId>,
     clauses: Vec<Line<TermClause>>,

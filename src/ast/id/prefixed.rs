@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// An identifier with a prefix.
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct PrefixedId {
     prefix: IdPrefix,
     local: IdLocal,
@@ -66,7 +66,7 @@ impl_fromstr!(PrefixedId);
 /// * A canonical ID prefix only contains alphabetic characters (`[a-zA-Z]`)
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct IdPrefix {
     value: String,
     canonical: bool,
@@ -172,7 +172,7 @@ impl_fromstr!(IdPrefix);
 /// * A canonical local ID only contains digits (`[0-9]`).
 /// * A non-canonical local ID can contain any character excepting
 ///   whitespaces and newlines.
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct IdLocal {
     value: String,
     canonical: bool,

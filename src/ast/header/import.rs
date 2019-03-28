@@ -10,7 +10,6 @@ use pest::iterators::Pair;
 use crate::ast::*;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Parser;
 use crate::parser::Rule;
 
 /// A reference to another document to be imported.

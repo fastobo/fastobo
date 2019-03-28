@@ -161,7 +161,7 @@ XrefList     = {"[" ~ (XrefListItem ~ ws?)? ~ ("," ~ ws ~ XrefListItem)* ~ ws? ~
 OboDoc      = { HeaderFrame ~ (EntityFrame)* ~ nl* ~ EOI }
 EntityFrame = { TermFrame | InstanceFrame | TypedefFrame }
 
-EntitySingle = { nl* ~ EntityFrame ~ nl* ~ EOI }  // NB(@althonos): for iterative parsers.
+EntitySingle = _{ nl* ~ EntityFrame ~ nl* ~ EOI }  // NB(@althonos): for iterative parsers.
 
 
 // 3.2 Obo Headers

@@ -10,7 +10,6 @@ use crate::ast::*;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Parser;
 use crate::parser::Rule;
 
 /// A database cross-reference definition.

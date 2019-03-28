@@ -24,7 +24,6 @@ pub use self::unprefixed::UnprefixedId;
 
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Parser;
 use crate::parser::Rule;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.

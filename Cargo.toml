@@ -4,14 +4,12 @@ version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 
-[dependencies.pest]
-version = "2.1.0"
-[dependencies.pest_derive]
-version = "2.1.0"
-[dependencies.failure]
-version = "*"
-[dependencies.url]
-version = "*"
+# Required dependencies
+[dependencies]
+pest = "2.1.0"
+pest_derive = "2.1.0"
+failure = "*"
+url = "*"
 
 [dev-dependencies.textwrap]
 version = "*"
@@ -19,9 +17,3 @@ version = "*"
 version = "*"
 [dev-dependencies.tests-macros]
 path = "./tests-macros"
-
-
-[dependencies.pyo3]
-version  = "0.6.0-alpha.4"
-optional = true
-features = ["extension-module"]

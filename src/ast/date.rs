@@ -6,10 +6,9 @@ use std::str::FromStr;
 
 use pest::iterators::Pair;
 
-use super::super::parser::Parser;
-use super::super::parser::Rule;
 use crate::error::Error;
 use crate::error::Result;
+use crate::parser::Rule;
 use crate::parser::FromPair;
 
 /// A naive datetime, as found in header frames.
@@ -199,6 +198,11 @@ mod tests {
             }
 
             match IsoDateTime::from_str("2017-1-24T14:41:36Z") {
+                Ok(_) => (),
+                Err(e) => panic!("{}", e),
+            }
+
+            match IsoDateTime::from_str("2017-1-24T14:41:36+01:30") {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }

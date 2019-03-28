@@ -7,7 +7,6 @@ use std::str::FromStr;
 use crate::ast::*;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Parser;
 use crate::parser::Rule;
 
 /// A clause appearing in a typedef frame.

@@ -9,7 +9,6 @@ use pest::iterators::Pair;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Parser;
 use crate::parser::Rule;
 
 /// An identifier with a prefix.

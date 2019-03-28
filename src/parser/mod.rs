@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
-use pest::Parser as PestParser;
+use pest::Parser;
 
 use crate::error::Error;
 use crate::error::Result;
@@ -10,7 +10,7 @@ use crate::error::Result;
 /// The OBO format version 1.4 parser.
 #[derive(Debug, Parser)]
 #[grammar = "parser/grammar.pest"]
-pub struct Parser;
+pub struct OboParser;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
@@ -58,7 +58,7 @@ macro_rules! impl_fromstr {
             type Err = $crate::error::Error;
             fn from_str(s: &str) -> Result<Self> {
                 use $crate::error::Error;
-                use $crate::parser::Parser as OboParser;
+                use $crate::parser::OboParser;
                 use $crate::pest::Parser;
                 // Parse the input string
                 let mut pairs = OboParser::parse(Self::RULE, s)?;

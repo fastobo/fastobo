@@ -337,7 +337,15 @@ Synonym = { QuotedString ~ ws ~ SynonymScope ~ (ws ~ SynonymTypeId)? ~ ws ~ Xref
 
 Import = { Iri | Id }
 
-PropertyValue = { RelationId ~ ws ~ ((QuotedString ~ ws ~ XsdDatatype) | Id) }
+// WORKAROUND(@althonos): the 1.4 spec requires all property values to be
+//                        quote-enclosed, but this is not done currently by the
+//                        owlapi and owl2obo converters. As a workaround we can
+//                        accept unquoted string without whitespaces as well as
+//                        quoted strings for now.
+
+PropertyValue = { RelationId ~ ws ~ (((QuotedString | PvValue) ~ ws ~ XsdDatatype) | Id) }
+
+PvValue       = @{ NonWsChar+ }
 XsdDatatype   = { "xsd:" ~ ASCII_ALPHANUMERIC+ }
 
 
@@ -416,17 +424,18 @@ IriIpv6Address      = {
 
 
 // Annex II: ISO-8601 Grammar for DateTime w/ Timezone
-Iso8601DateTime = {Iso8601Date ~ "T" ~ Iso8601Time ~ Iso8601TimeZone }
+Iso8601DateTime = {Iso8601Date ~ "T" ~ Iso8601Time ~ Iso8601TimeZone? }
 
+Iso8601Date    = ${ Iso8601Year ~ Iso8601DateSep? ~ Iso8601Month ~ Iso8601DateSep? ~ Iso8601Day }
+Iso8601DateSep = _{"-" | "–"}
+Iso8601Year    = @{ ASCII_DIGIT{4} }
+Iso8601Month   = @{ ASCII_DIGIT{1,2} }
+Iso8601Day     = @{ ASCII_DIGIT{1,2} }
 
-Iso8601Date  = ${ Iso8601Year ~ "-"? ~ Iso8601Month ~ "-"? ~ Iso8601Day }
-Iso8601Year  = @{ ASCII_DIGIT{4} }
-Iso8601Month = @{ ASCII_DIGIT{1,2} }
-Iso8601Day   = @{ ASCII_DIGIT{1,2} }
-
-Iso8601Time   = ${ Iso8601Hour ~ ":"? ~ Iso8601Minute ~ ":"? ~ Iso8601Second }
-Iso8601Hour   = @{ (('0'..'1') ~ ('0'..'9')) | "2" ~ '0'..'3' }
-Iso8601Minute = @{ ('0'..'5') ~ ('0'..'9') }
-Iso8601Second = @{ ('0'..'5') ~ ('0'..'9') }
+Iso8601Time    = ${ Iso8601Hour ~ Iso8601TimeSep? ~ Iso8601Minute ~ Iso8601TimeSep? ~ Iso8601Second }
+Iso8601TimeSep = _{":"}
+Iso8601Hour    = @{ (('0'..'1') ~ ('0'..'9')) | "2" ~ '0'..'4' }
+Iso8601Minute  = @{ ('0'..'5') ~ ('0'..'9') }
+Iso8601Second  = @{ (('0'..'5') ~ ('0'..'9')) | "60" }
 
 Iso8601TimeZone = { "Z" | (("+" | "-") ~ Iso8601Hour ~ ":"? ~ Iso8601Minute) }

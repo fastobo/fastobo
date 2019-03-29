@@ -8,8 +8,8 @@ use pest::iterators::Pair;
 
 use crate::error::Error;
 use crate::error::Result;
-use crate::parser::Rule;
 use crate::parser::FromPair;
+use crate::parser::Rule;
 
 /// A naive datetime, as found in header frames.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -74,29 +74,26 @@ pub struct IsoDateTime {
     hour: u8,
     minute: u8,
     second: u8,
-    timezone: IsoTimezone,
+    timezone: Option<IsoTimezone>,
 }
 
 impl Display for IsoDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
             f,
-            "{:02}-{:02}-{:04}T{:02}:{:02}:{:02}{}",
-            self.day,
-            self.month,
-            self.year,
-            self.hour,
-            self.minute,
-            self.second,
-            self.timezone,
-        )
+            "{:02}-{:02}-{:04}T{:02}:{:02}:{:02}",
+            self.day, self.month, self.year, self.hour, self.minute, self.second,
+        )?;
+        match self.timezone {
+            Some(ref tz) => tz.fmt(f),
+            None => Ok(()),
+        }
     }
 }
 
 impl FromPair for IsoDateTime {
     const RULE: Rule = Rule::Iso8601DateTime;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-
         let mut inner = pair.into_inner();
         let mut date = inner.next().unwrap().into_inner();
         let mut time = inner.next().unwrap().into_inner();
@@ -109,9 +106,20 @@ impl FromPair for IsoDateTime {
         let minute = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
         let second = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
 
-        let timezone = IsoTimezone::from_pair_unchecked(inner.next().unwrap())?;
+        let timezone = match inner.next() {
+            Some(pair) => Some(IsoTimezone::from_pair_unchecked(pair)?),
+            None => None,
+        };
 
-        Ok(IsoDateTime {day, month, year, hour, minute, second, timezone})
+        Ok(IsoDateTime {
+            day,
+            month,
+            year,
+            hour,
+            minute,
+            second,
+            timezone,
+        })
     }
 }
 impl_fromstr!(IsoDateTime);
@@ -121,7 +129,7 @@ impl_fromstr!(IsoDateTime);
 pub enum IsoTimezone {
     Utc,
     Plus(u8, u8),
-    Minus(u8, u8)
+    Minus(u8, u8),
 }
 
 impl Display for IsoTimezone {

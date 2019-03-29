@@ -4,8 +4,8 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
-use url::Url;
 use pest::iterators::Pair;
+use url::Url;
 
 use crate::ast::*;
 use crate::error::Result;
@@ -87,6 +87,11 @@ impl FromPair for PropertyValue {
             Rule::Id => {
                 let id = Id::from_pair_unchecked(second)?;
                 Ok(PropertyValue::Identified(relid, id))
+            }
+            Rule::PvValue => {
+                let desc = QuotedString::new(second.as_str().to_string());
+                let datatype = Id::from_str(inner.next().unwrap().as_str())?;
+                Ok(PropertyValue::Typed(relid, desc, datatype))
             }
             Rule::QuotedString => {
                 let desc = QuotedString::from_pair_unchecked(second)?;

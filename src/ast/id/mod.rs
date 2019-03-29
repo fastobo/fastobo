@@ -8,8 +8,8 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-use url::Url;
 use pest::iterators::Pair;
+use url::Url;
 
 pub use self::prefixed::IdLocal;
 pub use self::prefixed::IdPrefix;

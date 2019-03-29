@@ -4,8 +4,8 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
-use url::Url;
 use pest::iterators::Pair;
+use url::Url;
 
 use crate::ast::*;
 use crate::error::Error;

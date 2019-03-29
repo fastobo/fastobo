@@ -8,8 +8,8 @@
 extern crate failure;
 #[macro_use]
 extern crate pest_derive;
-extern crate url;
 extern crate pest;
+extern crate url;
 
 #[macro_use]
 pub mod parser;

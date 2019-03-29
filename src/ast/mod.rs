@@ -24,14 +24,14 @@ pub use self::term::*;
 pub use self::typedef::*;
 pub use self::xref::*;
 
+use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
-use std::fs::File;
 use std::path::Path;
 use std::str::FromStr;
 
-use pest::Parser;
 use pest::iterators::Pair;
+use pest::Parser;
 
 use crate::error::Result;
 use crate::parser::FromPair;
@@ -47,24 +47,27 @@ pub struct OboDoc {
 impl OboDoc {
     /// Create a new OBO document.
     pub fn new(header: HeaderFrame) -> Self {
-        Self { header, entities: Vec::new() }
+        Self {
+            header,
+            entities: Vec::new(),
+        }
     }
 
     /// Create a new OBO document with the provided entity frames.
     pub fn with_entities<E>(header: HeaderFrame, entities: E) -> Self
     where
-        E: IntoIterator<Item = EntityFrame>
+        E: IntoIterator<Item = EntityFrame>,
     {
         Self {
             header,
-            entities: entities.into_iter().collect()
+            entities: entities.into_iter().collect(),
         }
     }
 
     /// Consume an OBO stream to produce the corresponding AST.
     pub fn from_stream<B>(mut stream: B) -> Result<Self>
     where
-        B: BufRead
+        B: BufRead,
     {
         let mut line = String::new();
         let mut frame_lines = String::new();
@@ -82,17 +85,17 @@ impl OboDoc {
         // read all entity frames
         frame_lines.clear();
         while !line.is_empty() {
-
             frame_lines.push_str(&line);
             line.clear();
             stream.read_line(&mut line);
 
             if line.trim_left().starts_with('[') {
                 let mut pairs = OboParser::parse(Rule::EntitySingle, &frame_lines)?;
-                obodoc.entities.push(EntityFrame::from_pair(pairs.next().unwrap())?);
+                obodoc
+                    .entities
+                    .push(EntityFrame::from_pair(pairs.next().unwrap())?);
                 frame_lines.clear()
             }
-
         }
 
         Ok(obodoc)
@@ -101,12 +104,11 @@ impl OboDoc {
     /// Read
     pub fn from_file<P>(path: P) -> Result<Self>
     where
-        P: AsRef<Path>
+        P: AsRef<Path>,
     {
         let mut f = File::open(path).map(BufReader::new)?;
         Self::from_stream(f)
     }
-
 
     pub fn header(&self) -> &HeaderFrame {
         &self.header
@@ -138,7 +140,6 @@ impl FromPair for OboDoc {
     }
 }
 impl_fromstr!(OboDoc);
-
 
 /// An entity frame, either for a term, an instance, or a typedef.
 pub enum EntityFrame {

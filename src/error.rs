@@ -15,7 +15,7 @@ pub enum Error {
     #[fail(display = "parser error: {}", error)]
     ParserError { error: PestError<Rule> },
     #[fail(display = "IO error: {}", error)]
-    IOError { error: IOError }
+    IOError { error: IOError },
 }
 
 impl From<PestError<Rule>> for Error {

@@ -56,22 +56,24 @@ macro_rules! impl_fromstr {
     ($type:ty) => {
         impl std::str::FromStr for $type {
             type Err = $crate::error::Error;
-            fn from_str(s: &str) -> Result<Self> {
+            fn from_str(s: &str) -> $crate::error::Result<Self> {
                 use $crate::error::Error;
                 use $crate::parser::OboParser;
+                use $crate::pest::error::ErrorVariant;
                 use $crate::pest::Parser;
                 use $crate::pest::Position;
-                use $crate::pest::error::ErrorVariant;
 
                 // Parse the input string
                 let mut pairs = OboParser::parse(Self::RULE, s)?;
                 let pair = pairs.next().unwrap();
                 // Check EOI was reached
                 if pair.as_span().end() != s.len() {
-                    let span = pair.as_span().end_pos()
+                    let span = pair
+                        .as_span()
+                        .end_pos()
                         .span(&Position::new(s, s.len()).unwrap());
                     let variant = ErrorVariant::CustomError {
-                        message: "remaining input".to_string()
+                        message: "remaining input".to_string(),
                     };
                     Err($crate::pest::error::Error::new_from_span(variant, span).into())
                 } else {

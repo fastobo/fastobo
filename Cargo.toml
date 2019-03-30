@@ -1,3 +1,6 @@
+[workspace]
+members = ["fastobo-syntax"]
+
 [package]
 name = "fastobo"
 version = "0.1.0"
@@ -10,6 +13,8 @@ pest = "2.1.0"
 pest_derive = "2.1.0"
 failure = "0.1.5"
 url = "1.7.2"
+[dependencies.fastobo-syntax]
+path = "./fastobo-syntax"
 
 [dev-dependencies]
 textwrap = "0.11.0"

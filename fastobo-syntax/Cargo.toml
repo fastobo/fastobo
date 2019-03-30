@@ -1,8 +1,15 @@
 [package]
 name = "fastobo-syntax"
 version = "0.1.0"
-authors = ["Martin Larralde <martin.larralde@ens-cachan.fr>"]
+authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/althonos/fastobo"
+documentation = "https://github.com/althonos/fastobo/tree/master/fastobo-syntax"
+homepage = "https://github.com/althonos/fastobo"
+description = "PEG Syntax and pest parser for the OBO flat file format 1.4"
 edition = "2018"
+workspace = ".."
 
 [dependencies]
 pest = "2.1"

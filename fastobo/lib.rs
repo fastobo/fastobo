@@ -12,8 +12,11 @@
 
 #[macro_use]
 extern crate failure;
+#[macro_use]
+extern crate opaque_typedef_macros;
 
 extern crate fastobo_syntax;
+extern crate opaque_typedef;
 extern crate pest;
 extern crate url;
 

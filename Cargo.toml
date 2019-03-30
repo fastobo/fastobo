@@ -32,6 +32,8 @@ pest = "2.1.0"
 failure = "0.1.5"
 url = "1.7.2"
 fastobo-syntax = { path = "./fastobo-syntax", version = "0.1.0" }
+opaque_typedef = "0.0.4"
+opaque_typedef_macros = "0.0.4"
 
 [dev-dependencies]
 reqwest = "*"

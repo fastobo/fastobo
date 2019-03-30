@@ -7,10 +7,9 @@ use pest::Parser;
 use crate::error::Error;
 use crate::error::Result;
 
-/// The OBO format version 1.4 parser.
-#[derive(Debug, Parser)]
-#[grammar = "parser/grammar.pest"]
-pub struct OboParser;
+pub use fastobo_syntax::OboParser;
+pub use fastobo_syntax::Rule;
+
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///

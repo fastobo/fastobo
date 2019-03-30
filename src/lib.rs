@@ -6,12 +6,13 @@
 
 #[macro_use]
 extern crate failure;
-#[macro_use]
-extern crate pest_derive;
+
+extern crate fastobo_syntax;
 extern crate pest;
 extern crate url;
 
 #[macro_use]
 pub mod parser;
+
 pub mod ast;
 pub mod error;

@@ -8,8 +8,6 @@ use crate::parser::Rule;
 pub enum Error {
     #[fail(display = "invalid character: {}", c)]
     InvalidCharacter { c: char },
-    #[fail(display = "remaining input: {}", i)]
-    RemainingInput { i: String },
     #[fail(display = "unexpected rule: {:?} (expected {:?})", actual, expected)]
     UnexpectedRule { expected: Rule, actual: Rule },
     #[fail(display = "parser error: {}", error)]

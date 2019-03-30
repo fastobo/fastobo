@@ -10,7 +10,6 @@ use crate::error::Result;
 pub use fastobo_syntax::OboParser;
 pub use fastobo_syntax::Rule;
 
-
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
 /// [`pest::Pair`]: https://docs.rs/pest/2.1.0/pest/iterators/struct.Pair.html

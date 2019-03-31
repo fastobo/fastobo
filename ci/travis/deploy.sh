@@ -33,6 +33,7 @@ case "$TRAVIS_TAG" in
 			log Publishing fastobo $TRAVIS_TAG
 			cargo publish --token $CRATES_IO_TOKEN
 			;;
+
 	*)
 			error Error invalid or missing tag: $TRAVIS_TAG
 			exit 1
@@ -54,8 +55,7 @@ case "$TRAVIS_TAG" in
 			cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
 			chandler push --github="$TRAVIS_REPO_SLUG" \
 								    --changelog="CHANGELOG.md" \
-										--git="../.git" \
-										--tag-prefix=syntax/v
+										--git="../.git"
 			;;
 	v*)
 			cd "$TRAVIS_BUILD_DIR"

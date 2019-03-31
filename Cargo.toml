@@ -1,16 +1,32 @@
 [workspace]
 members = ["fastobo-syntax"]
 
-[lib]
-path = "fastobo/lib.rs"
-
 [package]
 name = "fastobo"
 version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
+license = "MIT"
+description = "Faultless AST for Open Biomedical Ontologies."
+repository = "https://github.com/althonos/fastobo"
+readme = "README.md"
+keywords = ["obo", "ontology", "obofoundry", "ast", "syntax", "parser"]
+categories   = ["science", "parser-implementations"]
 
-# Required dependencies
+[lib]
+name = "fastobo"
+path = "fastobo/lib.rs"
+
+[badges.travis-ci]
+repository = "althonos/fastobo"
+[badges.codecov]
+repository = "althonos/fastobo"
+service    = "github"
+[badges.is-it-maintained-issue-resolution]
+repository = "althonos/fastobo"
+[badges.maintenance]
+status     = "actively-developed"
+
 [dependencies]
 pest = "2.1.0"
 failure = "0.1.5"
@@ -29,3 +45,6 @@ lto = true
 
 [profile.release]
 lto = true
+
+[package.metadata.docs.rs]
+features = ["docs"]

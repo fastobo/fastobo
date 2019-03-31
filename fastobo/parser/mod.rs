@@ -1,3 +1,5 @@
+//! Parser and parsing-related traits for the OBO format.
+
 use std::borrow::Cow;
 use std::str::FromStr;
 
@@ -7,7 +9,9 @@ use pest::Parser;
 use crate::error::Error;
 use crate::error::Result;
 
+#[doc(inline)]
 pub use fastobo_syntax::OboParser;
+#[doc(inline)]
 pub use fastobo_syntax::Rule;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].

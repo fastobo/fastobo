@@ -1,9 +1,12 @@
+//! `Error` and `Result` types for this crate.
+
 use std::io::Error as IOError;
 
 use pest::error::Error as PestError;
 
 use crate::parser::Rule;
 
+/// The error type for this crate.
 #[derive(Debug, Fail)]
 pub enum Error {
     #[fail(display = "invalid character: {}", c)]
@@ -28,4 +31,5 @@ impl From<IOError> for Error {
     }
 }
 
+/// The result type for this crate.
 pub type Result<T> = std::result::Result<T, Error>;

@@ -1,3 +1,7 @@
+//! Owned syntax tree for the [OBO format version 1.4].
+//!
+//! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.
+
 mod date;
 mod header;
 mod id;

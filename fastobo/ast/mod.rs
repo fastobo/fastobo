@@ -69,7 +69,7 @@ impl OboDoc {
     }
 
     /// Consume an OBO stream to produce the corresponding AST.
-    pub fn from_stream<B>(mut stream: B) -> Result<Self>
+    pub fn from_stream<B>(stream: &mut B) -> Result<Self>
     where
         B: BufRead,
     {
@@ -80,7 +80,7 @@ impl OboDoc {
         while !line.trim_start().starts_with('[') {
             frame_lines.push_str(&line);
             line.clear();
-            stream.read_line(&mut line);
+            stream.read_line(&mut line)?;
         }
 
         // create the OBO document
@@ -91,9 +91,9 @@ impl OboDoc {
         while !line.is_empty() {
             frame_lines.push_str(&line);
             line.clear();
-            stream.read_line(&mut line);
+            stream.read_line(&mut line)?;
 
-            if line.trim_left().starts_with('[') {
+            if line.trim_start().starts_with('[') {
                 let mut pairs = OboParser::parse(Rule::EntitySingle, &frame_lines)?;
                 obodoc
                     .entities
@@ -111,7 +111,7 @@ impl OboDoc {
         P: AsRef<Path>,
     {
         let mut f = File::open(path).map(BufReader::new)?;
-        Self::from_stream(f)
+        Self::from_stream(&mut f)
     }
 
     pub fn header(&self) -> &HeaderFrame {

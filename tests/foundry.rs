@@ -57,7 +57,7 @@ macro_rules! foundrytest {
             // println!("{:?}", std::str::from_utf8(peek));
 
             if peek.starts_with(b"format-version:") {
-                match fastobo::ast::OboDoc::from_stream(buf) {
+                match fastobo::ast::OboDoc::from_stream(&mut buf) {
                     Ok(doc) => println!("{}", doc.header()),
                     Err(e) => panic!("{}", e),
                 }

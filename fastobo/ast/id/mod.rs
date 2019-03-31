@@ -2,7 +2,6 @@ mod prefixed;
 mod subclasses;
 mod unprefixed;
 
-use std::convert::TryFrom;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;

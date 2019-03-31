@@ -11,6 +11,13 @@ description = "PEG Syntax and pest parser for the OBO flat file format 1.4"
 edition = "2018"
 workspace = ".."
 
+[badges.travis-ci]
+repository = "althonos/fastobo"
+[badges.is-it-maintained-issue-resolution]
+repository = "althonos/fastobo"
+[badges.maintenance]
+status     = "actively-developed"
+
 [dependencies]
 pest = "2.1"
 pest_derive = "2.1"

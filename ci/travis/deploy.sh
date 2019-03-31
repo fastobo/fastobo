@@ -23,14 +23,15 @@ error() {
 # --- Publish crate to `crates.io` ---------------------------------------------
 
 case "$TRAVIS_TAG" in
-	v*)
-			log Publishing fastobo $TRAVIS_TAG
-			cargo publish --token $CRATES_IO_TOKEN --dry-run
+	v*-syntax)
+			cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
+			log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
+			cargo publish --token $CRATES_IO_TOKEN
 			;;
-	syntax/v*)
-			cd fastobo-syntax
-			log Publishing fastobo-syntax ${TRAVIS_TAG#syntax/}
-			cargo publish --token $CRATES_IO_TOKEN --dry-run
+	v*)
+			cd "$TRAVIS_BUILD_DIR"
+			log Publishing fastobo $TRAVIS_TAG
+			cargo publish --token $CRATES_IO_TOKEN
 			;;
 	*)
 			error Error invalid or missing tag: $TRAVIS_TAG
@@ -48,4 +49,20 @@ log Installing chandler gem
 gem install --user-install chandler
 
 log Updating GitHub release notes
-chandler push --github="$TRAVIS_REPO_SLUG"
+case "$TRAVIS_TAG" in
+	v*-syntax)
+			cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
+			chandler push --github="$TRAVIS_REPO_SLUG" \
+								    --changelog="CHANGELOG.md" \
+										--git="../.git" \
+										--tag-prefix=syntax/v
+			;;
+	v*)
+			cd "$TRAVIS_BUILD_DIR"
+			chandler push --github="$TRAVIS_REPO_SLUG"
+			;;
+	*)
+			error Error invalid or missing tag: $TRAVIS_TAG
+			exit 1
+			;;
+esac

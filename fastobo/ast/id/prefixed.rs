@@ -29,7 +29,7 @@ impl PrefixedId {
     /// # Example
     /// ```rust
     /// # extern crate fastobo;
-    /// # use fastobo::obo14::*;
+    /// # use fastobo::ast::*;
     /// # use std::str::FromStr;
     /// let canonical_id = PrefixedId::from_str("GO:0046154").unwrap();
     /// assert!(canonical_id.is_canonical());

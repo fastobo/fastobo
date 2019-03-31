@@ -15,7 +15,7 @@ use crate::parser::Rule;
 /// # Example
 /// ```rust
 /// # extern crate fastobo;
-/// # use fastobo::obo14::QuotedString;
+/// # use fastobo::ast::QuotedString;
 /// let s = QuotedString::new("Hello, world!");
 /// assert_eq!(s.as_ref(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");

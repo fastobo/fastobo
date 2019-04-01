@@ -77,8 +77,7 @@ impl_fromstr!(UnquotedString);
 /// A borrowed `UnquotedString`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
 #[opaque_typedef(derive(
-    AsRefDeref,
-    AsRefSelf,
+    AsRef(Deref, Self),
     FromInner,
     Deref,
     Into(Arc, Box, Rc, Inner),

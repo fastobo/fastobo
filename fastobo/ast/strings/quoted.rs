@@ -32,7 +32,7 @@ use super::unescape;
 /// assert_eq!(s.as_ref(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd)]
 pub struct QuotedString {
     value: String,
 }
@@ -79,10 +79,9 @@ impl FromPair for QuotedString {
 impl_fromstr!(QuotedString);
 
 /// A borrowed `QuotedString`.
-#[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
+#[derive(Debug, Eq, Hash, PartialEq, PartialOrd, OpaqueTypedefUnsized)]
 #[opaque_typedef(derive(
-    AsRefDeref,
-    AsRefSelf,
+    AsRef(Deref, Self),
     FromInner,
     Deref,
     Into(Arc, Box, Rc, Inner),
@@ -95,6 +94,7 @@ pub struct QuotedStr(str);
 impl QuotedStr {
     /// Create a new `QuotedStr`.
     pub fn new(s: &str) -> &Self {
+        // Using `unchecked` because there is no validation needed.
         unsafe { QuotedStr::from_inner_unchecked(s.as_ref()) }
     }
 }

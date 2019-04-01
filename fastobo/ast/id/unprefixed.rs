@@ -23,6 +23,12 @@ impl UnprefixedId {
     }
 }
 
+impl AsRef<str> for UnprefixedId {
+    fn as_ref(&self) -> &str {
+        &self.value
+    }
+}
+
 impl Display for UnprefixedId {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.value.chars().try_for_each(|char| match char {

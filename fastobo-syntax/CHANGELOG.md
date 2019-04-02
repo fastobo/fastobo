@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Fix invalid header values being successfully parsed into `Unreserved` nonetheless.
+
 [Unreleased]: https://github.com/althonos/obofoundry.rs/compare/syntax/v0.1.0-syntax...HEAD
 
 

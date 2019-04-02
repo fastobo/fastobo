@@ -96,9 +96,7 @@ impl UnquotedStr {
 
 impl<'a> Display for UnquotedStr {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        f.write_char('"')
-            .and(escape(f, &self.0))
-            .and(f.write_char('"'))
+        escape(f, &self.0)
     }
 }
 

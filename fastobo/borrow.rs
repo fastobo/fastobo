@@ -201,7 +201,7 @@ impl<'a> Deref for Cow<'a, &'a str> {
     type Target = str;
     fn deref(&self) -> &Self::Target {
         match self {
-            Borrowed(s) => s.clone(),
+            Borrowed(s) => Clone::clone(s),
             Owned(ref s) => s.as_ref(),
         }
     }

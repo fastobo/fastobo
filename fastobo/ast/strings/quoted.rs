@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::ops::Deref;
 
 use pest::iterators::Pair;
 use opaque_typedef::OpaqueTypedefUnsized;
@@ -33,30 +34,45 @@ use super::unescape;
 /// assert_eq!(s.as_ref(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct QuotedString {
     value: String,
 }
 
 impl QuotedString {
     /// Create a new `QuotedString`.
-    pub fn new<S>(s: S) -> Self
-    where
-        S: Into<String>,
-    {
+    pub fn new(s: String) -> Self {
         QuotedString { value: s.into() }
+    }
+
+    /// Extracts a string slice containing the `QuotedString` value.
+    pub fn as_str(&self) -> &str {
+        &self.value
     }
 }
 
 impl AsRef<str> for QuotedString {
     fn as_ref(&self) -> &str {
-        &self.value
+        self.as_str()
+    }
+}
+
+impl AsRef<QuotedStr> for QuotedString {
+    fn as_ref(&self) -> &QuotedStr {
+        <Self as Borrow<&QuotedStr>>::borrow(self)
+    }
+}
+
+impl Deref for QuotedString {
+    type Target = QuotedStr;
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
     }
 }
 
 impl std::borrow::Borrow<QuotedStr> for QuotedString {
     fn borrow(&self) -> &QuotedStr {
-        QuotedStr::new(&self.value)
+        QuotedStr::new(self.as_ref())
     }
 }
 
@@ -86,7 +102,7 @@ impl<'i> FromPair<'i> for QuotedString {
 impl_fromstr!(QuotedString);
 
 /// A borrowed `QuotedString`.
-#[derive(Debug, Eq, Hash, PartialEq, PartialOrd, OpaqueTypedefUnsized)]
+#[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
 #[repr(transparent)]
 pub struct QuotedStr(str);
 
@@ -112,20 +128,6 @@ impl<'a> Display for QuotedStr {
     }
 }
 
-impl std::borrow::ToOwned for QuotedStr {
-    type Owned = QuotedString;
-    fn to_owned(&self) -> QuotedString {
-        QuotedString::new(self.as_ref())
-    }
-}
-
-impl<'a> ToOwned<'a> for &'a QuotedStr {
-    type Owned = QuotedString;
-    fn to_owned(&self) -> QuotedString {
-        QuotedString::new(self.0.to_string())
-    }
-}
-
 impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
     const RULE: Rule = Rule::QuotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
@@ -134,6 +136,21 @@ impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
         } else {
             Ok(Cow::Borrowed(QuotedStr::new(pair.as_str())))
         }
+    }
+}
+impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
+
+impl std::borrow::ToOwned for QuotedStr {
+    type Owned = QuotedString;
+    fn to_owned(&self) -> QuotedString {
+        QuotedString::new(self.as_ref().to_owned())
+    }
+}
+
+impl<'a> ToOwned<'a> for &'a QuotedStr {
+    type Owned = QuotedString;
+    fn to_owned(&self) -> QuotedString {
+        QuotedString::new(self.0.to_string())
     }
 }
 

@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::ops::Deref;
 
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
@@ -20,19 +21,16 @@ use super::unescape;
 /// A string without delimiters, used as values in different clauses.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct UnquotedString {
-    value: String,
+    value: Cow<'static, &'static str>,
 }
 
 impl UnquotedString {
     /// Create a new `UnquotedString`.
-    pub fn new<S>(s: S) -> Self
-    where
-        S: Into<String>,
-    {
+    pub fn new(s: String) -> Self {
         UnquotedString { value: s.into() }
     }
 
-    /// Extracts a string slice containing the entire `UnquotedString`.
+    /// Extracts a string slice containing the `UnquotedString` value.
     pub fn as_str(&self) -> &str {
         &self.value
     }
@@ -40,12 +38,25 @@ impl UnquotedString {
 
 impl AsRef<str> for UnquotedString {
     fn as_ref(&self) -> &str {
-        &self.value
+        self.as_str()
     }
 }
 
 impl AsRef<UnquotedStr> for UnquotedString {
     fn as_ref(&self) -> &UnquotedStr {
+        UnquotedStr::new(self.as_ref())
+    }
+}
+
+impl Deref for UnquotedString {
+    type Target = UnquotedStr;
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
+    }
+}
+
+impl std::borrow::Borrow<UnquotedStr> for UnquotedString {
+    fn borrow(&self) -> &UnquotedStr {
         UnquotedStr::new(self.as_ref())
     }
 }
@@ -86,6 +97,12 @@ impl UnquotedStr {
     }
 }
 
+impl AsRef<str> for UnquotedStr {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
 impl<'a> Display for UnquotedStr {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         escape(f, &self.0)
@@ -102,6 +119,14 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
         }
     }
 }
+impl_fromslice!('i, Cow<'i, &'i UnquotedStr>);
+
+impl std::borrow::ToOwned for UnquotedStr {
+    type Owned = UnquotedString;
+    fn to_owned(&self) -> UnquotedString {
+        UnquotedString::new(self.as_ref().to_string())
+    }
+}
 
 impl<'a> ToOwned<'a> for &'a UnquotedStr {
     type Owned = UnquotedString;
@@ -109,7 +134,6 @@ impl<'a> ToOwned<'a> for &'a UnquotedStr {
         UnquotedString::new(self.0.to_string())
     }
 }
-
 
 #[cfg(test)]
 mod tests {

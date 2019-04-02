@@ -1,4 +1,5 @@
-use std::borrow::Borrow;
+// use std::borrow::Borrow;
+// use std::borrow::Cow;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -10,6 +11,9 @@ use pest::iterators::Pair;
 use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::borrow::Borrow;
+use crate::borrow::Cow;
+use crate::borrow::ToOwned;
 use super::escape;
 use super::unescape;
 
@@ -27,6 +31,11 @@ impl UnquotedString {
     {
         UnquotedString { value: s.into() }
     }
+
+    /// Extracts a string slice containing the entire `UnquotedString`.
+    pub fn as_str(&self) -> &str {
+        &self.value
+    }
 }
 
 impl AsRef<str> for UnquotedString {
@@ -35,8 +44,14 @@ impl AsRef<str> for UnquotedString {
     }
 }
 
-impl Borrow<UnquotedStr> for UnquotedString {
-    fn borrow(&self) -> &UnquotedStr {
+impl AsRef<UnquotedStr> for UnquotedString {
+    fn as_ref(&self) -> &UnquotedStr {
+        UnquotedStr::new(self.as_ref())
+    }
+}
+
+impl<'a> Borrow<'a, &'a UnquotedStr> for UnquotedString {
+    fn borrow(&'a self) -> &'a UnquotedStr {
         UnquotedStr::new(&self.value)
     }
 }
@@ -53,22 +68,7 @@ impl<'i> FromPair<'i> for UnquotedString {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         let s = pair.as_str();
         let mut local = String::with_capacity(s.len());
-        let mut chars = s.chars();
-        while let Some(char) = chars.next() {
-            if char == '\\' {
-                match chars.next() {
-                    Some('r') => local.push('\r'),
-                    Some('n') => local.push('\n'),
-                    Some('f') => local.push('\u{000c}'),
-                    Some('t') => local.push('\t'),
-                    Some(other) => local.push(other),
-                    None => panic!("missing stuff"), // FIXME(@althonos)
-                }
-            } else {
-                local.push(char);
-            }
-        }
-
+        unescape(&mut local, s).expect("String as fmt::Write cannot fail");
         Ok(UnquotedString::new(local))
     }
 }
@@ -76,14 +76,6 @@ impl_fromstr!(UnquotedString);
 
 /// A borrowed `UnquotedString`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
-#[opaque_typedef(derive(
-    AsRef(Deref, Self),
-    FromInner,
-    Deref,
-    Into(Arc, Box, Rc, Inner),
-    PartialEq(Inner, InnerRev, InnerCow, InnerCowRev, SelfCow, SelfCowRev),
-    PartialOrd(Inner, InnerRev, InnerCow, InnerCowRev, SelfCow, SelfCowRev)
-))]
 #[repr(transparent)]
 pub struct UnquotedStr(str);
 
@@ -100,16 +92,23 @@ impl<'a> Display for UnquotedStr {
     }
 }
 
-impl ToOwned for UnquotedStr {
-    type Owned = UnquotedString;
-    fn to_owned(&self) -> UnquotedString {
-        UnquotedString::new(self.0.to_string())
+impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
+    const RULE: Rule = Rule::UnquotedString;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+        if pair.as_str().find('\\').is_some() {
+            UnquotedString::from_pair_unchecked(pair).map(|s| Cow::Owned(s))
+        } else {
+            Ok(Cow::Borrowed(UnquotedStr::new(pair.as_str())))
+        }
     }
 }
 
-
-
-
+impl<'a> ToOwned<'a> for &'a UnquotedStr {
+    type Owned = UnquotedString;
+    fn to_owned(&'a self) -> UnquotedString {
+        UnquotedString::new(self.0.to_string())
+    }
+}
 
 
 #[cfg(test)]

@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -10,9 +9,11 @@ use opaque_typedef::OpaqueTypedefUnsized;
 use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::borrow::Borrow;
+use crate::borrow::Cow;
+use crate::borrow::ToOwned;
 use super::escape;
 use super::unescape;
-
 
 /// A string enclosed by quotes, used for definitions.
 ///
@@ -53,8 +54,14 @@ impl AsRef<str> for QuotedString {
     }
 }
 
-impl Borrow<QuotedStr> for QuotedString {
+impl std::borrow::Borrow<QuotedStr> for QuotedString {
     fn borrow(&self) -> &QuotedStr {
+        QuotedStr::new(&self.value)
+    }
+}
+
+impl<'a> Borrow<'a, &'a QuotedStr> for QuotedString {
+    fn borrow(&'a self) -> &'a QuotedStr {
         QuotedStr::new(&self.value)
     }
 }
@@ -80,14 +87,6 @@ impl_fromstr!(QuotedString);
 
 /// A borrowed `QuotedString`.
 #[derive(Debug, Eq, Hash, PartialEq, PartialOrd, OpaqueTypedefUnsized)]
-#[opaque_typedef(derive(
-    AsRef(Deref, Self),
-    FromInner,
-    Deref,
-    Into(Arc, Box, Rc, Inner),
-    PartialEq(Inner, InnerRev, InnerCow, InnerCowRev, SelfCow, SelfCowRev),
-    PartialOrd(Inner, InnerRev, InnerCow, InnerCowRev, SelfCow, SelfCowRev)
-))]
 #[repr(transparent)]
 pub struct QuotedStr(str);
 
@@ -99,6 +98,12 @@ impl QuotedStr {
     }
 }
 
+impl AsRef<str> for QuotedStr {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
 impl<'a> Display for QuotedStr {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_char('"')
@@ -107,10 +112,28 @@ impl<'a> Display for QuotedStr {
     }
 }
 
-impl ToOwned for QuotedStr {
+impl std::borrow::ToOwned for QuotedStr {
+    type Owned = QuotedString;
+    fn to_owned(&self) -> QuotedString {
+        QuotedString::new(self.as_ref())
+    }
+}
+
+impl<'a> ToOwned<'a> for &'a QuotedStr {
     type Owned = QuotedString;
     fn to_owned(&self) -> QuotedString {
         QuotedString::new(self.0.to_string())
+    }
+}
+
+impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
+    const RULE: Rule = Rule::QuotedString;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+        if pair.as_str().find('\\').is_some() {
+            QuotedString::from_pair_unchecked(pair).map(|s| Cow::Owned(s))
+        } else {
+            Ok(Cow::Borrowed(QuotedStr::new(pair.as_str())))
+        }
     }
 }
 

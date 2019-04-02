@@ -32,6 +32,27 @@ impl NaiveDateTime {
             minute,
         }
     }
+
+    pub fn day(&self) -> u8 {
+        self.day
+    }
+
+    pub fn month(&self) -> u8 {
+        self.month
+    }
+
+    pub fn year(&self) -> u16 {
+        self.year
+    }
+
+    pub fn hour(&self) -> u8 {
+        self.hour
+    }
+
+    pub fn minute(&self) -> u8 {
+        self.minute
+    }
+
 }
 
 impl Display for NaiveDateTime {

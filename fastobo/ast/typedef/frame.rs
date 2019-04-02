@@ -23,9 +23,9 @@ impl Display for TypedefFrame {
     }
 }
 
-impl FromPair for TypedefFrame {
+impl<'i> FromPair<'i> for TypedefFrame {
     const RULE: Rule = Rule::TypedefFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let relid = RelationId::from_pair_unchecked(inner.next().unwrap())?;
         let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(relid);

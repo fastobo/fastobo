@@ -33,7 +33,7 @@ impl Display for Qualifier {
     }
 }
 
-impl FromPair for Qualifier {
+impl<'i> FromPair<'i> for Qualifier {
     const RULE: Rule = Rule::Qualifier;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
@@ -63,9 +63,9 @@ impl Display for QualifierList {
     }
 }
 
-impl FromPair for QualifierList {
+impl<'i> FromPair<'i> for QualifierList {
     const RULE: Rule = Rule::QualifierList;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut qualifiers = Vec::new();
         for pair in pair.into_inner() {
             qualifiers.push(Qualifier::from_pair_unchecked(pair)?);

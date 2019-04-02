@@ -126,9 +126,9 @@ impl Display for TypedefClause {
     }
 }
 
-impl FromPair for Line<TypedefClause> {
+impl<'i> FromPair<'i> for Line<TypedefClause> {
     const RULE: Rule = Rule::TypedefClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clause = TypedefClause::from_pair_unchecked(inner.next().unwrap())?;
         let eol = inner.next().unwrap();
@@ -137,9 +137,9 @@ impl FromPair for Line<TypedefClause> {
 }
 impl_fromstr!(Line<TypedefClause>);
 
-impl FromPair for TypedefClause {
+impl<'i> FromPair<'i> for TypedefClause {
     const RULE: Rule = Rule::TypedefClause;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         match inner.next().unwrap().as_rule() {
             Rule::IsAnonymousTag => {

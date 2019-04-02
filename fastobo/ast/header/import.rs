@@ -41,9 +41,9 @@ impl Display for Import {
     }
 }
 
-impl FromPair for Import {
+impl<'i> FromPair<'i> for Import {
     const RULE: Rule = Rule::Import;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iri => Ok(Url::parse(inner.as_str()).unwrap().into()), // FIXME

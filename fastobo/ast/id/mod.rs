@@ -62,9 +62,9 @@ impl Display for Id {
     }
 }
 
-impl FromPair for Id {
+impl<'i> FromPair<'i> for Id {
     const RULE: Rule = Rule::Id;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::PrefixedId => PrefixedId::from_pair_unchecked(inner).map(From::from),

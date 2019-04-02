@@ -42,9 +42,9 @@ impl Display for Xref {
     }
 }
 
-impl FromPair for Xref {
+impl<'i> FromPair<'i> for Xref {
     const RULE: Rule = Rule::Xref;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let id = Id::from_pair_unchecked(inner.next().unwrap())?;
         let desc = match inner.next() {
@@ -86,9 +86,9 @@ impl Display for XrefList {
     }
 }
 
-impl FromPair for XrefList {
+impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
             // FIXME(@althonos): avoid using FromStr: maybe duplicate rules ?

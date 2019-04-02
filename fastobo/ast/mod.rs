@@ -127,9 +127,9 @@ impl OboDoc {
     }
 }
 
-impl FromPair for OboDoc {
+impl<'i> FromPair<'i> for OboDoc {
     const RULE: Rule = Rule::OboDoc;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
 
         let mut entities = Vec::new();
@@ -170,9 +170,9 @@ impl From<InstanceFrame> for EntityFrame {
     }
 }
 
-impl FromPair for EntityFrame {
+impl<'i> FromPair<'i> for EntityFrame {
     const RULE: Rule = Rule::EntityFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::TermFrame => TermFrame::from_pair_unchecked(inner).map(From::from),

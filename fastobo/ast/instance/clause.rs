@@ -65,9 +65,9 @@ impl Display for InstanceClause {
     }
 }
 
-impl FromPair for InstanceClause {
+impl<'i> FromPair<'i> for InstanceClause {
     const RULE: Rule = Rule::InstanceClause;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         match inner.next().unwrap().as_rule() {
             Rule::IsAnonymousTag => {
@@ -146,9 +146,9 @@ impl FromPair for InstanceClause {
 }
 impl_fromstr!(InstanceClause);
 
-impl FromPair for Line<InstanceClause> {
+impl<'i> FromPair<'i> for Line<InstanceClause> {
     const RULE: Rule = Rule::InstanceClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clause = InstanceClause::from_pair_unchecked(inner.next().unwrap())?;
         Line::<()>::from_pair_unchecked(inner.next().unwrap()).map(|line| line.with_content(clause))

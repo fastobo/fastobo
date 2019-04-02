@@ -43,9 +43,9 @@ impl Display for UnprefixedId {
     }
 }
 
-impl FromPair for UnprefixedId {
+impl<'i> FromPair<'i> for UnprefixedId {
     const RULE: Rule = Rule::UnprefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut local = String::with_capacity(pair.as_str().len());
         let mut chars = pair.as_str().chars();
         while let Some(char) = chars.next() {

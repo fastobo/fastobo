@@ -17,7 +17,7 @@ pub use fastobo_syntax::Rule;
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
 /// [`pest::Pair`]: https://docs.rs/pest/2.1.0/pest/iterators/struct.Pair.html
-pub trait FromPair: Sized {
+pub trait FromPair<'i>: Sized {
     const RULE: Rule;
 
     /// Create a new instance from a `Pair` without checking the rule.
@@ -25,11 +25,11 @@ pub trait FromPair: Sized {
     /// # Panic
     /// Panics if the pair was not produced by the right rule, i.e.
     /// `pair.as_rule() != <Self as FromPair>::RULE`.
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self>;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self>;
 
     /// Create a new instance from a `Pair`.
     #[inline]
-    fn from_pair(pair: Pair<Rule>) -> Result<Self> {
+    fn from_pair(pair: Pair<'i, Rule>) -> Result<Self> {
         if pair.as_rule() != Self::RULE {
             return Err(Error::UnexpectedRule {
                 actual: pair.as_rule(),

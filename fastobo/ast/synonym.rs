@@ -33,9 +33,9 @@ impl Display for SynonymScope {
     }
 }
 
-impl FromPair for SynonymScope {
+impl<'i> FromPair<'i> for SynonymScope {
     const RULE: Rule = Rule::SynonymScope;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         match pair.as_str() {
             "EXACT" => Ok(SynonymScope::Exact),
             "BROAD" => Ok(SynonymScope::Broad),
@@ -97,9 +97,9 @@ impl Display for Synonym {
     }
 }
 
-impl FromPair for Synonym {
+impl<'i> FromPair<'i> for Synonym {
     const RULE: Rule = Rule::Synonym;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
 
         let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;

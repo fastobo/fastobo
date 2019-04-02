@@ -66,7 +66,7 @@ impl Display for QuotedString {
     }
 }
 
-impl FromPair for QuotedString {
+impl<'i> FromPair<'i> for QuotedString {
     const RULE: Rule = Rule::QuotedString;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self, Error> {
         let s = pair.as_str();

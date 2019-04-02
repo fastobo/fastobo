@@ -48,9 +48,9 @@ impl Display for UnquotedString {
     }
 }
 
-impl FromPair for UnquotedString {
+impl<'i> FromPair<'i> for UnquotedString {
     const RULE: Rule = Rule::UnquotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self, Error> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         let s = pair.as_str();
         let mut local = String::with_capacity(s.len());
         let mut chars = s.chars();

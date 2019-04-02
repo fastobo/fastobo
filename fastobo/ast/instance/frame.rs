@@ -24,9 +24,9 @@ impl Display for InstanceFrame {
     }
 }
 
-impl FromPair for InstanceFrame {
+impl<'i> FromPair<'i> for InstanceFrame {
     const RULE: Rule = Rule::InstanceFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let iid = InstanceId::from_pair_unchecked(inner.next().unwrap())?;
         let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(iid);

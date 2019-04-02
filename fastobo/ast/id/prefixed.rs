@@ -49,9 +49,9 @@ impl Display for PrefixedId {
     }
 }
 
-impl FromPair for PrefixedId {
+impl<'i> FromPair<'i> for PrefixedId {
     const RULE: Rule = Rule::PrefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inners = pair.into_inner();
         let prefix = IdPrefix::from_pair_unchecked(inners.next().unwrap())?;
         let local = IdLocal::from_pair_unchecked(inners.next().unwrap())?;
@@ -128,9 +128,9 @@ impl Display for IdPrefix {
     }
 }
 
-impl FromPair for IdPrefix {
+impl<'i> FromPair<'i> for IdPrefix {
     const RULE: Rule = Rule::IdPrefix;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
@@ -215,9 +215,9 @@ impl Display for IdLocal {
     }
 }
 
-impl FromPair for IdLocal {
+impl<'i> FromPair<'i> for IdLocal {
     const RULE: Rule = Rule::IdLocal;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {

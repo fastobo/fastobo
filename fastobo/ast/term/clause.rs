@@ -82,9 +82,9 @@ impl Display for TermClause {
     }
 }
 
-impl FromPair for Line<TermClause> {
+impl<'i> FromPair<'i> for Line<TermClause> {
     const RULE: Rule = Rule::TermClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clause = TermClause::from_pair_unchecked(inner.next().unwrap())?;
         let eol = inner.next().unwrap();
@@ -93,7 +93,7 @@ impl FromPair for Line<TermClause> {
 }
 impl_fromstr!(Line<TermClause>);
 
-impl FromPair for TermClause {
+impl<'i> FromPair<'i> for TermClause {
     const RULE: Rule = Rule::TermClause;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();

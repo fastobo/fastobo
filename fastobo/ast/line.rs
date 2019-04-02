@@ -63,9 +63,9 @@ where
 
 pub type Eol = Line<()>;
 
-impl FromPair for Line<()> {
+impl<'i> FromPair<'i> for Line<()> {
     const RULE: Rule = Rule::EOL;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let opt1 = inner.next();
         let opt2 = inner.next();
@@ -156,9 +156,9 @@ impl Display for Comment {
     }
 }
 
-impl FromPair for Comment {
+impl<'i> FromPair<'i> for Comment {
     const RULE: Rule = Rule::HiddenComment;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         // FIXME(@althonos): Check for trailing spaces ?
         Ok(Comment::new(pair.as_str()[1..].to_string()))
     }

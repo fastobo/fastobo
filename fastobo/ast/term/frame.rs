@@ -24,9 +24,9 @@ impl Display for TermFrame {
     }
 }
 
-impl FromPair for TermFrame {
+impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clsid = ClassId::from_pair_unchecked(inner.next().unwrap())?;
         let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(clsid);

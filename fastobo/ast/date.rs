@@ -65,9 +65,9 @@ impl Display for NaiveDateTime {
     }
 }
 
-impl FromPair for NaiveDateTime {
+impl<'i> FromPair<'i> for NaiveDateTime {
     const RULE: Rule = Rule::NaiveDateTime;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let date = inner.next().unwrap();
         let time = inner.next().unwrap();
@@ -112,9 +112,9 @@ impl Display for IsoDateTime {
     }
 }
 
-impl FromPair for IsoDateTime {
+impl<'i> FromPair<'i> for IsoDateTime {
     const RULE: Rule = Rule::Iso8601DateTime;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let mut date = inner.next().unwrap().into_inner();
         let mut time = inner.next().unwrap().into_inner();
@@ -164,9 +164,9 @@ impl Display for IsoTimezone {
     }
 }
 
-impl FromPair for IsoTimezone {
+impl<'i> FromPair<'i> for IsoTimezone {
     const RULE: Rule = Rule::Iso8601TimeZone;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         use self::IsoTimezone::*;
 
         let tag = pair.as_str().chars().next().unwrap();

@@ -40,9 +40,9 @@ macro_rules! id_subclass {
             }
         }
 
-        impl FromPair for $name {
+        impl<'i> FromPair<'i> for $name {
             const RULE: Rule = Rule::$name;
-            unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
                 Id::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
             }
         }

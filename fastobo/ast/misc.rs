@@ -12,46 +12,6 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
-/// An Internationalized Resource Identifier, either absolute or relative.
-// #[derive(Debug, Hash, Eq, PartialEq)]
-// pub enum Iri {
-//
-//     Absolute(AbsoluteIriString),
-//     Relative(RelativeIriString),
-// }
-//
-// impl From<AbsoluteIriString> for Iri {
-//     fn from(abs: AbsoluteIriString) -> Self {
-//         Iri::Absolute(abs)
-//     }
-// }
-//
-// impl From<RelativeIriString> for Iri {
-//     fn from(rel: RelativeIriString) -> Self {
-//         Iri::Relative(rel)
-//     }
-// }
-//
-// impl Display for Iri {
-//     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-//         use self::Iri::*;
-//         match self {
-//             Absolute(iri) => iri.fmt(f),
-//             Relative(iri) => iri.fmt(f),
-//         }
-//     }
-// }
-//
-// impl FromPair for Iri {
-//     const RULE: Rule = Rule::Iri;
-//     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
-//         // FIXME(@althonos): proper iri_strng error handling.
-//         let iri = AbsoluteIriStr::new(pair.as_str()).expect("invalid IRI");
-//         Ok(Iri::Absolute(iri.to_owned()))
-//     }
-// }
-// impl_fromstr!(Iri);
-
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum PropertyValue {
@@ -77,9 +37,9 @@ impl Display for PropertyValue {
     }
 }
 
-impl FromPair for PropertyValue {
+impl<'i> FromPair<'i> for PropertyValue {
     const RULE: Rule = Rule::PropertyValue;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let relid = RelationId::from_pair_unchecked(inner.next().unwrap())?;
         let second = inner.next().unwrap();
@@ -104,16 +64,16 @@ impl FromPair for PropertyValue {
 }
 impl_fromstr!(PropertyValue);
 
-impl FromPair for bool {
+impl<'i> FromPair<'i> for bool {
     const RULE: Rule = Rule::Boolean;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
     }
 }
 
-impl FromPair for Url {
+impl<'i> FromPair<'i> for Url {
     const RULE: Rule = Rule::Iri;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         Ok(Url::parse(pair.as_str()).unwrap()) // FIXME
     }
 }

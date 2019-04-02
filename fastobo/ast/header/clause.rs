@@ -111,9 +111,9 @@ impl Display for HeaderClause {
     }
 }
 
-impl FromPair for HeaderClause {
+impl<'i> FromPair<'i> for HeaderClause {
     const RULE: Rule = Rule::HeaderClause;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let tag = inner.next().unwrap();
         match tag.as_rule() {

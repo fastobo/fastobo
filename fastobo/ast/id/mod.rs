@@ -27,6 +27,7 @@ pub use self::subclasses::SynonymTypeId;
 pub use self::unprefixed::UnprefixedId;
 pub use self::unprefixed::UnprefixedIdentifier;
 
+use crate::borrow::Cow;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
@@ -83,6 +84,13 @@ impl<'i> FromPair<'i> for Identifier {
     }
 }
 impl_fromstr!(Identifier);
+
+/// A borrowed `Identifier`.
+pub enum Id<'a> {
+    Prefixed(Cow<'a, PrefixedId<'a>>),
+    Unprefixed(Cow<'a, &'a UnprefixedId>),
+    Url(Cow<'a, &'a Url>),
+}
 
 #[cfg(test)]
 mod tests {

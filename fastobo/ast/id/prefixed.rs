@@ -159,19 +159,7 @@ impl<'a> Borrow<'a, IdPrf<'a>> for IdPrefix {
 
 impl Display for IdPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        if self.canonical {
-            f.write_str(&self.value)
-        } else {
-            self.value.chars().try_for_each(|char| match char {
-                '\r' => f.write_str("\\r"),
-                '\n' => f.write_str("\\n"),
-                '\u{000c}' => f.write_str("\\f"),
-                ' ' => f.write_str("\\ "),
-                '\t' => f.write_str("\\t"),
-                ':' => f.write_str("\\:"), // FIXME(@althonos) ?
-                _ => f.write_char(char),
-            })
-        }
+        self.borrow().fmt(f)
     }
 }
 
@@ -221,10 +209,29 @@ pub struct IdPrf<'a> {
 }
 
 impl<'a> IdPrf<'a> {
-    fn new(s: &'a str, canonical: bool) -> Self {
+    // FIXME(@althonos): no canonical, add another `new_unchecked` method.
+    pub fn new(s: &'a str, canonical: bool) -> Self {
         IdPrf {
             value: s,
             canonical
+        }
+    }
+}
+
+impl<'a> Display for IdPrf<'a> {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        if self.canonical {
+            f.write_str(&self.value)
+        } else {
+            self.value.chars().try_for_each(|char| match char {
+                '\r' => f.write_str("\\r"),
+                '\n' => f.write_str("\\n"),
+                '\u{000c}' => f.write_str("\\f"),
+                ' ' => f.write_str("\\ "),
+                '\t' => f.write_str("\\t"),
+                ':' => f.write_str("\\:"), // FIXME(@althonos) ?
+                _ => f.write_char(char),
+            })
         }
     }
 }

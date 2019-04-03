@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 use pyo3::PyTypeInfo;
 use pyo3::types::PyAny;
 use pyo3::types::PyList;
+use pyo3::types::PyString;
 use pyo3::exceptions::RuntimeError;
 use pyo3::exceptions::IndexError;
 use pyo3::exceptions::TypeError;
@@ -67,13 +68,13 @@ impl From<Vec<obo::HeaderClause>> for HeaderFrame {
     }
 }
 
-// FIXME(@althonos)
 #[pyproto]
 impl PyObjectProtocol for HeaderFrame {
     fn __repr__(&self) -> PyResult<PyObject> {
         let gil = Python::acquire_gil();
         let py = gil.python();
-        self.clauses.call_method0(py, "__repr__")
+        let fmt = PyString::new(py, "HeaderFrame({!r})").to_object(py);
+        fmt.call_method1(py, "format", (&self.clauses,))
     }
 }
 

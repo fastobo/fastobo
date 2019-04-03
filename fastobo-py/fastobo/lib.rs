@@ -67,10 +67,8 @@ impl From<obo::OboDoc> for OboDoc {
 #[pymodule]
 fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
 
-    {
-        use header::{header, PyInit_header};
-        m.add_wrapped(pyo3::wrap_pymodule!(header))?;
-    }
+
+    header::module(py, m);
 
 
     // // Note that the `#[pyfn()]` annotation automatically converts the arguments from
@@ -86,15 +84,6 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
             .map(From::from)
             .map_err(|e| RuntimeError::py_err(format!("{}", e))) // FIXME: SyntaxError ?
     }
-
-    // #[pyfn(m, "dumps")]
-    // fn dumps(_py: Python, obj: &PyAny) -> PyResult<String> {
-    //     let doc: &OboDoc = OboDoc::try_from(obj)?;
-    //     let ast: fastobo::ast::OboDoc = doc.clone().into();
-    //     Ok(ast.to_string())
-    // }
-    //
-    // m.add_class::<OboDoc>()?;
 
     m.add_class::<HeaderFrame>()?;
     m.add_class::<OboDoc>()?;

@@ -49,6 +49,8 @@ impl<'a> Borrow<'a, HeaderClauseRef<'a>> for HeaderClause {
         match self {
             HeaderClause::FormatVersion(ref v) =>
                 HeaderClauseRef::FormatVersion(Cow::Borrowed(v.borrow())),
+            HeaderClause::TreatXrefsAsIsA(ref pref) =>
+                HeaderClauseRef::TreatXrefsAsIsA(Cow::Borrowed(pref.borrow())),
             _ => unimplemented!(),
         }
     }
@@ -241,7 +243,7 @@ impl<'i> FromPair<'i> for HeaderClause {
 }
 impl_fromstr!(HeaderClause);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum HeaderClauseRef<'a> {
     FormatVersion(Cow<'a, &'a UnquotedStr>),
     // DataVersion(Cow<'a, &'a UnquotedStr>),
@@ -251,6 +253,10 @@ pub enum HeaderClauseRef<'a> {
     // Import(Cow<'a, &'a Import>),
     // SubsetDef(SubsetId, Cow<'a, &'a UnquotedStr>),
     // SynonymTypedef(SynonymTypeId, Cow<'a, &'a UnquotedStr>),
+
+
+    TreatXrefsAsIsA(Cow<'a, IdPrf<'a>>),
+
 }
 
 impl<'a> Display for HeaderClauseRef<'a> {
@@ -260,6 +266,9 @@ impl<'a> Display for HeaderClauseRef<'a> {
             FormatVersion(version) =>
                 f.write_str("format-version: ")
                     .and(version.fmt(f)),
+            TreatXrefsAsIsA(prefix) =>
+                f.write_str("treat-xrefs-as-is_a: ")
+                    .and(prefix.fmt(f)),
         }
     }
 }
@@ -269,7 +278,9 @@ impl<'a> ToOwned<'a> for HeaderClauseRef<'a> {
     fn to_owned(&'a self) -> Self::Owned {
         match self {
             HeaderClauseRef::FormatVersion(ref v) =>
-                HeaderClause::FormatVersion(<Cow<'a, &'a UnquotedStr> as ToOwned>::to_owned(&v)),
+                HeaderClause::FormatVersion(ToOwned::to_owned(v)),
+            HeaderClauseRef::TreatXrefsAsIsA(ref v) =>
+                HeaderClause::TreatXrefsAsIsA(ToOwned::to_owned(v))
         }
     }
 }

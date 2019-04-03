@@ -7,6 +7,9 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
+use crate::borrow::Borrow;
+use crate::borrow::Cow;
+use crate::borrow::ToOwned;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
@@ -38,6 +41,10 @@ impl<'i> FromPair<'i> for HeaderFrame {
     }
 }
 impl_fromstr!(HeaderFrame);
+
+pub struct HeaderFrameRef<'a> {
+    pub clauses: Cow<'a, &'a [HeaderClauseRef<'a>]>
+}
 
 #[cfg(test)]
 mod tests {

@@ -3,5 +3,6 @@ mod frame;
 mod import;
 
 pub use self::clause::HeaderClause;
+pub use self::clause::HeaderClauseRef;
 pub use self::frame::HeaderFrame;
 pub use self::import::Import;

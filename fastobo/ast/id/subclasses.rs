@@ -13,23 +13,23 @@ macro_rules! id_subclass {
         #[derive(Clone, Debug, PartialEq, Hash, Eq)]
         #[doc=$docstring]
         pub struct $name {
-            id: Id,
+            id: Identifier,
         }
 
-        impl From<Id> for $name {
-            fn from(id: Id) -> Self {
+        impl From<Identifier> for $name {
+            fn from(id: Identifier) -> Self {
                 $name { id }
             }
         }
 
-        impl From<$name> for Id {
+        impl From<$name> for Identifier {
             fn from(id: $name) -> Self {
                 id.id
             }
         }
 
-        impl AsRef<Id> for $name {
-            fn as_ref(&self) -> &Id {
+        impl AsRef<Identifier> for $name {
+            fn as_ref(&self) -> &Identifier {
                 &self.id
             }
         }
@@ -43,14 +43,14 @@ macro_rules! id_subclass {
         impl<'i> FromPair<'i> for $name {
             const RULE: Rule = Rule::$name;
             unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-                Id::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
+                Identifier::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
             }
         }
 
         impl ::std::str::FromStr for $name {
             type Err = $crate::error::Error;
             fn from_str(s: &str) -> Result<Self> {
-                Id::from_str(s).map(Self::from)
+                Identifier::from_str(s).map(Self::from)
             }
         }
     };

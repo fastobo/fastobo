@@ -16,7 +16,7 @@ pub enum InstanceClause {
     IsAnonymous(bool),
     Name(UnquotedString),
     Namespace(NamespaceId),
-    AltId(Id),
+    AltId(Identifier),
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
@@ -24,12 +24,12 @@ pub enum InstanceClause {
     Xref(Xref),
     PropertyValue(PropertyValue),
     InstanceOf(ClassId),
-    Relationship(RelationId, Id), // QUESTION(@althonos): InstanceId ?
+    Relationship(RelationId, Identifier), // QUESTION(@althonos): InstanceId ?
     CreatedBy(UnquotedString),
     CreationDate(IsoDateTime),
     IsObsolete(bool),
     ReplacedBy(InstanceId),
-    Consider(Id),
+    Consider(Identifier),
 }
 
 impl Display for InstanceClause {
@@ -83,7 +83,7 @@ impl<'i> FromPair<'i> for InstanceClause {
                 Ok(InstanceClause::Namespace(ns))
             }
             Rule::AltIdTag => {
-                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(InstanceClause::AltId(id))
             }
             Rule::DefTag => {
@@ -117,7 +117,7 @@ impl<'i> FromPair<'i> for InstanceClause {
             }
             Rule::RelationshipTag => {
                 let r = RelationId::from_pair_unchecked(inner.next().unwrap())?;
-                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(InstanceClause::Relationship(r, id))
             }
             Rule::CreatedByTag => {
@@ -137,7 +137,7 @@ impl<'i> FromPair<'i> for InstanceClause {
                 Ok(InstanceClause::ReplacedBy(id))
             }
             Rule::ConsiderTag => {
-                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(InstanceClause::Consider(id))
             }
             _ => unreachable!(),

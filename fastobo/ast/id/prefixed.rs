@@ -3,8 +3,12 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
+use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
+use crate::borrow::Borrow;
+use crate::borrow::Cow;
+use crate::borrow::ToOwned;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
@@ -12,13 +16,13 @@ use crate::parser::Rule;
 
 /// An identifier with a prefix.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
-pub struct PrefixedId {
+pub struct PrefixedIdentifier {
     prefix: IdPrefix,
     local: IdLocal,
 }
 
-impl PrefixedId {
-    /// Create a new `PrefixedId` from a prefix and a local identifier.
+impl PrefixedIdentifier {
+    /// Create a new `PrefixedIdentifier` from a prefix and a local identifier.
     pub fn new(prefix: IdPrefix, local: IdLocal) -> Self {
         Self { prefix, local }
     }
@@ -40,7 +44,16 @@ impl PrefixedId {
     }
 }
 
-impl Display for PrefixedId {
+impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdentifier {
+    fn borrow(&'a self) -> PrefixedId<'a> {
+        PrefixedId::new(
+            self.prefix.borrow(),
+            self.local.borrow(),
+        )
+    }
+}
+
+impl Display for PrefixedIdentifier {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.prefix
             .fmt(f)
@@ -49,16 +62,43 @@ impl Display for PrefixedId {
     }
 }
 
-impl<'i> FromPair<'i> for PrefixedId {
+impl<'i> FromPair<'i> for PrefixedIdentifier {
     const RULE: Rule = Rule::PrefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inners = pair.into_inner();
         let prefix = IdPrefix::from_pair_unchecked(inners.next().unwrap())?;
         let local = IdLocal::from_pair_unchecked(inners.next().unwrap())?;
-        Ok(PrefixedId::new(prefix, local))
+        Ok(Self::new(prefix, local))
     }
 }
-impl_fromstr!(PrefixedId);
+impl_fromstr!(PrefixedIdentifier);
+
+/// A borrowed `PrefixedIdentifier`
+#[derive(Clone, Debug)]
+pub struct PrefixedId<'a> {
+    prefix: Cow<'a, IdPrf<'a>>,
+    local: Cow<'a, IdLcl<'a>>,
+}
+
+impl<'a> PrefixedId<'a> {
+    /// Create a new `PrefixedId` from references.
+    pub fn new(prefix: IdPrf<'a>, local: IdLcl<'a>) -> Self {
+        Self {
+            prefix: Cow::Borrowed(prefix),
+            local: Cow::Borrowed(local),
+        }
+    }
+}
+
+impl<'a> ToOwned<'a> for PrefixedId<'a> {
+    type Owned = PrefixedIdentifier;
+    fn to_owned(&'a self) -> PrefixedIdentifier {
+        PrefixedIdentifier::new(
+            <Cow<IdPrf> as ToOwned<'a>>::to_owned(&self.prefix),
+            <Cow<IdLcl> as ToOwned<'a>>::to_owned(&self.local),
+        )
+    }
+}
 
 /// An identifier prefix, either canonical or non-canonical.
 ///
@@ -73,12 +113,8 @@ pub struct IdPrefix {
 
 impl IdPrefix {
     /// Create a new identifier prefix.
-    pub fn new<S>(s: S) -> Self
-    where
-        S: Into<String>,
-    {
-        let string = s.into();
-        let mut chars = string.chars();
+    pub fn new(s: String) -> Self {
+        let mut chars = s.chars();
 
         let canonical = if let Some(c) = chars.next() {
             match c {
@@ -93,7 +129,7 @@ impl IdPrefix {
         };
 
         IdPrefix {
-            value: string,
+            value: s,
             canonical: canonical,
         }
     }
@@ -102,11 +138,22 @@ impl IdPrefix {
     pub fn is_canonical(&self) -> bool {
         self.canonical
     }
+
+    /// Create a new `IdPrefix` without checking if it is canonical.
+    unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
+        Self { value: s, canonical }
+    }
 }
 
 impl AsRef<str> for IdPrefix {
     fn as_ref(&self) -> &str {
         &self.value
+    }
+}
+
+impl<'a> Borrow<'a, IdPrf<'a>> for IdPrefix {
+    fn borrow(&'a self) -> IdPrf<'a> {
+        IdPrf::new(&self.value, self.canonical)
     }
 }
 
@@ -166,6 +213,31 @@ impl<'i> FromPair<'i> for IdPrefix {
 }
 impl_fromstr!(IdPrefix);
 
+/// A borrowed `IdPrefix`
+#[derive(Clone, Debug)]
+pub struct IdPrf<'a> {
+    value: &'a str,
+    canonical: bool,
+}
+
+impl<'a> IdPrf<'a> {
+    fn new(s: &'a str, canonical: bool) -> Self {
+        IdPrf {
+            value: s,
+            canonical
+        }
+    }
+}
+
+impl<'a> ToOwned<'a> for IdPrf<'a> {
+    type Owned = IdPrefix;
+    fn to_owned(&self) -> IdPrefix {
+        unsafe {
+            IdPrefix::new_unchecked(self.value.to_string(), self.canonical)
+        }
+    }
+}
+
 /// A local identifier, preceded by a prefix in prefixed IDs.
 ///
 /// * A canonical local ID only contains digits (`[0-9]`).
@@ -179,22 +251,33 @@ pub struct IdLocal {
 
 impl IdLocal {
     /// Create a new local identifier.
-    pub fn new<S>(s: S) -> Self
-    where
-        S: Into<String>,
-    {
-        let string = s.into();
-        let canonical = string.chars().all(|c| c.is_digit(10));
-
+    pub fn new(s: String) -> Self {
         IdLocal {
-            value: string,
-            canonical: canonical,
+            canonical: s.chars().all(|c| c.is_digit(10)),
+            value: s,
         }
     }
 
     /// Check if the local identifier is canonical or not.
     pub fn is_canonical(&self) -> bool {
         self.canonical
+    }
+
+    /// Create a new `IdLocal` without checking if it is canonical.
+    unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
+        Self { value: s, canonical }
+    }
+}
+
+impl AsRef<str> for IdLocal {
+    fn as_ref(&self) -> &str {
+        &self.value
+    }
+}
+
+impl<'a> Borrow<'a, IdLcl<'a>> for IdLocal {
+    fn borrow(&'a self) -> IdLcl<'a> {
+        IdLcl::new(&self.value, self.canonical)
     }
 }
 
@@ -252,6 +335,37 @@ impl<'i> FromPair<'i> for IdLocal {
     }
 }
 impl_fromstr!(IdLocal);
+
+/// A borrowed `IdLocal`.
+#[derive(Clone, Debug)]
+pub struct IdLcl<'a> {
+    value: &'a str,
+    canonical: bool,
+}
+
+impl<'a> IdLcl<'a> {
+    fn new(s: &'a str, canonical: bool) -> Self {
+        IdLcl {
+            value: s,
+            canonical
+        }
+    }
+}
+
+impl<'a> AsRef<str> for IdLcl<'a> {
+    fn as_ref(&self) -> &str {
+        self.value
+    }
+}
+
+impl<'a> ToOwned<'a> for IdLcl<'a> {
+    type Owned = IdLocal;
+    fn to_owned(&self) -> Self::Owned {
+        unsafe {
+            IdLocal::new_unchecked(self.value.to_owned(), self.canonical)
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

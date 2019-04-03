@@ -15,7 +15,7 @@ pub enum TypedefClause {
     IsAnonymous(bool),
     Name(UnquotedString),
     Namespace(NamespaceId),
-    AltId(Id),
+    AltId(Identifier),
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
@@ -45,7 +45,7 @@ pub enum TypedefClause {
     Relationship(RelationId, RelationId),
     IsObsolete(bool),
     ReplacedBy(RelationId),
-    Consider(Id),
+    Consider(Identifier),
     CreatedBy(UnquotedString),
     CreationDate(IsoDateTime),
     ExpandAssertionTo(QuotedString, XrefList),
@@ -155,7 +155,7 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::Namespace(ns))
             }
             Rule::AltIdTag => {
-                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::AltId(id))
             }
             Rule::DefTag => {
@@ -279,7 +279,7 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::ReplacedBy(id))
             }
             Rule::ConsiderTag => {
-                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Consider(id))
             }
             Rule::CreatedByTag => {

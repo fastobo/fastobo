@@ -17,7 +17,7 @@ pub enum TermClause {
     IsAnonymous(bool),
     Name(UnquotedString),
     Namespace(NamespaceId),
-    AltId(Id),
+    AltId(Identifier),
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetId),
@@ -111,7 +111,7 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::Namespace(ns))
             }
             Rule::AltIdTag => {
-                let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::AltId(id))
             }
             Rule::DefTag => {

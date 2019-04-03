@@ -15,9 +15,9 @@ use crate::parser::Rule;
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum PropertyValue {
-    Identified(RelationId, Id),
+    Identified(RelationId, Identifier),
     // FIXME(@althonos): maybe replaced `String` with `DatatypeId` newtype.
-    Typed(RelationId, QuotedString, Id),
+    Typed(RelationId, QuotedString, Identifier),
 }
 
 impl Display for PropertyValue {
@@ -45,17 +45,17 @@ impl<'i> FromPair<'i> for PropertyValue {
         let second = inner.next().unwrap();
         match second.as_rule() {
             Rule::Id => {
-                let id = Id::from_pair_unchecked(second)?;
+                let id = Identifier::from_pair_unchecked(second)?;
                 Ok(PropertyValue::Identified(relid, id))
             }
             Rule::PvValue => {
                 let desc = QuotedString::new(second.as_str().to_string());
-                let datatype = Id::from_str(inner.next().unwrap().as_str())?;
+                let datatype = Identifier::from_str(inner.next().unwrap().as_str())?;
                 Ok(PropertyValue::Typed(relid, desc, datatype))
             }
             Rule::QuotedString => {
                 let desc = QuotedString::from_pair_unchecked(second)?;
-                let datatype = Id::from_str(inner.next().unwrap().as_str())?;
+                let datatype = Identifier::from_str(inner.next().unwrap().as_str())?;
                 Ok(PropertyValue::Typed(relid, desc, datatype))
             }
             _ => unreachable!(),

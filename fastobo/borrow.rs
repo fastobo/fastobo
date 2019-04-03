@@ -51,14 +51,14 @@ pub trait Borrow<'a, Borrowed: 'a> {
     fn borrow(&'a self) -> Borrowed;
 }
 
-impl<'a, T, B> Borrow<'a, &'a B> for T
-where
-    T: std::borrow::Borrow<B>,
-{
-    fn borrow(&'a self) -> &'a B {
-        <Self as std::borrow::Borrow<B>>::borrow(self)
-    }
-}
+// impl<'a, T, B> Borrow<'a, &'a B> for T
+// where
+//     T: std::borrow::Borrow<B>,
+// {
+//     fn borrow(&'a self) -> &'a B {
+//         <Self as std::borrow::Borrow<B>>::borrow(self)
+//     }
+// }
 
 impl<'a> Borrow<'a, &'a str> for String {
     fn borrow(&'a self) -> &'a str {
@@ -78,14 +78,24 @@ where
     fn to_owned(&'a self) -> Self::Owned;
 }
 
-impl<'a, Borrowed> ToOwned<'a> for &'a Borrowed
+// impl<'a, Borrowed> ToOwned<'a> for &'a Borrowed
+// where
+//     Borrowed: std::borrow::ToOwned,
+//     <Borrowed as std::borrow::ToOwned>::Owned: std::borrow::Borrow<Borrowed>,
+// {
+//     type Owned = <&'a Borrowed as std::borrow::ToOwned>::Owned;
+//     fn to_owned(&'a self) -> Self::Owned {
+//         <Self as std::borrow::ToOwned>::to_owned(self)
+//     }
+// }
+
+impl<'a, T> ToOwned<'a> for &'a T
 where
-    Borrowed: std::borrow::ToOwned,
-    <Borrowed as std::borrow::ToOwned>::Owned: std::borrow::Borrow<Borrowed>,
+    T: Clone
 {
-    type Owned = <&'a Borrowed as std::borrow::ToOwned>::Owned;
-    fn to_owned(&'a self) -> Self::Owned {
-        <Self as std::borrow::ToOwned>::to_owned(self)
+    type Owned = T;
+    fn to_owned(&self) -> Self::Owned {
+        (*self).clone()
     }
 }
 
@@ -98,14 +108,26 @@ impl<'a> ToOwned<'a> for &'a str {
 
 // --- Cow -------------------------------------------------------------------
 
-pub enum Cow<'a, B: 'a>
+pub enum Cow<'a, B>
 where
-    B: ToOwned<'a>,
+    B: 'a + ToOwned<'a>,
 {
     /// Borrowed data.
     Borrowed(B),
     /// Owned data.
     Owned(<B as ToOwned<'a>>::Owned),
+}
+
+impl<'a, B> Cow<'a, &'a B>
+where
+    B: 'a + Clone + Borrow<'a, &'a B>,
+{
+    pub fn into_owned(self) -> <&'a B as ToOwned<'a>>::Owned {
+        match self {
+            Borrowed(b) => b.to_owned(),
+            Owned(o) => o,
+        }
+    }
 }
 
 impl<'a, B> ToOwned<'a> for Cow<'a, B>

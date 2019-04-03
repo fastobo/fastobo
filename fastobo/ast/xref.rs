@@ -15,16 +15,16 @@ use crate::parser::Rule;
 /// A database cross-reference definition.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Xref {
-    id: Id,
+    id: Identifier,
     desc: Option<QuotedString>,
 }
 
 impl Xref {
-    pub fn new(id: Id) -> Self {
+    pub fn new(id: Identifier) -> Self {
         Self { id, desc: None }
     }
 
-    pub fn with_desc(id: Id, desc: QuotedString) -> Self {
+    pub fn with_desc(id: Identifier, desc: QuotedString) -> Self {
         Self {
             id,
             desc: Some(desc),
@@ -46,7 +46,7 @@ impl<'i> FromPair<'i> for Xref {
     const RULE: Rule = Rule::Xref;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
-        let id = Id::from_pair_unchecked(inner.next().unwrap())?;
+        let id = FromPair::from_pair_unchecked(inner.next().unwrap())?;
         let desc = match inner.next() {
             Some(pair) => Some(QuotedString::from_pair_unchecked(pair)?),
             None => None,

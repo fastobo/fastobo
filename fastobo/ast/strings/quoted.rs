@@ -103,6 +103,7 @@ impl_fromstr!(QuotedString);
 
 /// A borrowed `QuotedString`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
+#[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
 #[repr(transparent)]
 pub struct QuotedStr(str);
 
@@ -111,12 +112,6 @@ impl QuotedStr {
     pub fn new(s: &str) -> &Self {
         // Using `unchecked` because there is no validation needed.
         unsafe { QuotedStr::from_inner_unchecked(s.as_ref()) }
-    }
-}
-
-impl AsRef<str> for QuotedStr {
-    fn as_ref(&self) -> &str {
-        &self.0
     }
 }
 
@@ -143,14 +138,14 @@ impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
 impl std::borrow::ToOwned for QuotedStr {
     type Owned = QuotedString;
     fn to_owned(&self) -> QuotedString {
-        QuotedString::new(self.as_ref().to_owned())
+        QuotedString::new(self.0.to_owned())
     }
 }
 
 impl<'a> ToOwned<'a> for &'a QuotedStr {
     type Owned = QuotedString;
     fn to_owned(&self) -> QuotedString {
-        QuotedString::new(self.0.to_string())
+        QuotedString::new(self.0.to_owned())
     }
 }
 

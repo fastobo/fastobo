@@ -85,6 +85,7 @@ impl_fromstr!(UnquotedString);
 
 /// A borrowed `UnquotedString`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
+#[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
 #[repr(transparent)]
 pub struct UnquotedStr(str);
 
@@ -92,12 +93,6 @@ impl UnquotedStr {
     /// Create a new `QuotedStr`.
     pub fn new(s: &str) -> &Self {
         unsafe { UnquotedStr::from_inner_unchecked(s.as_ref()) }
-    }
-}
-
-impl AsRef<str> for UnquotedStr {
-    fn as_ref(&self) -> &str {
-        &self.0
     }
 }
 
@@ -122,14 +117,14 @@ impl_fromslice!('i, Cow<'i, &'i UnquotedStr>);
 impl std::borrow::ToOwned for UnquotedStr {
     type Owned = UnquotedString;
     fn to_owned(&self) -> UnquotedString {
-        UnquotedString::new(self.as_ref().to_string())
+        UnquotedString::new(self.0.to_owned())
     }
 }
 
 impl<'a> ToOwned<'a> for &'a UnquotedStr {
     type Owned = UnquotedString;
     fn to_owned(&'a self) -> UnquotedString {
-        UnquotedString::new(self.0.to_string())
+        UnquotedString::new(self.0.to_owned())
     }
 }
 

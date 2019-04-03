@@ -1,5 +1,5 @@
 [workspace]
-members = ["fastobo-syntax"]
+members = ["fastobo-syntax", "fastobo-py/fastobo"]
 
 [package]
 name = "fastobo"
@@ -19,6 +19,10 @@ features = ["docs"]
 [lib]
 name = "fastobo"
 path = "fastobo/lib.rs"
+
+[[bin]]
+name = "validate"
+path = "fastobo/bin/validate.rs"
 
 [badges.travis-ci]
 repository = "althonos/fastobo"

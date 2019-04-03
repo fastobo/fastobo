@@ -8,8 +8,8 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
-macro_rules! id_subclass {
-    (#[doc = $docstring:literal] pub struct $name:ident;) => {
+macro_rules! identifier_subclass {
+    (#[doc = $docstring:literal] pub struct $name:ident) => {
         #[derive(Clone, Debug, PartialEq, Hash, Eq)]
         #[doc=$docstring]
         pub struct $name {
@@ -56,16 +56,33 @@ macro_rules! id_subclass {
     };
 }
 
-macro_rules! id_subclasses {
+macro_rules! identifier_subclasses {
     ($(#[doc = $docstring:literal] pub struct $name:ident;)*) => {
-        $(id_subclass!(#[doc = $docstring] pub struct $name;);)*
+        $(identifier_subclass!(#[doc = $docstring] pub struct $name);)*
     }
 }
+
+
+// macro_rules! identifier_borrow {
+//     (#[doc = $docstring:literal] pub struct $name:ident : &$life:lifetime $borrowed) => {
+//         #[doc=$docstring]
+//         pub struct $name<$life> {
+//             inner: $crate::borrow::Cow<$life, &$life $borrowed>
+//         }
+//     }
+// }
+
+
+
+
+
+
+
 
 // NB(@althonos): All identifiers are defined as separate typedefs so that
 //                `PartialEq` is not implemented and trying to compare a
 //                `ClassId` with a `RelationId` would fail at compile-time.
-id_subclasses! {
+identifier_subclasses! {
     /// A unique identifier for a class (*i.e.* a term).
     pub struct ClassId;
 
@@ -84,3 +101,9 @@ id_subclasses! {
     /// A unique identifier for a synonym type.
     pub struct SynonymTypeId;
 }
+
+
+// identifier_borrow! {
+//     ///
+//     pub struct ClassIdentifier<'a>: &'a
+// }

@@ -14,6 +14,44 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
+fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+    s.chars().try_for_each(|char| match char {
+        '\r' => f.write_str("\\r"),
+        '\n' => f.write_str("\\n"),
+        '\u{000c}' => f.write_str("\\f"),
+        ' ' => f.write_str("\\ "),
+        '\t' => f.write_str("\\t"),
+        ':' => f.write_str("\\:"),
+        '"' => f.write_str("\\\""),
+        '\\' => f.write_str("\\\\"),
+        _ => f.write_char(char)
+    })
+}
+
+fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+    let mut chars = s.chars();
+    while let Some(char) = chars.next() {
+        if char == '\\' {
+            match chars.next() {
+                Some('r') => f.write_char('\r')?,
+                Some('n') => f.write_char('\n')?,
+                Some('f') => f.write_char('\u{000c}')?,
+                Some('t') => f.write_char('\t')?,
+                Some(other) => f.write_char(other)?,
+                None => panic!("invalid escape"), // FIXME(@althonos)
+            }
+        } else {
+            f.write_char(char)?;
+        }
+    }
+    Ok(())
+}
+
+fn is_canonical<S: AsRef<str>>(s: S) -> bool {
+    s.as_ref().chars().all(|c| c.is_ascii_digit())
+}
+
+
 /// A local identifier, preceded by a prefix in prefixed IDs.
 ///
 /// * A canonical local ID only contains digits (`[0-9]`).
@@ -29,7 +67,7 @@ impl IdLocal {
     /// Create a new local identifier.
     pub fn new(s: String) -> Self {
         IdLocal {
-            canonical: s.chars().all(|c| c.is_digit(10)),
+            canonical: is_canonical(&s),
             value: s,
         }
     }
@@ -53,24 +91,13 @@ impl AsRef<str> for IdLocal {
 
 impl<'a> Borrow<'a, IdLcl<'a>> for IdLocal {
     fn borrow(&'a self) -> IdLcl<'a> {
-        IdLcl::new(&self.value, self.canonical)
+        unsafe { IdLcl::new_unchecked(&self.value, self.canonical) }
     }
 }
 
 impl Display for IdLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        if self.canonical {
-            f.write_str(&self.value)
-        } else {
-            self.value.chars().try_for_each(|char| match char {
-                '\r' => f.write_str("\\r"),
-                '\n' => f.write_str("\\n"),
-                '\u{000c}' => f.write_str("\\f"),
-                ' ' => f.write_str("\\ "),
-                '\t' => f.write_str("\\t"),
-                _ => f.write_char(char),
-            })
-        }
+        self.borrow().fmt(f)
     }
 }
 
@@ -120,10 +147,27 @@ pub struct IdLcl<'a> {
 }
 
 impl<'a> IdLcl<'a> {
-    fn new(s: &'a str, canonical: bool) -> Self {
+    fn new(s: &'a str) -> Self {
         IdLcl {
+            canonical: is_canonical(s),
             value: s,
-            canonical
+        }
+    }
+
+    pub unsafe fn new_unchecked(s: &'a str, canonical: bool) -> Self {
+        Self {
+            value: s,
+            canonical,
+        }
+    }
+}
+
+impl<'a> Display for IdLcl<'a> {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        if self.canonical {
+            f.write_str(&self.value)
+        } else {
+            escape(f, &self.value)
         }
     }
 }

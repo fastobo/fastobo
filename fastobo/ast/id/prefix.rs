@@ -15,6 +15,50 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 
+fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+    s.chars().try_for_each(|char| match char {
+        '\r' => f.write_str("\\r"),
+        '\n' => f.write_str("\\n"),
+        '\u{000c}' => f.write_str("\\f"),
+        ' ' => f.write_str("\\ "),
+        '\t' => f.write_str("\\t"),
+        ':' => f.write_str("\\:"),
+        '"' => f.write_str("\\\""),
+        '\\' => f.write_str("\\\\"),
+        _ => f.write_char(char)
+    })
+}
+
+fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+    let mut chars = s.chars();
+    while let Some(char) = chars.next() {
+        if char == '\\' {
+            match chars.next() {
+                Some('r') => f.write_char('\r')?,
+                Some('n') => f.write_char('\n')?,
+                Some('f') => f.write_char('\u{000c}')?,
+                Some('t') => f.write_char('\t')?,
+                Some(other) => f.write_char(other)?,
+                None => panic!("invalid escape"), // FIXME(@althonos)
+            }
+        } else {
+            f.write_char(char)?;
+        }
+    }
+    Ok(())
+}
+
+fn is_canonical<S: AsRef<str>>(s: S) -> bool {
+    let string = s.as_ref();
+    let mut chars = string.chars();
+    if let Some(c) = chars.next() {
+        c.is_ascii_alphabetic() && chars.all(|ref c| char::is_ascii_alphanumeric(c))
+    } else {
+        false
+    }
+}
+
+
 /// An identifier prefix, either canonical or non-canonical.
 ///
 /// * A canonical ID prefix only contains alphabetic characters (`[a-zA-Z]`)
@@ -29,23 +73,9 @@ pub struct IdPrefix {
 impl IdPrefix {
     /// Create a new identifier prefix.
     pub fn new(s: String) -> Self {
-        let mut chars = s.chars();
-
-        let canonical = if let Some(c) = chars.next() {
-            match c {
-                'A'...'Z' | 'a'...'z' => chars.all(|c| match c {
-                    'A'...'Z' | 'a'...'z' | '_' => true,
-                    _ => false,
-                }),
-                _ => false,
-            }
-        } else {
-            false
-        };
-
         IdPrefix {
+            canonical: is_canonical(&s),
             value: s,
-            canonical: canonical,
         }
     }
 
@@ -54,8 +84,8 @@ impl IdPrefix {
         self.canonical
     }
 
-    /// Create a new `IdPrefix` without checking if it is canonical.
-    unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
+    /// Create a new `IdPrefix` without checking if it is canonical or not.
+    pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
         Self { value: s, canonical }
     }
 }
@@ -68,7 +98,7 @@ impl AsRef<str> for IdPrefix {
 
 impl<'a> Borrow<'a, IdPrf<'a>> for IdPrefix {
     fn borrow(&'a self) -> IdPrf<'a> {
-        IdPrf::new(&self.value, self.canonical)
+        unsafe { IdPrf::new_unchecked(&self.value, self.canonical) }
     }
 }
 
@@ -91,25 +121,12 @@ impl<'i> FromPair<'i> for IdPrefix {
         }
 
         // Unescape the prefix if is non canonical.
+        // FIXME: count the number of "\" to avoid underestimating the capacity.
         let mut local = String::with_capacity(inner.as_str().len());
-        let mut chars = inner.as_str().chars();
-        while let Some(char) = chars.next() {
-            if char == '\\' {
-                match chars.next() {
-                    Some('r') => local.push('\r'),
-                    Some('n') => local.push('\n'),
-                    Some('f') => local.push('\u{000c}'),
-                    Some('t') => local.push('\t'),
-                    Some(other) => local.push(other),
-                    None => panic!("missing stuff"), // FIXME(@althonos)
-                }
-            } else {
-                local.push(char);
-            }
-        }
+        unescape(&mut local, inner.as_str());
 
         Ok(IdPrefix {
-            value: inner.as_str().to_string(),
+            value: local,
             canonical: false,
         })
     }
@@ -127,15 +144,20 @@ impl<'a> IdPrf<'a> {
     // FIXME(@althonos): no canonical, add another `new_unchecked` method.
 
     /// Create a new `IdPrf` from a borrowed string slice.
-    pub fn new(s: &'a str, canonical: bool) -> Self {
+    pub fn new(s: &'a str) -> Self {
         IdPrf {
+            canonical: is_canonical(s),
             value: s,
-            canonical
         }
     }
 
     pub fn as_str(&self) -> &'a str {
         self.value
+    }
+
+    /// Create a new `IdPrf` without checking if it is canonical or not.
+    pub unsafe fn new_unchecked(s: &'a str, canonical: bool) -> Self {
+        Self { value: s, canonical }
     }
 }
 
@@ -156,15 +178,7 @@ impl<'a> Display for IdPrf<'a> {
         if self.canonical {
             f.write_str(&self.value)
         } else {
-            self.value.chars().try_for_each(|char| match char {
-                '\r' => f.write_str("\\r"),
-                '\n' => f.write_str("\\n"),
-                '\u{000c}' => f.write_str("\\f"),
-                ' ' => f.write_str("\\ "),
-                '\t' => f.write_str("\\t"),
-                ':' => f.write_str("\\:"), // FIXME(@althonos) ?
-                _ => f.write_char(char),
-            })
+            escape(f, &self.value)
         }
     }
 }

@@ -120,7 +120,7 @@ mod tests {
 
             let actual = XrefList::from_str("[PSI:MS]").unwrap();
             let expected = XrefList::from(vec![Xref::new(
-                PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into(),
+                PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS"))).into(),
             )]);
             assert_eq!(actual, expected);
 
@@ -129,11 +129,11 @@ mod tests {
             )
             .unwrap();
             let expected = XrefList::from(vec![
-                Xref::new(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS")).into()),
+                Xref::new(PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS"))).into()),
                 Xref::with_desc(
-                    PrefixedId::new(IdPrefix::new("reactome"), IdLocal::new("R-HSA-8983680"))
+                    PrefixedIdent::new(IdentPrefix::new(String::from("reactome")), IdentLocal::new(String::from("R-HSA-8983680")))
                         .into(),
-                    QuotedString::new("OAS1 produces oligoadenylates"),
+                    QuotedString::new(String::from("OAS1 produces oligoadenylates")),
                 ),
             ]);
             assert_eq!(actual, expected);

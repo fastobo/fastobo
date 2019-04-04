@@ -69,7 +69,7 @@ mod tests {
 
         assert_eq!(
             actual.clauses[0],
-            HeaderClause::FormatVersion(UnquotedString::new("1.2")),
+            HeaderClause::FormatVersion(UnquotedString::new(String::from("1.2"))),
         );
     }
 }

@@ -47,10 +47,10 @@ mod tests {
     use std::str::FromStr;
 
     use super::*;
-    use crate::ast::Id;
-    use crate::ast::IdLocal;
+    use crate::ast::Ident;
+    use crate::ast::IdentLocal;
     use crate::ast::IdentPrefix;
-    use crate::ast::PrefixedId;
+    use crate::ast::PrefixedIdent;
 
     #[test]
     fn from_str() {
@@ -64,9 +64,9 @@ mod tests {
         .unwrap();
         assert_eq!(
             actual.id.as_ref(),
-            &ClassIdent::from(Id::from(PrefixedId::new(
-                IdentPrefix::new("MS"),
-                IdLocal::new("1000008")
+            &ClassIdent::from(Ident::from(PrefixedIdent::new(
+                IdentPrefix::new(String::from("MS")),
+                IdentLocal::new(String::from("1000008"))
             )))
         );
 

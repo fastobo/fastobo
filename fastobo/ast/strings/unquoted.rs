@@ -138,11 +138,11 @@ mod tests {
     #[test]
     fn from_str() {
         let actual = UnquotedString::from_str("something\\ttabbed");
-        let expected = UnquotedString::new("something\ttabbed");
+        let expected = UnquotedString::new(String::from("something\ttabbed"));
         assert_eq!(expected, actual.unwrap());
 
         let actual = UnquotedString::from_str("namespace-id-rule").unwrap();
-        let expected = UnquotedString::new("namespace-id-rule");
+        let expected = UnquotedString::new(String::from("namespace-id-rule"));
         assert_eq!(expected, actual);
     }
 }

@@ -106,19 +106,19 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let actual = Id::from_str("http://purl.obolibrary.org/obo/po.owl").unwrap();
-        let expected = Id::Url(Url::parse("http://purl.obolibrary.org/obo/po.owl").unwrap());
+        let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl").unwrap();
+        let expected = Ident::Url(Url::parse("http://purl.obolibrary.org/obo/po.owl").unwrap());
         assert_eq!(actual, expected);
 
-        let actual = Id::from_str("GO:0046154").unwrap();
-        let expected = Id::Prefixed(PrefixedId::new(
-            IdPrefix::new("GO"),
-            IdLocal::new("0046154"),
+        let actual = Ident::from_str("GO:0046154").unwrap();
+        let expected = Ident::Prefixed(PrefixedIdent::new(
+            IdentPrefix::new(String::from("GO")),
+            IdentLocal::new(String::from("0046154")),
         ));
         assert_eq!(actual, expected);
 
-        let actual = Id::from_str("goslim_plant").unwrap();
-        let expected = Id::Unprefixed(UnprefixedId::new("goslim_plant"));
+        let actual = Ident::from_str("goslim_plant").unwrap();
+        let expected = Ident::Unprefixed(UnprefixedIdent::new(String::from("goslim_plant")));
         assert_eq!(actual, expected);
     }
 }

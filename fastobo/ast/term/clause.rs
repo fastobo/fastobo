@@ -217,7 +217,7 @@ mod tests {
     #[test]
     fn from_str() {
         let actual = TermClause::from_str("name: sample name").unwrap();
-        let expected = TermClause::Name(UnquotedString::new("sample name"));
+        let expected = TermClause::Name(UnquotedString::new(String::from("sample name")));
         assert_eq!(actual, expected);
 
         let actual = TermClause::from_str(
@@ -225,30 +225,30 @@ mod tests {
         )
         .unwrap();
         let expected = TermClause::Def(
-            QuotedString::new("A reference string relevant to the sample under study."),
-            XrefList::from(vec![Xref::new(Id::Prefixed(PrefixedId::new(
-                IdentPrefix::new("PSI"),
-                IdLocal::new("MS"),
+            QuotedString::new(String::from("A reference string relevant to the sample under study.")),
+            XrefList::from(vec![Xref::new(Ident::Prefixed(PrefixedIdent::new(
+                IdentPrefix::new(String::from("PSI")),
+                IdentLocal::new(String::from("MS")),
             )))]),
         );
         assert_eq!(actual, expected);
 
         let actual = TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
         let expected = TermClause::Synonym(Synonym::new(
-            QuotedString::new("chemical entity"),
+            QuotedString::new(String::from("chemical entity")),
             SynonymScope::Exact,
-            XrefList::from(vec![Xref::new(Id::from(UnprefixedId::new("UniProt")))]),
+            XrefList::from(vec![Xref::new(Ident::from(UnprefixedIdent::new(String::from("UniProt"))))]),
         ));
         assert_eq!(actual, expected);
 
         let actual =
             TermClause::from_str("xref: CAS:22325-47-9 \"NIST Chemistry WebBook\"").unwrap();
         let expected = TermClause::Xref(Xref::with_desc(
-            Id::from(PrefixedId::new(
-                IdentPrefix::new("CAS"),
-                IdLocal::new("22325-47-9"),
+            Ident::from(PrefixedIdent::new(
+                IdentPrefix::new(String::from("CAS")),
+                IdentLocal::new(String::from("22325-47-9")),
             )),
-            QuotedString::new("NIST Chemistry WebBook"),
+            QuotedString::new(String::from("NIST Chemistry WebBook")),
         ));
         assert_eq!(actual, expected);
 
@@ -257,10 +257,10 @@ mod tests {
                 .unwrap();
         let expected = Line::with_comment(Comment::new(" leaf lamina")).with_content(
             TermClause::IntersectionOf(
-                Some(RelationIdent::from(Id::from(UnprefixedId::new("part_of")))),
-                ClassIdent::from(Id::from(PrefixedId::new(
-                    IdentPrefix::new("PO"),
-                    IdLocal::new("0020039"),
+                Some(RelationIdent::from(Ident::from(UnprefixedIdent::new(String::from("part_of"))))),
+                ClassIdent::from(Ident::from(PrefixedIdent::new(
+                    IdentPrefix::new(String::from("PO")),
+                    IdentLocal::new(String::from("0020039")),
                 ))),
             ),
         );
@@ -268,12 +268,12 @@ mod tests {
 
         let actual =
             Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n").unwrap();
-        let expected = Line::with_comment(Comment::new(" leaf epidermis")).with_content(
+        let expected = Line::with_comment(Comment::new(String::from(" leaf epidermis"))).with_content(
             TermClause::IntersectionOf(
                 None,
-                ClassId::from(Id::from(PrefixedId::new(
-                    IdentPrefix::new("PO"),
-                    IdLocal::new("0006016"),
+                ClassIdent::from(Ident::from(PrefixedIdent::new(
+                    IdentPrefix::new(String::from("PO")),
+                    IdentLocal::new(String::from("0006016")),
                 ))),
             ),
         );
@@ -281,16 +281,16 @@ mod tests {
 
         let actual =
             TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
-        let expected = TermClause::Xref(Xref::new(Id::from(PrefixedId::new(
-            IdentPrefix::new("Wikipedia"),
-            IdLocal::new("https://en.wikipedia.org/wiki/Gas"),
+        let expected = TermClause::Xref(Xref::new(Ident::from(PrefixedIdent::new(
+            IdentPrefix::new(String::from("Wikipedia")),
+            IdentLocal::new(String::from("https://en.wikipedia.org/wiki/Gas")),
         ))));
         assert_eq!(actual, expected);
 
         let actual = TermClause::from_str("def: \"OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms.\" [PSI:PI]").unwrap();
         let expected = TermClause::Def(
-            QuotedString::new("OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms."),
-            XrefList::from(vec![Xref::new(Id::from(PrefixedId::new(IdentPrefix::new("PSI"), IdLocal::new("PI"))))])
+            QuotedString::new(String::from("OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms.")),
+            XrefList::from(vec![Xref::new(Ident::from(PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("PI")))))])
         );
         assert_eq!(actual, expected);
 

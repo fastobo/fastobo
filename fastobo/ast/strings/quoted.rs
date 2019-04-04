@@ -30,8 +30,8 @@ use super::unescape;
 /// ```rust
 /// # extern crate fastobo;
 /// # use fastobo::ast::QuotedString;
-/// let s = QuotedString::new("Hello, world!");
-/// assert_eq!(s.as_ref(), "Hello, world!");
+/// let s = QuotedString::new(String::from("Hello, world!"));
+/// assert_eq!(s.as_str(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -159,11 +159,11 @@ mod tests {
     #[test]
     fn from_str() {
         let actual = QuotedString::from_str("\"something in quotes\"");
-        let expected = QuotedString::new("something in quotes");
+        let expected = QuotedString::new(String::from("something in quotes"));
         assert_eq!(expected, actual.unwrap());
 
         let actual = QuotedString::from_str("\"something in \\\"escaped\\\" quotes\"");
-        let expected = QuotedString::new("something in \"escaped\" quotes");
+        let expected = QuotedString::new(String::from("something in \"escaped\" quotes"));
         assert_eq!(expected, actual.unwrap());
     }
 }

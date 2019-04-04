@@ -78,7 +78,7 @@ impl IdentLocal {
     }
 
     /// Create a new `IdLocal` without checking if it is canonical.
-    unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
+    pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
         Self { value: s, canonical }
     }
 }
@@ -133,7 +133,7 @@ pub struct IdLocal<'a> {
 }
 
 impl<'a> IdLocal<'a> {
-    fn new(s: &'a str) -> Self {
+    pub fn new(s: &'a str) -> Self {
         Self {
             canonical: is_canonical(s),
             value: s,

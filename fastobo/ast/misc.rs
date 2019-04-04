@@ -95,18 +95,18 @@ mod tests {
         fn from_str() {
             let actual = PropertyValue::from_str("married_to heather").unwrap();
             let expected = PropertyValue::Identified(
-                RelationIdent::from(Id::Unprefixed(UnprefixedId::new("married_to"))),
-                Id::Unprefixed(UnprefixedId::new("heather")),
+                RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from("married_to")))),
+                Ident::Unprefixed(UnprefixedIdent::new(String::from("heather"))),
             );
             assert_eq!(actual, expected);
 
             let actual = PropertyValue::from_str("shoe_size \"8\" xsd:positiveInteger").unwrap();
             let expected = PropertyValue::Typed(
-                RelationIdent::from(Id::Unprefixed(UnprefixedId::new("shoe_size"))),
-                QuotedString::new("8"),
-                Id::Prefixed(PrefixedId::new(
-                    IdPrefix::new("xsd"),
-                    IdLocal::new("positiveInteger"),
+                RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from("shoe_size")))),
+                QuotedString::new(String::from("8")),
+                Ident::from(PrefixedIdent::new(
+                    IdentPrefix::new(String::from("xsd")),
+                    IdentLocal::new(String::from("positiveInteger")),
                 )),
             );
             assert_eq!(actual, expected);

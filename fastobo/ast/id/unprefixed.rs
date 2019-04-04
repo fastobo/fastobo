@@ -141,18 +141,18 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let actual = UnprefixedId::from_str("biological_process").unwrap();
-        let expected = UnprefixedId::new("biological_process");
+        let actual = UnprefixedIdent::from_str("biological_process").unwrap();
+        let expected = UnprefixedIdent::new(String::from("biological_process"));
         assert_eq!(actual, expected);
 
-        assert!(UnprefixedId::from_str("").is_err());
-        assert!(UnprefixedId::from_str("Some\nthing:spanning").is_err());
-        assert!(UnprefixedId::from_str("goslim_plant remaining").is_err());
+        assert!(UnprefixedIdent::from_str("").is_err());
+        assert!(UnprefixedIdent::from_str("Some\nthing:spanning").is_err());
+        assert!(UnprefixedIdent::from_str("goslim_plant remaining").is_err());
     }
 
     #[test]
     fn to_string() {
-        let id = UnprefixedId::new("something:with:colons");
+        let id = UnprefixedIdent::new(String::from("something:with:colons"));
         assert_eq!(id.to_string(), "something\\:with\\:colons");
     }
 }

@@ -79,15 +79,15 @@ impl_fromstr!(QualifierList);
 mod tests {
 
     use super::*;
-    use crate::ast::Id;
-    use crate::ast::UnprefixedId;
+    use crate::ast::Ident;
+    use crate::ast::UnprefixedIdent;
 
     #[test]
     fn from_str() {
         let actual = Qualifier::from_str("comment=\"NYBG:Dario_Cavaliere\"").unwrap();
         let expected = Qualifier::new(
-            RelationIdent::from(Id::from(UnprefixedId::new("comment"))),
-            QuotedString::new("NYBG:Dario_Cavaliere"),
+            RelationIdent::from(Ident::from(UnprefixedIdent::new(String::from("comment")))),
+            QuotedString::new(String::from("NYBG:Dario_Cavaliere")),
         );
         assert_eq!(actual, expected);
     }

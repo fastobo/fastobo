@@ -38,10 +38,10 @@ impl PrefixedIdent {
     /// # extern crate fastobo;
     /// # use fastobo::ast::*;
     /// # use std::str::FromStr;
-    /// let canonical_id = PrefixedId::from_str("GO:0046154").unwrap();
+    /// let canonical_id = PrefixedIdent::from_str("GO:0046154").unwrap();
     /// assert!(canonical_id.is_canonical());
     ///
-    /// let noncanonical_id = PrefixedId::from_str("PATO:something").unwrap();
+    /// let noncanonical_id = PrefixedIdent::from_str("PATO:something").unwrap();
     /// assert!(!noncanonical_id.is_canonical());
     pub fn is_canonical(&self) -> bool {
         self.prefix.is_canonical() && self.local.is_canonical()
@@ -118,34 +118,34 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let actual = PrefixedId::from_str("GO:0046154").unwrap();
-        let expected = PrefixedId::new(IdPrefix::new("GO"), IdLocal::new("0046154"));
+        let actual = PrefixedIdent::from_str("GO:0046154").unwrap();
+        let expected = PrefixedIdent::new(IdentPrefix::new(String::from("GO")), IdentLocal::new(String::from("0046154")));
         assert_eq!(actual, expected);
 
-        let actual = PrefixedId::from_str("PSI:MS").unwrap();
-        let expected = PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("MS"));
+        let actual = PrefixedIdent::from_str("PSI:MS").unwrap();
+        let expected = PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS")));
         assert_eq!(actual, expected);
 
-        let actual = PrefixedId::from_str("CAS:22325-47-9").unwrap();
-        let expected = PrefixedId::new(IdPrefix::new("CAS"), IdLocal::new("22325-47-9"));
+        let actual = PrefixedIdent::from_str("CAS:22325-47-9").unwrap();
+        let expected = PrefixedIdent::new(IdentPrefix::new(String::from("CAS")), IdentLocal::new(String::from("22325-47-9")));
         assert_eq!(actual, expected);
 
-        let actual = PrefixedId::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
-        let expected = PrefixedId::new(
-            IdPrefix::new("Wikipedia"),
-            IdLocal::new("https://en.wikipedia.org/wiki/Gas"),
+        let actual = PrefixedIdent::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
+        let expected = PrefixedIdent::new(
+            IdentPrefix::new(String::from("Wikipedia")),
+            IdentLocal::new(String::from("https://en.wikipedia.org/wiki/Gas")),
         );
         assert_eq!(actual, expected);
 
-        assert!(PrefixedId::from_str("[Term]").is_err());
-        assert!(PrefixedId::from_str("").is_err());
-        assert!(PrefixedId::from_str("Some\nthing:spanning").is_err());
-        assert!(PrefixedId::from_str("GO:0046154 remaining").is_err());
+        assert!(PrefixedIdent::from_str("[Term]").is_err());
+        assert!(PrefixedIdent::from_str("").is_err());
+        assert!(PrefixedIdent::from_str("Some\nthing:spanning").is_err());
+        assert!(PrefixedIdent::from_str("GO:0046154 remaining").is_err());
     }
 
     #[test]
     fn to_string() {
-        let id = PrefixedId::new(IdPrefix::new("GO"), IdLocal::new("0046154"));
+        let id = PrefixedIdent::new(IdentPrefix::new(String::from("GO")), IdentLocal::new(String::from("0046154")));
         assert_eq!(id.to_string(), "GO:0046154")
     }
 }

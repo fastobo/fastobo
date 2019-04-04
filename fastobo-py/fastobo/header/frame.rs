@@ -17,6 +17,7 @@ use pyo3::class::gc::PyVisit;
 use pyo3::AsPyPointer;
 
 use super::HeaderClause;
+use super::BaseHeaderClause;
 
 #[pyclass(weakref, gc)]
 pub struct HeaderFrame {
@@ -95,7 +96,7 @@ impl PySequenceProtocol for HeaderFrame {
     fn __setitem__(&mut self, index: isize, elem: PyObject) -> PyResult<()> {
         let list = self.as_pylist();
         if index < list.len() as isize {
-            if Python::acquire_gil().python().is_instance::<HeaderClause, PyObject>(&elem)? {
+            if Python::acquire_gil().python().is_instance::<BaseHeaderClause, PyObject>(&elem)? {
                 list.set_item(index, elem)
             } else {
                 Err(TypeError::py_err("expected HeaderClause"))

@@ -13,7 +13,7 @@ use crate::parser::Rule;
 /// An instance frame, describing a particular individual.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct InstanceFrame {
-    id: Line<InstanceId>,
+    id: Line<InstanceIdent>,
     clauses: Vec<Line<InstanceClause>>,
 }
 
@@ -28,7 +28,7 @@ impl<'i> FromPair<'i> for InstanceFrame {
     const RULE: Rule = Rule::InstanceFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
-        let iid = InstanceId::from_pair_unchecked(inner.next().unwrap())?;
+        let iid = InstanceIdent::from_pair_unchecked(inner.next().unwrap())?;
         let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(iid);
 
         let mut clauses = Vec::new();

@@ -13,7 +13,7 @@ use crate::parser::Rule;
 /// A term frame, describing a class.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TermFrame {
-    id: Line<ClassId>,
+    id: Line<ClassIdent>,
     clauses: Vec<Line<TermClause>>,
 }
 
@@ -28,7 +28,7 @@ impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
-        let clsid = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+        let clsid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
         let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(clsid);
 
         let mut clauses = Vec::new();
@@ -49,7 +49,7 @@ mod tests {
     use super::*;
     use crate::ast::Id;
     use crate::ast::IdLocal;
-    use crate::ast::IdPrefix;
+    use crate::ast::IdentPrefix;
     use crate::ast::PrefixedId;
 
     #[test]
@@ -64,8 +64,8 @@ mod tests {
         .unwrap();
         assert_eq!(
             actual.id.as_ref(),
-            &ClassId::from(Id::from(PrefixedId::new(
-                IdPrefix::new("MS"),
+            &ClassIdent::from(Id::from(PrefixedId::new(
+                IdentPrefix::new("MS"),
                 IdLocal::new("1000008")
             )))
         );

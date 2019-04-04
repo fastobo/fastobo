@@ -58,15 +58,15 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// * A non-canonical local ID can contain any character excepting
 ///   whitespaces and newlines.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
-pub struct IdLocal {
+pub struct IdentLocal {
     value: String,
     canonical: bool,
 }
 
-impl IdLocal {
+impl IdentLocal {
     /// Create a new local identifier.
     pub fn new(s: String) -> Self {
-        IdLocal {
+        Self {
             canonical: is_canonical(&s),
             value: s,
         }
@@ -83,31 +83,31 @@ impl IdLocal {
     }
 }
 
-impl AsRef<str> for IdLocal {
+impl AsRef<str> for IdentLocal {
     fn as_ref(&self) -> &str {
         &self.value
     }
 }
 
-impl<'a> Borrow<'a, IdLcl<'a>> for IdLocal {
-    fn borrow(&'a self) -> IdLcl<'a> {
-        unsafe { IdLcl::new_unchecked(&self.value, self.canonical) }
+impl<'a> Borrow<'a, IdLocal<'a>> for IdentLocal {
+    fn borrow(&'a self) -> IdLocal<'a> {
+        unsafe { IdLocal::new_unchecked(&self.value, self.canonical) }
     }
 }
 
-impl Display for IdLocal {
+impl Display for IdentLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.borrow().fmt(f)
     }
 }
 
-impl<'i> FromPair<'i> for IdLocal {
+impl<'i> FromPair<'i> for IdentLocal {
     const RULE: Rule = Rule::IdLocal;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {
-            return Ok(IdLocal {
+            return Ok(Self {
                 value: inner.as_str().to_string(),
                 canonical: true,
             });
@@ -115,40 +115,26 @@ impl<'i> FromPair<'i> for IdLocal {
 
         // Unescape the local ID if it is non canonical.
         let mut local = String::with_capacity(inner.as_str().len());
-        let mut chars = inner.as_str().chars();
-        while let Some(char) = chars.next() {
-            if char == '\\' {
-                match chars.next() {
-                    Some('r') => local.push('\r'),
-                    Some('n') => local.push('\n'),
-                    Some('f') => local.push('\u{000c}'),
-                    Some('t') => local.push('\t'),
-                    Some(other) => local.push(other),
-                    None => panic!("missing stuff"), // FIXME(@althonos)
-                }
-            } else {
-                local.push(char);
-            }
-        }
+        unescape(&mut local, inner.as_str());
 
-        Ok(IdLocal {
+        Ok(Self {
             value: local,
             canonical: false,
         })
     }
 }
-impl_fromstr!(IdLocal);
+impl_fromstr!(IdentLocal);
 
 /// A borrowed `IdLocal`.
 #[derive(Clone, Debug)]
-pub struct IdLcl<'a> {
+pub struct IdLocal<'a> {
     value: &'a str,
     canonical: bool,
 }
 
-impl<'a> IdLcl<'a> {
+impl<'a> IdLocal<'a> {
     fn new(s: &'a str) -> Self {
-        IdLcl {
+        Self {
             canonical: is_canonical(s),
             value: s,
         }
@@ -162,7 +148,7 @@ impl<'a> IdLcl<'a> {
     }
 }
 
-impl<'a> Display for IdLcl<'a> {
+impl<'a> Display for IdLocal<'a> {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         if self.canonical {
             f.write_str(&self.value)
@@ -172,17 +158,17 @@ impl<'a> Display for IdLcl<'a> {
     }
 }
 
-impl<'a> AsRef<str> for IdLcl<'a> {
+impl<'a> AsRef<str> for IdLocal<'a> {
     fn as_ref(&self) -> &str {
         self.value
     }
 }
 
-impl<'a> ToOwned<'a> for IdLcl<'a> {
-    type Owned = IdLocal;
+impl<'a> ToOwned<'a> for IdLocal<'a> {
+    type Owned = IdentLocal;
     fn to_owned(&self) -> Self::Owned {
         unsafe {
-            IdLocal::new_unchecked(self.value.to_owned(), self.canonical)
+            IdentLocal::new_unchecked(self.value.to_owned(), self.canonical)
         }
     }
 }

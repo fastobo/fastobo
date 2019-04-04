@@ -14,18 +14,18 @@ use crate::parser::Rule;
 pub enum TypedefClause {
     IsAnonymous(bool),
     Name(UnquotedString),
-    Namespace(NamespaceId),
-    AltId(Identifier),
+    Namespace(NamespaceIdent),
+    AltId(Ident),
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
-    Subset(SubsetId),
+    Subset(SubsetIdent),
     Synonym(Synonym),
     Xref(Xref),
     PropertyValue(PropertyValue),
-    Domain(ClassId), // QUESTION(@althonos): Should be ID ?
-    Range(ClassId),  // QUESTION(@althonos): same.
+    Domain(ClassIdent), // QUESTION(@althonos): Should be ID ?
+    Range(ClassIdent),  // QUESTION(@althonos): same.
     Builtin(bool),
-    HoldsOverChain(RelationId, RelationId),
+    HoldsOverChain(RelationIdent, RelationIdent),
     IsAntiSymmetric(bool),
     IsCyclic(bool),
     IsReflexive(bool),
@@ -33,19 +33,19 @@ pub enum TypedefClause {
     IsTransitive(bool),
     IsFunctional(bool),
     IsInverseFunctional(bool),
-    IsA(RelationId),
-    IntersectionOf(RelationId),
-    UnionOf(RelationId),
-    EquivalentTo(RelationId),
-    DisjointFrom(RelationId),
-    InverseOf(RelationId),
-    TransitiveOver(RelationId),
-    EquivalentToChain(RelationId, RelationId),
-    DisjointOver(RelationId),
-    Relationship(RelationId, RelationId),
+    IsA(RelationIdent),
+    IntersectionOf(RelationIdent),
+    UnionOf(RelationIdent),
+    EquivalentTo(RelationIdent),
+    DisjointFrom(RelationIdent),
+    InverseOf(RelationIdent),
+    TransitiveOver(RelationIdent),
+    EquivalentToChain(RelationIdent, RelationIdent),
+    DisjointOver(RelationIdent),
+    Relationship(RelationIdent, RelationIdent),
     IsObsolete(bool),
-    ReplacedBy(RelationId),
-    Consider(Identifier),
+    ReplacedBy(RelationIdent),
+    Consider(Ident),
     CreatedBy(UnquotedString),
     CreationDate(IsoDateTime),
     ExpandAssertionTo(QuotedString, XrefList),
@@ -151,11 +151,11 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::Name(n))
             }
             Rule::NamespaceTag => {
-                let ns = NamespaceId::from_pair_unchecked(inner.next().unwrap())?;
+                let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Namespace(ns))
             }
             Rule::AltIdTag => {
-                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::AltId(id))
             }
             Rule::DefTag => {
@@ -168,7 +168,7 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::Comment(comment))
             }
             Rule::SubsetTag => {
-                let id = SubsetId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Subset(id))
             }
             Rule::SynonymTag => {
@@ -184,11 +184,11 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::PropertyValue(pv))
             }
             Rule::DomainTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Domain(id))
             }
             Rule::RangeTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Range(id))
             }
             Rule::BuiltinTag => {
@@ -196,8 +196,8 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::Builtin(b))
             }
             Rule::HoldsOverChainTag => {
-                let r1 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
-                let r2 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let r1 = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let r2 = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::HoldsOverChain(r1, r2))
             }
             Rule::IsAntiSymmetricTag => {
@@ -229,45 +229,45 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::IsInverseFunctional(b))
             }
             Rule::IsATag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::IsA(id))
             }
             Rule::IntersectionOfTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::IntersectionOf(id))
             }
             Rule::UnionOfTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::UnionOf(id))
             }
             Rule::EquivalentToTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::EquivalentTo(id))
             }
             Rule::DisjointFromTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::DisjointFrom(id))
             }
             Rule::InverseOfTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::InverseOf(id))
             }
             Rule::TransitiveOverTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::TransitiveOver(id))
             }
             Rule::EquivalentToChainTag => {
-                let r1 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
-                let r2 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let r1 = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let r2 = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::EquivalentToChain(r1, r2))
             }
             Rule::DisjointOverTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::DisjointOver(id))
             }
             Rule::RelationshipTag => {
-                let r1 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
-                let r2 = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let r1 = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let r2 = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Relationship(r1, r2))
             }
             Rule::IsObsoleteTag => {
@@ -275,11 +275,11 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::IsObsolete(b))
             }
             Rule::ReplacedByTag => {
-                let id = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::ReplacedBy(id))
             }
             Rule::ConsiderTag => {
-                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::Consider(id))
             }
             Rule::CreatedByTag => {

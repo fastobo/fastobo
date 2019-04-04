@@ -15,16 +15,16 @@ use crate::parser::Rule;
 /// A database cross-reference definition.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Xref {
-    id: Identifier,
+    id: Ident,
     desc: Option<QuotedString>,
 }
 
 impl Xref {
-    pub fn new(id: Identifier) -> Self {
+    pub fn new(id: Ident) -> Self {
         Self { id, desc: None }
     }
 
-    pub fn with_desc(id: Identifier, desc: QuotedString) -> Self {
+    pub fn with_desc(id: Ident, desc: QuotedString) -> Self {
         Self {
             id,
             desc: Some(desc),

@@ -1,3 +1,8 @@
+//! Identifiers used in OBO documents.
+//!
+//! `Ident` refers to an *owned* identifier, while `Id` refers to its *borrowed*
+//! counterpart.
+
 mod local;
 mod prefix;
 mod prefixed;
@@ -12,55 +17,55 @@ use std::fmt::Write;
 use pest::iterators::Pair;
 use url::Url;
 
-pub use self::local::IdLcl;
+pub use self::local::IdentLocal;
 pub use self::local::IdLocal;
+pub use self::prefix::IdentPrefix;
 pub use self::prefix::IdPrefix;
-pub use self::prefix::IdPrf;
 pub use self::prefixed::PrefixedId;
-pub use self::prefixed::PrefixedIdentifier;
-pub use self::subclasses::ClassId;
-pub use self::subclasses::InstanceId;
-pub use self::subclasses::NamespaceId;
-pub use self::subclasses::RelationId;
-pub use self::subclasses::SubsetId;
-pub use self::subclasses::SynonymTypeId;
+pub use self::prefixed::PrefixedIdent;
+pub use self::subclasses::ClassIdent;
+pub use self::subclasses::InstanceIdent;
+pub use self::subclasses::NamespaceIdent;
+pub use self::subclasses::RelationIdent;
+pub use self::subclasses::SubsetIdent;
+pub use self::subclasses::SynonymTypeIdent;
+pub use self::unprefixed::UnprefixedIdent;
 pub use self::unprefixed::UnprefixedId;
-pub use self::unprefixed::UnprefixedIdentifier;
 
 use crate::borrow::Cow;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
-use self::Identifier::*;
+use self::Ident::*;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
-pub enum Identifier {
-    Prefixed(PrefixedIdentifier),
-    Unprefixed(UnprefixedIdentifier),
+pub enum Ident {
+    Prefixed(PrefixedIdent),
+    Unprefixed(UnprefixedIdent),
     Url(Url),
 }
 
-impl From<PrefixedIdentifier> for Identifier {
-    fn from(id: PrefixedIdentifier) -> Self {
-        Identifier::Prefixed(id)
+impl From<PrefixedIdent> for Ident {
+    fn from(id: PrefixedIdent) -> Self {
+        Prefixed(id)
     }
 }
 
-impl From<UnprefixedIdentifier> for Identifier {
-    fn from(id: UnprefixedIdentifier) -> Self {
-        Identifier::Unprefixed(id)
+impl From<UnprefixedIdent> for Ident {
+    fn from(id: UnprefixedIdent) -> Self {
+        Unprefixed(id)
     }
 }
 
-impl From<Url> for Identifier {
+impl From<Url> for Ident {
     fn from(url: Url) -> Self {
-        Identifier::Url(url)
+        Ident::Url(url)
     }
 }
 
-impl Display for Identifier {
+impl Display for Ident {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
             Prefixed(id) => id.fmt(f),
@@ -70,20 +75,20 @@ impl Display for Identifier {
     }
 }
 
-impl<'i> FromPair<'i> for Identifier {
+impl<'i> FromPair<'i> for Ident {
     const RULE: Rule = Rule::Id;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::PrefixedId => PrefixedIdentifier::from_pair_unchecked(inner).map(From::from),
-            Rule::UnprefixedId => UnprefixedIdentifier::from_pair_unchecked(inner).map(From::from),
+            Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner).map(From::from),
+            Rule::UnprefixedId => UnprefixedIdent::from_pair_unchecked(inner).map(From::from),
             // FIXME(@althonos): need proper error report if the parser fails.
-            Rule::UrlId => Ok(Identifier::Url(Url::parse(inner.as_str()).unwrap())),
+            Rule::UrlId => Ok(Ident::Url(Url::parse(inner.as_str()).unwrap())),
             _ => unreachable!(),
         }
     }
 }
-impl_fromstr!(Identifier);
+impl_fromstr!(Ident);
 
 /// A borrowed `Identifier`.
 pub enum Id<'a> {

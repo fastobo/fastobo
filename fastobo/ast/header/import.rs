@@ -16,7 +16,7 @@ use crate::parser::Rule;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Import {
     Url(Url),
-    Abbreviated(Identifier), // QUESTION(@althonos): UnprefixedID ?
+    Abbreviated(Ident), // QUESTION(@althonos): UnprefixedID ?
 }
 
 impl From<Url> for Import {
@@ -25,8 +25,8 @@ impl From<Url> for Import {
     }
 }
 
-impl From<Identifier> for Import {
-    fn from(id: Identifier) -> Self {
+impl From<Ident> for Import {
+    fn from(id: Ident) -> Self {
         Import::Abbreviated(id)
     }
 }
@@ -47,7 +47,7 @@ impl<'i> FromPair<'i> for Import {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iri => Ok(Url::parse(inner.as_str()).unwrap().into()), // FIXME
-            Rule::Id => Identifier::from_pair_unchecked(inner).map(From::from),
+            Rule::Id => Ident::from_pair_unchecked(inner).map(From::from),
             _ => unreachable!(),
         }
     }

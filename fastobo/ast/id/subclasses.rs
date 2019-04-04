@@ -8,28 +8,28 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
-macro_rules! identifier_subclass {
-    (#[doc = $docstring:literal] pub struct $name:ident) => {
+macro_rules! ident_subclass {
+    (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident) => {
         #[derive(Clone, Debug, PartialEq, Hash, Eq)]
         #[doc=$docstring]
         pub struct $name {
-            id: Identifier,
+            id: Ident,
         }
 
-        impl From<Identifier> for $name {
-            fn from(id: Identifier) -> Self {
+        impl From<Ident> for $name {
+            fn from(id: Ident) -> Self {
                 $name { id }
             }
         }
 
-        impl From<$name> for Identifier {
+        impl From<$name> for Ident {
             fn from(id: $name) -> Self {
                 id.id
             }
         }
 
-        impl AsRef<Identifier> for $name {
-            fn as_ref(&self) -> &Identifier {
+        impl AsRef<Ident> for $name {
+            fn as_ref(&self) -> &Ident {
                 &self.id
             }
         }
@@ -41,24 +41,24 @@ macro_rules! identifier_subclass {
         }
 
         impl<'i> FromPair<'i> for $name {
-            const RULE: Rule = Rule::$name;
+            const RULE: Rule = $rule;
             unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-                Identifier::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
+                Ident::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
             }
         }
 
         impl ::std::str::FromStr for $name {
             type Err = $crate::error::Error;
             fn from_str(s: &str) -> Result<Self> {
-                Identifier::from_str(s).map(Self::from)
+                Ident::from_str(s).map(Self::from)
             }
         }
     };
 }
 
-macro_rules! identifier_subclasses {
-    ($(#[doc = $docstring:literal] pub struct $name:ident;)*) => {
-        $(identifier_subclass!(#[doc = $docstring] pub struct $name);)*
+macro_rules! ident_subclasses {
+    ($(#[doc = $docstring:literal] $rule:expr => pub struct $name:ident;)*) => {
+        $(ident_subclass!(#[doc = $docstring] $rule => pub struct $name);)*
     }
 }
 
@@ -82,24 +82,24 @@ macro_rules! identifier_subclasses {
 // NB(@althonos): All identifiers are defined as separate typedefs so that
 //                `PartialEq` is not implemented and trying to compare a
 //                `ClassId` with a `RelationId` would fail at compile-time.
-identifier_subclasses! {
+ident_subclasses! {
     /// A unique identifier for a class (*i.e.* a term).
-    pub struct ClassId;
+    Rule::ClassId => pub struct ClassIdent;
 
     /// A unique identifier for an instance.
-    pub struct InstanceId;
+    Rule::InstanceId => pub struct InstanceIdent;
 
     /// An OBO namespace identifier.
-    pub struct NamespaceId;
+    Rule::NamespaceId => pub struct NamespaceIdent;
 
     /// A unique identifier for a typedef (*i.e.* a relation).
-    pub struct RelationId;
+    Rule::RelationId => pub struct RelationIdent;
 
     /// A unique identifier for a subset
-    pub struct SubsetId;
+    Rule::SubsetId => pub struct SubsetIdent;
 
     /// A unique identifier for a synonym type.
-    pub struct SynonymTypeId;
+    Rule::SynonymTypeId => pub struct SynonymTypeIdent;
 }
 
 

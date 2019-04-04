@@ -65,15 +65,15 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
-pub struct IdPrefix {
+pub struct IdentPrefix {
     value: String,
     canonical: bool,
 }
 
-impl IdPrefix {
+impl IdentPrefix {
     /// Create a new identifier prefix.
     pub fn new(s: String) -> Self {
-        IdPrefix {
+        Self {
             canonical: is_canonical(&s),
             value: s,
         }
@@ -90,31 +90,31 @@ impl IdPrefix {
     }
 }
 
-impl AsRef<str> for IdPrefix {
+impl AsRef<str> for IdentPrefix {
     fn as_ref(&self) -> &str {
         &self.value
     }
 }
 
-impl<'a> Borrow<'a, IdPrf<'a>> for IdPrefix {
-    fn borrow(&'a self) -> IdPrf<'a> {
-        unsafe { IdPrf::new_unchecked(&self.value, self.canonical) }
+impl<'a> Borrow<'a, IdPrefix<'a>> for IdentPrefix {
+    fn borrow(&'a self) -> IdPrefix<'a> {
+        unsafe { IdPrefix::new_unchecked(&self.value, self.canonical) }
     }
 }
 
-impl Display for IdPrefix {
+impl Display for IdentPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.borrow().fmt(f)
     }
 }
 
-impl<'i> FromPair<'i> for IdPrefix {
+impl<'i> FromPair<'i> for IdentPrefix {
     const RULE: Rule = Rule::IdPrefix;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
-            return Ok(IdPrefix {
+            return Ok(Self {
                 value: inner.as_str().to_string(),
                 canonical: true,
             });
@@ -125,27 +125,27 @@ impl<'i> FromPair<'i> for IdPrefix {
         let mut local = String::with_capacity(inner.as_str().len());
         unescape(&mut local, inner.as_str());
 
-        Ok(IdPrefix {
+        Ok(Self {
             value: local,
             canonical: false,
         })
     }
 }
-impl_fromstr!(IdPrefix);
+impl_fromstr!(IdentPrefix);
 
-/// A borrowed `IdPrefix`
+/// A borrowed `IdentPrefix`
 #[derive(Clone, Debug)]
-pub struct IdPrf<'a> {
+pub struct IdPrefix<'a> {
     value: &'a str,
     canonical: bool,
 }
 
-impl<'a> IdPrf<'a> {
+impl<'a> IdPrefix<'a> {
     // FIXME(@althonos): no canonical, add another `new_unchecked` method.
 
     /// Create a new `IdPrf` from a borrowed string slice.
     pub fn new(s: &'a str) -> Self {
-        IdPrf {
+        Self {
             canonical: is_canonical(s),
             value: s,
         }
@@ -161,19 +161,19 @@ impl<'a> IdPrf<'a> {
     }
 }
 
-impl<'a> Into<&'a str> for IdPrf<'a> {
+impl<'a> Into<&'a str> for IdPrefix<'a> {
     fn into(self) -> &'a str {
         self.value
     }
 }
 
-impl<'a> AsRef<str> for IdPrf<'a> {
+impl<'a> AsRef<str> for IdPrefix<'a> {
     fn as_ref(&self) -> &str {
         &self.value
     }
 }
 
-impl<'a> Display for IdPrf<'a> {
+impl<'a> Display for IdPrefix<'a> {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         if self.canonical {
             f.write_str(&self.value)
@@ -183,11 +183,11 @@ impl<'a> Display for IdPrf<'a> {
     }
 }
 
-impl<'a> ToOwned<'a> for IdPrf<'a> {
-    type Owned = IdPrefix;
-    fn to_owned(&self) -> IdPrefix {
+impl<'a> ToOwned<'a> for IdPrefix<'a> {
+    type Owned = IdentPrefix;
+    fn to_owned(&self) -> IdentPrefix {
         unsafe {
-            IdPrefix::new_unchecked(self.value.to_string(), self.canonical)
+            IdentPrefix::new_unchecked(self.value.to_string(), self.canonical)
         }
     }
 }

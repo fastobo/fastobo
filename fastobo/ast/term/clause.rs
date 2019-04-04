@@ -16,24 +16,24 @@ use crate::parser::Rule;
 pub enum TermClause {
     IsAnonymous(bool),
     Name(UnquotedString),
-    Namespace(NamespaceId),
-    AltId(Identifier),
+    Namespace(NamespaceIdent),
+    AltId(Ident),
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
-    Subset(SubsetId),
+    Subset(SubsetIdent),
     Synonym(Synonym),
     Xref(Xref),
     Builtin(bool),
     PropertyValue(PropertyValue),
-    IsA(ClassId),
-    IntersectionOf(Option<RelationId>, ClassId),
-    UnionOf(ClassId),
-    EquivalentTo(ClassId),
-    DisjointFrom(ClassId),
-    Relationship(RelationId, ClassId),
+    IsA(ClassIdent),
+    IntersectionOf(Option<RelationIdent>, ClassIdent),
+    UnionOf(ClassIdent),
+    EquivalentTo(ClassIdent),
+    DisjointFrom(ClassIdent),
+    Relationship(RelationIdent, ClassIdent),
     IsObsolete(bool),
-    ReplacedBy(ClassId),
-    Consider(ClassId),
+    ReplacedBy(ClassIdent),
+    Consider(ClassIdent),
     CreatedBy(UnquotedString),
     CreationDate(IsoDateTime),
     // FIXME(@althonos): in the guide but not in the syntax.
@@ -107,11 +107,11 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::Name(name))
             }
             Rule::NamespaceTag => {
-                let ns = NamespaceId::from_pair_unchecked(inner.next().unwrap())?;
+                let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::Namespace(ns))
             }
             Rule::AltIdTag => {
-                let id = Identifier::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::AltId(id))
             }
             Rule::DefTag => {
@@ -124,7 +124,7 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::Comment(comment))
             }
             Rule::SubsetTag => {
-                let id = SubsetId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::Subset(id))
             }
             Rule::SynonymTag => {
@@ -144,35 +144,35 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::PropertyValue(pv))
             }
             Rule::IsATag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::IsA(id))
             }
             Rule::IntersectionOfTag => {
                 let id = inner.next().unwrap();
                 if id.as_rule() == Rule::ClassId {
-                    let classid = ClassId::from_pair_unchecked(id)?;
+                    let classid = ClassIdent::from_pair_unchecked(id)?;
                     Ok(TermClause::IntersectionOf(None, classid))
                 } else {
-                    let relid = RelationId::from_pair_unchecked(id)?;
-                    let classid = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                    let relid = RelationIdent::from_pair_unchecked(id)?;
+                    let classid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                     Ok(TermClause::IntersectionOf(Some(relid), classid))
                 }
             }
             Rule::UnionOfTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::UnionOf(id))
             }
             Rule::EquivalentToTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::EquivalentTo(id))
             }
             Rule::DisjointFromTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::DisjointFrom(id))
             }
             Rule::RelationshipTag => {
-                let rel = RelationId::from_pair_unchecked(inner.next().unwrap())?;
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let rel = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::Relationship(rel, id))
             }
             Rule::IsObsoleteTag => {
@@ -180,11 +180,11 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::IsObsolete(b))
             }
             Rule::ReplacedByTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::ReplacedBy(id))
             }
             Rule::ConsiderTag => {
-                let id = ClassId::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TermClause::Consider(id))
             }
             Rule::CreatedByTag => {
@@ -209,7 +209,7 @@ mod tests {
     use super::*;
     use crate::ast::Comment;
     use crate::ast::IdLocal;
-    use crate::ast::IdPrefix;
+    use crate::ast::IdentPrefix;
     use crate::ast::PrefixedId;
     use crate::ast::UnprefixedId;
     use crate::ast::Xref;
@@ -227,7 +227,7 @@ mod tests {
         let expected = TermClause::Def(
             QuotedString::new("A reference string relevant to the sample under study."),
             XrefList::from(vec![Xref::new(Id::Prefixed(PrefixedId::new(
-                IdPrefix::new("PSI"),
+                IdentPrefix::new("PSI"),
                 IdLocal::new("MS"),
             )))]),
         );
@@ -245,7 +245,7 @@ mod tests {
             TermClause::from_str("xref: CAS:22325-47-9 \"NIST Chemistry WebBook\"").unwrap();
         let expected = TermClause::Xref(Xref::with_desc(
             Id::from(PrefixedId::new(
-                IdPrefix::new("CAS"),
+                IdentPrefix::new("CAS"),
                 IdLocal::new("22325-47-9"),
             )),
             QuotedString::new("NIST Chemistry WebBook"),
@@ -257,9 +257,9 @@ mod tests {
                 .unwrap();
         let expected = Line::with_comment(Comment::new(" leaf lamina")).with_content(
             TermClause::IntersectionOf(
-                Some(RelationId::from(Id::from(UnprefixedId::new("part_of")))),
-                ClassId::from(Id::from(PrefixedId::new(
-                    IdPrefix::new("PO"),
+                Some(RelationIdent::from(Id::from(UnprefixedId::new("part_of")))),
+                ClassIdent::from(Id::from(PrefixedId::new(
+                    IdentPrefix::new("PO"),
                     IdLocal::new("0020039"),
                 ))),
             ),
@@ -272,7 +272,7 @@ mod tests {
             TermClause::IntersectionOf(
                 None,
                 ClassId::from(Id::from(PrefixedId::new(
-                    IdPrefix::new("PO"),
+                    IdentPrefix::new("PO"),
                     IdLocal::new("0006016"),
                 ))),
             ),
@@ -282,7 +282,7 @@ mod tests {
         let actual =
             TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
         let expected = TermClause::Xref(Xref::new(Id::from(PrefixedId::new(
-            IdPrefix::new("Wikipedia"),
+            IdentPrefix::new("Wikipedia"),
             IdLocal::new("https://en.wikipedia.org/wiki/Gas"),
         ))));
         assert_eq!(actual, expected);
@@ -290,7 +290,7 @@ mod tests {
         let actual = TermClause::from_str("def: \"OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms.\" [PSI:PI]").unwrap();
         let expected = TermClause::Def(
             QuotedString::new("OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms."),
-            XrefList::from(vec![Xref::new(Id::from(PrefixedId::new(IdPrefix::new("PSI"), IdLocal::new("PI"))))])
+            XrefList::from(vec![Xref::new(Id::from(PrefixedId::new(IdentPrefix::new("PSI"), IdLocal::new("PI"))))])
         );
         assert_eq!(actual, expected);
 

@@ -52,7 +52,7 @@ impl_fromstr!(SynonymScope);
 pub struct Synonym {
     desc: QuotedString,
     scope: SynonymScope,
-    ty: Option<SynonymTypeId>,
+    ty: Option<SynonymTypeIdent>,
     xrefs: XrefList,
 }
 
@@ -69,7 +69,7 @@ impl Synonym {
     pub fn with_type(
         desc: QuotedString,
         scope: SynonymScope,
-        ty: SynonymTypeId,
+        ty: SynonymTypeIdent,
         xrefs: XrefList,
     ) -> Self {
         Self {
@@ -108,7 +108,7 @@ impl<'i> FromPair<'i> for Synonym {
         let nxt = inner.next().unwrap();
         match nxt.as_rule() {
             Rule::SynonymTypeId => {
-                let ty = Some(SynonymTypeId::from_pair_unchecked(nxt)?);
+                let ty = Some(SynonymTypeIdent::from_pair_unchecked(nxt)?);
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(Synonym {
                     desc,

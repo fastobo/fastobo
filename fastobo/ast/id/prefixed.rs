@@ -13,21 +13,21 @@ use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-use super::IdPrf;
 use super::IdPrefix;
+use super::IdentPrefix;
 use super::IdLocal;
-use super::IdLcl;
+use super::IdentLocal;
 
 /// An identifier with a prefix.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
-pub struct PrefixedIdentifier {
-    prefix: IdPrefix,
-    local: IdLocal,
+pub struct PrefixedIdent {
+    prefix: IdentPrefix,
+    local: IdentLocal,
 }
 
-impl PrefixedIdentifier {
+impl PrefixedIdent {
     /// Create a new `PrefixedIdentifier` from a prefix and a local identifier.
-    pub fn new(prefix: IdPrefix, local: IdLocal) -> Self {
+    pub fn new(prefix: IdentPrefix, local: IdentLocal) -> Self {
         Self { prefix, local }
     }
 
@@ -48,12 +48,12 @@ impl PrefixedIdentifier {
     }
 
     /// The prefix of the prefixed identifier.
-    pub fn prefix(&self) -> IdPrf<'_> {
+    pub fn prefix(&self) -> IdPrefix<'_> {
         self.prefix.borrow()
     }
 }
 
-impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdentifier {
+impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdent {
     fn borrow(&'a self) -> PrefixedId<'a> {
         PrefixedId::new(
             self.prefix.borrow(),
@@ -62,7 +62,7 @@ impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdentifier {
     }
 }
 
-impl Display for PrefixedIdentifier {
+impl Display for PrefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.prefix
             .fmt(f)
@@ -71,27 +71,27 @@ impl Display for PrefixedIdentifier {
     }
 }
 
-impl<'i> FromPair<'i> for PrefixedIdentifier {
+impl<'i> FromPair<'i> for PrefixedIdent {
     const RULE: Rule = Rule::PrefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inners = pair.into_inner();
-        let prefix = IdPrefix::from_pair_unchecked(inners.next().unwrap())?;
-        let local = IdLocal::from_pair_unchecked(inners.next().unwrap())?;
+        let prefix = IdentPrefix::from_pair_unchecked(inners.next().unwrap())?;
+        let local = IdentLocal::from_pair_unchecked(inners.next().unwrap())?;
         Ok(Self::new(prefix, local))
     }
 }
-impl_fromstr!(PrefixedIdentifier);
+impl_fromstr!(PrefixedIdent);
 
 /// A borrowed `PrefixedIdentifier`
 #[derive(Clone, Debug)]
 pub struct PrefixedId<'a> {
-    prefix: Cow<'a, IdPrf<'a>>,
-    local: Cow<'a, IdLcl<'a>>,
+    prefix: Cow<'a, IdPrefix<'a>>,
+    local: Cow<'a, IdLocal<'a>>,
 }
 
 impl<'a> PrefixedId<'a> {
     /// Create a new `PrefixedId` from references.
-    pub fn new(prefix: IdPrf<'a>, local: IdLcl<'a>) -> Self {
+    pub fn new(prefix: IdPrefix<'a>, local: IdLocal<'a>) -> Self {
         Self {
             prefix: Cow::Borrowed(prefix),
             local: Cow::Borrowed(local),
@@ -100,11 +100,11 @@ impl<'a> PrefixedId<'a> {
 }
 
 impl<'a> ToOwned<'a> for PrefixedId<'a> {
-    type Owned = PrefixedIdentifier;
-    fn to_owned(&'a self) -> PrefixedIdentifier {
-        PrefixedIdentifier::new(
-            <Cow<IdPrf> as ToOwned<'a>>::to_owned(&self.prefix),
-            <Cow<IdLcl> as ToOwned<'a>>::to_owned(&self.local),
+    type Owned = PrefixedIdent;
+    fn to_owned(&'a self) -> PrefixedIdent {
+        PrefixedIdent::new(
+            <Cow<IdPrefix> as ToOwned<'a>>::to_owned(&self.prefix),
+            <Cow<IdLocal> as ToOwned<'a>>::to_owned(&self.local),
         )
     }
 }

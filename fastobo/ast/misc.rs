@@ -15,9 +15,9 @@ use crate::parser::Rule;
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum PropertyValue {
-    Identified(RelationId, Identifier),
+    Identified(RelationIdent, Ident),
     // FIXME(@althonos): maybe replaced `String` with `DatatypeId` newtype.
-    Typed(RelationId, QuotedString, Identifier),
+    Typed(RelationIdent, QuotedString, Ident),
 }
 
 impl Display for PropertyValue {
@@ -41,21 +41,21 @@ impl<'i> FromPair<'i> for PropertyValue {
     const RULE: Rule = Rule::PropertyValue;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
-        let relid = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
         let second = inner.next().unwrap();
         match second.as_rule() {
             Rule::Id => {
-                let id = Identifier::from_pair_unchecked(second)?;
+                let id = Ident::from_pair_unchecked(second)?;
                 Ok(PropertyValue::Identified(relid, id))
             }
             Rule::PvValue => {
                 let desc = QuotedString::new(second.as_str().to_string());
-                let datatype = Identifier::from_str(inner.next().unwrap().as_str())?;
+                let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
                 Ok(PropertyValue::Typed(relid, desc, datatype))
             }
             Rule::QuotedString => {
                 let desc = QuotedString::from_pair_unchecked(second)?;
-                let datatype = Identifier::from_str(inner.next().unwrap().as_str())?;
+                let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
                 Ok(PropertyValue::Typed(relid, desc, datatype))
             }
             _ => unreachable!(),
@@ -95,14 +95,14 @@ mod tests {
         fn from_str() {
             let actual = PropertyValue::from_str("married_to heather").unwrap();
             let expected = PropertyValue::Identified(
-                RelationId::from(Id::Unprefixed(UnprefixedId::new("married_to"))),
+                RelationIdent::from(Id::Unprefixed(UnprefixedId::new("married_to"))),
                 Id::Unprefixed(UnprefixedId::new("heather")),
             );
             assert_eq!(actual, expected);
 
             let actual = PropertyValue::from_str("shoe_size \"8\" xsd:positiveInteger").unwrap();
             let expected = PropertyValue::Typed(
-                RelationId::from(Id::Unprefixed(UnprefixedId::new("shoe_size"))),
+                RelationIdent::from(Id::Unprefixed(UnprefixedId::new("shoe_size"))),
                 QuotedString::new("8"),
                 Id::Prefixed(PrefixedId::new(
                     IdPrefix::new("xsd"),

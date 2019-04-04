@@ -14,12 +14,12 @@ use crate::parser::Rule;
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Qualifier {
-    key: RelationId,
+    key: RelationIdent,
     value: QuotedString,
 }
 
 impl Qualifier {
-    pub fn new(key: RelationId, value: QuotedString) -> Self {
+    pub fn new(key: RelationIdent, value: QuotedString) -> Self {
         Self { key, value }
     }
 }
@@ -37,7 +37,7 @@ impl<'i> FromPair<'i> for Qualifier {
     const RULE: Rule = Rule::Qualifier;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
-        let key = RelationId::from_str(inner.next().unwrap().as_str())?;
+        let key = RelationIdent::from_str(inner.next().unwrap().as_str())?;
         let value = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
         Ok(Qualifier { key, value })
     }
@@ -86,7 +86,7 @@ mod tests {
     fn from_str() {
         let actual = Qualifier::from_str("comment=\"NYBG:Dario_Cavaliere\"").unwrap();
         let expected = Qualifier::new(
-            RelationId::from(Id::from(UnprefixedId::new("comment"))),
+            RelationIdent::from(Id::from(UnprefixedId::new("comment"))),
             QuotedString::new("NYBG:Dario_Cavaliere"),
         );
         assert_eq!(actual, expected);

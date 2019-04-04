@@ -17,43 +17,43 @@ use crate::parser::Rule;
 
 /// An identifier without a prefix.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
-pub struct UnprefixedIdentifier {
+pub struct UnprefixedIdent {
     value: String,
 }
 
-impl UnprefixedIdentifier {
+impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
     pub fn new(id: String) -> Self {
         Self { value: id }
     }
 }
 
-impl AsRef<str> for UnprefixedIdentifier {
+impl AsRef<str> for UnprefixedIdent {
     fn as_ref(&self) -> &str {
         &self.value
     }
 }
 
-impl AsRef<UnprefixedId> for UnprefixedIdentifier {
+impl AsRef<UnprefixedId> for UnprefixedIdent {
     fn as_ref(&self) -> &UnprefixedId {
         UnprefixedId::new(&self.as_ref())
     }
 }
 
-impl<'a> Borrow<'a, &'a UnprefixedId> for UnprefixedIdentifier {
+impl<'a> Borrow<'a, &'a UnprefixedId> for UnprefixedIdent {
     fn borrow(&'a self) -> &'a UnprefixedId {
         self.as_ref()
     }
 }
 
-impl Deref for UnprefixedIdentifier {
+impl Deref for UnprefixedIdent {
     type Target = UnprefixedId;
     fn deref(&self) -> &Self::Target {
         self.as_ref()
     }
 }
 
-impl Display for UnprefixedIdentifier {
+impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.value.chars().try_for_each(|char| match char {
             '\r' => f.write_str("\\r"),
@@ -67,7 +67,7 @@ impl Display for UnprefixedIdentifier {
     }
 }
 
-impl<'i> FromPair<'i> for UnprefixedIdentifier {
+impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut local = String::with_capacity(pair.as_str().len());
@@ -90,7 +90,7 @@ impl<'i> FromPair<'i> for UnprefixedIdentifier {
         Ok(Self::new(local))
     }
 }
-impl_fromstr!(UnprefixedIdentifier);
+impl_fromstr!(UnprefixedIdent);
 
 /// A borrowed `UnprefixedIdentifier`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
@@ -116,7 +116,7 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnprefixedId> {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         if pair.as_str().find('\\').is_some() {
-            UnprefixedIdentifier::from_pair_unchecked(pair).map(Cow::Owned)
+            UnprefixedIdent::from_pair_unchecked(pair).map(Cow::Owned)
         } else {
             Ok(Cow::Borrowed(UnprefixedId::new(pair.as_str())))
         }
@@ -125,9 +125,9 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnprefixedId> {
 impl_fromslice!('i, Cow<'i, &'i UnprefixedId>);
 
 impl<'a> ToOwned<'a> for &'a UnprefixedId {
-    type Owned = UnprefixedIdentifier;
-    fn to_owned(&'a self) -> UnprefixedIdentifier {
-        UnprefixedIdentifier::new(self.0.to_string())
+    type Owned = UnprefixedIdent;
+    fn to_owned(&'a self) -> UnprefixedIdent {
+        UnprefixedIdent::new(self.0.to_string())
     }
 }
 

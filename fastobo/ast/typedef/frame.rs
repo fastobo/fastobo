@@ -12,7 +12,7 @@ use crate::parser::Rule;
 /// A typedef clause, describing a relationship.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypedefFrame {
-    id: Line<RelationId>,
+    id: Line<RelationIdent>,
     clauses: Vec<Line<TypedefClause>>,
 }
 
@@ -27,7 +27,7 @@ impl<'i> FromPair<'i> for TypedefFrame {
     const RULE: Rule = Rule::TypedefFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
-        let relid = RelationId::from_pair_unchecked(inner.next().unwrap())?;
+        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
         let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(relid);
 
         let mut clauses = Vec::new();

@@ -509,7 +509,7 @@ impl SynonymTypedefClause {
 impl From<SynonymTypedefClause> for obo::HeaderClause {
     fn from(clause: SynonymTypedefClause) -> Self {
         obo::HeaderClause::SynonymTypedef(
-            obo::SynonymTypeId::from_str(&clause.typedef).unwrap(),
+            obo::SynonymTypeIdent::from_str(&clause.typedef).unwrap(),
             obo::QuotedString::new(clause.description),
             clause.scope.map(|s| obo::SynonymScope::from_str(&s).unwrap()),
         )
@@ -531,7 +531,7 @@ impl SynonymTypedefClause {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DefaultNamespaceClause {
     #[pyo3(get, set)]
-    namespace: String,    // should be `NamespaceId`
+    namespace: String,    // should be `NamespaceIdent`
 }
 
 impl DefaultNamespaceClause {
@@ -543,7 +543,7 @@ impl DefaultNamespaceClause {
 impl From<DefaultNamespaceClause> for obo::HeaderClause {
     fn from(clause: DefaultNamespaceClause) -> Self {
         obo::HeaderClause::DefaultNamespace(
-            obo::NamespaceId::from_str(&clause.namespace).unwrap()
+            obo::NamespaceIdent::from_str(&clause.namespace).unwrap()
         )
     }
 }
@@ -562,7 +562,7 @@ impl DefaultNamespaceClause {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IdspaceClause {
     #[pyo3(get, set)]
-    prefix: String,         // should be `IdPrefix`
+    prefix: String,         // should be `IdentPrefix`
     #[pyo3(get, set)]
     url: String,            // should be `Url`
     #[pyo3(get, set)]
@@ -582,7 +582,7 @@ impl IdspaceClause {
 impl From<IdspaceClause> for obo::HeaderClause {
     fn from(clause: IdspaceClause) -> Self {
         obo::HeaderClause::Idspace(
-            obo::IdPrefix::from_str(&clause.prefix).unwrap(),
+            obo::IdentPrefix::from_str(&clause.prefix).unwrap(),
             FromStr::from_str(&clause.url).unwrap(),
             clause.description.map(|s| obo::QuotedString::from_str(&s).unwrap())
         )
@@ -595,7 +595,7 @@ impl From<IdspaceClause> for obo::HeaderClause {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TreatXrefsAsEquivalentClause {
     #[pyo3(get, set)]
-    idspace: String,   // Should be `IdPrefix`
+    idspace: String,   // Should be `IdentPrefix`
 }
 
 // --- TreatXrefsAsGenusDifferentiaClause -------------------------------------
@@ -604,7 +604,7 @@ pub struct TreatXrefsAsEquivalentClause {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TreatXrefsAsGenusDifferentiaClause {
     #[pyo3(get, set)]
-    idspace: String,   // Should be `IdPrefix`
+    idspace: String,   // Should be `IdentPrefix`
     #[pyo3(get, set)]
     relation: String,  // Should be `RelationId`
     #[pyo3(get, set)]
@@ -617,7 +617,7 @@ pub struct TreatXrefsAsGenusDifferentiaClause {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TreatXrefsAsReverseGenusDifferentiaClause {
     #[pyo3(get, set)]
-    idspace: String,   // Should be `IdPrefix`
+    idspace: String,   // Should be `IdentPrefix`
     #[pyo3(get, set)]
     relation: String,  // Should be `RelationId`
     #[pyo3(get, set)]

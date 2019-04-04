@@ -88,6 +88,11 @@ impl IdentPrefix {
     pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
         Self { value: s, canonical }
     }
+
+    /// Get the prefix as a string slice.
+    pub fn as_str(&self) -> &str {
+        &self.value
+    }
 }
 
 impl AsRef<str> for IdentPrefix {
@@ -114,21 +119,16 @@ impl<'i> FromPair<'i> for IdentPrefix {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
-            return Ok(Self {
-                value: inner.as_str().to_string(),
-                canonical: true,
-            });
+            return Ok(Self::new_unchecked(inner.as_str().to_string(), true));
         }
 
         // Unescape the prefix if is non canonical.
         // FIXME: count the number of "\" to avoid underestimating the capacity.
         let mut local = String::with_capacity(inner.as_str().len());
-        unescape(&mut local, inner.as_str());
+        unescape(&mut local, inner.as_str())
+            .expect("fmt::Write cannot fail on a String");
 
-        Ok(Self {
-            value: local,
-            canonical: false,
-        })
+        Ok(Self::new_unchecked(local, false))
     }
 }
 impl_fromstr!(IdentPrefix);
@@ -141,8 +141,6 @@ pub struct IdPrefix<'a> {
 }
 
 impl<'a> IdPrefix<'a> {
-    // FIXME(@althonos): no canonical, add another `new_unchecked` method.
-
     /// Create a new `IdPrf` from a borrowed string slice.
     pub fn new(s: &'a str) -> Self {
         Self {

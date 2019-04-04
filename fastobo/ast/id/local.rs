@@ -81,6 +81,11 @@ impl IdentLocal {
     pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
         Self { value: s, canonical }
     }
+
+    /// Get the local identifier as a string slice.
+    pub fn as_str(&self) -> &str {
+        &self.value
+    }
 }
 
 impl AsRef<str> for IdentLocal {
@@ -107,20 +112,15 @@ impl<'i> FromPair<'i> for IdentLocal {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {
-            return Ok(Self {
-                value: inner.as_str().to_string(),
-                canonical: true,
-            });
+            return Ok(Self::new_unchecked(inner.as_str().to_string(), true));
         }
 
         // Unescape the local ID if it is non canonical.
         let mut local = String::with_capacity(inner.as_str().len());
-        unescape(&mut local, inner.as_str());
+        unescape(&mut local, inner.as_str())
+            .expect("fmt::Write cannot fail on a String");
 
-        Ok(Self {
-            value: local,
-            canonical: false,
-        })
+        Ok(Self::new_unchecked(local, false))
     }
 }
 impl_fromstr!(IdentLocal);

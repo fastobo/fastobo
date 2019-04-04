@@ -15,6 +15,41 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
+
+fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+    s.chars().try_for_each(|char| match char {
+        '\r' => f.write_str("\\r"),
+        '\n' => f.write_str("\\n"),
+        '\u{000c}' => f.write_str("\\f"),
+        ' ' => f.write_str("\\ "),
+        '\t' => f.write_str("\\t"),
+        ':' => f.write_str("\\:"),
+        '"' => f.write_str("\\\""),
+        '\\' => f.write_str("\\\\"),
+        _ => f.write_char(char)
+    })
+}
+
+fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+    let mut chars = s.chars();
+    while let Some(char) = chars.next() {
+        if char == '\\' {
+            match chars.next() {
+                Some('r') => f.write_char('\r')?,
+                Some('n') => f.write_char('\n')?,
+                Some('f') => f.write_char('\u{000c}')?,
+                Some('t') => f.write_char('\t')?,
+                Some(other) => f.write_char(other)?,
+                None => panic!("invalid escape"), // FIXME(@althonos)
+            }
+        } else {
+            f.write_char(char)?;
+        }
+    }
+    Ok(())
+}
+
+
 /// An identifier without a prefix.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct UnprefixedIdent {
@@ -25,6 +60,11 @@ impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
     pub fn new(id: String) -> Self {
         Self { value: id }
+    }
+
+    /// Return a reference to the underlying `str`.
+    pub fn as_str(&self) -> &str {
+        &self.value
     }
 }
 
@@ -55,15 +95,7 @@ impl Deref for UnprefixedIdent {
 
 impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.value.chars().try_for_each(|char| match char {
-            '\r' => f.write_str("\\r"),
-            '\n' => f.write_str("\\n"),
-            '\u{000c}' => f.write_str("\\f"),
-            ' ' => f.write_str("\\ "),
-            '\t' => f.write_str("\\t"),
-            ':' => f.write_str("\\:"),
-            _ => f.write_char(char),
-        })
+        self.borrow().fmt(f)
     }
 }
 
@@ -71,22 +103,8 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut local = String::with_capacity(pair.as_str().len());
-        let mut chars = pair.as_str().chars();
-        while let Some(char) = chars.next() {
-            if char == '\\' {
-                match chars.next() {
-                    Some('r') => local.push('\r'),
-                    Some('n') => local.push('\n'),
-                    Some('f') => local.push('\u{000c}'),
-                    Some('t') => local.push('\t'),
-                    Some(other) => local.push(other),
-                    None => panic!("missing stuff"), // FIXME(@althonos)
-                }
-            } else {
-                local.push(char);
-            }
-        }
-
+        unescape(&mut local, pair.as_str())
+            .expect("fmt::Write cannot fail on a String");
         Ok(Self::new(local))
     }
 }
@@ -102,6 +120,11 @@ impl UnprefixedId {
     pub fn new(s: &str) -> &Self {
         unsafe { UnprefixedId::from_inner_unchecked(s.as_ref()) }
     }
+
+    /// Return a reference to the underlying string slice.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
 }
 
 impl AsRef<str> for UnprefixedId {
@@ -111,7 +134,12 @@ impl AsRef<str> for UnprefixedId {
 }
 
 // TODO(@althonos)
-// impl Display for UnprefixedId {}
+impl Display for UnprefixedId {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        escape(f, &self.0)
+    }
+}
+
 impl<'i> FromPair<'i> for Cow<'i, &'i UnprefixedId> {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
@@ -130,7 +158,6 @@ impl<'a> ToOwned<'a> for &'a UnprefixedId {
         UnprefixedIdent::new(self.0.to_string())
     }
 }
-
 
 #[cfg(test)]
 mod tests {

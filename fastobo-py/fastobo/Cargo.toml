@@ -14,3 +14,7 @@ pyo3 = { path = "/home/althonos/Code/pyo3/pyo3" }
 #pyo3 = { git = "https://github.com/PyO3/pyo3" }
 fastobo = { path = "../.." }
 libc = "*"
+url = "*"
+
+opaque_typedef = "*"
+opaque_typedef_macros = "*"

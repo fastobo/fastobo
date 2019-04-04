@@ -14,5 +14,6 @@ pub fn module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<self::clause::HeaderClause>()?;
     m.add_class::<self::clause::FormatVersionClause>()?;
     m.add_class::<self::clause::DataVersionClause>()?;
+    m.add_class::<self::clause::SubsetdefClause>()?;
     Ok(())
 }

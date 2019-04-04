@@ -6,7 +6,7 @@ publish = false
 
 [lib]
 crate-type = ["cdylib"]
-name = "fastobo"
+name = "fastobo_py"
 path = "lib.rs"
 
 [dependencies]

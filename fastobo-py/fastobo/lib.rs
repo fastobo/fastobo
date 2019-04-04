@@ -1,3 +1,4 @@
+#![recursion_limit="128"]
 #![allow(unused_imports)]
 
 extern crate fastobo;
@@ -33,7 +34,7 @@ use fastobo::ast as obo;
 pub mod header;
 pub mod id;
 
-use self::header::HeaderFrame;
+use self::header::frame::HeaderFrame;
 
 // -------------------------------------------------------------------------
 
@@ -70,15 +71,20 @@ impl From<obo::OboDoc> for OboDoc {
 #[pymodule]
 fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
 
+    {
+        use self::header::*;
+        m.add_wrapped(pyo3::wrap_pymodule!(header))?;
+    }
 
-    header::module(py, m);
-    id::module(py, m);
-
+    {
+        use self::id::*;
+        m.add_wrapped(pyo3::wrap_pymodule!(id))?;
+    }
 
     // // Note that the `#[pyfn()]` annotation automatically converts the arguments from
     // // Python objects to Rust values; and the Rust return value back into a Python object.
     #[pyfn(m, "loads")]
-    fn loads(py: Python, s: pyo3::types::PyString) -> PyResult<OboDoc> {
+    fn loads(py: Python, s: &str) -> PyResult<OboDoc> {
 
         let s = unsafe {
             std::str::from_utf8_unchecked(s.as_bytes())

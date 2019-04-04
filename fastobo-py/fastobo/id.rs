@@ -12,10 +12,13 @@ use fastobo::ast;
 
 // --- Module export ----------------------------------------------------------
 
-pub fn module(_py: Python, m: &PyModule) -> PyResult<()> {
+#[pymodule(id)]
+fn module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<self::BaseIdent>()?;
     m.add_class::<self::PrefixedIdent>()?;
     m.add_class::<self::UnprefixedIdent>()?;
+    m.add_class::<self::IdentPrefix>()?;
+    m.add_class::<self::IdentLocal>()?;
     m.add_class::<self::Url>()?;
     Ok(())
 }
@@ -48,6 +51,13 @@ impl From<ast::SubsetIdent> for Ident {
     }
 }
 
+impl From<ast::NamespaceIdent> for Ident {
+    fn from(id: ast::NamespaceIdent) -> Self {
+        let id: ast::Ident = id.into();
+        Self(id)
+    }
+}
+
 impl From<Ident> for ast::Ident {
     fn from(id: Ident) -> Self {
         id.0
@@ -57,6 +67,12 @@ impl From<Ident> for ast::Ident {
 impl From<Ident> for ast::SubsetIdent {
     fn from(id: Ident) -> Self {
         ast::SubsetIdent::from(id.0)
+    }
+}
+
+impl From<Ident> for ast::NamespaceIdent {
+    fn from(id: Ident) -> Self {
+        ast::NamespaceIdent::from(id.0)
     }
 }
 
@@ -92,6 +108,7 @@ pub struct BaseIdent {}
 
 // --- PrefixedIdent ----------------------------------------------------------
 
+/// An identifier with a prefix.
 #[pyclass(extends=BaseIdent)]
 pub struct PrefixedIdent {
     inner: ast::PrefixedIdent,
@@ -149,6 +166,19 @@ impl PyObjectProtocol for PrefixedIdent {
 
 // --- UnprefixedIdent --------------------------------------------------------
 
+/// An identifier without a prefix.
+///
+/// Example:
+///
+///     .. code::
+///
+///         >>> from fastobo import UnprefixedIdent
+///         >>> ident = UnprefixedIdent(\"hello world\")
+///         >>> print(ident.escaped)
+///         hello\\ world
+///         >>> print(ident.unescaped)
+///         hello world
+///
 #[pyclass(extends=BaseIdent)]
 pub struct UnprefixedIdent {
     inner: ast::UnprefixedIdent,
@@ -174,13 +204,27 @@ impl From<ast::UnprefixedIdent> for UnprefixedIdent {
 
 #[pymethods]
 impl UnprefixedIdent {
+
+    /// Create a new `UnprefixedIdent` instance.
+    ///
+    /// Arguments:
+    ///     value (`str`): the unescaped representation of the identifier.
     #[new]
     fn __init__(obj: &PyRawObject, value: &str) -> PyResult<()> {
-        match ast::UnprefixedIdent::from_str(value) {
-            Ok(id) => Ok(obj.init(UnprefixedIdent::new(id))),
-            // ERROR FIXME: add source
-            Err(e) => ValueError::into(format!("invalid ident: {}", e))
-        }
+        let id = ast::UnprefixedIdent::new(value.to_string());
+        Ok(obj.init(UnprefixedIdent::new(id)))
+    }
+
+    /// `str`: the escaped representation of the identifier.
+    #[getter]
+    fn escaped(&self) -> PyResult<String> {
+        Ok(self.inner.to_string())
+    }
+
+    /// `str`: the unescaped representation of the identifier.
+    #[getter]
+    fn unescaped(&self) -> PyResult<String> {
+        Ok(self.inner.as_str().to_string())
     }
 }
 
@@ -190,7 +234,7 @@ impl PyObjectProtocol for UnprefixedIdent {
         let gil = Python::acquire_gil();
         let py = gil.python();
         let fmt = PyString::new(py, "UnprefixedIdent({!r})").to_object(py);
-        fmt.call_method1(py, "format", (self.inner.to_string(),))
+        fmt.call_method1(py, "format", (self.inner.as_str().to_string(),))
     }
 
     fn __str__(&self) -> PyResult<String> {
@@ -200,8 +244,9 @@ impl PyObjectProtocol for UnprefixedIdent {
 
 // --- UrlIdent ---------------------------------------------------------------
 
+/// A URL used as an identifier.
 #[pyclass(extends=BaseIdent)]
-#[derive(OpaqueTypedef)]
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 #[opaque_typedef(derive(FromInner, IntoInner))]
 pub struct Url{
     inner: url::Url
@@ -209,7 +254,7 @@ pub struct Url{
 
 impl Url {
     pub fn new(url: url::Url) -> Self {
-        Url { inner: url }
+        Self { inner: url }
     }
 }
 
@@ -230,7 +275,113 @@ impl PyObjectProtocol for Url {
         let gil = Python::acquire_gil();
         let py = gil.python();
         let fmt = PyString::new(py, "Url({!r})").to_object(py);
-        fmt.call_method1(py, "format", (self.inner.to_string(),))
+        fmt.call_method1(py, "format", (self.inner.as_str(),))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(self.inner.to_string())
+    }
+}
+
+/// --- IdentPrefix ----------------------------------------------------------
+
+/// The prefix of a prefixed identifier.
+#[pyclass]
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
+#[opaque_typedef(derive(FromInner, IntoInner))]
+pub struct IdentPrefix {
+    inner: ast::IdentPrefix
+}
+
+impl IdentPrefix {
+    pub fn new(prefix: ast::IdentPrefix) -> Self {
+        Self { inner: prefix }
+    }
+}
+
+#[pymethods]
+impl IdentPrefix {
+
+    /// Create a new `IdentPrefix` instance.
+    ///
+    /// Arguments:
+    ///     value (`str`): the unescaped representation of the prefix.
+    #[new]
+    fn __init__(obj: &PyRawObject, value: String) -> PyResult<()> {
+        Ok(obj.init(Self::new(ast::IdentPrefix::new(value))))
+    }
+
+    /// `str`: the escaped representation of the identifier.
+    #[getter]
+    fn escaped(&self) -> PyResult<String> {
+        Ok(self.inner.to_string())
+    }
+
+    /// `str`: the unescaped representation of the identifier.
+    #[getter]
+    fn unescaped(&self) -> PyResult<&str> {
+        Ok(self.inner.as_str())
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for IdentPrefix {
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        let fmt = PyString::new(py, "IdentPrefix({!r})").to_object(py);
+        fmt.call_method1(py, "format", (self.inner.as_str(),))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(self.inner.to_string())
+    }
+}
+
+/// --- IdentLocal -----------------------------------------------------------
+
+#[pyclass]
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
+#[opaque_typedef(derive(FromInner, IntoInner))]
+pub struct IdentLocal {
+    inner: ast::IdentLocal,
+}
+
+impl IdentLocal {
+    pub fn new(local: ast::IdentLocal) -> Self {
+        Self { inner: local }
+    }
+}
+
+#[pymethods]
+impl IdentLocal {
+
+    /// Create a new `IdentLocal` instance.
+    #[new]
+    fn __init__(obj: &PyRawObject, value: String) -> PyResult<()> {
+        Ok(obj.init(Self::new(ast::IdentLocal::new(value))))
+    }
+
+    /// `str`: the escaped representation of the identifier.
+    #[getter]
+    fn escaped(&self) -> PyResult<String> {
+        Ok(self.inner.to_string())
+    }
+
+    /// `str`: the unescaped representation of the identifier.
+    #[getter]
+    fn unescaped(&self) -> PyResult<&str> {
+        Ok(self.inner.as_str())
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for IdentLocal {
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        let fmt = PyString::new(py, "IdentLocal({!r})").to_object(py);
+        fmt.call_method1(py, "format", (self.inner.as_str(),))
     }
 
     fn __str__(&self) -> PyResult<String> {

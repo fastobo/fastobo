@@ -42,6 +42,11 @@ impl PrefixedIdentifier {
     pub fn is_canonical(&self) -> bool {
         self.prefix.is_canonical() && self.local.is_canonical()
     }
+
+    /// The prefix of the prefixed identifier.
+    pub fn prefix(&self) -> IdPrf<'_> {
+        self.prefix.borrow()
+    }
 }
 
 impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdentifier {
@@ -210,11 +215,29 @@ pub struct IdPrf<'a> {
 
 impl<'a> IdPrf<'a> {
     // FIXME(@althonos): no canonical, add another `new_unchecked` method.
+
+    /// Create a new `IdPrf` from a borrowed string slice.
     pub fn new(s: &'a str, canonical: bool) -> Self {
         IdPrf {
             value: s,
             canonical
         }
+    }
+
+    pub fn as_str(&self) -> &'a str {
+        self.value
+    }
+}
+
+impl<'a> Into<&'a str> for IdPrf<'a> {
+    fn into(self) -> &'a str {
+        self.value
+    }
+}
+
+impl<'a> AsRef<str> for IdPrf<'a> {
+    fn as_ref(&self) -> &str {
+        &self.value
     }
 }
 

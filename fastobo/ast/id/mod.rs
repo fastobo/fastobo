@@ -1,3 +1,5 @@
+mod local;
+mod prefix;
 mod prefixed;
 mod subclasses;
 mod unprefixed;
@@ -10,20 +12,18 @@ use std::fmt::Write;
 use pest::iterators::Pair;
 use url::Url;
 
-pub use self::prefixed::IdLcl;
-pub use self::prefixed::IdLocal;
-pub use self::prefixed::IdPrefix;
-pub use self::prefixed::IdPrf;
+pub use self::local::IdLcl;
+pub use self::local::IdLocal;
+pub use self::prefix::IdPrefix;
+pub use self::prefix::IdPrf;
 pub use self::prefixed::PrefixedId;
 pub use self::prefixed::PrefixedIdentifier;
-
 pub use self::subclasses::ClassId;
 pub use self::subclasses::InstanceId;
 pub use self::subclasses::NamespaceId;
 pub use self::subclasses::RelationId;
 pub use self::subclasses::SubsetId;
 pub use self::subclasses::SynonymTypeId;
-
 pub use self::unprefixed::UnprefixedId;
 pub use self::unprefixed::UnprefixedIdentifier;
 

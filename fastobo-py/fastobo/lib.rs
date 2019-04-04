@@ -3,6 +3,11 @@
 extern crate fastobo;
 extern crate pyo3;
 extern crate libc;
+extern crate url;
+
+#[macro_use]
+extern crate opaque_typedef_macros;
+extern crate opaque_typedef;
 
 use std::rc::Rc;
 use std::str::FromStr;
@@ -25,10 +30,8 @@ use fastobo::ast as obo;
 
 // -------------------------------------------------------------------------
 
-#[macro_use]
-mod _macros;
-
 pub mod header;
+pub mod id;
 
 use self::header::HeaderFrame;
 
@@ -69,6 +72,7 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
 
 
     header::module(py, m);
+    id::module(py, m);
 
 
     // // Note that the `#[pyfn()]` annotation automatically converts the arguments from

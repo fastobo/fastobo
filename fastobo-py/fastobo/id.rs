@@ -25,7 +25,26 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 
 // --- Conversion Wrapper -----------------------------------------------------
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+macro_rules! impl_convert {
+    ($base:ident, $cls:ident) => {
+        impl From<$crate::fastobo::ast::$base> for $cls {
+            fn from(id: $crate::fastobo::ast::$base) -> $cls {
+                let ident: ast::Ident = id.into();
+                $cls::from(ident)
+            }
+        }
+
+        impl From<$cls> for $crate::fastobo::ast::$base {
+            fn from(id: $cls) -> $crate::fastobo::ast::$base {
+                let ident: ast::Ident = id.into();
+                $crate::fastobo::ast::$base::from(ident)
+            }
+        }
+    };
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, OpaqueTypedef)]
+#[opaque_typedef(derive(FromInner, IntoInner))]
 pub struct Ident(ast::Ident);
 
 impl FromStr for Ident {
@@ -38,43 +57,11 @@ impl FromStr for Ident {
     }
 }
 
-impl From<ast::Ident> for Ident {
-    fn from(id: ast::Ident) -> Ident {
-        Ident(id)
-    }
-}
-
-impl From<ast::SubsetIdent> for Ident {
-    fn from(id: ast::SubsetIdent) -> Self {
-        let id: ast::Ident = id.into();
-        Self(id)
-    }
-}
-
-impl From<ast::NamespaceIdent> for Ident {
-    fn from(id: ast::NamespaceIdent) -> Self {
-        let id: ast::Ident = id.into();
-        Self(id)
-    }
-}
-
-impl From<Ident> for ast::Ident {
-    fn from(id: Ident) -> Self {
-        id.0
-    }
-}
-
-impl From<Ident> for ast::SubsetIdent {
-    fn from(id: Ident) -> Self {
-        ast::SubsetIdent::from(id.0)
-    }
-}
-
-impl From<Ident> for ast::NamespaceIdent {
-    fn from(id: Ident) -> Self {
-        ast::NamespaceIdent::from(id.0)
-    }
-}
+impl_convert!(ClassIdent, Ident);
+impl_convert!(RelationIdent, Ident);
+impl_convert!(SubsetIdent, Ident);
+impl_convert!(SynonymTypeIdent, Ident);
+impl_convert!(NamespaceIdent, Ident);
 
 impl IntoPyObject for Ident {
     fn into_object(self, py: Python) -> PyObject {
@@ -88,7 +75,7 @@ impl IntoPyObject for Ident {
 }
 
 impl<'source> FromPyObject<'source> for Ident {
-    fn extract(ob: &'source PyAny) -> PyResult<Self> {
+    fn extract(ob: &'source PyAny) -> PyResult<Self> {    
         if let Ok(id) = ob.downcast_ref::<PrefixedIdent>() {
             Ok(Ident(id.inner.clone().into()))
         } else if let Ok(id) = ob.downcast_ref::<UnprefixedIdent>() {

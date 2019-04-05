@@ -193,7 +193,7 @@ impl PrefixedIdent {
 
         let py = prefix.py();
 
-        let p = if let Ok(ref pref) = prefix.downcast_ref::<IdentPrefix>() {
+        let p = if prefix.downcast_ref::<IdentPrefix>().is_ok() {
             unsafe { Py::from_borrowed_ptr(prefix.as_ptr()) }
         } else if let Ok(ref s) = PyString::try_from(prefix) {
             let string = s.to_string();
@@ -204,7 +204,7 @@ impl PrefixedIdent {
             return TypeError::into(msg);
         };
 
-        let l = if let Ok(ref pref) = local.downcast_ref::<IdentLocal>() {
+        let l = if local.downcast_ref::<IdentLocal>().is_ok() {
             unsafe { Py::from_borrowed_ptr(local.as_ptr()) }
         } else if let Ok(ref s) = PyString::try_from(local) {
             let string = s.to_string();
@@ -225,11 +225,43 @@ impl PrefixedIdent {
         Ok(self.prefix.clone_ref(py))
     }
 
+    #[setter]
+    fn set_prefix(&mut self, prefix: &PyAny) -> PyResult<()> {
+        let py = prefix.py();
+        self.prefix = if prefix.downcast_ref::<IdentPrefix>().is_ok() {
+            unsafe { Py::from_borrowed_ptr(prefix.as_ptr()) }
+        } else if let Ok(ref s) = PyString::try_from(prefix) {
+            let string = s.to_string();
+            Py::new(py, IdentPrefix::new(ast::IdentPrefix::new(string)))?
+        } else {
+            let ty = prefix.get_type().name();
+            let msg = format!("expected IdentPrefix or str, found {}", ty);
+            return TypeError::into(msg);
+        };
+        Ok(())
+    }
+
     /// `str`: the local part of the identifier.
     #[getter]
     fn get_local(&self) -> PyResult<Py<IdentLocal>> {
         let py = unsafe { Python::assume_gil_acquired() };
         Ok(self.local.clone_ref(py))
+    }
+
+    #[setter]
+    fn set_local(&mut self, local: &PyAny) -> PyResult<()> {
+        let py = local.py();
+        self.local = if local.downcast_ref::<IdentLocal>().is_ok() {
+            unsafe { Py::from_borrowed_ptr(local.as_ptr()) }
+        } else if let Ok(ref s) = PyString::try_from(local) {
+            let string = s.to_string();
+            Py::new(py, IdentLocal::new(ast::IdentLocal::new(string)))?
+        } else {
+            let ty = local.get_type().name();
+            let msg = format!("expected IdentLocal or str, found {}", ty);
+            return TypeError::into(msg);
+        };
+        Ok(())
     }
 }
 
@@ -457,13 +489,13 @@ impl IdentLocal {
 
     /// `str`: the escaped representation of the identifier.
     #[getter]
-    fn escaped(&self) -> PyResult<String> {
+    fn get_escaped(&self) -> PyResult<String> {
         Ok(self.inner.to_string())
     }
 
     /// `str`: the unescaped representation of the identifier.
     #[getter]
-    fn unescaped(&self) -> PyResult<&str> {
+    fn get_unescaped(&self) -> PyResult<&str> {
         Ok(self.inner.as_str())
     }
 }

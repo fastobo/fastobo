@@ -1,21 +1,21 @@
 #!/bin/sh
 
 log() {
-		tput bold
-		tput setaf 2
-		printf "%12s " $1
-		tput sgr0
-		shift 1
-		echo $@
+	tput bold
+	tput setaf 2
+	printf "%12s " $1
+	tput sgr0
+	shift 1
+	echo $@
 }
 
 error() {
-		tput bold
-		tput setaf 1
-		printf "%12s " $1
-		tput sgr0
-		shift 1
-		echo $@
+	tput bold
+	tput setaf 1
+	printf "%12s " $1
+	tput sgr0
+	shift 1
+	echo $@
 }
 
 
@@ -24,20 +24,20 @@ error() {
 
 case "$TRAVIS_TAG" in
 	v*-syntax)
-			cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
-			log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
-			cargo publish --token $CRATES_IO_TOKEN
-			;;
+		cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
+		log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
+		cargo publish --token $CRATES_IO_TOKEN
+		;;
 	v*)
-			cd "$TRAVIS_BUILD_DIR"
-			log Publishing fastobo $TRAVIS_TAG
-			cargo publish --token $CRATES_IO_TOKEN
-			;;
+		cd "$TRAVIS_BUILD_DIR/fastobo"
+		log Publishing fastobo $TRAVIS_TAG
+		cargo publish --token $CRATES_IO_TOKEN
+		;;
 
 	*)
-			error Error invalid or missing tag: $TRAVIS_TAG
-			exit 1
-			;;
+		error Error invalid or missing tag: $TRAVIS_TAG
+		exit 1
+		;;
 esac
 
 
@@ -52,17 +52,19 @@ gem install --user-install chandler
 log Updating GitHub release notes
 case "$TRAVIS_TAG" in
 	v*-syntax)
-			cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
-			chandler push --github="$TRAVIS_REPO_SLUG" \
-								    --changelog="CHANGELOG.md" \
-										--git="../.git"
+		cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
+		chandler push --github="$TRAVIS_REPO_SLUG" \
+			--changelog="CHANGELOG.md" \
+			--git="../.git"
 			;;
 	v*)
-			cd "$TRAVIS_BUILD_DIR"
-			chandler push --github="$TRAVIS_REPO_SLUG"
+		cd "$TRAVIS_BUILD_DIR/fastobo"
+		chandler push --github="$TRAVIS_REPO_SLUG" \
+			--changelog="CHANGELOG.md" \
+			--git="../.git"
 			;;
 	*)
-			error Error invalid or missing tag: $TRAVIS_TAG
-			exit 1
-			;;
+		error Error invalid or missing tag: $TRAVIS_TAG
+		exit 1
+		;;
 esac

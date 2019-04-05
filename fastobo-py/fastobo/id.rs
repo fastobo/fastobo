@@ -413,7 +413,7 @@ impl PyObjectProtocol for Url {
 /// The prefix of a prefixed identifier.
 #[pyclass]
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
-#[opaque_typedef(derive(FromInner, IntoInner))]
+#[opaque_typedef(derive(FromInner, IntoInner, AsRefInner))]
 pub struct IdentPrefix {
     inner: ast::IdentPrefix
 }

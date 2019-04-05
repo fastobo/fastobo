@@ -99,6 +99,10 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
         m.add_wrapped(pyo3::wrap_pymodule!(id))?;
     }
 
+    {
+        use self::pv::*;
+        m.add_wrapped(pyo3::wrap_pymodule!(pv))?;
+    }
 
     #[pyfn(m, "load")]
     fn load(py: Python, fh: &PyAny) -> PyResult<OboDoc> {

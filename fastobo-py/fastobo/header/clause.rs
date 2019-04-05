@@ -504,7 +504,7 @@ impl ImportClause {
 #[pyclass(extends=BaseHeaderClause)]
 #[derive(Clone, Debug)]
 pub struct SubsetdefClause {
-    subset: Ident,
+    subset: Ident, // FIXME: Py<Ident>,
     description: QuotedString,
 }
 
@@ -538,6 +538,10 @@ impl SubsetdefClause {
     // #[new]
     // fn __init__(obj: &PyRawObject, subset: &PyAny, description: String) -> PyResult<()> {
     //     let py = obj.py();
+    //
+    //
+    //     if
+    //
     //     let ident = if py.is_instance::<BaseIdent, PyAny>(subset)? {
     //         Ident::extract(subset)?
     //     } else if py.is_instance::<PyString, PyAny>(subset)? {
@@ -552,6 +556,17 @@ impl SubsetdefClause {
 
 #[pyproto]
 impl PyObjectProtocol for SubsetdefClause {
+
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+
+        let r = self.subset.to_object(py).call_method0(py, "__repr__")?;
+
+        let fmt = PyString::new(py, "SubsetdefClause({}, {!r})").to_object(py);
+        fmt.call_method1(py, "format", (r, self.description.as_str()))
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(self.to_string())
     }
@@ -625,6 +640,12 @@ impl DefaultNamespaceClause {
     }
 }
 
+impl Display for DefaultNamespaceClause {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        obo::HeaderClause::from(self.clone()).fmt(f)
+    }
+}
+
 impl From<DefaultNamespaceClause> for obo::HeaderClause {
     fn from(clause: DefaultNamespaceClause) -> Self {
         obo::HeaderClause::DefaultNamespace(From::from(clause.namespace))
@@ -646,6 +667,26 @@ impl DefaultNamespaceClause {
             return TypeError::into("expected str or Ident for 'namespace'");
         };
         Ok(obj.init(Self::new(ident)))
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for DefaultNamespaceClause {
+    fn __repr__(&self) -> PyResult<PyObject> {
+
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+
+        let ns = self.namespace.to_object(py);
+        let nsref = ns.as_ref(py);
+
+        let fmt = PyString::new(py, "DefaultNamespaceClause({})").to_object(py);
+        fmt.call_method1(py, "format", (nsref.repr()?, ))
+
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(self.clone().to_string())
     }
 }
 

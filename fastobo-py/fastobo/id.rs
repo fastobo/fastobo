@@ -104,6 +104,7 @@ impl From<Ident> for fastobo::ast::Ident {
 
 impl_convert!(ClassIdent, Ident);
 impl_convert!(RelationIdent, Ident);
+impl_convert!(InstanceIdent, Ident);
 impl_convert!(SubsetIdent, Ident);
 impl_convert!(SynonymTypeIdent, Ident);
 impl_convert!(NamespaceIdent, Ident);
@@ -180,7 +181,6 @@ impl From<ast::PrefixedIdent> for PrefixedIdent {
                 .expect("could not allocate on Python heap"),
             Py::new(py, local.into())
                 .expect("could not allocate on Python heap"),
-
         )
     }
 }
@@ -236,15 +236,17 @@ impl PrefixedIdent {
 #[pyproto]
 impl PyObjectProtocol for PrefixedIdent {
     fn __repr__(&self) -> PyResult<PyObject> {
-
+        // acquire the GIL
         let gil = Python::acquire_gil();
         let py = gil.python();
-
+        // extract inner references
+        let pref = self.prefix.as_ref(py);
+        let lref = self.local.as_ref(py);
+        // extract string slices
+        let p = pref.inner.as_str();
+        let l = lref.inner.as_str();
+        // return the formatted `repr` string
         let fmt = PyString::new(py, "PrefixedIdent({!r}, {!r})").to_object(py);
-
-        let p = self.prefix.as_ref(py).inner.as_str().to_string();
-        let l = self.local.as_ref(py).inner.as_str().to_string();
-
         fmt.call_method1(py, "format", (p, l))
     }
 

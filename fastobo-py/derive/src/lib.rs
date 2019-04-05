@@ -18,6 +18,8 @@ pub fn pywrapper_derive(input: TokenStream) -> TokenStream {
         output.extend(topyobject_impl_enum(&ast, &e));
         output.extend(intopyobject_impl_enum(&ast, &e));
         output.extend(frompyobject_impl_enum(&ast, &e));
+        output.extend(aspyptr_impl_enum(&ast, &e));
+        // output.extend(pyobjectprotocol_impl_enum(&ast, &e))
     } else {
         panic!("only supports enums");
     }
@@ -43,6 +45,33 @@ fn clone_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
                 use self::#name::*;
                 let gil = pyo3::Python::acquire_gil();
                 let py = gil.python();
+
+                match self {
+                    #(#variants,)*
+                }
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+fn aspyptr_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
+    let mut variants = Vec::new();
+
+    // Build clone for each variant
+    for variant in &en.variants {
+        let name = &variant.ident;
+        variants.push(quote::quote!(#name(x) => x.as_ptr()));
+    }
+
+    // Build clone implementation
+    let name = &ast.ident;
+    let expanded = quote::quote! {
+        #[automatically_derived]
+        impl pyo3::AsPyPointer for #name {
+            fn as_ptr(&self) -> *mut pyo3::ffi::PyObject {
+                use self::#name::*;
 
                 match self {
                     #(#variants,)*
@@ -183,3 +212,41 @@ fn frompyobject_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenSt
 
     TokenStream::from(expanded)
 }
+
+// fn pyobjectprotocol_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
+//
+//     let name = &ast.ident;
+//     let mut methods = Vec::new();
+//
+//     let unary: Vec<syn::Ident> = vec![
+//         syn::Ident::new("__repr__", syn::export::Span::call_site()),
+//         syn::Ident::new("__str__", syn::export::Span::call_site()),
+//     ];
+//
+//     for meth in unary.iter() {
+//         let mut variants = Vec::new();
+//         // Build clone for each variant
+//         for variant in &en.variants {
+//             let name = &variant.ident;
+//             variants.push(quote::quote!(#name(x) => x.#meth()));
+//         }
+//         methods.push(quote::quote!(
+//             fn #meth(&mut self) -> PyResult<PyObject> {
+//                 use self::#name::*;
+//                 match self {
+//                     #(#variants,)*
+//                 }
+//             }
+//         ));
+//     }
+//
+//     let expanded = quote::quote! {
+//         #[pyproto]
+//         #[automatically_derived]
+//         impl<'source> pyo3::PyObjectProtocol<'source> for #name {
+//             #(#methods)*
+//         }
+//     };
+//
+//     TokenStream::from(expanded)
+// }

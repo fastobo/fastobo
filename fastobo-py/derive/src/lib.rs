@@ -16,6 +16,7 @@ pub fn pywrapper_derive(input: TokenStream) -> TokenStream {
     if let syn::Data::Enum(e) = &ast.data {
         output.extend(clone_impl_enum(&ast, &e));
         output.extend(topyobject_impl_enum(&ast, &e));
+        output.extend(intopyobject_impl_enum(&ast, &e));
         output.extend(frompyobject_impl_enum(&ast, &e));
     } else {
         panic!("only supports enums");
@@ -68,6 +69,32 @@ fn topyobject_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStre
         #[automatically_derived]
         impl pyo3::ToPyObject for #name {
             fn to_object(&self, py: Python) -> pyo3::PyObject {
+                use self::#name::*;
+                match self {
+                    #(#variants,)*
+                }
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+fn intopyobject_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
+    let mut variants = Vec::new();
+
+    // Build clone for each variant
+    for variant in &en.variants {
+        let name = &variant.ident;
+        variants.push(quote::quote!(#name(x) => x.into_object(py)));
+    }
+
+    // Build clone implementation
+    let name = &ast.ident;
+    let expanded = quote::quote! {
+        #[automatically_derived]
+        impl pyo3::IntoPyObject for #name {
+            fn into_object(self, py: Python) -> pyo3::PyObject {
                 use self::#name::*;
                 match self {
                     #(#variants,)*

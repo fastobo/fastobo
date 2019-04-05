@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use pyo3::AsPyPointer;
+use pyo3::PyNativeType;
 use pyo3::PyObjectProtocol;
 use pyo3::PyTypeInfo;
 use pyo3::prelude::*;
@@ -9,6 +11,8 @@ use pyo3::types::PyAny;
 use pyo3::types::PyString;
 
 use fastobo::ast;
+use fastobo::borrow::Borrow;
+use fastobo::borrow::ToOwned;
 
 // --- Module export ----------------------------------------------------------
 
@@ -43,17 +47,58 @@ macro_rules! impl_convert {
     };
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, OpaqueTypedef)]
-#[opaque_typedef(derive(FromInner, IntoInner))]
-pub struct Ident(ast::Ident);
+#[derive(Debug, PyWrapper)]
+#[wraps(BaseIdent)]
+pub enum Ident {
+    Unprefixed(Py<UnprefixedIdent>),
+    Prefixed(Py<PrefixedIdent>),
+    Url(Py<Url>),
+}
 
-impl FromStr for Ident {
-    type Err = PyErr;
-    fn from_str(s: &str) -> PyResult<Self> {
-        match ast::Ident::from_str(s) {
-            Ok(id) => Ok(Ident(id)),
-            Err(e) => unimplemented!(),
+impl FromPy<fastobo::ast::Ident> for Ident {
+    fn from_py(ident: fastobo::ast::Ident, py: Python) -> Self {
+        match ident {
+            ast::Ident::Unprefixed(id) => Py::new(py, UnprefixedIdent::from(id))
+                .map(Ident::Unprefixed),
+            ast::Ident::Prefixed(id) => Py::new(py, PrefixedIdent::from(id))
+                .map(Ident::Prefixed),
+            ast::Ident::Url(id) => Py::new(py, Url::from(id))
+                .map(Ident::Url)
         }
+        .expect("could not allocate on Python heap")
+    }
+}
+
+impl From<fastobo::ast::Ident> for Ident {
+    fn from(ident: fastobo::ast::Ident) -> Self {
+        let gil = Python::acquire_gil();
+        Self::from_py(ident, gil.python())
+    }
+}
+
+impl FromPy<Ident> for fastobo::ast::Ident {
+    fn from_py(ident: Ident, py: Python) -> Self {
+        match ident {
+            Ident::Unprefixed(id) => {
+                let i: UnprefixedIdent = id.as_ref(py).clone();
+                ast::Ident::Unprefixed(i.into())
+            }
+            Ident::Prefixed(id) => {
+                let i: PrefixedIdent = id.as_ref(py).clone();
+                ast::Ident::Prefixed(i.into())
+            }
+            Ident::Url(id) => {
+                let url: Url = id.as_ref(py).clone();
+                ast::Ident::Url(url.into())
+            }
+        }
+    }
+}
+
+impl From<Ident> for fastobo::ast::Ident {
+    fn from(ident: Ident) -> Self {
+        let gil = Python::acquire_gil();
+        Self::from_py(ident, gil.python())
     }
 }
 
@@ -62,31 +107,6 @@ impl_convert!(RelationIdent, Ident);
 impl_convert!(SubsetIdent, Ident);
 impl_convert!(SynonymTypeIdent, Ident);
 impl_convert!(NamespaceIdent, Ident);
-
-impl IntoPyObject for Ident {
-    fn into_object(self, py: Python) -> PyObject {
-        use fastobo::ast::Ident::*;
-        match self.0 {
-            Unprefixed(id) => UnprefixedIdent::from(id).into_object(py),
-            Prefixed(id) => PrefixedIdent::from(id).into_object(py),
-            Url(_) => unimplemented!("Ident.into_object for Ident::Url")
-        }
-    }
-}
-
-impl<'source> FromPyObject<'source> for Ident {
-    fn extract(ob: &'source PyAny) -> PyResult<Self> {    
-        if let Ok(id) = ob.downcast_ref::<PrefixedIdent>() {
-            Ok(Ident(id.inner.clone().into()))
-        } else if let Ok(id) = ob.downcast_ref::<UnprefixedIdent>() {
-            Ok(Ident(id.inner.clone().into()))
-        } else if let Ok(url) = ob.downcast_ref::<Url>() {
-            Ok(Ident(url.inner.clone().into()))
-        } else {
-            TypeError::into("expected PrefixedIdent or UnprefixedIdent")
-        }
-    }
-}
 
 // --- Base -------------------------------------------------------------------
 
@@ -97,57 +117,140 @@ pub struct BaseIdent {}
 
 /// An identifier with a prefix.
 #[pyclass(extends=BaseIdent)]
+#[derive(Debug)]
 pub struct PrefixedIdent {
-    inner: ast::PrefixedIdent,
+    prefix: Py<IdentPrefix>,
+    local: Py<IdentLocal>,
 }
 
+impl Clone for PrefixedIdent {
+    fn clone(&self) -> Self {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        Self {
+            prefix: self.prefix.clone_ref(py),
+            local: self.local.clone_ref(py),
+        }
+    }
+}
+
+impl PartialEq for PrefixedIdent {
+    fn eq(&self, other: &Self) -> bool {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+
+        *self.prefix.as_ref(py) == *other.prefix.as_ref(py)
+        && *self.local.as_ref(py) == *other.local.as_ref(py)
+
+    }
+}
+
+impl Eq for PrefixedIdent {}
+
 impl PrefixedIdent {
-    fn new(id: ast::PrefixedIdent) -> Self {
-        PrefixedIdent { inner: id }
+    fn new(prefix: Py<IdentPrefix>, local: Py<IdentLocal>) -> Self {
+        PrefixedIdent { prefix, local }
     }
 }
 
 impl From<PrefixedIdent> for ast::PrefixedIdent {
     fn from(ident: PrefixedIdent) -> Self {
-        ident.inner
+
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+
+        ast::PrefixedIdent::new(
+            ident.prefix.as_ref(py).clone().into(),
+            ident.local.as_ref(py).clone().into(),
+        )
+
     }
 }
 
 impl From<ast::PrefixedIdent> for PrefixedIdent {
     fn from(id: ast::PrefixedIdent) -> Self {
-        Self::new(id)
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+
+        let prefix = fastobo::borrow::ToOwned::to_owned(&id.prefix());
+        let local = fastobo::borrow::ToOwned::to_owned(&id.local());
+
+        Self::new(
+            Py::new(py, prefix.into())
+                .expect("could not allocate on Python heap"),
+            Py::new(py, local.into())
+                .expect("could not allocate on Python heap"),
+
+        )
     }
 }
 
 #[pymethods]
 impl PrefixedIdent {
+
     #[new]
-    fn __init__(obj: &PyRawObject, value: &str) -> PyResult<()> {
-        match ast::PrefixedIdent::from_str(value) {
-            Ok(id) => Ok(obj.init(PrefixedIdent::new(id))),
-            // ERROR FIXME: add source
-            Err(e) => ValueError::into(format!("invalid ident: {}", e)),
-        }
+    fn __init__(obj: &PyRawObject, prefix: &PyAny, local: &PyAny) -> PyResult<()> {
+
+        let py = prefix.py();
+
+        let p = if let Ok(ref pref) = prefix.downcast_ref::<IdentPrefix>() {
+            unsafe { Py::from_borrowed_ptr(prefix.as_ptr()) }
+        } else if let Ok(ref s) = PyString::try_from(prefix) {
+            let string = s.to_string();
+            Py::new(py, IdentPrefix::new(ast::IdentPrefix::new(string)))?
+        } else {
+            let ty = prefix.get_type().name();
+            let msg = format!("expected IdentPrefix or str, found {}", ty);
+            return TypeError::into(msg);
+        };
+
+        let l = if let Ok(ref pref) = local.downcast_ref::<IdentLocal>() {
+            unsafe { Py::from_borrowed_ptr(local.as_ptr()) }
+        } else if let Ok(ref s) = PyString::try_from(local) {
+            let string = s.to_string();
+            Py::new(py, IdentLocal::new(ast::IdentLocal::new(string)))?
+        } else {
+            let ty = local.get_type().name();
+            let msg = format!("expected IdentLocal or str, found {}", ty);
+            return TypeError::into(msg);
+        };
+
+        Ok(obj.init(Self::new(p, l)))
     }
 
     /// `str`: the IDspace of the identifier.
     #[getter]
-    fn prefix(&self) -> PyResult<&str> {
-        Ok(self.inner.prefix().as_str())
+    fn get_prefix(&self) -> PyResult<Py<IdentPrefix>> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.prefix.clone_ref(py))
+    }
+
+    /// `str`: the local part of the identifier.
+    #[getter]
+    fn get_local(&self) -> PyResult<Py<IdentLocal>> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.local.clone_ref(py))
     }
 }
 
 #[pyproto]
 impl PyObjectProtocol for PrefixedIdent {
     fn __repr__(&self) -> PyResult<PyObject> {
+
         let gil = Python::acquire_gil();
         let py = gil.python();
-        let fmt = PyString::new(py, "PrefixedIdent({!r})").to_object(py);
-        fmt.call_method1(py, "format", (self.inner.to_string(),))
+
+        let fmt = PyString::new(py, "PrefixedIdent({!r}, {!r})").to_object(py);
+
+        let p = self.prefix.as_ref(py).inner.as_str().to_string();
+        let l = self.local.as_ref(py).inner.as_str().to_string();
+
+        fmt.call_method1(py, "format", (p, l))
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(self.inner.to_string())
+        let id: PrefixedIdent = self.clone();
+        Ok(ast::PrefixedIdent::from(id).to_string())
     }
 }
 
@@ -167,6 +270,7 @@ impl PyObjectProtocol for PrefixedIdent {
 ///         hello world
 ///
 #[pyclass(extends=BaseIdent)]
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 pub struct UnprefixedIdent {
     inner: ast::UnprefixedIdent,
 }

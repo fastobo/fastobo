@@ -1,0 +1,13 @@
+
+include *
+
+include Cargo.toml
+include COPYING
+include README.rst
+
+recursive-include derive *
+recursive-include fastobo *
+recursive-include fastobo-py *
+recursive-include fastobo-syntax *
+
+recursive-exclude * Cargo.lock

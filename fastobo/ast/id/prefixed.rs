@@ -51,6 +51,11 @@ impl PrefixedIdent {
     pub fn prefix(&self) -> IdPrefix<'_> {
         self.prefix.borrow()
     }
+
+    /// The local part of the prefixed identifier.
+    pub fn local(&self) -> IdLocal<'_> {
+        self.local.borrow()
+    }
 }
 
 impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdent {

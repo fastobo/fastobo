@@ -19,53 +19,42 @@ use pyo3::AsPyPointer;
 use super::HeaderClause;
 use super::BaseHeaderClause;
 
-#[pyclass(weakref, gc)]
+#[pyclass]
+#[derive(Debug)]
 pub struct HeaderFrame {
-    clauses: PyObject,
-}
-
-impl HeaderFrame {
-    fn as_pylist(&self) -> &PyList {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
-        PyTryFrom::try_from(self.clauses.as_ref(py)).expect("always PyList")
-    }
-}
-
-impl AsRef<PyList> for HeaderFrame {
-    fn as_ref(&self) -> &PyList {
-        self.as_pylist()
-    }
-}
-
-impl AsPyPointer for HeaderFrame {
-    fn as_ptr(&self) -> *mut pyo3::ffi::PyObject {
-        self.clauses.as_ptr()
-    }
+    clauses: Vec<HeaderClause>
 }
 
 impl Clone for HeaderFrame {
     fn clone(&self) -> Self {
         let gil = Python::acquire_gil();
         let py = gil.python();
-        Self { clauses: self.clauses.clone_ref(py) }
+        Self {
+            clauses: self.clauses.iter().map(|r| r.clone()).collect()
+        }
+    }
+}
+
+impl ToPyObject for HeaderFrame {
+    fn to_object(&self, py: Python) -> PyObject {
+        PyList::new(py, &self.clauses).into_object(py)
+    }
+}
+
+impl HeaderFrame {
+    pub fn new(clauses: Vec<HeaderClause>) -> Self {
+        Self { clauses }
     }
 }
 
 impl From<obo::HeaderFrame> for HeaderFrame {
     fn from(frame: fastobo::ast::HeaderFrame) -> Self {
-        Self::from(frame.clauses)
-    }
-}
-
-impl From<Vec<obo::HeaderClause>> for HeaderFrame {
-    fn from(clauses: Vec<obo::HeaderClause>) -> Self {
         let gil = Python::acquire_gil();
         let py = gil.python();
-        let pylist = PyList::new(py, clauses.into_iter().map(HeaderClause::from));
-        Self {
-            clauses: pylist.to_object(py),
-        }
+        let clauses = frame.clauses
+            .into_iter()
+            .map(|clause| HeaderClause::from_py(clause, py));
+        Self::new(clauses.collect())
     }
 }
 
@@ -75,7 +64,7 @@ impl PyObjectProtocol for HeaderFrame {
         let gil = Python::acquire_gil();
         let py = gil.python();
         let fmt = PyString::new(py, "HeaderFrame({!r})").to_object(py);
-        fmt.call_method1(py, "format", (&self.clauses,))
+        fmt.call_method1(py, "format", (self.to_object(py),))
     }
 }
 
@@ -83,44 +72,44 @@ impl PyObjectProtocol for HeaderFrame {
 #[pyproto]
 impl PySequenceProtocol for HeaderFrame {
     fn __len__(&self) -> PyResult<usize> {
-        Ok(self.as_pylist().len())
+        Ok(self.clauses.len())
     }
     fn __getitem__(&self, index: isize) -> PyResult<PyObject> {
-        let list = self.as_pylist();
-        if index < list.len() as isize {
-            Ok(list.get_item(index).into())
+
+        let py = unsafe {
+            Python::assume_gil_acquired()
+        };
+
+        if index < self.clauses.len() as isize {
+            let item = &self.clauses[index as usize];
+            Ok(item.to_object(py))
         } else {
-            Err(IndexError::py_err("list index out of range"))
+            IndexError::into("list index out of range")
         }
     }
-    fn __setitem__(&mut self, index: isize, elem: PyObject) -> PyResult<()> {
-        let list = self.as_pylist();
-        if index < list.len() as isize {
-            if Python::acquire_gil().python().is_instance::<BaseHeaderClause, PyObject>(&elem)? {
-                list.set_item(index, elem)
-            } else {
-                Err(TypeError::py_err("expected HeaderClause"))
+    fn __setitem__(&mut self, index: isize, elem: &PyAny) -> PyResult<()> {
+
+        if index as usize > self.clauses.len() {
+            return IndexError::into("list index out of range");
+        }
+
+        match HeaderClause::extract(elem) {
+            Ok(clause) => {
+                self.clauses[index as usize] = clause;
+                Ok(())
             }
-        } else {
-            Err(IndexError::py_err("list index out of range"))
+            Err(e) => {Err(e)}
+                // TypeError::into(format!(
+                //     "expected BaseHeaderClause, found {}",
+                //     elem.get_type().name()
+                // ))
         }
     }
     fn __delitem__(&mut self, index: isize) -> PyResult<()> {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
-        self.clauses.call_method1(py, "__delitem__", (index, ))?;
+        if index as usize > self.clauses.len() {
+            return IndexError::into("list index out of range");
+        }
+        self.clauses.remove(index as usize);
         Ok(())
-    }
-}
-
-#[pyproto]
-impl PyGCProtocol for HeaderFrame {
-    fn __traverse__(&self, visit: PyVisit) -> Result<(), PyTraverseError> {
-        visit.call(&self.clauses)
-    }
-    fn __clear__(&mut self) {
-        let gil = GILGuard::acquire();
-        let py = gil.python();
-        py.release(&self.clauses)
     }
 }

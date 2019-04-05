@@ -1,5 +1,5 @@
 [workspace]
-members = ["fastobo-syntax", "fastobo-py/fastobo"]
+members = ["fastobo-syntax", "fastobo-py/fastobo", "fastobo-py/derive"]
 
 [package]
 name = "fastobo"

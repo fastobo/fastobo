@@ -88,22 +88,12 @@ impl PySequenceProtocol for HeaderFrame {
         }
     }
     fn __setitem__(&mut self, index: isize, elem: &PyAny) -> PyResult<()> {
-
         if index as usize > self.clauses.len() {
             return IndexError::into("list index out of range");
         }
-
-        match HeaderClause::extract(elem) {
-            Ok(clause) => {
-                self.clauses[index as usize] = clause;
-                Ok(())
-            }
-            Err(e) => {Err(e)}
-                // TypeError::into(format!(
-                //     "expected BaseHeaderClause, found {}",
-                //     elem.get_type().name()
-                // ))
-        }
+        let clause = HeaderClause::extract(elem)?;
+        self.clauses[index as usize] = clause;
+        Ok(())
     }
     fn __delitem__(&mut self, index: isize) -> PyResult<()> {
         if index as usize > self.clauses.len() {

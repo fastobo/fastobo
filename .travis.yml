@@ -1,37 +1,64 @@
 sudo: false
 dist: xenial
-language: rust
+
 cache:
+  pip: true
   cargo: true
   dir: $SCCACHE_DIR
 
-rust:
-  - stable
-  - beta
-  - nightly
-
 env:
   global:
-  - RUST_BACKTRACE=1
-  - RUSTC_WRAPPER=sccache
-  - SCCACHE_DIR="$HOME/.cache/sccache"
+    - PATH="$HOME/.cargo/bin:$PATH"
+    - RUST_BACKTRACE=1
+    - RUSTC_WRAPPER=sccache
+    - SCCACHE_DIR="$HOME/.cache/sccache"
 
-before_install:
-  - ci/travis/setup.sh
+stages:
+  - name: Rust
+  - name: Python
 
-script:
-  - cargo tarpaulin -v --out Xml --ciserver travis-ci
+.test-rust: &test-rust
+  stage: Rust
+  language: rust
+  before_install:
+    - ci/travis/setup.sh
+  script:
+    - cargo tarpaulin -v --out Xml --ciserver travis-ci
+  after_script:
+    - curl -SsL "https://codecov.io/bash" | bash
 
-after_script:
-  - curl -SsL "https://codecov.io/bash" | bash
+.test-python: &test-python
+  stage: Python
+  language: python
+  before_install:
+    - ci/travis/setup.sh
+  before_script:
+    - cd $TRAVIS_BUILD_DIR/fastobo-py && python setup.py build_ext --inplace
+  script:
+    - cd $TRAVIS_BUILD_DIR/fastobo-py && python setup.py test
 
-deploy:
-  provider: script
-  script: ci/travis/deploy.sh
-  on:
-    tags: true
-    repo: althonos/fastobo
-    rust: stable
+jobs:
+  include:
+    - rust: stable
+      <<: *test-rust
+    - rust: beta
+      <<: *test-rust
+    - rust: nightly
+      <<: *test-rust
+    - python: 3.5
+      <<: *test-python
+    - python: 3.6
+      <<: *test-python
+    - python: 3.7
+      <<: *test-python
+
+# deploy:
+#   provider: script
+#   script: ci/travis/deploy.sh
+#   on:
+#     tags: true
+#     repo: althonos/fastobo
+#     rust: stable
 
 notifications:
   email:

@@ -10,7 +10,7 @@ publish = false
 [lib]
 crate-type = ["cdylib"]
 name = "fastobo_py"
-path = "lib.rs"
+path = "fastobo-py/lib.rs"
 
 [dependencies]
 pyo3 = { git = "https://github.com/PyO3/pyo3" }

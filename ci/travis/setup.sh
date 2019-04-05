@@ -9,8 +9,21 @@ log() {
 	echo $@
 }
 
+# --- Install python requirements -------------------------------------------
+if [ "$TRAVIS_BUILD_STAGE_NAME" != "Rust" ]; then
+	log Install Python requirements
+	pip install -r "$TRAVIS_BUILD_DIR/ci/requirements.txt"
+fi
 
-# --- Setup sscache ------------------------------------------------------------------
+
+# --- Setup Rust ------------------------------------------------------------
+if [ "$TRAVIS_BUILD_STAGE_NAME" != "Rust" ]; then
+	log Installing Rust nightly
+	curl -sSf https://build.travis-ci.org/files/rustup-init.sh | sh -s -- --default-toolchain=nightly -y
+fi
+
+
+# --- Setup sscache ---------------------------------------------------------
 LATEST=$(cargo search sccache | grep sccache | cut -f2 -d"\"")
 LOCAL=$(sccache --version 2>/dev/null | cut -f2 -d" " || echo "none")
 
@@ -24,7 +37,7 @@ else
 fi
 
 
-# --- Setup cargo-tarpaulin ----------------------------------------------------------
+# --- Setup cargo-tarpaulin -------------------------------------------------
 LATEST=$(cargo search cargo-tarpaulin | grep cargo-tarpaulin | cut -f2 -d"\"")
 LOCAL=$(cargo tarpaulin --version 2>/dev/null | cut -d" " -f3 || echo "none")
 

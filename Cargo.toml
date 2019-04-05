@@ -1,8 +1,9 @@
 [workspace]
 members = ["fastobo-syntax", "fastobo"]
 
-[profile.bench]
-lto = true
+[profile.test]
+opt-level = 3
 
 [profile.release]
+opt-level = 3
 lto = true

@@ -32,6 +32,7 @@ use pyo3::PyObjectProtocol;
 use pyo3::gc::PyTraverseError;
 use pyo3::class::gc::PyVisit;
 use pyo3::type_object::PyTypeCreate;
+use pyo3::class::basic::CompareOp;
 
 use crate::id::Url;
 use crate::id::Ident;
@@ -149,11 +150,13 @@ impl From<fastobo::ast::HeaderClause> for HeaderClause {
 
 // --- Base ------------------------------------------------------------------
 
+/// A header clause, appearing in the OBO header frame.
 #[pyclass(subclass)]
 pub struct BaseHeaderClause {}
 
 // --- FormatVersion ---------------------------------------------------------
 
+/// A header clause indicating the format version of the OBO document.
 #[pyclass(extends=BaseHeaderClause)]
 #[derive(Debug, Clone)]
 pub struct FormatVersionClause {
@@ -223,6 +226,20 @@ impl PyObjectProtocol for FormatVersionClause {
     fn __str__(&self) -> PyResult<String> {
         Ok(self.to_string())
     }
+
+
+    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
+        let py = other.py();
+        if let Ok(ref clause) = other.downcast_ref::<Self>() {
+            Ok(match op {
+                CompareOp::Eq => (self.version == clause.version).to_object(py),
+                CompareOp::Ne => (self.version != clause.version).to_object(py),
+                _ => other.py().NotImplemented(),
+            })
+        } else {
+            Ok(false.to_object(py))
+        }
+    }
 }
 
 // --- DataVersion -----------------------------------------------------------
@@ -270,8 +287,6 @@ impl DataVersionClause {
         Ok(())
     }
 }
-
-
 
 #[pyproto]
 impl PyObjectProtocol for DataVersionClause {

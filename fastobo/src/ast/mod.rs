@@ -37,6 +37,7 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 use pest::Parser;
 
+use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
@@ -73,21 +74,32 @@ impl OboDoc {
     where
         B: BufRead,
     {
-        let mut line = String::new();
-        let mut frame_lines = String::new();
+        let mut line = String::from("\n");
+        let mut l: &str = &line[..0];
 
         // collect the header frame
-        while !line.trim_start().starts_with('[') {
-            frame_lines.push_str(&line);
+        let mut frame_clauses = Vec::new();
+        while !l.starts_with('[') && !line.is_empty() {
+            if !l.is_empty() {
+                let clause = OboParser::parse(Rule::HeaderClause, &line)
+                    .map_err(Error::from)
+                    .and_then(|mut p| unsafe {
+                        let pair = p.next().unwrap();
+                        HeaderClause::from_pair_unchecked(pair)
+                    })?;
+                frame_clauses.push(clause)
+            }
+
             line.clear();
             stream.read_line(&mut line)?;
+            l = line.trim();
         }
 
         // create the OBO document
-        let mut obodoc = Self::new(HeaderFrame::from_str(&frame_lines)?);
+        let mut obodoc = Self::new(HeaderFrame::new(frame_clauses));
 
         // read all entity frames
-        frame_lines.clear();
+        let mut frame_lines = String::new();
         while !line.is_empty() {
             frame_lines.push_str(&line);
             line.clear();

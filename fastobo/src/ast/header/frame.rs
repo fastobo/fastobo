@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::iter::FromIterator;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
@@ -20,6 +21,12 @@ pub struct HeaderFrame {
     pub clauses: Vec<HeaderClause>,
 }
 
+impl HeaderFrame {
+    pub fn new(clauses: Vec<HeaderClause>) -> Self {
+        Self { clauses }
+    }
+}
+
 impl Display for HeaderFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut clauses = self.clauses.iter().peekable();
@@ -27,6 +34,15 @@ impl Display for HeaderFrame {
             clause.fmt(f).and(f.write_char('\n'))?;
         }
         Ok(())
+    }
+}
+
+impl FromIterator<HeaderClause> for HeaderFrame {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = HeaderClause>
+    {
+        Self::new(iter.into_iter().collect())
     }
 }
 

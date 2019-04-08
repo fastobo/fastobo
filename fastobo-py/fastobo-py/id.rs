@@ -31,16 +31,16 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 
 macro_rules! impl_convert {
     ($base:ident, $cls:ident) => {
-        impl From<$crate::fastobo::ast::$base> for $cls {
-            fn from(id: $crate::fastobo::ast::$base) -> $cls {
+        impl FromPy<$crate::fastobo::ast::$base> for $cls {
+            fn from_py(id: $crate::fastobo::ast::$base, py: Python) -> $cls {
                 let ident: ast::Ident = id.into();
-                $cls::from(ident)
+                $cls::from_py(ident, py)
             }
         }
 
-        impl From<$cls> for $crate::fastobo::ast::$base {
-            fn from(id: $cls) -> $crate::fastobo::ast::$base {
-                let ident: ast::Ident = id.into();
+        impl FromPy<$cls> for $crate::fastobo::ast::$base {
+            fn from_py(id: $cls, py: Python) -> $crate::fastobo::ast::$base {
+                let ident: ast::Ident = id.into_py(py);
                 $crate::fastobo::ast::$base::from(ident)
             }
         }
@@ -69,13 +69,6 @@ impl FromPy<fastobo::ast::Ident> for Ident {
     }
 }
 
-impl From<fastobo::ast::Ident> for Ident {
-    fn from(ident: fastobo::ast::Ident) -> Self {
-        let gil = Python::acquire_gil();
-        Self::from_py(ident, gil.python())
-    }
-}
-
 impl FromPy<Ident> for fastobo::ast::Ident {
     fn from_py(ident: Ident, py: Python) -> Self {
         match ident {
@@ -92,13 +85,6 @@ impl FromPy<Ident> for fastobo::ast::Ident {
                 ast::Ident::Url(url.into())
             }
         }
-    }
-}
-
-impl From<Ident> for fastobo::ast::Ident {
-    fn from(ident: Ident) -> Self {
-        let gil = Python::acquire_gil();
-        Self::from_py(ident, gil.python())
     }
 }
 

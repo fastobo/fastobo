@@ -9,8 +9,6 @@ use crate::parser::Rule;
 /// The error type for this crate.
 #[derive(Debug, Fail)]
 pub enum Error {
-    #[fail(display = "invalid character: {}", c)]
-    InvalidCharacter { c: char },
     #[fail(display = "unexpected rule: {:?} (expected {:?})", actual, expected)]
     UnexpectedRule { expected: Rule, actual: Rule },
     #[fail(display = "parser error: {}", error)]

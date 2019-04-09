@@ -19,6 +19,7 @@ pub fn pywrapper_derive(input: TokenStream) -> TokenStream {
         output.extend(intopyobject_impl_enum(&ast, &e));
         output.extend(frompyobject_impl_enum(&ast, &e));
         output.extend(aspyptr_impl_enum(&ast, &e));
+        output.extend(frompy_impl_enum(&ast, &e));
         // output.extend(pyobjectprotocol_impl_enum(&ast, &e))
     } else {
         panic!("only supports enums");
@@ -205,6 +206,32 @@ fn frompyobject_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenSt
                     pyo3::exceptions::TypeError::into(
                         format!("expected BaseHeaderClause instance, {} found", ty),
                     )
+                }
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+fn frompy_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
+    let mut variants = Vec::new();
+
+    // Build clone for each variant
+    for variant in &en.variants {
+        let name = &variant.ident;
+        variants.push(quote::quote!(#name(x) => Self::from_py(x.as_ref(py).clone(), py)));
+    }
+
+    // Build clone implementation
+    let name = &ast.ident;
+    let expanded = quote::quote! {
+        #[automatically_derived]
+        impl pyo3::FromPy<&#name> for fastobo::ast::#name {
+            fn from_py(obj: &#name, py: Python) -> Self {
+                use self::#name::*;
+                match obj {
+                    #(#variants,)*
                 }
             }
         }

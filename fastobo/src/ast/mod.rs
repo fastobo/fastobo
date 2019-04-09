@@ -45,8 +45,8 @@ use crate::parser::Rule;
 
 /// A complete OBO document in format version 1.4.
 pub struct OboDoc {
-    header: HeaderFrame,
-    entities: Vec<EntityFrame>,
+    pub header: HeaderFrame,
+    pub entities: Vec<EntityFrame>,
 }
 
 impl OboDoc {

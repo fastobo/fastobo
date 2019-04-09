@@ -1,5 +1,10 @@
 [workspace]
-members = ["fastobo-syntax", "fastobo"]
+members = [
+  "fastobo",
+  "fastobo-syntax",
+  "fastobo-py",
+  "fastobo-py-derive",
+]
 
 [profile.test]
 opt-level = 3

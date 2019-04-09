@@ -1,6 +1,3 @@
-[workspace]
-members = ["fastobo", "derive", "fastobo-syntax"]
-
 [package]
 name = "fastobo-py"
 version = "0.1.0"
@@ -10,7 +7,6 @@ publish = false
 [lib]
 crate-type = ["cdylib"]
 name = "fastobo_py"
-path = "fastobo-py/lib.rs"
 
 [dependencies]
 pyo3 = { git = "https://github.com/PyO3/pyo3" }
@@ -20,9 +16,5 @@ url = "1.7.2"
 opaque_typedef = "0.0.5"
 opaque_typedef_macros = "0.0.5"
 
-fastobo = { path = "fastobo" }
-fastobo-py-derive = { path = "derive" }
-
-
-[profile.release]
-lto = true
+fastobo = { path = "../fastobo" }
+fastobo-py-derive = { path = "../fastobo-py-derive" }

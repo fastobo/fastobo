@@ -63,14 +63,45 @@ macro_rules! ident_subclasses {
 }
 
 
-// macro_rules! identifier_borrow {
-//     (#[doc = $docstring:literal] pub struct $name:ident : &$life:lifetime $borrowed) => {
-//         #[doc=$docstring]
-//         pub struct $name<$life> {
-//             inner: $crate::borrow::Cow<$life, &$life $borrowed>
-//         }
-//     }
-// }
+macro_rules! id_subclass {
+    (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident : &$life:lifetime $borrowed:ident) => {
+        #[doc=$docstring]
+        pub struct $name<$life> {
+            inner: Id<$life>
+        }
+
+        impl<$life> From<Id<$life>> for $name<$life> {
+            fn from(id: Id<$life>) -> Self {
+                Self {
+                    inner: id
+                }
+            }
+        }
+
+        impl<$life> From<$name<$life>> for Id<$life> {
+            fn from(id: $name<$life>) -> Self {
+                id.inner
+            }
+        }
+
+        // TODO
+        // impl<'i> FromPair<'i> for $name<'i> {
+        //     const RULE: Rule = $rule;
+        //     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+        //         Id::from_pair_unchecked(pair.into_inner().next().unwrap())
+        //             .map(From::from)
+        //     }
+        // }
+
+
+        impl<$life> crate::borrow::Borrow<$life, $name<$life>> for $borrowed {
+            fn borrow(&$life self) -> $name<$life> {
+                $name::from(self.id.borrow())
+            }
+        }
+
+    }
+}
 
 
 
@@ -103,7 +134,7 @@ ident_subclasses! {
 }
 
 
-// identifier_borrow! {
-//     ///
-//     pub struct ClassIdentifier<'a>: &'a
-// }
+id_subclass! {
+    ///
+    Rule::ClassId => pub struct ClassId: &'a ClassIdent
+}

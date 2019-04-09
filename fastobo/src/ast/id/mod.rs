@@ -24,6 +24,7 @@ pub use self::prefix::IdPrefix;
 pub use self::prefixed::PrefixedId;
 pub use self::prefixed::PrefixedIdent;
 pub use self::subclasses::ClassIdent;
+pub use self::subclasses::ClassId;
 pub use self::subclasses::InstanceIdent;
 pub use self::subclasses::NamespaceIdent;
 pub use self::subclasses::RelationIdent;
@@ -32,12 +33,12 @@ pub use self::subclasses::SynonymTypeIdent;
 pub use self::unprefixed::UnprefixedIdent;
 pub use self::unprefixed::UnprefixedId;
 
+use crate::borrow::Borrow;
+use crate::borrow::ToOwned;
 use crate::borrow::Cow;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-
-use self::Ident::*;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
@@ -47,31 +48,43 @@ pub enum Ident {
     Url(Url),
 }
 
+impl<'a> Borrow<'a, Id<'a>> for Ident {
+    fn borrow(&'a self) -> Id<'a> {
+        use self::Ident::*;
+        match self {
+            Ident::Prefixed(ref id) => Id::Prefixed(Cow::Borrowed(id.borrow())),
+            Ident::Unprefixed(ref id) => Id::Unprefixed(Cow::Borrowed(id)),
+            Ident::Url(ref url) => Id::Url(Cow::Borrowed(url)),
+        }
+    }
+}
+
+impl Display for Ident {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use self::Ident::*;
+        match self {
+            Prefixed(id) => id.fmt(f),
+            Unprefixed(id) => id.fmt(f),
+            Url(url) => url.fmt(f),
+        }
+    }
+}
+
 impl From<PrefixedIdent> for Ident {
     fn from(id: PrefixedIdent) -> Self {
-        Prefixed(id)
+        Ident::Prefixed(id)
     }
 }
 
 impl From<UnprefixedIdent> for Ident {
     fn from(id: UnprefixedIdent) -> Self {
-        Unprefixed(id)
+        Ident::Unprefixed(id)
     }
 }
 
 impl From<Url> for Ident {
     fn from(url: Url) -> Self {
         Ident::Url(url)
-    }
-}
-
-impl Display for Ident {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        match self {
-            Prefixed(id) => id.fmt(f),
-            Unprefixed(id) => id.fmt(f),
-            Url(url) => url.fmt(f),
-        }
     }
 }
 
@@ -95,6 +108,35 @@ pub enum Id<'a> {
     Prefixed(Cow<'a, PrefixedId<'a>>),
     Unprefixed(Cow<'a, &'a UnprefixedId>),
     Url(Cow<'a, &'a Url>),
+}
+
+impl<'a> Display for Id<'a> {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use self::Id::*;
+        match self {
+            Prefixed(id) => id.fmt(f),
+            Unprefixed(id) => id.fmt(f),
+            Url(url) => url.fmt(f),
+        }
+    }
+}
+
+impl<'a> From<PrefixedId<'a>> for Id<'a> {
+     fn from(id: PrefixedId<'a>) -> Self {
+         Id::Prefixed(Cow::Borrowed(id))
+     }
+}
+
+impl<'a> From<&'a UnprefixedId> for Id<'a> {
+    fn from(id: &'a UnprefixedId) -> Self {
+        Id::Unprefixed(Cow::Borrowed(id))
+    }
+}
+
+impl<'a> From<&'a Url> for Id<'a> {
+    fn from(url: &'a Url) -> Self {
+        Id::Url(Cow::Borrowed(url))
+    }
 }
 
 #[cfg(test)]

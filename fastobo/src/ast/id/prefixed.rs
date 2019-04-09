@@ -69,10 +69,7 @@ impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdent {
 
 impl Display for PrefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.prefix
-            .fmt(f)
-            .and(f.write_char(':'))
-            .and(self.local.fmt(f))
+        self.borrow().fmt(f)
     }
 }
 
@@ -101,6 +98,15 @@ impl<'a> PrefixedId<'a> {
             prefix: Cow::Borrowed(prefix),
             local: Cow::Borrowed(local),
         }
+    }
+}
+
+impl<'a> Display for PrefixedId<'a> {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.prefix
+            .fmt(f)
+            .and(f.write_char(':'))
+            .and(self.local.fmt(f))
     }
 }
 

@@ -7,8 +7,6 @@ use pyo3::AsPyPointer;
 use pyo3::PyDowncastError;
 use pyo3::types::PyBytes;
 
-
-
 pub struct PyFile<'p> {
     file: PyObject,
     __data: PhantomData<&'p PyObject>

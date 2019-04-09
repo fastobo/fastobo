@@ -9,7 +9,7 @@
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo/blob/master/fastobo-syntax/CHANGELOG.md)
 
 
-## About
+## Overview
 
 This library is a strict implementation of the [OBO flat file format 1.4](http://owlcollab.github.io/oboformat/doc/obo-syntax.html)
 syntax using the [`pest`](https://pest.rs/) parser generator. It was outsourced from [`fastobo`](https://github.com/althonos/fastobo/)
@@ -18,6 +18,7 @@ to reduce compilation time, since deriving the `OboParser` from
 
 The parser itself is reexported in [`fastobo::parser`](https://docs.rs/fastobo/latest/fastobo/parser/), so there
 is probably no need to depend on this library directly.
+
 
 ## Strictness
 
@@ -29,3 +30,20 @@ The syntax is a strict implementation of the 1.4 format, with the following exce
   ([owlcs/owlapi#833](https://github.com/owlcs/owlapi/pull/833)).
 * ISO-8601 datetimes can only be parsed from the canonical format (`ỲYYY-MM-DDTHH:MM:SS`)
   with an optional timezone. Week dates and calendar dates are not supported.
+
+
+## Feedback
+
+Found a bug ? Have an enhancement request ? Head over to the
+[GitHub issue tracker](https://github.com/althonos/fastobo/issues) of the project if
+you need to report or ask something. If you are filling in on a bug, please include as much
+information as you can about the issue, and try to recreate the same bug in a simple, easily
+reproductible situation.
+
+
+## About
+
+This project is currently being developed by [Martin Larralde](https://github.com/althonos)
+as part of a Master's Degree internship in the [BBOP team](http://berkeleybop.org/) of the
+[Lawrence Berkeley National Laboratory](https://www.lbl.gov/), under the supervision of
+[Chris Mungall](http://biosciences.lbl.gov/profiles/chris-mungall/).

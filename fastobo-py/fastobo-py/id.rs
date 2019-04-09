@@ -58,12 +58,15 @@ pub enum Ident {
 impl FromPy<fastobo::ast::Ident> for Ident {
     fn from_py(ident: fastobo::ast::Ident, py: Python) -> Self {
         match ident {
-            ast::Ident::Unprefixed(id) => Py::new(py, UnprefixedIdent::from(id))
-                .map(Ident::Unprefixed),
-            ast::Ident::Prefixed(id) => Py::new(py, PrefixedIdent::from(id))
-                .map(Ident::Prefixed),
-            ast::Ident::Url(id) => Py::new(py, Url::from(id))
-                .map(Ident::Url)
+            ast::Ident::Unprefixed(id) =>
+                Py::new(py, UnprefixedIdent::from_py(id, py))
+                    .map(Ident::Unprefixed),
+            ast::Ident::Prefixed(id) =>
+                Py::new(py, PrefixedIdent::from_py(id, py))
+                    .map(Ident::Prefixed),
+            ast::Ident::Url(id) =>
+                Py::new(py, Url::from_py(id, py))
+                    .map(Ident::Url)
         }
         .expect("could not allocate on Python heap")
     }
@@ -74,15 +77,15 @@ impl FromPy<Ident> for fastobo::ast::Ident {
         match ident {
             Ident::Unprefixed(id) => {
                 let i: UnprefixedIdent = id.as_ref(py).clone();
-                ast::Ident::Unprefixed(i.into())
+                ast::Ident::Unprefixed(i.into_py(py))
             }
             Ident::Prefixed(id) => {
                 let i: PrefixedIdent = id.as_ref(py).clone();
-                ast::Ident::Prefixed(i.into())
+                ast::Ident::Prefixed(i.into_py(py))
             }
             Ident::Url(id) => {
                 let url: Url = id.as_ref(py).clone();
-                ast::Ident::Url(url.into())
+                ast::Ident::Url(url.into_py(py))
             }
         }
     }
@@ -140,24 +143,23 @@ impl PrefixedIdent {
     }
 }
 
-impl From<PrefixedIdent> for ast::PrefixedIdent {
-    fn from(ident: PrefixedIdent) -> Self {
-
-        let gil = Python::acquire_gil();
-        let py = gil.python();
-
+impl FromPy<PrefixedIdent> for ast::PrefixedIdent {
+    fn from_py(ident: PrefixedIdent, py: Python) -> Self {
         ast::PrefixedIdent::new(
             ident.prefix.as_ref(py).clone().into(),
             ident.local.as_ref(py).clone().into(),
         )
-
     }
 }
 
-impl From<ast::PrefixedIdent> for PrefixedIdent {
-    fn from(id: ast::PrefixedIdent) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
+impl FromPy<PrefixedIdent> for ast::Ident {
+    fn from_py(ident: PrefixedIdent, py: Python) -> Self {
+        Self::from(ast::PrefixedIdent::from_py(ident, py))
+    }
+}
+
+impl FromPy<ast::PrefixedIdent> for PrefixedIdent {
+    fn from_py(id: ast::PrefixedIdent, py: Python) -> Self {
 
         let prefix = fastobo::borrow::ToOwned::to_owned(&id.prefix());
         let local = fastobo::borrow::ToOwned::to_owned(&id.local());
@@ -269,8 +271,9 @@ impl PyObjectProtocol for PrefixedIdent {
     }
 
     fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
         let id: PrefixedIdent = self.clone();
-        Ok(ast::PrefixedIdent::from(id).to_string())
+        Ok(ast::PrefixedIdent::from_py(id, py).to_string())
     }
 }
 
@@ -307,9 +310,33 @@ impl From<UnprefixedIdent> for ast::UnprefixedIdent {
     }
 }
 
+impl FromPy<UnprefixedIdent> for ast::UnprefixedIdent {
+    fn from_py(id: UnprefixedIdent, _py: Python) -> Self {
+        Self::from(id)
+    }
+}
+
+impl From<UnprefixedIdent> for ast::Ident {
+    fn from(id: UnprefixedIdent) -> Self {
+        ast::Ident::Unprefixed(ast::UnprefixedIdent::from(id))
+    }
+}
+
+impl FromPy<UnprefixedIdent> for ast::Ident {
+    fn from_py(id: UnprefixedIdent, _py: Python) -> Self {
+        Self::from(id)
+    }
+}
+
 impl From<ast::UnprefixedIdent> for UnprefixedIdent {
     fn from(id: ast::UnprefixedIdent) -> Self {
         Self::new(id)
+    }
+}
+
+impl FromPy<ast::UnprefixedIdent> for UnprefixedIdent {
+    fn from_py(id: ast::UnprefixedIdent, _py: Python) -> Self {
+        Self::from(id)
     }
 }
 
@@ -366,6 +393,30 @@ pub struct Url{
 impl Url {
     pub fn new(url: url::Url) -> Self {
         Self { inner: url }
+    }
+}
+
+impl FromPy<url::Url> for Url {
+    fn from_py(url: url::Url, _py: Python) -> Self {
+        Self::new(url)
+    }
+}
+
+impl From<Url> for fastobo::ast::Ident {
+    fn from(url: Url) -> Self {
+        fastobo::ast::Ident::Url(url.inner)
+    }
+}
+
+impl FromPy<Url> for fastobo::ast::Ident {
+    fn from_py(url: Url, _py: Python) -> Self {
+        Self::from(url)
+    }
+}
+
+impl FromPy<Url> for url::Url {
+    fn from_py(url: Url, _py: Python) -> Self {
+        url.inner
     }
 }
 

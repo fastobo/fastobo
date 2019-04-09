@@ -26,10 +26,15 @@ pub use self::prefixed::PrefixedIdent;
 pub use self::subclasses::ClassIdent;
 pub use self::subclasses::ClassId;
 pub use self::subclasses::InstanceIdent;
+pub use self::subclasses::InstanceId;
 pub use self::subclasses::NamespaceIdent;
+pub use self::subclasses::NamespaceId;
 pub use self::subclasses::RelationIdent;
+pub use self::subclasses::RelationId;
 pub use self::subclasses::SubsetIdent;
+pub use self::subclasses::SubsetId;
 pub use self::subclasses::SynonymTypeIdent;
+pub use self::subclasses::SynonymTypeId;
 pub use self::unprefixed::UnprefixedIdent;
 pub use self::unprefixed::UnprefixedId;
 

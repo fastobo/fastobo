@@ -16,18 +16,6 @@ macro_rules! ident_subclass {
             id: Ident,
         }
 
-        impl From<Ident> for $name {
-            fn from(id: Ident) -> Self {
-                $name { id }
-            }
-        }
-
-        impl From<$name> for Ident {
-            fn from(id: $name) -> Self {
-                id.id
-            }
-        }
-
         impl AsRef<Ident> for $name {
             fn as_ref(&self) -> &Ident {
                 &self.id
@@ -40,7 +28,19 @@ macro_rules! ident_subclass {
             }
         }
 
-        impl<'i> FromPair<'i> for $name {
+        impl From<Ident> for $name {
+            fn from(id: Ident) -> Self {
+                $name { id }
+            }
+        }
+
+        impl From<$name> for Ident {
+            fn from(id: $name) -> Self {
+                id.id
+            }
+        }
+
+        impl<'i> crate::parser::FromPair<'i> for $name {
             const RULE: Rule = $rule;
             unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
                 Ident::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
@@ -64,10 +64,16 @@ macro_rules! ident_subclasses {
 
 
 macro_rules! id_subclass {
-    (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident : &$life:lifetime $borrowed:ident) => {
+    (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident : &$life:lifetime $owned:ident) => {
         #[doc=$docstring]
         pub struct $name<$life> {
             inner: Id<$life>
+        }
+
+        impl<$life> ::std::fmt::Display for $name<$life> {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                self.inner.fmt(f)
+            }
         }
 
         impl<$life> From<Id<$life>> for $name<$life> {
@@ -84,31 +90,43 @@ macro_rules! id_subclass {
             }
         }
 
-        // TODO
-        // impl<'i> FromPair<'i> for $name<'i> {
-        //     const RULE: Rule = $rule;
-        //     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-        //         Id::from_pair_unchecked(pair.into_inner().next().unwrap())
-        //             .map(From::from)
-        //     }
-        // }
+        impl<'i> crate::parser::FromPair<'i> for $name<'i> {
+            const RULE: Rule = $rule;
+            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+                Id::from_pair_unchecked(pair.into_inner().next().unwrap())
+                    .map(From::from)
+            }
+        }
 
+        impl<'i> crate::parser::FromSlice<'i> for $name<'i> {
+            type Err = $crate::error::Error;
+            fn from_slice(s: &'i str) -> $crate::error::Result<Self> {
+                Id::from_slice(s).map(From::from)
+            }
+        }
 
-        impl<$life> crate::borrow::Borrow<$life, $name<$life>> for $borrowed {
+        impl<$life> crate::borrow::Borrow<$life, $name<$life>> for $owned {
             fn borrow(&$life self) -> $name<$life> {
                 $name::from(self.id.borrow())
             }
         }
 
+        impl<$life> crate::borrow::ToOwned<$life> for $name<$life> {
+            type Owned = $owned;
+            fn to_owned(&$life self) -> $owned {
+                let id = <Id<$life> as crate::borrow::ToOwned<$life>>::to_owned(&self.inner);
+                $owned::from(id)
+            }
+        }
     }
 }
 
 
-
-
-
-
-
+macro_rules! id_subclasses {
+    ($(#[doc = $docstring:literal] $rule:expr => pub struct $name:ident : &$life:lifetime $owned:ident;)*) => {
+        $(id_subclass!(#[doc = $docstring] $rule => pub struct $name : &$life $owned);)*
+    }
+}
 
 // NB(@althonos): All identifiers are defined as separate typedefs so that
 //                `PartialEq` is not implemented and trying to compare a
@@ -134,7 +152,22 @@ ident_subclasses! {
 }
 
 
-id_subclass! {
-    ///
-    Rule::ClassId => pub struct ClassId: &'a ClassIdent
+id_subclasses! {
+    /// A borrowed `ClassIdent`.
+    Rule::ClassId => pub struct ClassId: &'a ClassIdent;
+
+    /// A borrowed `InstanceIdent`
+    Rule::InstanceId => pub struct InstanceId: &'a InstanceIdent;
+
+    /// A borrowed `NamespaceIdent`.
+    Rule::NamespaceId => pub struct NamespaceId: &'a NamespaceIdent;
+
+    /// A borrowed `RelationIdent`.
+    Rule::RelationId => pub struct RelationId: &'a RelationIdent;
+
+    /// A borrowed `SubsetIdent`.
+    Rule::SubsetId => pub struct SubsetId: &'a SubsetIdent;
+
+    /// A borrowed `SynonymTypeIdent`.
+    Rule::SynonymTypeId => pub struct SynonymTypeId: &'a SynonymTypeIdent;
 }

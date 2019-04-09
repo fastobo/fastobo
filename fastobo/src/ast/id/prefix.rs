@@ -6,9 +6,9 @@ use std::fmt::Write;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
@@ -102,15 +102,9 @@ impl AsRef<str> for IdentPrefix {
     }
 }
 
-impl<'a> Borrow<'a, IdPrefix<'a>> for IdentPrefix {
-    fn borrow(&'a self) -> IdPrefix<'a> {
-        unsafe { IdPrefix::new_unchecked(&self.value, self.canonical) }
-    }
-}
-
 impl Display for IdentPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.borrow().fmt(f)
+        self.share().fmt(f)
     }
 }
 
@@ -133,6 +127,13 @@ impl<'i> FromPair<'i> for IdentPrefix {
     }
 }
 impl_fromstr!(IdentPrefix);
+
+impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
+    fn share(&'a self) -> IdPrefix<'a> {
+        unsafe { IdPrefix::new_unchecked(&self.value, self.canonical) }
+    }
+}
+
 
 /// A borrowed `IdentPrefix`
 #[derive(Clone, Debug)]
@@ -197,9 +198,9 @@ impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
 }
 impl_fromslice!('i, Cow<'i, IdPrefix<'i>>);
 
-impl<'a> ToOwned<'a> for IdPrefix<'a> {
+impl<'a> Redeem<'a> for IdPrefix<'a> {
     type Owned = IdentPrefix;
-    fn to_owned(&self) -> IdentPrefix {
+    fn redeem(&self) -> IdentPrefix {
         unsafe {
             IdentPrefix::new_unchecked(self.value.to_string(), self.canonical)
         }

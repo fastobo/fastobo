@@ -9,9 +9,9 @@ use fastobo::ast;
 use fastobo::ast as obo;
 use fastobo::ast::UnquotedString;
 use fastobo::ast::QuotedString;
-use fastobo::borrow::Cow;
-use fastobo::borrow::Borrow;
-use fastobo::borrow::ToOwned;
+use fastobo::share::Share;
+use fastobo::share::Cow;
+use fastobo::share::Redeem;
 
 use pyo3::prelude::*;
 use pyo3::PyTypeInfo;

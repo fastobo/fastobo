@@ -5,8 +5,6 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 use pest::Parser;
 
-use crate::borrow::Borrow;
-use crate::borrow::ToOwned;
 use crate::error::Error;
 
 mod quickfind;

@@ -8,9 +8,9 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
-use crate::borrow::Borrow;
+use crate::share::Cow;
+use crate::share::Share;
+use crate::share::Redeem;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
@@ -23,17 +23,17 @@ pub enum PropertyValue {
     Typed(RelationIdent, QuotedString, Ident),
 }
 
-impl<'a> Borrow<'a, PropVal<'a>> for PropertyValue {
-    fn borrow(&'a self) -> PropVal<'a> {
+impl<'a> Share<'a, PropVal<'a>> for PropertyValue {
+    fn share(&'a self) -> PropVal<'a> {
         match self {
             PropertyValue::Identified(p, v) => PropVal::Identified(
-                Cow::Borrowed(p.borrow()),
-                Cow::Borrowed(v.borrow()),
+                Cow::Borrowed(p.share()),
+                Cow::Borrowed(v.share()),
             ),
             PropertyValue::Typed(p, v, t) => PropVal::Typed(
-                Cow::Borrowed(p.borrow()),
-                Cow::Borrowed(v.borrow()),
-                Cow::Borrowed(t.borrow()),
+                Cow::Borrowed(p.share()),
+                Cow::Borrowed(v.share()),
+                Cow::Borrowed(t.share()),
             )
         }
     }
@@ -41,7 +41,7 @@ impl<'a> Borrow<'a, PropVal<'a>> for PropertyValue {
 
 impl Display for PropertyValue {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.borrow().fmt(f)
+        self.share().fmt(f)
     }
 }
 
@@ -78,19 +78,14 @@ pub enum PropVal<'a> {
     Typed(Cow<'a, RelationId<'a>>, Cow<'a, &'a QuotedStr>, Cow<'a, Id<'a>>)
 }
 
-impl<'a> ToOwned<'a> for PropVal<'a> {
+impl<'a> Redeem<'a> for PropVal<'a> {
     type Owned = PropertyValue;
-    fn to_owned(&'a self) -> PropertyValue {
+    fn redeem(&'a self) -> PropertyValue {
         match self {
-            PropVal::Identified(p, v) => PropertyValue::Identified(
-                p.to_owned(),
-                <Cow<Id> as crate::borrow::ToOwned>::to_owned(v)
-            ),
-            PropVal::Typed(p, v, t) => PropertyValue::Typed(
-                p.to_owned(),
-                <Cow<&QuotedStr> as crate::borrow::ToOwned>::to_owned(v),
-                t.to_owned(),
-            )
+            PropVal::Identified(p, v) =>
+                PropertyValue::Identified(p.redeem(), v.redeem()),
+            PropVal::Typed(p, v, t) =>
+                PropertyValue::Typed(p.redeem(), v.redeem(), t.redeem()),
         }
     }
 }

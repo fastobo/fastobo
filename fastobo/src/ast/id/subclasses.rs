@@ -5,7 +5,10 @@ use pest::iterators::Pair;
 use crate::ast::*;
 use crate::error::Result;
 use crate::parser::FromPair;
+use crate::parser::FromSlice;
 use crate::parser::Rule;
+use crate::share::Share;
+use crate::share::Redeem;
 
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! ident_subclass {
@@ -90,7 +93,7 @@ macro_rules! id_subclass {
             }
         }
 
-        impl<'i> crate::parser::FromPair<'i> for $name<'i> {
+        impl<'i> FromPair<'i> for $name<'i> {
             const RULE: Rule = $rule;
             unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
                 Id::from_pair_unchecked(pair.into_inner().next().unwrap())
@@ -98,24 +101,23 @@ macro_rules! id_subclass {
             }
         }
 
-        impl<'i> crate::parser::FromSlice<'i> for $name<'i> {
+        impl<'i> FromSlice<'i> for $name<'i> {
             type Err = $crate::error::Error;
             fn from_slice(s: &'i str) -> $crate::error::Result<Self> {
                 Id::from_slice(s).map(From::from)
             }
         }
 
-        impl<$life> crate::borrow::Borrow<$life, $name<$life>> for $owned {
-            fn borrow(&$life self) -> $name<$life> {
-                $name::from(self.id.borrow())
+        impl<$life> Share<$life, $name<$life>> for $owned {
+            fn share(&$life self) -> $name<$life> {
+                $name::from(self.id.share())
             }
         }
 
-        impl<$life> crate::borrow::ToOwned<$life> for $name<$life> {
+        impl<$life> Redeem<$life> for $name<$life> {
             type Owned = $owned;
-            fn to_owned(&$life self) -> $owned {
-                let id = <Id<$life> as crate::borrow::ToOwned<$life>>::to_owned(&self.inner);
-                $owned::from(id)
+            fn redeem(&$life self) -> $owned {
+                $owned::from(self.inner.redeem())
             }
         }
     }

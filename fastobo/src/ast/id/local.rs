@@ -6,9 +6,9 @@ use std::fmt::Write;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
@@ -95,15 +95,15 @@ impl AsRef<str> for IdentLocal {
     }
 }
 
-impl<'a> Borrow<'a, IdLocal<'a>> for IdentLocal {
-    fn borrow(&'a self) -> IdLocal<'a> {
+impl<'a> Share<'a, IdLocal<'a>> for IdentLocal {
+    fn share(&'a self) -> IdLocal<'a> {
         unsafe { IdLocal::new_unchecked(&self.value, self.canonical) }
     }
 }
 
 impl Display for IdentLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.borrow().fmt(f)
+        self.share().fmt(f)
     }
 }
 
@@ -181,9 +181,9 @@ impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
 }
 impl_fromslice!('i, Cow<'i, IdLocal<'i>>);
 
-impl<'a> ToOwned<'a> for IdLocal<'a> {
+impl<'a> Redeem<'a> for IdLocal<'a> {
     type Owned = IdentLocal;
-    fn to_owned(&self) -> Self::Owned {
+    fn redeem(&self) -> Self::Owned {
         unsafe {
             IdentLocal::new_unchecked(self.value.to_owned(), self.canonical)
         }

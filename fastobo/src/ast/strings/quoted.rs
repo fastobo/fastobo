@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::borrow::ToOwned;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -11,9 +13,9 @@ use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use super::escape;
 use super::unescape;
 
@@ -60,7 +62,7 @@ impl AsRef<str> for QuotedString {
 
 impl AsRef<QuotedStr> for QuotedString {
     fn as_ref(&self) -> &QuotedStr {
-        <Self as Borrow<&QuotedStr>>::borrow(self)
+        self.share()
     }
 }
 
@@ -71,14 +73,14 @@ impl Deref for QuotedString {
     }
 }
 
-impl std::borrow::Borrow<QuotedStr> for QuotedString {
+impl Borrow<QuotedStr> for QuotedString {
     fn borrow(&self) -> &QuotedStr {
         QuotedStr::new(self.as_ref())
     }
 }
 
-impl<'a> Borrow<'a, &'a QuotedStr> for QuotedString {
-    fn borrow(&'a self) -> &'a QuotedStr {
+impl<'a> Share<'a, &'a QuotedStr> for QuotedString {
+    fn share(&'a self) -> &'a QuotedStr {
         QuotedStr::new(&self.value)
     }
 }
@@ -137,16 +139,16 @@ impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
 }
 impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
 
-impl std::borrow::ToOwned for QuotedStr {
+impl ToOwned for QuotedStr {
     type Owned = QuotedString;
     fn to_owned(&self) -> QuotedString {
         QuotedString::new(self.0.to_owned())
     }
 }
 
-impl<'a> ToOwned<'a> for &'a QuotedStr {
+impl<'a> Redeem<'a> for &'a QuotedStr {
     type Owned = QuotedString;
-    fn to_owned(&self) -> QuotedString {
+    fn redeem(&self) -> QuotedString {
         QuotedString::new(self.0.to_owned())
     }
 }

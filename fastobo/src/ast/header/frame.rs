@@ -8,9 +8,9 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;

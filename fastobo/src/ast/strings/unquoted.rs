@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::borrow::ToOwned;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -11,9 +13,9 @@ use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::parser::QuickFind;
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use super::escape;
 use super::unescape;
 
@@ -54,14 +56,14 @@ impl Deref for UnquotedString {
     }
 }
 
-impl std::borrow::Borrow<UnquotedStr> for UnquotedString {
+impl Borrow<UnquotedStr> for UnquotedString {
     fn borrow(&self) -> &UnquotedStr {
         UnquotedStr::new(self.as_ref())
     }
 }
 
-impl<'a> Borrow<'a, &'a UnquotedStr> for UnquotedString {
-    fn borrow(&'a self) -> &'a UnquotedStr {
+impl<'a> Share<'a, &'a UnquotedStr> for UnquotedString {
+    fn share(&'a self) -> &'a UnquotedStr {
         UnquotedStr::new(&self.value)
     }
 }
@@ -116,16 +118,16 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
 }
 impl_fromslice!('i, Cow<'i, &'i UnquotedStr>);
 
-impl std::borrow::ToOwned for UnquotedStr {
+impl ToOwned for UnquotedStr {
     type Owned = UnquotedString;
     fn to_owned(&self) -> UnquotedString {
         UnquotedString::new(self.0.to_owned())
     }
 }
 
-impl<'a> ToOwned<'a> for &'a UnquotedStr {
+impl<'a> Redeem<'a> for &'a UnquotedStr {
     type Owned = UnquotedString;
-    fn to_owned(&'a self) -> UnquotedString {
+    fn redeem(&'a self) -> UnquotedString {
         UnquotedString::new(self.0.to_owned())
     }
 }

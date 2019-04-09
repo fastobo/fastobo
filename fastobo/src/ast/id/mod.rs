@@ -38,9 +38,9 @@ pub use self::subclasses::SynonymTypeId;
 pub use self::unprefixed::UnprefixedIdent;
 pub use self::unprefixed::UnprefixedId;
 
-use crate::borrow::Borrow;
-use crate::borrow::ToOwned;
-use crate::borrow::Cow;
+use crate::share::Share;
+use crate::share::Redeem;
+use crate::share::Cow;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
@@ -51,17 +51,6 @@ pub enum Ident {
     Prefixed(PrefixedIdent),
     Unprefixed(UnprefixedIdent),
     Url(Url),
-}
-
-impl<'a> Borrow<'a, Id<'a>> for Ident {
-    fn borrow(&'a self) -> Id<'a> {
-        use self::Ident::*;
-        match self {
-            Ident::Prefixed(ref id) => Id::Prefixed(Cow::Borrowed(id.borrow())),
-            Ident::Unprefixed(ref id) => Id::Unprefixed(Cow::Borrowed(id)),
-            Ident::Url(ref url) => Id::Url(Cow::Borrowed(url)),
-        }
-    }
 }
 
 impl Display for Ident {
@@ -107,6 +96,17 @@ impl<'i> FromPair<'i> for Ident {
     }
 }
 impl_fromstr!(Ident);
+
+impl<'a> Share<'a, Id<'a>> for Ident {
+    fn share(&'a self) -> Id<'a> {
+        use self::Ident::*;
+        match self {
+            Ident::Prefixed(ref id) => Id::Prefixed(Cow::Borrowed(id.share())),
+            Ident::Unprefixed(ref id) => Id::Unprefixed(Cow::Borrowed(id)),
+            Ident::Url(ref url) => Id::Url(Cow::Borrowed(url)),
+        }
+    }
+}
 
 /// A borrowed `Identifier`.
 pub enum Id<'a> {
@@ -158,16 +158,19 @@ impl<'i> FromPair<'i> for Id<'i> {
 }
 impl_fromslice!('i, Id<'i>);
 
-impl<'a> ToOwned<'a> for Id<'a> {
+impl<'a> Redeem<'a> for Id<'a> {
     type Owned = Ident;
-    fn to_owned(&'a self) -> Ident {
+    fn redeem(&'a self) -> Ident {
         match self {
-            Id::Prefixed(Cow::Owned(id)) => Ident::Prefixed(id.clone()),
-            Id::Prefixed(Cow::Borrowed(id)) => Ident::Prefixed(<PrefixedId as crate::borrow::ToOwned>::to_owned(id)),
-            Id::Unprefixed(Cow::Owned(id)) => Ident::Unprefixed(id.clone()),
-            Id::Unprefixed(Cow::Borrowed(id)) => Ident::Unprefixed(<&UnprefixedId as crate::borrow::ToOwned>::to_owned(id)),
-            Id::Url(Cow::Owned(url)) => Ident::Url(url.clone()),
-            Id::Url(Cow::Borrowed(url)) => Ident::Url((*url).clone()),
+            Id::Prefixed(cow) => Ident::Prefixed(cow.redeem()),
+            Id::Unprefixed(cow) => Ident::Unprefixed(cow.redeem()),
+            Id::Url(cow) => Ident::Url(cow.redeem())
+            // Id::Prefixed(Cow::Owned(id)) => Ident::Prefixed(id.clone()),
+            // Id::Prefixed(Cow::Borrowed(id)) => Ident::Prefixed(<PrefixedId as crate::borrow::ToOwned>::to_owned(id)),
+            // Id::Unprefixed(Cow::Owned(id)) => Ident::Unprefixed(id.clone()),
+            // Id::Unprefixed(Cow::Borrowed(id)) => Ident::Unprefixed(<&UnprefixedId as crate::borrow::ToOwned>::to_owned(id)),
+            // Id::Url(Cow::Owned(url)) => Ident::Url(url.clone()),
+            // Id::Url(Cow::Borrowed(url)) => Ident::Url((*url).clone()),
         }
     }
 }

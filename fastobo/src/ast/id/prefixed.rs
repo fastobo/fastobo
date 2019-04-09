@@ -6,9 +6,9 @@ use std::fmt::Write;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
@@ -49,27 +49,18 @@ impl PrefixedIdent {
 
     /// The prefix of the prefixed identifier.
     pub fn prefix(&self) -> IdPrefix<'_> {
-        self.prefix.borrow()
+        self.prefix.share()
     }
 
     /// The local part of the prefixed identifier.
     pub fn local(&self) -> IdLocal<'_> {
-        self.local.borrow()
-    }
-}
-
-impl<'a> Borrow<'a, PrefixedId<'a>> for PrefixedIdent {
-    fn borrow(&'a self) -> PrefixedId<'a> {
-        PrefixedId::new(
-            self.prefix.borrow(),
-            self.local.borrow(),
-        )
+        self.local.share()
     }
 }
 
 impl Display for PrefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.borrow().fmt(f)
+        self.share().fmt(f)
     }
 }
 
@@ -83,6 +74,15 @@ impl<'i> FromPair<'i> for PrefixedIdent {
     }
 }
 impl_fromstr!(PrefixedIdent);
+
+impl<'a> Share<'a, PrefixedId<'a>> for PrefixedIdent {
+    fn share(&'a self) -> PrefixedId<'a> {
+        PrefixedId::new(
+            self.prefix.share(),
+            self.local.share(),
+        )
+    }
+}
 
 /// A borrowed `PrefixedIdentifier`
 #[derive(Clone, Debug)]
@@ -121,13 +121,10 @@ impl<'i> FromPair<'i> for Cow<'i, PrefixedId<'i>> {
 }
 impl_fromslice!('i, Cow<'i, PrefixedId<'i>>);
 
-impl<'a> ToOwned<'a> for PrefixedId<'a> {
+impl<'a> Redeem<'a> for PrefixedId<'a> {
     type Owned = PrefixedIdent;
-    fn to_owned(&'a self) -> PrefixedIdent {
-        PrefixedIdent::new(
-            <Cow<IdPrefix> as ToOwned<'a>>::to_owned(&self.prefix),
-            <Cow<IdLocal> as ToOwned<'a>>::to_owned(&self.local),
-        )
+    fn redeem(&'a self) -> PrefixedIdent {
+        PrefixedIdent::new(self.prefix.redeem(), self.local.redeem())
     }
 }
 

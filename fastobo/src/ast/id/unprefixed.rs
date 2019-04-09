@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::borrow::ToOwned;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -7,9 +9,9 @@ use std::ops::Deref;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::borrow::Borrow;
-use crate::borrow::Cow;
-use crate::borrow::ToOwned;
+use crate::share::Share;
+use crate::share::Cow;
+use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
@@ -81,8 +83,8 @@ impl AsRef<UnprefixedId> for UnprefixedIdent {
     }
 }
 
-impl<'a> Borrow<'a, &'a UnprefixedId> for UnprefixedIdent {
-    fn borrow(&'a self) -> &'a UnprefixedId {
+impl Borrow<UnprefixedId> for UnprefixedIdent {
+    fn borrow(&self) -> &UnprefixedId {
         self.as_ref()
     }
 }
@@ -96,7 +98,7 @@ impl Deref for UnprefixedIdent {
 
 impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.borrow().fmt(f)
+        self.share().fmt(f)
     }
 }
 
@@ -111,6 +113,12 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
     }
 }
 impl_fromstr!(UnprefixedIdent);
+
+impl<'a> Share<'a, &'a UnprefixedId> for UnprefixedIdent {
+    fn share(&'a self) -> &'a UnprefixedId {
+        self.as_ref()
+    }
+}
 
 /// A borrowed `UnprefixedIdentifier`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
@@ -153,9 +161,16 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnprefixedId> {
 }
 impl_fromslice!('i, Cow<'i, &'i UnprefixedId>);
 
-impl<'a> ToOwned<'a> for &'a UnprefixedId {
+impl<'a> Redeem<'a> for &'a UnprefixedId {
     type Owned = UnprefixedIdent;
-    fn to_owned(&'a self) -> UnprefixedIdent {
+    fn redeem(&'a self) -> UnprefixedIdent {
+        UnprefixedIdent::new(self.0.to_string())
+    }
+}
+
+impl ToOwned for UnprefixedId {
+    type Owned = UnprefixedIdent;
+    fn to_owned(&self) -> Self::Owned {
         UnprefixedIdent::new(self.0.to_string())
     }
 }

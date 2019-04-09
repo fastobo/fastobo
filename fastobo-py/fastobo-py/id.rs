@@ -11,9 +11,9 @@ use pyo3::types::PyAny;
 use pyo3::types::PyString;
 
 use fastobo::ast;
-use fastobo::borrow::Borrow;
-use fastobo::borrow::Cow;
-use fastobo::borrow::ToOwned;
+use fastobo::share::Share;
+use fastobo::share::Cow;
+use fastobo::share::Redeem;
 
 use crate::_utils::AsGILRef;
 
@@ -197,8 +197,8 @@ impl FromPy<PrefixedIdent> for ast::Ident {
 impl FromPy<ast::PrefixedIdent> for PrefixedIdent {
     fn from_py(id: ast::PrefixedIdent, py: Python) -> Self {
 
-        let prefix = fastobo::borrow::ToOwned::to_owned(&id.prefix());
-        let local = fastobo::borrow::ToOwned::to_owned(&id.local());
+        let prefix = id.prefix().redeem();
+        let local = id.local().redeem();
 
         Self::new(
             Py::new(py, prefix.into())
@@ -340,19 +340,19 @@ impl UnprefixedIdent {
     }
 
     fn as_ref<'p>(&'p self, _py: Python<'p>) -> &'p ast::UnprefixedId {
-        self.inner.borrow()
+        self.inner.share()
     }
 }
 
 impl AsRef<ast::UnprefixedId> for UnprefixedIdent {
     fn as_ref(&self) -> &ast::UnprefixedId {
-        self.inner.borrow()
+        self.inner.share()
     }
 }
 
 impl<'p> AsGILRef<'p, &'p fastobo::ast::UnprefixedId> for UnprefixedIdent {
     fn as_gil_ref(&'p self, _py: Python<'p>) -> &'p fastobo::ast::UnprefixedId {
-        self.inner.borrow()
+        self.inner.share()
     }
 }
 
@@ -525,7 +525,7 @@ impl IdentPrefix {
 
 impl<'p> AsGILRef<'p, fastobo::ast::IdPrefix<'p>> for IdentPrefix {
     fn as_gil_ref(&'p self, _py: Python<'p>) -> fastobo::ast::IdPrefix<'p> {
-        self.inner.borrow()
+        self.inner.share()
     }
 }
 
@@ -583,13 +583,13 @@ impl IdentLocal {
     }
 
     pub fn as_ref(&self, _py: Python) -> fastobo::ast::IdLocal<'_> {
-        self.inner.borrow()
+        self.inner.share()
     }
 }
 
 impl<'p> AsGILRef<'p, fastobo::ast::IdLocal<'p>> for IdentLocal {
     fn as_gil_ref(&'p self, _py: Python<'p>) -> fastobo::ast::IdLocal<'p> {
-        self.inner.borrow()
+        self.inner.share()
     }
 }
 

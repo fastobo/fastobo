@@ -10,8 +10,8 @@ use pyo3::types::PyAny;
 use pyo3::types::PyString;
 
 use fastobo::ast;
-use fastobo::borrow::Cow;
-use fastobo::borrow::Borrow;
+use fastobo::share::Cow;
+use fastobo::share::Share;
 
 use crate::id::Ident;
 use crate::_utils::AsGILRef;
@@ -94,7 +94,7 @@ impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for TypedPropertyValue  {
     fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::PropVal<'p> {
         fastobo::ast::PropVal::Typed(
             Cow::Borrowed(self.relation.as_gil_ref(py).into()),
-            Cow::Borrowed(self.value.borrow()),
+            Cow::Borrowed(self.value.share()),
             Cow::Borrowed(self.datatype.as_gil_ref(py))
         )
     }

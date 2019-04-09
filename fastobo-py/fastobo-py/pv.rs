@@ -164,8 +164,8 @@ impl PyObjectProtocol for TypedPropertyValue {
 
     fn __repr__(&self) -> PyResult<PyObject> {
         let py = unsafe { Python::assume_gil_acquired() };
-        let fmt = PyString::new(py, "TypedPropertyValue({!r}, {!r}, {!r})").to_object(py);
-        fmt.call_method1(py, "format", (
+        let fmt = PyString::new(py, "TypedPropertyValue({!r}, {!r}, {!r})");
+        fmt.to_object(py).call_method1(py, "format", (
             self.relation.to_object(py),
             self.value.as_str(),
             self.datatype.to_object(py))
@@ -200,11 +200,67 @@ impl IdentifiedPropertyValue {
     }
 }
 
+impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for IdentifiedPropertyValue {
+    fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::PropVal<'p> {
+        fastobo::ast::PropVal::Identified(
+            Cow::Borrowed(self.relation.as_gil_ref(py).into()),
+            Cow::Borrowed(self.value.as_gil_ref(py).into())
+        )
+    }
+}
+
 impl FromPy<IdentifiedPropertyValue> for fastobo::ast::PropertyValue {
     fn from_py(pv: IdentifiedPropertyValue, py: Python) -> Self {
         fastobo::ast::PropertyValue::Identified(
             pv.relation.into_py(py),
             pv.value.into_py(py),
         )
+    }
+}
+
+#[pymethods]
+impl IdentifiedPropertyValue {
+    #[new]
+    fn __init__(obj: &PyRawObject, relation: Ident, value: Ident) -> PyResult<()> {
+        Ok(obj.init(Self::new(obj.py(), relation, value)))
+    }
+
+    #[getter]
+    fn get_relation(&self) -> PyResult<&Ident> {
+        Ok(&self.relation)
+    }
+
+    #[setter]
+    fn set_relation(&mut self, relation: Ident) -> PyResult<()> {
+        self.relation = relation;
+        Ok(())
+    }
+
+    #[getter]
+    fn get_value(&self) -> PyResult<&Ident> {
+        Ok(&self.value)
+    }
+
+    #[setter]
+    fn set_value(&mut self, value: Ident) -> PyResult<()> {
+        self.value = value;
+        Ok(())
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for IdentifiedPropertyValue {
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        let fmt = PyString::new(py, "IdentifiedPropertyValue({!r}, {!r})");
+        fmt.to_object(py).call_method1(py, "format", (
+            self.relation.to_object(py),
+            self.value.to_object(py),
+        ))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.as_gil_ref(py).to_string())
     }
 }

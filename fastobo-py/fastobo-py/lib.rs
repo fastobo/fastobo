@@ -15,3 +15,4 @@ extern crate fastobo_py_derive;
 
 mod utils;
 mod py;
+mod pyfile;

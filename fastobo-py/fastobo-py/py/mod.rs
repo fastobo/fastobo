@@ -4,6 +4,7 @@ use std::string::ToString;
 
 use pyo3::prelude::*;
 use pyo3::PyTypeInfo;
+use pyo3::PyNativeType;
 use pyo3::types::PyAny;
 use pyo3::types::PyList;
 use pyo3::types::PyString;
@@ -20,6 +21,7 @@ use pyo3::class::gc::PyVisit;
 use fastobo::ast as obo;
 
 use crate::utils::AsGILRef;
+use crate::pyfile::PyFile;
 
 // -------------------------------------------------------------------------
 
@@ -99,10 +101,17 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
                 Ok(doc) => Ok(doc.into_py(py)),
                 Err(e) => ValueError::into(format!("load failed: {}", e)),
             }
+
+        } else if let Ok(f) = PyFile::from_object(fh.py(), fh) {
+            let mut bufreader = std::io::BufReader::new(f);
+            match obo::OboDoc::from_stream(&mut bufreader) {
+                Ok(doc) => Ok(doc.into_py(py)),
+                Err(e) => ValueError::into(format!("load failed: {}", e)),
+            }
         } else {
-            return pyo3::exceptions::NotImplementedError::into(
+            pyo3::exceptions::NotImplementedError::into(
                 "cannot only use load with a path right now"
-            );
+            )
         }
     }
 

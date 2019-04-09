@@ -1,4 +1,5 @@
 use std::iter::FromIterator;
+use std::iter::IntoIterator;
 
 use fastobo::ast as obo;
 use pyo3::prelude::*;
@@ -20,25 +21,9 @@ use super::HeaderClause;
 use super::BaseHeaderClause;
 
 #[pyclass]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct HeaderFrame {
     clauses: Vec<HeaderClause>
-}
-
-impl Clone for HeaderFrame {
-    fn clone(&self) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
-        Self {
-            clauses: self.clauses.iter().map(|r| r.clone()).collect()
-        }
-    }
-}
-
-impl ToPyObject for HeaderFrame {
-    fn to_object(&self, py: Python) -> PyObject {
-        PyList::new(py, &self.clauses).into_object(py)
-    }
 }
 
 impl HeaderFrame {
@@ -47,14 +32,36 @@ impl HeaderFrame {
     }
 }
 
-impl From<obo::HeaderFrame> for HeaderFrame {
-    fn from(frame: fastobo::ast::HeaderFrame) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
-        let clauses = frame.clauses
+impl FromIterator<HeaderClause> for HeaderFrame {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item=HeaderClause>
+    {
+        Self::new(iter.into_iter().collect())
+    }
+}
+
+impl FromPy<obo::HeaderFrame> for HeaderFrame {
+    fn from_py(frame: fastobo::ast::HeaderFrame, py: Python) -> Self {
+        frame.clauses
             .into_iter()
-            .map(|clause| HeaderClause::from_py(clause, py));
-        Self::new(clauses.collect())
+            .map(|clause| HeaderClause::from_py(clause, py))
+            .collect()
+    }
+}
+
+impl FromPy<HeaderFrame> for obo::HeaderFrame {
+    fn from_py(frame: HeaderFrame, py: Python) -> Self {
+        frame.clauses
+            .into_iter()
+            .map(|clause| obo::HeaderClause::from_py(clause, py))
+            .collect()
+    }
+}
+
+impl ToPyObject for HeaderFrame {
+    fn to_object(&self, py: Python) -> PyObject {
+        PyList::new(py, &self.clauses).into_object(py)
     }
 }
 
@@ -65,6 +72,16 @@ impl PyObjectProtocol for HeaderFrame {
         let py = gil.python();
         let fmt = PyString::new(py, "HeaderFrame({!r})").to_object(py);
         fmt.call_method1(py, "format", (self.to_object(py),))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        let frame: obo::HeaderFrame = self
+            .clauses
+            .iter()
+            .map(|c| FromPy::from_py(c, py))
+            .collect();
+        Ok(frame.to_string())
     }
 }
 

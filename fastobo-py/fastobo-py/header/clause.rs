@@ -1067,7 +1067,7 @@ impl PyObjectProtocol for TreatXrefsAsHasSubclassClause {
         let gil = Python::acquire_gil();
         let py = gil.python();
         let fmt = PyString::new(py, "OwlAxiomsClause({!r})").to_object(py);
-        fmt.call_method1(py, "format", (self.idspace.as_ref().as_str(),))
+        fmt.call_method1(py, "format", (self.idspace.as_ref(py).as_str(),))
     }
 }
 

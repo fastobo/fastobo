@@ -228,12 +228,13 @@ impl FromPy<FormatVersionClause> for obo::HeaderClause {
     }
 }
 
-impl FormatVersionClause {
-    fn to_ref<'s>(&'s self) -> obo::HeaderClauseRef<'s> {
-        let s: &'s str = self.version.as_ref();
-        obo::HeaderClauseRef::FormatVersion(Cow::Borrowed(obo::UnquotedStr::new(s)))
-    }
-}
+// WIP(@althonos):
+// impl FormatVersionClause {
+//     fn to_ref<'s>(&'s self) -> obo::HeaderClauseRef<'s> {
+//         let s: &'s str = self.version.as_ref();
+//         obo::HeaderClauseRef::FormatVersion(Cow::Borrowed(obo::UnquotedStr::new(s)))
+//     }
+// }
 
 #[pymethods]
 impl FormatVersionClause {

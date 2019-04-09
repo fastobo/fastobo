@@ -58,9 +58,10 @@ impl<'i> FromPair<'i> for HeaderFrame {
 }
 impl_fromstr!(HeaderFrame);
 
-pub struct HeaderFrameRef<'a> {
-    pub clauses: Cow<'a, &'a [HeaderClauseRef<'a>]>
-}
+// WIP(@althonos)
+// pub struct HeaderFrameRef<'a> {
+//     pub clauses: Cow<'a, &'a [HeaderClauseRef<'a>]>
+// }
 
 #[cfg(test)]
 mod tests {

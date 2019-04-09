@@ -4,9 +4,11 @@ use std::iter::IntoIterator;
 use fastobo::ast as obo;
 use pyo3::prelude::*;
 use pyo3::PyTypeInfo;
+use pyo3::PyNativeType;
 use pyo3::types::PyAny;
 use pyo3::types::PyList;
 use pyo3::types::PyString;
+use pyo3::types::PyIterator;
 use pyo3::exceptions::RuntimeError;
 use pyo3::exceptions::IndexError;
 use pyo3::exceptions::TypeError;
@@ -118,5 +120,17 @@ impl PySequenceProtocol for HeaderFrame {
         }
         self.clauses.remove(index as usize);
         Ok(())
+    }
+    fn __concat__(&self, other: &PyAny) -> PyResult<Self> {
+
+        let iterator = PyIterator::from_object(other.py(), other)?;
+
+        // FIXME(@althonos): double GIL acquisition
+        let mut new_clauses = self.clauses.clone();
+        for item in iterator {
+            new_clauses.push(HeaderClause::extract(item?)?);
+        }
+
+        Ok(Self::new(new_clauses))
     }
 }

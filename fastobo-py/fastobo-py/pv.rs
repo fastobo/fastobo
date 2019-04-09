@@ -10,8 +10,11 @@ use pyo3::types::PyAny;
 use pyo3::types::PyString;
 
 use fastobo::ast;
+use fastobo::borrow::Cow;
+use fastobo::borrow::Borrow;
 
 use crate::id::Ident;
+use crate::_utils::AsGILRef;
 
 // --- Module export ---------------------------------------------------------
 
@@ -87,6 +90,16 @@ impl TypedPropertyValue {
     }
 }
 
+impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for TypedPropertyValue  {
+    fn as_ref(&'p self, py: Python<'p>) -> fastobo::ast::PropVal<'p> {
+        fastobo::ast::PropVal::Typed(
+            Cow::Borrowed(self.relation.as_ref(py).into()),
+            Cow::Borrowed(self.value.borrow()),
+            Cow::Borrowed(self.datatype.as_ref(py))
+        )
+    }
+}
+
 impl FromPy<TypedPropertyValue> for fastobo::ast::PropertyValue {
     fn from_py(pv: TypedPropertyValue, py: Python) -> Self {
         fastobo::ast::PropertyValue::Typed(
@@ -94,6 +107,74 @@ impl FromPy<TypedPropertyValue> for fastobo::ast::PropertyValue {
             pv.value,
             pv.datatype.into_py(py),
         )
+    }
+}
+
+#[pymethods]
+impl TypedPropertyValue {
+    #[new]
+    fn __init__(obj: &PyRawObject, relation: &PyAny , value: &PyAny, datatype: &PyAny) -> PyResult<()> {
+        let r = relation.extract::<Ident>()?;
+        let v = if let Ok(s) = value.extract::<&PyString>() {
+            ast::QuotedString::new(s.to_string()?.to_string())
+        } else {
+            let n = value.get_type().name();
+            return TypeError::into(format!("expected str for value, found {}", n))
+        };
+        let dt = datatype.extract::<Ident>()?;
+        Ok(obj.init(Self::new(obj.py(), r, v, dt)))
+    }
+
+    #[getter]
+    fn get_relation(&self) -> PyResult<&Ident> {
+        Ok(&self.relation)
+    }
+
+    #[setter]
+    fn set_relation(&mut self, relation: Ident) -> PyResult<()> {
+        self.relation = relation;
+        Ok(())
+    }
+
+    #[getter]
+    fn get_value(&self) -> PyResult<&str> {
+        Ok(self.value.as_str())
+    }
+
+    #[setter]
+    fn set_value(&mut self, value: String) -> PyResult<()> {
+        self.value = fastobo::ast::QuotedString::new(value);
+        Ok(())
+    }
+
+    #[getter]
+    fn get_datatype(&self) -> PyResult<&Ident> {
+        Ok(&self.datatype)
+    }
+
+    #[setter]
+    fn set_datatype(&mut self, datatype: Ident) -> PyResult<()> {
+        self.datatype = datatype;
+        Ok(())
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for TypedPropertyValue {
+
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        let fmt = PyString::new(py, "TypedPropertyValue({!r}, {!r}, {!r})").to_object(py);
+        fmt.call_method1(py, "format", (
+            self.relation.to_object(py),
+            self.value.as_str(),
+            self.datatype.to_object(py))
+        )
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.as_ref(py).to_string())
     }
 }
 

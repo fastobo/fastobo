@@ -12,7 +12,10 @@ use pyo3::types::PyString;
 
 use fastobo::ast;
 use fastobo::borrow::Borrow;
+use fastobo::borrow::Cow;
 use fastobo::borrow::ToOwned;
+
+use crate::_utils::ptr_to_ref;
 
 // --- Module export ----------------------------------------------------------
 
@@ -53,6 +56,27 @@ pub enum Ident {
     Unprefixed(Py<UnprefixedIdent>),
     Prefixed(Py<PrefixedIdent>),
     Url(Py<Url>),
+}
+
+impl Ident {
+    pub fn as_ref<'p>(&'p self, py: Python<'p>) -> fastobo::ast::Id<'p> {
+        unsafe {
+            match self {
+                Ident::Unprefixed(ref id) => {
+                    let x: &UnprefixedIdent = ptr_to_ref(py, id.as_ref(py).as_ptr());
+                    fastobo::ast::Id::Unprefixed(Cow::Borrowed(x.as_ref(py)))
+                }
+                Ident::Prefixed(ref id) => {
+                    let x: &PrefixedIdent = ptr_to_ref(py, id.as_ref(py).as_ptr());
+                    fastobo::ast::Id::Prefixed(Cow::Borrowed(x.as_ref(py)))
+                }
+                Ident::Url(ref url) => {
+                    let x: &Url = ptr_to_ref(py, url.as_ref(py).as_ptr());
+                    fastobo::ast::Id::Url(Cow::Borrowed(x.as_ref(py)))
+                }
+            }
+        }
+    }
 }
 
 impl FromPy<fastobo::ast::Ident> for Ident {
@@ -113,6 +137,22 @@ pub struct PrefixedIdent {
     local: Py<IdentLocal>,
 }
 
+impl PrefixedIdent {
+    fn new(prefix: Py<IdentPrefix>, local: Py<IdentLocal>) -> Self {
+        PrefixedIdent { prefix, local }
+    }
+
+    fn as_ref<'p>(&'p self, py: Python<'p>) -> fastobo::ast::PrefixedId<'p> {
+        // NB(@althonos): We can actually access the data as long as we hold
+        //                the GIL ('p), so we're fine here.
+        unsafe {
+            let prefix: &IdentPrefix = ptr_to_ref(py, self.prefix.as_ref(py).as_ptr());
+            let local: &IdentLocal = ptr_to_ref(py, self.local.as_ref(py).as_ptr());
+            fastobo::ast::PrefixedId::new(prefix.as_ref(py), local.as_ref(py))
+        }
+    }
+}
+
 impl Clone for PrefixedIdent {
     fn clone(&self) -> Self {
         let gil = Python::acquire_gil();
@@ -136,12 +176,6 @@ impl PartialEq for PrefixedIdent {
 }
 
 impl Eq for PrefixedIdent {}
-
-impl PrefixedIdent {
-    fn new(prefix: Py<IdentPrefix>, local: Py<IdentLocal>) -> Self {
-        PrefixedIdent { prefix, local }
-    }
-}
 
 impl FromPy<PrefixedIdent> for ast::PrefixedIdent {
     fn from_py(ident: PrefixedIdent, py: Python) -> Self {
@@ -302,6 +336,16 @@ impl UnprefixedIdent {
     fn new(id: ast::UnprefixedIdent) -> Self {
         UnprefixedIdent { inner: id }
     }
+
+    fn as_ref<'p>(&'p self, _py: Python<'p>) -> &'p ast::UnprefixedId {
+        self.inner.borrow()
+    }
+}
+
+impl AsRef<ast::UnprefixedId> for UnprefixedIdent {
+    fn as_ref(&self) -> &ast::UnprefixedId {
+        self.inner.borrow()
+    }
 }
 
 impl From<UnprefixedIdent> for ast::UnprefixedIdent {
@@ -394,6 +438,10 @@ impl Url {
     pub fn new(url: url::Url) -> Self {
         Self { inner: url }
     }
+
+    pub fn as_ref<'p>(&'p self, py: Python<'p>) -> &'p url::Url {
+        &self.inner
+    }
 }
 
 impl FromPy<url::Url> for Url {
@@ -445,7 +493,7 @@ impl PyObjectProtocol for Url {
     }
 }
 
-/// --- IdentPrefix ----------------------------------------------------------
+// --- IdentPrefix -----------------------------------------------------------
 
 /// The prefix of a prefixed identifier.
 #[pyclass]
@@ -458,6 +506,10 @@ pub struct IdentPrefix {
 impl IdentPrefix {
     pub fn new(prefix: ast::IdentPrefix) -> Self {
         Self { inner: prefix }
+    }
+
+    pub fn as_ref<'p>(&'p self, _py: Python<'p>) -> fastobo::ast::IdPrefix<'p> {
+        self.inner.borrow()
     }
 }
 
@@ -500,7 +552,7 @@ impl PyObjectProtocol for IdentPrefix {
     }
 }
 
-/// --- IdentLocal -----------------------------------------------------------
+// --- IdentLocal ------------------------------------------------------------
 
 #[pyclass]
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
@@ -512,6 +564,10 @@ pub struct IdentLocal {
 impl IdentLocal {
     pub fn new(local: ast::IdentLocal) -> Self {
         Self { inner: local }
+    }
+
+    pub fn as_ref(&self, _py: Python) -> fastobo::ast::IdLocal<'_> {
+        self.inner.borrow()
     }
 }
 

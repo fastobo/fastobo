@@ -25,7 +25,7 @@ stages:
   before_install:
     - ci/travis/setup.sh
   script:
-    - cargo tarpaulin -v --out Xml --ciserver travis-ci
+    - cargo tarpaulin -v -p fastobo --out Xml --ciserver travis-ci
   after_script:
     - curl -SsL "https://codecov.io/bash" | bash
 

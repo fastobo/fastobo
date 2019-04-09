@@ -38,15 +38,15 @@ case "$TRAVIS_TAG" in
 	# Release fastobo-py
 	v*-py)
 		python setup.py sdist bdist_wheel
-		twine upload --skip-existing dist/*.{whl,tar.gz}
+		twine upload --skip-existing dist/*.whl dist/*.tar.gz
 		;;
 	# Release dev version of `fastobo-py`
 	*)
 		VERSION=$(python setup.py --version)-dev$(git rev-list --count --all)+$(git rev-parse HEAD)
 		sed -i "s/version = $(python setup.py --version)/version = $VERSION/g" setup.cfg
 		log Publishing fastobo-py $VERSION
-		python setup.py bdist_wheel
-		twine upload --skip-existing dist/*.{whl,tar.gz} 
+		python setup.py sdist bdist_wheel
+		twine upload --skip-existing dist/*.whl dist/*.tar.gz
 		;;
 esac
 

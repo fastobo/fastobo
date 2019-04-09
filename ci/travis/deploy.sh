@@ -20,28 +20,38 @@ error() {
 
 
 
-# --- Publish crate to `crates.io` ---------------------------------------------
+# --- Publish crate to `crates.io` and/or `pypi.org` -------------------------
 
 case "$TRAVIS_TAG" in
+	# Release fastobo-syntax
 	v*-syntax)
 		cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
 		log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
 		cargo publish --token $CRATES_IO_TOKEN
 		;;
+	# Release fastobo
 	v*)
 		cd "$TRAVIS_BUILD_DIR/fastobo"
 		log Publishing fastobo $TRAVIS_TAG
 		cargo publish --token $CRATES_IO_TOKEN
 		;;
-
+	# Release fastobo-py
+	v*-py)
+		python setup.py sdist bdist_wheel
+		twine upload --skip-existing dist/*.{whl,tar.gz}
+		;;
+	# Release dev version of `fastobo-py`
 	*)
-		error Error invalid or missing tag: $TRAVIS_TAG
-		exit 1
+		VERSION=$(python setup.py --version)-dev$(git rev-list --count --all)+$(git rev-parse HEAD)
+		sed -i "s/version = $(python setup.py --version)/version = $VERSION/g" setup.cfg
+		log Publishing fastobo-py $VERSION
+		python setup.py bdist_wheel
+		twine upload --skip-existing dist/*.{whl,tar.gz} 
 		;;
 esac
 
 
-# --- Update release tags using Chandler ---------------------------------------
+# --- Update release tags using Chandler -------------------------------------
 
 export GEM_PATH="$(ruby -r rubygems -e 'puts Gem.user_dir')"
 export PATH="${GEM_PATH}/bin:$PATH"
@@ -63,8 +73,4 @@ case "$TRAVIS_TAG" in
 			--changelog="CHANGELOG.md" \
 			--git="../.git"
 			;;
-	*)
-		error Error invalid or missing tag: $TRAVIS_TAG
-		exit 1
-		;;
 esac

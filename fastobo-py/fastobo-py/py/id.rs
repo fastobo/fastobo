@@ -124,12 +124,23 @@ impl_convert!(NamespaceIdent, Ident);
 
 // --- Base -------------------------------------------------------------------
 
+/// A sequence of character used to refer to an OBO entity.
 #[pyclass(subclass)]
 pub struct BaseIdent {}
 
 // --- PrefixedIdent ----------------------------------------------------------
 
 /// An identifier with a prefix.
+///
+/// Example:
+///     >>> ident = fastobo.id.PrefixedIdent('GO', '0009637')
+///     >>> ident.prefix
+///     IdentPrefix('GO')
+///     >>> ident.local
+///     IdentLocal('0009637')
+///     >>> str(ident)
+///     'GO:0009637'
+///
 #[pyclass(extends=BaseIdent)]
 #[derive(Debug)]
 pub struct PrefixedIdent {
@@ -212,6 +223,15 @@ impl FromPy<ast::PrefixedIdent> for PrefixedIdent {
 #[pymethods]
 impl PrefixedIdent {
 
+    /// Create a new `PrefixedIdent` instance.
+    ///
+    /// Arguments passed as `str` must be in unescaped form, otherwise double
+    /// escaping will occur when serializing this identifier.
+    ///
+    /// Arguments:
+    ///     prefix (str or `IdentPrefix`): the idspace of the identifier.
+    ///     local (str or `IdentLocal`): the local part of the identifier.
+    ///
     #[new]
     fn __init__(obj: &PyRawObject, prefix: &PyAny, local: &PyAny) -> PyResult<()> {
 
@@ -318,15 +338,12 @@ impl PyObjectProtocol for PrefixedIdent {
 /// An identifier without a prefix.
 ///
 /// Example:
-///
-///     .. code::
-///
-///         >>> import fastobo
-///         >>> ident = fastobo.id.UnprefixedIdent(\"hello world\")
-///         >>> print(ident.escaped)
-///         hello\\ world
-///         >>> print(ident.unescaped)
-///         hello world
+///     >>> import fastobo
+///     >>> ident = fastobo.id.UnprefixedIdent(\"hello world\")
+///     >>> print(ident.escaped)
+///     hello\\ world
+///     >>> print(ident.unescaped)
+///     hello world
 ///
 #[pyclass(extends=BaseIdent)]
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
@@ -435,6 +452,19 @@ impl PyObjectProtocol for UnprefixedIdent {
 // --- UrlIdent ---------------------------------------------------------------
 
 /// A URL used as an identifier.
+///
+/// Use `str` to retrieve a serialized string of the inner URL.
+///
+/// Example:
+///     >>> import fastobo
+///     >>> id = fastobo.id.Url('http://purl.obolibrary.org/obo/GO_0070412')
+///     >>> str(id)
+///     'http://purl.obolibrary.org/obo/GO_0070412'
+///     >>> fastobo.id.Url('created_by')
+///     Traceback (most recent call last):
+///         ...
+///     ValueError: invalid url: ...
+///
 #[pyclass(extends=BaseIdent)]
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 #[opaque_typedef(derive(FromInner, IntoInner))]
@@ -484,6 +514,15 @@ impl FromPy<Url> for url::Url {
 
 #[pymethods]
 impl Url {
+
+    /// Create a new URL identifier.
+    ///
+    /// Arguments:
+    ///     value (str): the string containing the URL to use as an
+    ///         identifier.
+    ///
+    /// Raises:
+    ///     ValueError: when the given string is not a valid URL.
     #[new]
     fn __init__(obj: &PyRawObject, value: &str) -> PyResult<()> {
         match url::Url::from_str(value) {
@@ -502,6 +541,7 @@ impl PyObjectProtocol for Url {
         fmt.call_method1(py, "format", (self.inner.as_str(),))
     }
 
+    /// Retrieve the URL in a serialized form.
     fn __str__(&self) -> PyResult<String> {
         Ok(self.inner.to_string())
     }
@@ -570,6 +610,7 @@ impl PyObjectProtocol for IdentPrefix {
 
 // --- IdentLocal ------------------------------------------------------------
 
+/// The local component of a prefixed identifier.
 #[pyclass]
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 #[opaque_typedef(derive(FromInner, IntoInner))]

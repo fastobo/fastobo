@@ -36,6 +36,8 @@ use fastobo::ast as obo;
 
 // -------------------------------------------------------------------------
 
+mod _utils;
+
 pub mod header;
 pub mod id;
 pub mod pv;

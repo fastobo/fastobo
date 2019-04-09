@@ -110,6 +110,17 @@ impl<'a> Display for PrefixedId<'a> {
     }
 }
 
+impl<'i> FromPair<'i> for Cow<'i, PrefixedId<'i>> {
+    const RULE: Rule = Rule::PrefixedId;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+        let mut inners = pair.into_inner();
+        let prefix = Cow::<IdPrefix>::from_pair_unchecked(inners.next().unwrap())?;
+        let local = Cow::<IdLocal>::from_pair_unchecked(inners.next().unwrap())?;
+        Ok(Cow::Borrowed(PrefixedId { prefix, local }))
+    }
+}
+impl_fromslice!('i, Cow<'i, PrefixedId<'i>>);
+
 impl<'a> ToOwned<'a> for PrefixedId<'a> {
     type Owned = PrefixedIdent;
     fn to_owned(&'a self) -> PrefixedIdent {

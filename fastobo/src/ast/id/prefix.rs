@@ -159,12 +159,6 @@ impl<'a> IdPrefix<'a> {
     }
 }
 
-impl<'a> Into<&'a str> for IdPrefix<'a> {
-    fn into(self) -> &'a str {
-        self.value
-    }
-}
-
 impl<'a> AsRef<str> for IdPrefix<'a> {
     fn as_ref(&self) -> &str {
         &self.value
@@ -180,6 +174,27 @@ impl<'a> Display for IdPrefix<'a> {
         }
     }
 }
+
+impl<'a> Into<&'a str> for IdPrefix<'a> {
+    fn into(self) -> &'a str {
+        self.value
+    }
+}
+
+impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
+    const RULE: Rule = Rule::IdPrefix;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+        let inner = pair.into_inner().next().unwrap();
+        if inner.as_rule() == Rule::CanonicalIdPrefix {
+            Ok(Cow::Borrowed(IdPrefix::new_unchecked(inner.as_str(), true)))
+        } else if inner.as_str().find('\\').is_some() {
+            IdentPrefix::from_pair_unchecked(inner).map(Cow::Owned)
+        } else {
+            Ok(Cow::Borrowed(IdPrefix::new_unchecked(inner.as_str(), false)))
+        }
+    }
+}
+impl_fromslice!('i, Cow<'i, IdPrefix<'i>>);
 
 impl<'a> ToOwned<'a> for IdPrefix<'a> {
     type Owned = IdentPrefix;

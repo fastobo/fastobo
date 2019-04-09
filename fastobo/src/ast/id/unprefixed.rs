@@ -133,7 +133,6 @@ impl AsRef<str> for UnprefixedId {
     }
 }
 
-// TODO(@althonos)
 impl Display for UnprefixedId {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         escape(f, &self.0)

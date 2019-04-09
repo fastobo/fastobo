@@ -139,6 +139,34 @@ impl<'a> From<&'a Url> for Id<'a> {
     }
 }
 
+impl<'i> FromPair<'i> for Id<'i> {
+    const RULE: Rule = Rule::Id;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+        let inner = pair.into_inner().next().unwrap();
+        match inner.as_rule() {
+            Rule::PrefixedId => Cow::<PrefixedId>::from_pair_unchecked(inner).map(Id::Prefixed),
+            Rule::UnprefixedId => Cow::<&UnprefixedId>::from_pair_unchecked(inner).map(Id::Unprefixed),
+            Rule::UrlId => Url::from_pair_unchecked(inner).map(Cow::Owned).map(Id::Url),
+            _ => unreachable!()
+        }
+    }
+}
+impl_fromslice!('i, Id<'i>);
+
+impl<'a> ToOwned<'a> for Id<'a> {
+    type Owned = Ident;
+    fn to_owned(&'a self) -> Ident {
+        match self {
+            Id::Prefixed(Cow::Owned(id)) => Ident::Prefixed(id.clone()),
+            Id::Prefixed(Cow::Borrowed(id)) => Ident::Prefixed(<PrefixedId as crate::borrow::ToOwned>::to_owned(id)),
+            Id::Unprefixed(Cow::Owned(id)) => Ident::Unprefixed(id.clone()),
+            Id::Unprefixed(Cow::Borrowed(id)) => Ident::Unprefixed(<&UnprefixedId as crate::borrow::ToOwned>::to_owned(id)),
+            Id::Url(Cow::Owned(url)) => Ident::Url(url.clone()),
+            Id::Url(Cow::Borrowed(url)) => Ident::Url((*url).clone()),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

@@ -148,6 +148,12 @@ impl<'a> IdLocal<'a> {
     }
 }
 
+impl<'a> AsRef<str> for IdLocal<'a> {
+    fn as_ref(&self) -> &str {
+        self.value
+    }
+}
+
 impl<'a> Display for IdLocal<'a> {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         if self.canonical {
@@ -158,11 +164,20 @@ impl<'a> Display for IdLocal<'a> {
     }
 }
 
-impl<'a> AsRef<str> for IdLocal<'a> {
-    fn as_ref(&self) -> &str {
-        self.value
+impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
+    const RULE: Rule = Rule::IdLocal;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+        let inner = pair.into_inner().next().unwrap();
+        if inner.as_rule() == Rule::CanonicalIdLocal {
+            Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), true)))
+        } else if inner.as_str().find('\\').is_some() {
+            IdentLocal::from_pair_unchecked(inner).map(Cow::Owned)
+        } else {
+            Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), false)))
+        }
     }
 }
+impl_fromslice!('i, Cow<'i, IdLocal<'i>>);
 
 impl<'a> ToOwned<'a> for IdLocal<'a> {
     type Owned = IdentLocal;

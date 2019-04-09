@@ -9,3 +9,15 @@
 [![Crate](https://img.shields.io/crates/v/fastobo.svg?maxAge=600&style=flat-square)](https://crates.io/crates/fastobo)
 [![Documentation](https://img.shields.io/badge/docs.rs-latest-4d76ae.svg?maxAge=2678400&style=flat-square)](https://docs.rs/fastobo)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo/blob/master/CHANGELOG.md)
+
+
+## About
+
+This library provides an abstract syntax tree for the [OBO flat file format 1.4](http://owlcollab.github.io/oboformat/doc/obo-syntax.html).
+
+
+## Features
+
+* [x] Support for trailing qualifiers
+* [x] Support for inline comments
+* [ ] Support for comment blocks between frames

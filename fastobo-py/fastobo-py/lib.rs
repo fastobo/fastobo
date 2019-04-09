@@ -60,7 +60,7 @@ impl Clone for OboDoc {
 
 impl FromPy<obo::OboDoc> for OboDoc {
     fn from_py(doc: obo::OboDoc, py: Python) -> Self {
-        let header = HeaderFrame::from(doc.header().clone());
+        let header = HeaderFrame::from_py(doc.header, py);
         Self {
             header: Py::new(py, header)
                 .expect("could not move header to Python heap")

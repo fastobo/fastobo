@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import datetime
 import unittest
 
 import fastobo
@@ -61,6 +62,52 @@ class TestDataVersionClause(_TestUnquotedStringClause, unittest.TestCase):
         vc1.version = "1.3"
         self.assertEqual(vc1.version, "1.3")
         self.assertEqual(repr(vc1), "DataVersionClause('1.3')")
+
+
+class TestDateClause(unittest.TestCase):
+
+    type = fastobo.header.DateClause
+
+    def test_init(self):
+        try:
+            vc = self.type(datetime.datetime.now())
+        except Exception:
+            self.fail("could not create `{}` instance", self.type.__name__)
+
+    def test_init_type_error(self):
+        self.assertRaises(TypeError, self.type, 1)
+        self.assertRaises(TypeError, self.type, [])
+
+    @unittest.expectedFailure
+    def test_repr(self):
+        now = datetime.datetime.now()
+        x = self.type(now)
+        self.assertEqual(repr(x), "{}({!r})".format(self.type.__name__, now))
+
+    @unittest.expectedFailure
+    def test_eq(self):
+        now = datetime.datetime.now()
+        x = self.type(now)
+        self.assertEqual(x, self.type(now))
+        self.assertNotEqual(x, self.type(datetime.datetime.now()))
+
+    def test_str(self):
+        then = datetime.datetime(2019, 4, 8, 16, 51)
+        vc = self.type(then)
+        self.assertEqual(str(vc), "date: 08:04:2019 16:51")
+
+    @unittest.expectedFailure
+    def test_property_version(self):
+        now = datetime.datetime.now()
+        vc1 = self.type(now)
+        self.assertEqual(vc1.date, now)
+
+        then = datetime.datetime(2019, 4, 8, 16, 51)
+        vc1.date = then
+        self.assertEqual(vc1.date, then)
+
+        with self.assertRaises(TypeError):
+            vc1.date = 1
 
 
 class TestSavedByClause(_TestUnquotedStringClause, unittest.TestCase):

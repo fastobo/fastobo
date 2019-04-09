@@ -16,6 +16,8 @@ extern crate failure;
 extern crate opaque_typedef_macros;
 
 extern crate fastobo_syntax;
+#[cfg(feature = "memchr")]
+extern crate memchr;
 extern crate opaque_typedef;
 extern crate pest;
 extern crate url;

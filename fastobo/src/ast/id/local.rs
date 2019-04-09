@@ -13,6 +13,7 @@ use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::parser::QuickFind;
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
@@ -116,9 +117,10 @@ impl<'i> FromPair<'i> for IdentLocal {
         }
 
         // Unescape the local ID if it is non canonical.
-        let mut local = String::with_capacity(inner.as_str().len());
-        unescape(&mut local, inner.as_str())
-            .expect("fmt::Write cannot fail on a String");
+        let s = inner.as_str();
+        let escaped = s.quickcount(b'\\');
+        let mut local = String::with_capacity(s.len() + escaped);
+        unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
 
         Ok(Self::new_unchecked(local, false))
     }

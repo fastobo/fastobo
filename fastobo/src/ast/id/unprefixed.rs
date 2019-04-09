@@ -14,6 +14,7 @@ use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::parser::QuickFind;
 
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
@@ -102,9 +103,10 @@ impl Display for UnprefixedIdent {
 impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-        let mut local = String::with_capacity(pair.as_str().len());
-        unescape(&mut local, pair.as_str())
-            .expect("fmt::Write cannot fail on a String");
+        let s = pair.as_str();
+        let escaped = s.quickcount(b'\\');
+        let mut local = String::with_capacity(s.len() + escaped);
+        unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
         Ok(Self::new(local))
     }
 }
@@ -142,7 +144,7 @@ impl Display for UnprefixedId {
 impl<'i> FromPair<'i> for Cow<'i, &'i UnprefixedId> {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-        if pair.as_str().find('\\').is_some() {
+        if pair.as_str().quickfind(b'\\').is_some() {
             UnprefixedIdent::from_pair_unchecked(pair).map(Cow::Owned)
         } else {
             Ok(Cow::Borrowed(UnprefixedId::new(pair.as_str())))

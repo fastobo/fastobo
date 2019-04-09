@@ -9,6 +9,7 @@ use opaque_typedef::OpaqueTypedefUnsized;
 
 use crate::error::Error;
 use crate::parser::FromPair;
+use crate::parser::QuickFind;
 use crate::parser::Rule;
 use crate::borrow::Borrow;
 use crate::borrow::Cow;
@@ -93,7 +94,8 @@ impl<'i> FromPair<'i> for QuotedString {
     const RULE: Rule = Rule::QuotedString;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self, Error> {
         let s = pair.as_str();
-        let mut local = String::with_capacity(s.len());
+        let escaped = s.quickcount(b'\\');
+        let mut local = String::with_capacity(s.len() + escaped);
         unescape(&mut local, s.get_unchecked(1..s.len() - 1))
             .expect("String as fmt::Write cannot fail");
         Ok(QuotedString::new(local))
@@ -126,7 +128,7 @@ impl<'a> Display for QuotedStr {
 impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
     const RULE: Rule = Rule::QuotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
-        if pair.as_str().find('\\').is_some() {
+        if pair.as_str().quickfind(b'\\').is_some() {
             QuotedString::from_pair_unchecked(pair).map(|s| Cow::Owned(s))
         } else {
             Ok(Cow::Borrowed(QuotedStr::new(pair.as_str())))

@@ -9,10 +9,14 @@ use crate::borrow::Borrow;
 use crate::borrow::ToOwned;
 use crate::error::Error;
 
+mod quickfind;
+
 #[doc(inline)]
 pub use fastobo_syntax::OboParser;
 #[doc(inline)]
 pub use fastobo_syntax::Rule;
+
+pub use self::quickfind::QuickFind;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///

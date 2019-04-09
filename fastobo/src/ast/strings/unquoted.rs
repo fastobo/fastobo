@@ -10,6 +10,7 @@ use pest::iterators::Pair;
 use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::parser::QuickFind;
 use crate::borrow::Borrow;
 use crate::borrow::Cow;
 use crate::borrow::ToOwned;
@@ -76,7 +77,8 @@ impl<'i> FromPair<'i> for UnquotedString {
     const RULE: Rule = Rule::UnquotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         let s = pair.as_str();
-        let mut local = String::with_capacity(s.len());
+        let escaped = s.quickcount(b'\\'); // number of escaped characters
+        let mut local = String::with_capacity(s.len() + escaped);
         unescape(&mut local, s).expect("String as fmt::Write cannot fail");
         Ok(UnquotedString::new(local))
     }
@@ -105,7 +107,7 @@ impl<'a> Display for UnquotedStr {
 impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
     const RULE: Rule = Rule::UnquotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
-        if pair.as_str().find('\\').is_some() {
+        if pair.as_str().quickfind(b'\\').is_some() {
             UnquotedString::from_pair_unchecked(pair).map(|s| Cow::Owned(s))
         } else {
             Ok(Cow::Borrowed(UnquotedStr::new(pair.as_str())))

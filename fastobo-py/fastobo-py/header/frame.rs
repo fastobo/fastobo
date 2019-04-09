@@ -67,6 +67,22 @@ impl ToPyObject for HeaderFrame {
     }
 }
 
+#[pymethods]
+impl HeaderFrame {
+    #[new]
+    pub fn __init__(obj: &PyRawObject, clauses: Option<&PyAny>) -> PyResult<()> {
+        if let Some(c) = clauses {
+            let mut vec = Vec::new();
+            for item in PyIterator::from_object(c.py(), c)? {
+                vec.push(HeaderClause::extract(item?)?);
+            }
+            Ok(obj.init(Self::new(vec)))
+        } else {
+            Ok(obj.init(Self::new(Vec::new())))
+        }
+    }
+}
+
 #[pyproto]
 impl PyObjectProtocol for HeaderFrame {
     fn __repr__(&self) -> PyResult<PyObject> {

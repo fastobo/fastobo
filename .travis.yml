@@ -2,9 +2,11 @@ sudo: false
 dist: xenial
 
 cache:
-  pip: true
-  cargo: true
-  dir: $SCCACHE_DIR
+  directories:
+    - $SCCACHE_DIR
+    - $HOME/.cache/pip
+    - $HOME/.cargo
+    - $TRAVIS_BUILD_DIR/target
 
 env:
   global:

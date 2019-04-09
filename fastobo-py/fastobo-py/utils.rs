@@ -10,7 +10,6 @@ pub trait AsGILRef<'p, T>: 'p {
     fn as_gil_ref(&'p self, py: Python<'p>) -> T;
 }
 
-
 impl<'p, T> AsGILRef<'p, &'p T> for Py<T>
 where
     T: PyTypeInfo,
@@ -19,7 +18,6 @@ where
         unsafe { ptr_to_ref(py, self.as_ref(py).as_ptr()) }
     }
 }
-
 
 unsafe fn ptr_to_ref<'p, T>(_py: Python<'p>, t: *mut PyObject) -> &'p T
 where

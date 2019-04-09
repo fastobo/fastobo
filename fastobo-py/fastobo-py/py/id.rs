@@ -15,7 +15,7 @@ use fastobo::share::Share;
 use fastobo::share::Cow;
 use fastobo::share::Redeem;
 
-use crate::_utils::AsGILRef;
+use crate::utils::AsGILRef;
 
 // --- Module export ----------------------------------------------------------
 
@@ -321,8 +321,8 @@ impl PyObjectProtocol for PrefixedIdent {
 ///
 ///     .. code::
 ///
-///         >>> from fastobo import UnprefixedIdent
-///         >>> ident = UnprefixedIdent(\"hello world\")
+///         >>> import fastobo
+///         >>> ident = fastobo.id.UnprefixedIdent(\"hello world\")
 ///         >>> print(ident.escaped)
 ///         hello\\ world
 ///         >>> print(ident.unescaped)

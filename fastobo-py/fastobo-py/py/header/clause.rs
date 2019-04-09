@@ -34,12 +34,12 @@ use pyo3::class::gc::PyVisit;
 use pyo3::type_object::PyTypeCreate;
 use pyo3::class::basic::CompareOp;
 
-use crate::id::Url;
-use crate::id::Ident;
-use crate::id::IdentPrefix;
-use crate::id::BaseIdent;
-use crate::pv::PropertyValue;
-use crate::_utils::AsGILRef;
+use super::super::id::Url;
+use super::super::id::Ident;
+use super::super::id::IdentPrefix;
+use super::super::id::BaseIdent;
+use super::super::pv::PropertyValue;
+use crate::utils::AsGILRef;
 
 // --- Macros ----------------------------------------------------------------
 

@@ -13,8 +13,8 @@ use fastobo::ast;
 use fastobo::share::Cow;
 use fastobo::share::Share;
 
-use crate::id::Ident;
-use crate::_utils::AsGILRef;
+use crate::utils::AsGILRef;
+use super::id::Ident;
 
 // --- Module export ---------------------------------------------------------
 

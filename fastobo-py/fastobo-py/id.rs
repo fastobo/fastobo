@@ -15,7 +15,7 @@ use fastobo::borrow::Borrow;
 use fastobo::borrow::Cow;
 use fastobo::borrow::ToOwned;
 
-use crate::_utils::ptr_to_ref;
+use crate::_utils::AsGILRef;
 
 // --- Module export ----------------------------------------------------------
 
@@ -58,21 +58,21 @@ pub enum Ident {
     Url(Py<Url>),
 }
 
-impl Ident {
-    pub fn as_ref<'p>(&'p self, py: Python<'p>) -> fastobo::ast::Id<'p> {
+impl<'p> AsGILRef<'p, fastobo::ast::Id<'p>> for Ident {
+    fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::Id<'p> {
         unsafe {
             match self {
                 Ident::Unprefixed(ref id) => {
-                    let x: &UnprefixedIdent = ptr_to_ref(py, id.as_ref(py).as_ptr());
-                    fastobo::ast::Id::Unprefixed(Cow::Borrowed(x.as_ref(py)))
+                    let x: &UnprefixedIdent = id.as_gil_ref(py);
+                    fastobo::ast::Id::Unprefixed(Cow::Borrowed(x.as_gil_ref(py)))
                 }
                 Ident::Prefixed(ref id) => {
-                    let x: &PrefixedIdent = ptr_to_ref(py, id.as_ref(py).as_ptr());
-                    fastobo::ast::Id::Prefixed(Cow::Borrowed(x.as_ref(py)))
+                    let x: &PrefixedIdent = id.as_gil_ref(py);
+                    fastobo::ast::Id::Prefixed(Cow::Borrowed(x.as_gil_ref(py)))
                 }
                 Ident::Url(ref url) => {
-                    let x: &Url = ptr_to_ref(py, url.as_ref(py).as_ptr());
-                    fastobo::ast::Id::Url(Cow::Borrowed(x.as_ref(py)))
+                    let x: &Url = url.as_gil_ref(py);
+                    fastobo::ast::Id::Url(Cow::Borrowed(x.as_gil_ref(py)))
                 }
             }
         }
@@ -141,14 +141,16 @@ impl PrefixedIdent {
     fn new(prefix: Py<IdentPrefix>, local: Py<IdentLocal>) -> Self {
         PrefixedIdent { prefix, local }
     }
+}
 
-    fn as_ref<'p>(&'p self, py: Python<'p>) -> fastobo::ast::PrefixedId<'p> {
+impl<'p> AsGILRef<'p, fastobo::ast::PrefixedId<'p>> for PrefixedIdent {
+    fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::PrefixedId<'p> {
         // NB(@althonos): We can actually access the data as long as we hold
         //                the GIL ('p), so we're fine here.
         unsafe {
-            let prefix: &IdentPrefix = ptr_to_ref(py, self.prefix.as_ref(py).as_ptr());
-            let local: &IdentLocal = ptr_to_ref(py, self.local.as_ref(py).as_ptr());
-            fastobo::ast::PrefixedId::new(prefix.as_ref(py), local.as_ref(py))
+            let prefix: &IdentPrefix = self.prefix.as_gil_ref(py);
+            let local: &IdentLocal = self.local.as_gil_ref(py);
+            fastobo::ast::PrefixedId::new(prefix.as_gil_ref(py), local.as_gil_ref(py))
         }
     }
 }
@@ -348,6 +350,12 @@ impl AsRef<ast::UnprefixedId> for UnprefixedIdent {
     }
 }
 
+impl<'p> AsGILRef<'p, &'p fastobo::ast::UnprefixedId> for UnprefixedIdent {
+    fn as_gil_ref(&'p self, _py: Python<'p>) -> &'p fastobo::ast::UnprefixedId {
+        self.inner.borrow()
+    }
+}
+
 impl From<UnprefixedIdent> for ast::UnprefixedIdent {
     fn from(id: UnprefixedIdent) -> Self {
         id.inner
@@ -444,6 +452,12 @@ impl Url {
     }
 }
 
+impl<'p> AsGILRef<'p, &'p url::Url> for Url {
+    fn as_gil_ref(&'p self, _py: Python<'p>) -> &'p url::Url{
+        &self.inner
+    }
+}
+
 impl FromPy<url::Url> for Url {
     fn from_py(url: url::Url, _py: Python) -> Self {
         Self::new(url)
@@ -507,8 +521,10 @@ impl IdentPrefix {
     pub fn new(prefix: ast::IdentPrefix) -> Self {
         Self { inner: prefix }
     }
+}
 
-    pub fn as_ref<'p>(&'p self, _py: Python<'p>) -> fastobo::ast::IdPrefix<'p> {
+impl<'p> AsGILRef<'p, fastobo::ast::IdPrefix<'p>> for IdentPrefix {
+    fn as_gil_ref(&'p self, _py: Python<'p>) -> fastobo::ast::IdPrefix<'p> {
         self.inner.borrow()
     }
 }
@@ -567,6 +583,12 @@ impl IdentLocal {
     }
 
     pub fn as_ref(&self, _py: Python) -> fastobo::ast::IdLocal<'_> {
+        self.inner.borrow()
+    }
+}
+
+impl<'p> AsGILRef<'p, fastobo::ast::IdLocal<'p>> for IdentLocal {
+    fn as_gil_ref(&'p self, _py: Python<'p>) -> fastobo::ast::IdLocal<'p> {
         self.inner.borrow()
     }
 }

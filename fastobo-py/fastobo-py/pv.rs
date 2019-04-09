@@ -91,11 +91,11 @@ impl TypedPropertyValue {
 }
 
 impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for TypedPropertyValue  {
-    fn as_ref(&'p self, py: Python<'p>) -> fastobo::ast::PropVal<'p> {
+    fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::PropVal<'p> {
         fastobo::ast::PropVal::Typed(
-            Cow::Borrowed(self.relation.as_ref(py).into()),
+            Cow::Borrowed(self.relation.as_gil_ref(py).into()),
             Cow::Borrowed(self.value.borrow()),
-            Cow::Borrowed(self.datatype.as_ref(py))
+            Cow::Borrowed(self.datatype.as_gil_ref(py))
         )
     }
 }
@@ -174,7 +174,7 @@ impl PyObjectProtocol for TypedPropertyValue {
 
     fn __str__(&self) -> PyResult<String> {
         let py = unsafe { Python::assume_gil_acquired() };
-        Ok(self.as_ref(py).to_string())
+        Ok(self.as_gil_ref(py).to_string())
     }
 }
 

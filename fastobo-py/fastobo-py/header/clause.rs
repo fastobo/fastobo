@@ -39,6 +39,7 @@ use crate::id::Ident;
 use crate::id::IdentPrefix;
 use crate::id::BaseIdent;
 use crate::pv::PropertyValue;
+use crate::_utils::AsGILRef;
 
 // --- Macros ----------------------------------------------------------------
 
@@ -1067,7 +1068,7 @@ impl PyObjectProtocol for TreatXrefsAsHasSubclassClause {
         let gil = Python::acquire_gil();
         let py = gil.python();
         let fmt = PyString::new(py, "OwlAxiomsClause({!r})").to_object(py);
-        fmt.call_method1(py, "format", (self.idspace.as_ref(py).as_str(),))
+        fmt.call_method1(py, "format", (self.idspace.as_gil_ref(py).as_str(),))
     }
 }
 

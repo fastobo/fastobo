@@ -20,7 +20,7 @@ error() {
 
 release_py() {
 	IMG="quay.io/pypa/manylinux1_x86_64"
-	CP="cp${TRAVIS_PYTHON_VERSION/./}"
+	CP=cp$(echo $TRAVIS_PYTHON_VERSION | sed 's/\.//')
 
 	log Building fastobo-py sdist
 	python setup.py sdist

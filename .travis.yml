@@ -43,22 +43,22 @@ stages:
     - python setup.py build_ext --inplace
   script:
     - python setup.py test
+  after_success:
+    - ci/travis/deploy.sh
 
 jobs:
   include:
-    # - rust: stable
-    #   <<: *test-rust
-    # - rust: beta
-    #   <<: *test-rust
-    # - rust: nightly
-    #   <<: *test-rust
-    # - python: 3.5
-    #   <<: *test-python
-    # - python: 3.6
-    #   <<: *test-python
+    - rust: stable
+      <<: *test-rust
+    - rust: beta
+      <<: *test-rust
+    - rust: nightly
+      <<: *test-rust
+    - python: 3.5
+      <<: *test-python
+    - python: 3.6
+      <<: *test-python
     - python: 3.7
-      after_success:
-        - ci/travis/deploy.sh
       <<: *test-python
 
 # deploy:

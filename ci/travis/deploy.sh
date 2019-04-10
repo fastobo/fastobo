@@ -18,6 +18,19 @@ error() {
 	echo $@
 }
 
+release_py() {
+	IMG="quay.io/pypa/manylinux1_x86_64"
+	CP="cp${TRAVIS_PYTHON_VERSION/./}"
+
+	log Building fastobo-py sdist
+	python setup.py sdist
+
+	log Building fastobo-py wheel
+	docker run --rm -v $TRAVIS_BUILD_DIR:/io $IMG /io/ci/build-wheels.sh $CP
+
+	log Publishing fastobo-py $(python setup.py --version)
+	twine upload --skip-existing dist/*.whl dist/*.tar.gz
+}
 
 
 # --- Publish crate to `crates.io` and/or `pypi.org` -------------------------
@@ -37,19 +50,13 @@ case "$TRAVIS_TAG" in
 		;;
 	# Release fastobo-py
 	v*-py)
-		python setup.py sdist bdist_wheel
-		twine upload --skip-existing dist/*.whl dist/*.tar.gz
+		release_py
 		;;
 	# Release dev version of `fastobo-py`
 	*)
 		VERSION=$(python setup.py --version)-dev$(git rev-list --count --all)
 		sed -i "s/version = $(python setup.py --version)/version = $VERSION/g" setup.cfg
-		log Building fastobo-py sdist
-		python setup.py sdist		
-		log Building fastobo-py wheels
-		docker run --rm -v $TRAVIS_BUILD_DIR:/io quay.io/pypa/manylinux1_x86_64 /io/ci/build-wheels.sh
-		log Publishing fastobo-py $VERSION
-		twine upload --skip-existing dist/*.whl dist/*.tar.gz
+		release_py
 		;;
 esac
 

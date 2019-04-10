@@ -64,14 +64,6 @@ jobs:
     - python: 3.7
       <<: *test-python
 
-# deploy:
-#   provider: script
-#   script: ci/travis/deploy.sh
-#   on:
-#     tags: true
-#     repo: althonos/fastobo
-#     rust: stable
-
 notifications:
   email:
   - althonosdev@gmail.com

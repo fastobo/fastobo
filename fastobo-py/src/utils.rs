@@ -5,7 +5,6 @@ use pyo3::Py;
 use pyo3::PyTypeInfo;
 use pyo3::ffi::PyObject;
 
-
 pub trait AsGILRef<'p, T>: 'p {
     fn as_gil_ref(&'p self, py: Python<'p>) -> T;
 }

@@ -1,13 +1,6 @@
 sudo: false
 dist: xenial
 
-cache:
-  directories:
-    - $SCCACHE_DIR
-    - $HOME/.cache/pip
-    - $HOME/.cargo
-    - $TRAVIS_BUILD_DIR/target
-
 env:
   global:
     - PATH="$HOME/.cargo/bin:$PATH"
@@ -22,6 +15,10 @@ stages:
 .test-rust: &test-rust
   stage: Rust
   language: rust
+  cache:
+    directories:
+      - $SCCACHE_DIR
+      - $HOME/.cargo
   before_install:
     - ci/travis/setup.sh
   script:
@@ -32,6 +29,12 @@ stages:
 .test-python: &test-python
   stage: Python
   language: python
+  cache:
+    directories:
+      - $SCCACHE_DIR
+      - $HOME/.cargo
+      - $HOME/.cache/pip
+      - $TRAVIS_BUILD_DIR/target
   before_install:
     - ci/travis/setup.sh
   before_script:

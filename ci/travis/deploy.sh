@@ -42,7 +42,7 @@ case "$TRAVIS_TAG" in
 		;;
 	# Release dev version of `fastobo-py`
 	*)
-		VERSION=$(python setup.py --version)-dev$(git rev-list --count --all)+$(git rev-parse HEAD)
+		VERSION=$(python setup.py --version)-dev$(git rev-list --count --all)
 		sed -i "s/version = $(python setup.py --version)/version = $VERSION/g" setup.cfg
 		log Publishing fastobo-py $VERSION
 		python setup.py sdist bdist_wheel

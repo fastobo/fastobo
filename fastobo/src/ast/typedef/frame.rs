@@ -12,8 +12,8 @@ use crate::parser::Rule;
 /// A typedef clause, describing a relationship.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypedefFrame {
-    id: Line<RelationIdent>,
-    clauses: Vec<Line<TypedefClause>>,
+    pub id: Line<RelationIdent>,
+    pub clauses: Vec<Line<TypedefClause>>,
 }
 
 impl Display for TypedefFrame {

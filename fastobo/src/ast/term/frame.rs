@@ -13,8 +13,17 @@ use crate::parser::Rule;
 /// A term frame, describing a class.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TermFrame {
-    id: Line<ClassIdent>,
-    clauses: Vec<Line<TermClause>>,
+    pub id: Line<ClassIdent>,
+    pub clauses: Vec<Line<TermClause>>,
+}
+
+impl TermFrame {
+    pub fn new(id: ClassIdent) -> Self {
+        Self {
+            id: Line::from(id),
+            clauses: Vec::new(),
+        }
+    }
 }
 
 impl Display for TermFrame {

@@ -57,7 +57,7 @@ impl<'i> FromPair<'i> for Xref {
 impl_fromstr!(Xref);
 
 /// A list of containing zero or more `Xref`s.
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
 pub struct XrefList {
     xrefs: Vec<Xref>,
 }

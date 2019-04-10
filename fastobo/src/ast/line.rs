@@ -14,9 +14,9 @@ use crate::parser::Rule;
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Line<T> {
-    inner: T,
-    qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
-    comment: Option<Comment>,
+    pub inner: T,
+    pub qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
+    pub comment: Option<Comment>,
 }
 
 impl<T> AsRef<T> for Line<T> {

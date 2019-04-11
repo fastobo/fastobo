@@ -5,7 +5,7 @@ env:
   global:
     - PATH="$HOME/.cargo/bin:$PATH"
     - RUST_BACKTRACE=1
-    - RUSTC_WRAPPER=sccache
+    - RUSTC_WRAPPER="$HOME/.cargo/bin/sccache"
     - SCCACHE_DIR="$HOME/.cache/sccache"
 
 git:
@@ -14,6 +14,7 @@ git:
 stages:
   - name: Rust
   - name: Python
+  - name: Python on OSX
 
 .test-rust: &test-rust
   stage: Rust
@@ -22,7 +23,7 @@ stages:
     directories:
       - $SCCACHE_DIR
       - $HOME/.cargo
-  before_install:
+  install:
     - ci/travis/setup.sh
   script:
     - cargo tarpaulin -v -p fastobo --out Xml --ciserver travis-ci
@@ -32,20 +33,44 @@ stages:
 .test-python: &test-python
   stage: Python
   language: python
+  env:
+    - PYTHON=python
+  cache:
+    directories:
+      - $SCCACHE_DIR
+      - $HOME/.cargo
+      - $HOME/.cache/pip
+      - $HOME/Library/Caches/Homebrew
+      - $TRAVIS_BUILD_DIR/target
+  services:
+    - docker
+  install:
+    - ci/travis/setup.sh
+  before_script:
+    - python setup.py build_ext --inplace
+  script:
+    - python setup.py test
+  before_cache:
+    - brew cleanup
+  after_success:
+    - ci/travis/deploy.sh
+
+.test-python-osx: &test-python-osx
+  stage: Python on OSX
+  os: osx
+  language: generic
   cache:
     directories:
       - $SCCACHE_DIR
       - $HOME/.cargo
       - $HOME/.cache/pip
       - $TRAVIS_BUILD_DIR/target
-  services:
-    - docker
-  before_install:
+  install:
     - ci/travis/setup.sh
   before_script:
-    - python setup.py build_ext --inplace
+    - python3 setup.py build_ext --inplace
   script:
-    - python setup.py test
+    - python3 setup.py test
   after_success:
     - ci/travis/deploy.sh
 
@@ -63,6 +88,13 @@ jobs:
       <<: *test-python
     - python: 3.7
       <<: *test-python
+    - env: PYTHON=python3.6
+      <<: *test-python-osx
+    - env: PYTHON=python3.7
+      before_install:
+        - brew unlink python
+        - brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/python.rb
+      <<: *test-python-osx
 
 notifications:
   email:

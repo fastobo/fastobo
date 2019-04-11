@@ -19,16 +19,20 @@ error() {
 }
 
 release_py() {
-	IMG="quay.io/pypa/manylinux1_x86_64"
-	CP=cp$(echo $TRAVIS_PYTHON_VERSION | sed 's/\.//')
 
 	log Building fastobo-py sdist
-	python setup.py sdist
+	$PYTHON setup.py sdist
 
 	log Building fastobo-py wheel
-	docker run --rm -v $TRAVIS_BUILD_DIR:/io $IMG /io/ci/build-wheels.sh $CP
+	if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+		IMG="quay.io/pypa/manylinux1_x86_64"
+		CP=cp$(echo $TRAVIS_PYTHON_VERSION | sed 's/\.//')
+		docker run --rm -v $TRAVIS_BUILD_DIR:/io $IMG /io/ci/build-wheels.sh $CP
+	else
+		$PYTHON setup.py bdist_wheel
+	fi
 
-	log Publishing fastobo-py $(python setup.py --version)
+	log Publishing fastobo-py $($PYTHON setup.py --version)
 	twine upload --skip-existing dist/*.whl dist/*.tar.gz
 }
 
@@ -38,25 +42,33 @@ release_py() {
 case "$TRAVIS_TAG" in
 	# Release fastobo-syntax
 	v*-syntax)
-		cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
-		log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
-		cargo publish --token $CRATES_IO_TOKEN
+		if [ "$TRAVIS_BUILD_STAGE_NAME" = "Rust" ]; then
+			cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
+			log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
+			cargo publish --token $CRATES_IO_TOKEN
+		fi
 		;;
 	# Release fastobo
 	v*)
-		cd "$TRAVIS_BUILD_DIR/fastobo"
-		log Publishing fastobo $TRAVIS_TAG
-		cargo publish --token $CRATES_IO_TOKEN
+		if [ "$TRAVIS_BUILD_STAGE_NAME" = "Rust" ]; then
+			cd "$TRAVIS_BUILD_DIR/fastobo"
+			log Publishing fastobo $TRAVIS_TAG
+			cargo publish --token $CRATES_IO_TOKEN
+		fi
 		;;
 	# Release fastobo-py
 	v*-py)
-		release_py
+		if [ "$TRAVIS_BUILD_STAGE_NAME" != "Rust" ]; then
+			release_py
+		fi
 		;;
 	# Release dev version of `fastobo-py`
 	*)
-		VERSION=$(python setup.py --version)-dev$(git rev-list --count --all)
-		sed -i "s/version = $(python setup.py --version)/version = $VERSION/g" setup.cfg
-		release_py
+		if [ "$TRAVIS_BUILD_STAGE_NAME" != "Rust" ]; then
+			VERSION=$($PYTHON setup.py --version)-dev$(git rev-list --count --all)
+			sed -i'.BAK' -e "s/version = $($PYTHON setup.py --version)/version = $VERSION/g" setup.cfg
+			release_py
+		fi
 		;;
 esac
 

@@ -33,7 +33,7 @@ pub enum TermClause {
     Def(Py<DefClause>),
     Comment(Py<CommentClause>),
     Subset(Py<SubsetClause>),
-    // Synonym(Py<SynonymClause>),
+    Synonym(Py<SynonymClause>),
     Xref(Py<XrefClause>),
     Builtin(Py<BuiltinClause>),
     PropertyValue(Py<PropertyValueClause>),
@@ -47,7 +47,7 @@ pub enum TermClause {
     ReplacedBy(Py<ReplacedByClause>),
     Consider(Py<ConsiderClause>),
     CreatedBy(Py<CreatedByClause>),
-    // CreationDate(Py<CreationDateClause>)
+    CreationDate(Py<CreationDateClause>)
 }
 
 impl FromPy<fastobo::ast::TermClause> for TermClause {
@@ -75,7 +75,9 @@ impl FromPy<fastobo::ast::TermClause> for TermClause {
             Subset(s) =>
                 Py::new(py, SubsetClause::new(py, s))
                     .map(TermClause::Subset),
-            // Synonym
+            Synonym(s) =>
+                Py::new(py, SynonymClause::new(py, s))
+                    .map(TermClause::Synonym),
             Xref(x) =>
                 Py::new(py, XrefClause::new(py, x))
                     .map(TermClause::Xref),
@@ -115,8 +117,9 @@ impl FromPy<fastobo::ast::TermClause> for TermClause {
             CreatedBy(name) =>
                 Py::new(py, CreatedByClause::new(py, name))
                     .map(TermClause::CreatedBy),
-            // CreationDate
-            _ => unimplemented!(),
+            CreationDate(dt) =>
+                Py::new(py, CreationDateClause::new(py, dt))
+                    .map(TermClause::CreationDate),
         }.expect("could not allocate memory for `TermClause` in Python heap")
     }
 }
@@ -285,6 +288,23 @@ impl FromPy<SubsetClause> for fastobo::ast::TermClause {
 
 // --- Synonym ---------------------------------------------------------------
 
+#[pyclass(extends=BaseTermClause)]
+#[derive(Clone, Debug)]
+pub struct SynonymClause {}
+
+impl SynonymClause {
+    pub fn new<S>(py: Python, synonym: S) -> Self {
+        SynonymClause {}
+    }
+}
+
+impl FromPy<SynonymClause> for fastobo::ast::TermClause {
+    fn from_py(clause: SynonymClause, py: Python) -> Self {
+        // fastobo::ast::TermClause::Synonym(clause.synonym.into_py(py))
+        unimplemented!()
+    }
+}
+
 // --- Xref ------------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
@@ -339,15 +359,7 @@ impl FromPy<Xref> for XrefClause {
 impl XrefClause {
     #[new]
     fn __init__(obj: &PyRawObject, xref: &PyAny) -> PyResult<()> {
-        if Xref::is_instance(xref) {
-            unsafe {
-                let ptr = xref.as_ptr();
-                Ok(obj.init(Self::from(Py::from_borrowed_ptr(ptr))))
-            }
-        } else {
-            let ty = xref.get_type().name();
-            TypeError::into(format!("expected Xref, found {}", ty))
-        }
+        Xref::from_object(obj.py(), xref).map(|x| obj.init(Self::from(x)))
     }
 
     #[getter]
@@ -358,15 +370,8 @@ impl XrefClause {
 
     #[setter]
     fn set_ref(&mut self, xref: &PyAny) -> PyResult<()> {
-        if Xref::is_instance(xref) {
-            unsafe {
-                self.xref = Py::from_borrowed_ptr(xref.as_ptr());
-                Ok(())
-            }
-        } else {
-            let ty = xref.get_type().name();
-            TypeError::into(format!("expected Xref, found {}", ty))
-        }
+        self.xref = Xref::from_object(xref.py(), xref)?;
+        Ok(())
     }
 }
 
@@ -654,3 +659,21 @@ impl FromPy<CreatedByClause> for fastobo::ast::TermClause {
 
 
 // --- CreationDate ----------------------------------------------------------
+
+#[pyclass(extends=BaseTermClause)]
+#[derive(Clone, Debug)]
+pub struct CreationDateClause {
+    date: fastobo::ast::IsoDateTime,
+}
+
+impl CreationDateClause {
+    pub fn new(_py: Python, date: fastobo::ast::IsoDateTime) -> Self {
+        Self { date }
+    }
+}
+
+impl FromPy<CreationDateClause> for fastobo::ast::TermClause {
+    fn from_py(clause: CreationDateClause, py: Python) -> fastobo::ast::TermClause {
+        fastobo::ast::TermClause::CreationDate(clause.date)
+    }
+}

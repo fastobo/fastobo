@@ -1,3 +1,7 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
+use std::fmt::Write;
 use std::str::FromStr;
 
 use pyo3::AsPyPointer;
@@ -36,6 +40,14 @@ impl TermFrame {
     }
 }
 
+impl Display for TermFrame {
+    // FIXME: no clone
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        fastobo::ast::TermFrame::from_py(self.clone(), gil.python()).fmt(f)
+    }
+}
+
 impl FromPy<fastobo::ast::TermFrame> for TermFrame {
     fn from_py(frame: fastobo::ast::TermFrame, py: Python) -> Self {
         let clauses = frame
@@ -62,12 +74,22 @@ impl FromPy<TermFrame> for fastobo::ast::EntityFrame {
 
 #[pymethods]
 impl TermFrame {
-
     #[new]
     fn __init__(obj: &PyRawObject, id: Ident, clauses: Option<Vec<TermClause>>) -> PyResult<()> {
         Ok(obj.init(Self::with_clauses(id, clauses.unwrap_or_else(Vec::new))))
     }
+}
 
+#[pyproto]
+impl PyObjectProtocol for TermFrame {
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        PyString::new(py, "TermFrame({!r})")
+            .to_object(py)
+            .call_method1(py, "format", (&self.id,))
+    }
 
-
+    fn __str__(&self) -> PyResult<String> {
+        Ok(self.to_string())
+    }
 }

@@ -14,7 +14,7 @@ pub fn module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<self::clause::DefClause>()?;
     m.add_class::<self::clause::CommentClause>()?;
     m.add_class::<self::clause::SubsetClause>()?;
-    // m.add_class::<self::clause::SynonymClause>()?;
+    m.add_class::<self::clause::SynonymClause>()?;
     m.add_class::<self::clause::XrefClause>()?;
     m.add_class::<self::clause::BuiltinClause>()?;
     m.add_class::<self::clause::PropertyValueClause>()?;
@@ -28,6 +28,6 @@ pub fn module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<self::clause::ReplacedByClause>()?;
     m.add_class::<self::clause::ConsiderClause>()?;
     m.add_class::<self::clause::CreatedByClause>()?;
-    // m.add_class::<self::clause::CreationDateClause>()?;
+    m.add_class::<self::clause::CreationDateClause>()?;
     Ok(())
 }

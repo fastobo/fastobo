@@ -2,6 +2,9 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::iter::IntoIterator;
+use std::iter::FromIterator;
+use std::ops::Deref;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
@@ -15,8 +18,8 @@ use crate::parser::Rule;
 /// A database cross-reference definition.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Xref {
-    id: Ident,
-    desc: Option<QuotedString>,
+    pub id: Ident,
+    pub desc: Option<QuotedString>,
 }
 
 impl Xref {
@@ -24,10 +27,13 @@ impl Xref {
         Self { id, desc: None }
     }
 
-    pub fn with_desc(id: Ident, desc: QuotedString) -> Self {
+    pub fn with_desc<D>(id: Ident, desc: D) -> Self
+    where
+        D: Into<Option<QuotedString>>,
+    {
         Self {
             id,
-            desc: Some(desc),
+            desc: desc.into(),
         }
     }
 }
@@ -59,12 +65,25 @@ impl_fromstr!(Xref);
 /// A list of containing zero or more `Xref`s.
 #[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
 pub struct XrefList {
-    xrefs: Vec<Xref>,
+    pub xrefs: Vec<Xref>,
 }
 
-impl From<Vec<Xref>> for XrefList {
-    fn from(v: Vec<Xref>) -> XrefList {
-        Self { xrefs: v }
+impl XrefList {
+    pub fn new(xrefs: Vec<Xref>) -> Self {
+        Self { xrefs }
+    }
+}
+
+impl AsRef<[Xref]> for XrefList {
+    fn as_ref(&self) -> &[Xref] {
+        &self.xrefs
+    }
+}
+
+impl Deref for XrefList {
+    type Target = Vec<Xref>;
+    fn deref(&self) -> &Vec<Xref> {
+        &self.xrefs
     }
 }
 
@@ -86,6 +105,21 @@ impl Display for XrefList {
     }
 }
 
+impl From<Vec<Xref>> for XrefList {
+    fn from(v: Vec<Xref>) -> XrefList {
+        Self::new(v)
+    }
+}
+
+impl FromIterator<Xref> for XrefList {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Xref>
+    {
+        Self::new(iter.into_iter().collect())
+    }
+}
+
 impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
@@ -99,6 +133,14 @@ impl<'i> FromPair<'i> for XrefList {
     }
 }
 impl_fromstr!(XrefList);
+
+impl IntoIterator for XrefList {
+    type Item = Xref;
+    type IntoIter = <Vec<Xref> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.xrefs.into_iter()
+    }
+}
 
 #[cfg(test)]
 mod tests {

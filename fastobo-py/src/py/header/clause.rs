@@ -599,7 +599,7 @@ impl PyObjectProtocol for ImportClause {
 #[pyclass(extends=BaseHeaderClause)]
 #[derive(Clone, Debug)]
 pub struct SubsetdefClause {
-    subset: Ident, // FIXME: Py<Ident>,
+    subset: Ident,
     description: QuotedString,
 }
 

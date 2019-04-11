@@ -183,8 +183,16 @@ fn frompyobject_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenSt
         _ => panic!("#[wraps] argument must be a class ident"),
     };
 
-    // Build clone implementation
+    // Build FromPyObject implementation
     let name = &ast.ident;
+    let err_sub = syn::LitStr::new(
+        &format!("subclassing {} is not supported", base),
+        base.span()
+    );
+    let err_ty = syn::LitStr::new(
+        &format!("expected {} instance, {{}} found", base),
+        base.span()
+    );
     let expanded = quote::quote! {
         #[automatically_derived]
         impl<'source> pyo3::FromPyObject<'source> for #name {
@@ -197,15 +205,11 @@ fn frompyobject_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenSt
                     unsafe {
                         match ty.as_ref() {
                             #(#variants,)*
-                            _ => pyo3::exceptions::TypeError::into(
-                                "subclassing BaseHeaderClause is not supported"
-                            )
+                            _ => pyo3::exceptions::TypeError::into(#err_sub)
                         }
                     }
                 } else {
-                    pyo3::exceptions::TypeError::into(
-                        format!("expected BaseHeaderClause instance, {} found", ty),
-                    )
+                    pyo3::exceptions::TypeError::into(#err_ty)
                 }
             }
         }

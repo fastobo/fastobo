@@ -21,6 +21,7 @@ use pyo3::gc::PyTraverseError;
 use pyo3::class::gc::PyVisit;
 
 use super::id::Ident;
+use crate::utils::ClonePy;
 
 // --- Module export ---------------------------------------------------------
 
@@ -33,7 +34,7 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 // --- Xref ------------------------------------------------------------------
 
 #[pyclass]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Xref {
     #[pyo3(set)]
     id: Ident,
@@ -67,6 +68,15 @@ impl Xref {
         }
     }
 
+}
+
+impl ClonePy for Xref {
+    fn clone_py(&self, py: Python) -> Self {
+        Xref {
+            id: self.id.clone_py(py),
+            desc: self.desc.clone(),
+        }
+    }
 }
 
 impl FromPy<fastobo::ast::Xref> for Xref {
@@ -127,7 +137,7 @@ impl PyObjectProtocol for Xref {
 
     fn __str__(&self) -> PyResult<String> {
         let py = unsafe { Python::assume_gil_acquired() };
-        Ok(fastobo::ast::Xref::from_py(self.clone(), py).to_string())
+        Ok(fastobo::ast::Xref::from_py(self.clone_py(py), py).to_string())
     }
 }
 
@@ -139,12 +149,11 @@ pub struct XrefList {
     xrefs: Vec<Py<Xref>>
 }
 
-impl Clone for XrefList {
-    fn clone(&self) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
-        let xrefs = self.xrefs.iter().map(|r| r.clone_ref(py)).collect();
-        XrefList::new(py, xrefs)
+impl ClonePy for XrefList {
+    fn clone_py(&self, py: Python) -> Self {
+        XrefList {
+            xrefs: self.xrefs.clone_py(py)
+        }
     }
 }
 
@@ -169,7 +178,7 @@ impl FromPy<XrefList> for fastobo::ast::XrefList {
         list
             .xrefs
             .into_iter()
-            .map(|xref| xref.as_ref(py).clone().into_py(py))
+            .map(|xref| xref.as_ref(py).clone_py(py).into_py(py))
             .collect()
     }
 }

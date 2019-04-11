@@ -14,6 +14,7 @@ use fastobo::share::Cow;
 use fastobo::share::Share;
 
 use crate::utils::AsGILRef;
+use crate::utils::ClonePy;
 use super::id::Ident;
 
 // --- Module export ---------------------------------------------------------
@@ -28,7 +29,7 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 
 // --- Conversion Wrapper ----------------------------------------------------
 
-#[derive(Debug, PartialEq, PyWrapper)]
+#[derive(ClonePy, Debug, PartialEq, PyWrapper)]
 #[wraps(BasePropertyValue)]
 pub enum PropertyValue {
     Typed(Py<TypedPropertyValue>),
@@ -52,9 +53,9 @@ impl FromPy<PropertyValue> for fastobo::ast::PropertyValue {
     fn from_py(pv: PropertyValue, py: Python) -> Self {
         match pv {
             PropertyValue::Typed(t) =>
-                Self::from_py(t.as_ref(py).clone(), py),
+                Self::from_py(t.as_ref(py).clone_py(py), py),
             PropertyValue::Identified(i) =>
-                Self::from_py(i.as_ref(py).clone(), py)
+                Self::from_py(i.as_ref(py).clone_py(py), py)
         }
     }
 }
@@ -68,7 +69,7 @@ pub struct BasePropertyValue {}
 // --- Typed -----------------------------------------------------------------
 
 #[pyclass(extends=BasePropertyValue)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct TypedPropertyValue {
     relation: Ident,
     value: ast::QuotedString,
@@ -97,6 +98,16 @@ impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for TypedPropertyValue  {
             Cow::Borrowed(self.value.share()),
             Cow::Borrowed(self.datatype.as_gil_ref(py))
         )
+    }
+}
+
+impl ClonePy for TypedPropertyValue {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            relation: self.relation.clone_py(py),
+            value: self.value.clone(),
+            datatype: self.datatype.clone_py(py)
+        }
     }
 }
 
@@ -181,7 +192,7 @@ impl PyObjectProtocol for TypedPropertyValue {
 // --- Identified ------------------------------------------------------------
 
 #[pyclass(extends=BasePropertyValue)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct IdentifiedPropertyValue {
     relation: Ident,
     value: Ident,
@@ -206,6 +217,15 @@ impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for IdentifiedPropertyValue {
             Cow::Borrowed(self.relation.as_gil_ref(py).into()),
             Cow::Borrowed(self.value.as_gil_ref(py).into())
         )
+    }
+}
+
+impl ClonePy for IdentifiedPropertyValue {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            relation: self.relation.clone_py(py),
+            value: self.value.clone_py(py),
+        }
     }
 }
 

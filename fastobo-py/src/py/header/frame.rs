@@ -21,9 +21,10 @@ use pyo3::AsPyPointer;
 
 use super::HeaderClause;
 use super::BaseHeaderClause;
+use crate::utils::ClonePy;
 
 #[pyclass]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct HeaderFrame {
     clauses: Vec<HeaderClause>
 }
@@ -31,6 +32,14 @@ pub struct HeaderFrame {
 impl HeaderFrame {
     pub fn new(clauses: Vec<HeaderClause>) -> Self {
         Self { clauses }
+    }
+}
+
+impl ClonePy for HeaderFrame {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            clauses: self.clauses.clone_py(py)
+        }
     }
 }
 
@@ -139,10 +148,10 @@ impl PySequenceProtocol for HeaderFrame {
     }
     fn __concat__(&self, other: &PyAny) -> PyResult<Self> {
 
-        let iterator = PyIterator::from_object(other.py(), other)?;
+        let py = other.py();
 
-        // FIXME(@althonos): double GIL acquisition
-        let mut new_clauses = self.clauses.clone();
+        let iterator = PyIterator::from_object(py, other)?;
+        let mut new_clauses = self.clauses.clone_py(py);
         for item in iterator {
             new_clauses.push(HeaderClause::extract(item?)?);
         }

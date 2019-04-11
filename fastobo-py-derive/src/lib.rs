@@ -7,6 +7,64 @@ extern crate quote;
 use proc_macro::TokenStream;
 use syn::spanned::Spanned;
 
+
+#[proc_macro_derive(ClonePy)]
+pub fn clonepy_derive(input: TokenStream) -> TokenStream {
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
+    match &ast.data {
+        syn::Data::Enum(e) => clonepy_impl_enum(&ast, &e),
+        syn::Data::Struct(s) => clonepy_impl_struct(&ast, &s),
+        _ => panic!("#[derive(ClonePy)] only supports enum or structs"),
+    }
+}
+
+fn clonepy_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
+    let mut variants = Vec::new();
+
+    // Build clone_py for each variant
+    for variant in &en.variants {
+        let name = &variant.ident;
+        variants.push(quote::quote!(#name(x) => #name(x.clone_py(py))));
+    }
+
+    // Build clone implementation
+    let name = &ast.ident;
+    let expanded = quote::quote! {
+        #[automatically_derived]
+        #[allow(unused)]
+        impl ClonePy for #name {
+            fn clone_py(&self, py: Python) -> Self {
+                use self::#name::*;
+                let gil = pyo3::Python::acquire_gil();
+                let py = gil.python();
+
+                match self {
+                    #(#variants,)*
+                }
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+fn clonepy_impl_struct(ast: &syn::DeriveInput, en: &syn::DataStruct) -> TokenStream {
+
+    let name = &ast.ident;
+    let expanded = quote::quote! {
+        #[automatically_derived]
+        impl ClonePy for #name {
+            fn clone_py(&self, _py: Python) -> Self {
+                self.clone()
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+
+
 #[proc_macro_derive(PyWrapper, attributes(wraps))]
 pub fn pywrapper_derive(input: TokenStream) -> TokenStream {
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
@@ -14,7 +72,7 @@ pub fn pywrapper_derive(input: TokenStream) -> TokenStream {
     let mut output = TokenStream::new();
 
     if let syn::Data::Enum(e) = &ast.data {
-        output.extend(clone_impl_enum(&ast, &e));
+        // output.extend(clone_impl_enum(&ast, &e));
         output.extend(topyobject_impl_enum(&ast, &e));
         output.extend(intopyobject_impl_enum(&ast, &e));
         output.extend(frompyobject_impl_enum(&ast, &e));
@@ -224,7 +282,7 @@ fn frompy_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
     // Build clone for each variant
     for variant in &en.variants {
         let name = &variant.ident;
-        variants.push(quote::quote!(#name(x) => Self::from_py(x.as_ref(py).clone(), py)));
+        variants.push(quote::quote!(#name(x) => Self::from_py(x.as_ref(py).deref().clone_py(py), py)));
     }
 
     // Build clone implementation
@@ -233,6 +291,7 @@ fn frompy_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
         #[automatically_derived]
         impl pyo3::FromPy<&#name> for fastobo::ast::#name {
             fn from_py(obj: &#name, py: Python) -> Self {
+                use std::ops::Deref;
                 use self::#name::*;
                 match obj {
                     #(#variants,)*

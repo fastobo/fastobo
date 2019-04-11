@@ -21,6 +21,7 @@ use pyo3::class::gc::PyVisit;
 use fastobo::ast as obo;
 
 use crate::utils::AsGILRef;
+use crate::utils::ClonePy;
 use crate::pyfile::PyFile;
 
 // ---------------------------------------------------------------------------
@@ -30,7 +31,6 @@ pub mod id;
 pub mod term;
 pub mod pv;
 pub mod xref;
-
 
 use self::header::frame::HeaderFrame;
 use self::term::frame::TermFrame;
@@ -110,13 +110,11 @@ pub struct OboDoc {
     entities: Vec<EntityFrame>
 }
 
-impl Clone for OboDoc {
-    fn clone(&self) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
+impl ClonePy for OboDoc {
+    fn clone_py(&self, py: Python) -> Self {
         Self {
-            header: self.header.clone_ref(py),
-            entities: self.entities.clone()
+            header: self.header.clone_py(py),
+            entities: self.entities.clone_py(py)
         }
     }
 }
@@ -146,7 +144,7 @@ impl OboDoc {
     #[setter]
     fn set_header(&mut self, header: &HeaderFrame) -> PyResult<()> {
         let py = unsafe { Python::assume_gil_acquired() };
-        self.header = Py::new(py, header.clone())?;
+        self.header = Py::new(py, header.clone_py(py))?;
         Ok(())
     }
 }
@@ -175,7 +173,7 @@ impl PySequenceProtocol for OboDoc {
 
 // --- Conversion Wrapper ----------------------------------------------------
 
-#[derive(Debug, PartialEq, PyWrapper)]
+#[derive(ClonePy, Debug, PartialEq, PyWrapper)]
 #[wraps(BaseEntityFrame)]
 pub enum EntityFrame {
     Term(Py<TermFrame>),

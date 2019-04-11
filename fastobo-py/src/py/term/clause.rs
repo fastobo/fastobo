@@ -16,6 +16,7 @@ use fastobo::share::Cow;
 use fastobo::share::Redeem;
 
 use crate::utils::AsGILRef;
+use crate::utils::ClonePy;
 use crate::py::id::Ident;
 use crate::py::pv::PropertyValue;
 use crate::py::xref::Xref;
@@ -23,7 +24,7 @@ use crate::py::xref::XrefList;
 
 // --- Conversion Wrapper ----------------------------------------------------
 
-#[derive(Debug, PartialEq, PyWrapper)]
+#[derive(ClonePy, Debug, PartialEq, PyWrapper)]
 #[wraps(BaseTermClause)]
 pub enum TermClause {
     IsAnonymous(Py<IsAnonymousClause>),
@@ -133,7 +134,7 @@ pub struct BaseTermClause {}
 // --- IsAnonymous -----------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct IsAnonymousClause {
     #[pyo3(get, set)]
     anonymous: bool
@@ -155,7 +156,7 @@ impl FromPy<IsAnonymousClause> for fastobo::ast::TermClause {
 // --- Name ------------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct NameClause {
     name: fastobo::ast::UnquotedString,
 }
@@ -175,7 +176,7 @@ impl FromPy<NameClause> for fastobo::ast::TermClause {
 // --- Namespace -------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct NamespaceClause {
     namespace: Ident
 }
@@ -186,6 +187,14 @@ impl NamespaceClause {
         I: IntoPy<Ident>
     {
         Self { namespace: ns.into_py(py) }
+    }
+}
+
+impl ClonePy for NamespaceClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            namespace: self.namespace.clone_py(py)
+        }
     }
 }
 
@@ -200,7 +209,7 @@ impl FromPy<NamespaceClause> for fastobo::ast::TermClause {
 // --- AltId -----------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct AltIdClause {
     id: Ident,
 }
@@ -214,6 +223,14 @@ impl AltIdClause {
     }
 }
 
+impl ClonePy for AltIdClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            id: self.id.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<AltIdClause> for fastobo::ast::TermClause {
     fn from_py(clause: AltIdClause, py: Python) -> Self {
         fastobo::ast::TermClause::AltId(clause.id.into_py(py))
@@ -224,7 +241,7 @@ impl FromPy<AltIdClause> for fastobo::ast::TermClause {
 // --- Def -------------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct DefClause {
     definition: fastobo::ast::QuotedString
     // xrefs: XrefList // TODO
@@ -246,7 +263,7 @@ impl FromPy<DefClause> for fastobo::ast::TermClause {
 // --- Comment ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct CommentClause {
     comment: fastobo::ast::UnquotedString
 }
@@ -266,7 +283,7 @@ impl FromPy<CommentClause> for fastobo::ast::TermClause {
 // --- Subset ----------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct SubsetClause {
     subset: Ident
 }
@@ -280,6 +297,14 @@ impl SubsetClause {
     }
 }
 
+impl ClonePy for SubsetClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            subset: self.subset.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<SubsetClause> for fastobo::ast::TermClause {
     fn from_py(clause: SubsetClause, py: Python) -> Self {
         fastobo::ast::TermClause::Subset(clause.subset.into_py(py))
@@ -289,7 +314,7 @@ impl FromPy<SubsetClause> for fastobo::ast::TermClause {
 // --- Synonym ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct SynonymClause {}
 
 impl SynonymClause {
@@ -322,12 +347,10 @@ impl XrefClause {
     }
 }
 
-impl Clone for XrefClause {
-    fn clone(&self) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
+impl ClonePy for XrefClause {
+    fn clone_py(&self, py: Python) -> Self {
         Self {
-            xref: self.xref.clone_ref(py)
+            xref: self.xref.clone_py(py)
         }
     }
 }
@@ -335,7 +358,7 @@ impl Clone for XrefClause {
 impl FromPy<XrefClause> for fastobo::ast::TermClause {
     fn from_py(clause: XrefClause, py: Python) -> Self {
         fastobo::ast::TermClause::Xref(
-            clause.xref.as_ref(py).clone().into_py(py)
+            clause.xref.as_ref(py).clone_py(py).into_py(py)
         )
     }
 }
@@ -378,7 +401,7 @@ impl XrefClause {
 // --- Builtin ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct BuiltinClause {
     #[pyo3(get, set)]
     builtin: bool
@@ -399,7 +422,7 @@ impl FromPy<BuiltinClause> for fastobo::ast::TermClause {
 // --- PropertyValue ---------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct PropertyValueClause {
     inner: PropertyValue,
 }
@@ -413,6 +436,14 @@ impl PropertyValueClause {
     }
 }
 
+impl ClonePy for PropertyValueClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            inner: self.inner.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<PropertyValueClause> for fastobo::ast::TermClause {
     fn from_py(clause: PropertyValueClause, py: Python) -> ast::TermClause {
         ast::TermClause::PropertyValue(clause.inner.into_py(py))
@@ -422,7 +453,7 @@ impl FromPy<PropertyValueClause> for fastobo::ast::TermClause {
 // --- IsA -------------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct IsAClause {
     id: Ident
 }
@@ -436,6 +467,14 @@ impl IsAClause {
     }
 }
 
+impl ClonePy for IsAClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            id: self.id.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<IsAClause> for fastobo::ast::TermClause {
     fn from_py(clause: IsAClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::IsA(clause.id.into_py(py))
@@ -445,7 +484,7 @@ impl FromPy<IsAClause> for fastobo::ast::TermClause {
 // --- IntersectionOf --------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct IntersectionOfClause {
     relation: Option<Ident>,
     term: Ident,
@@ -464,6 +503,15 @@ impl IntersectionOfClause {
     }
 }
 
+impl ClonePy for IntersectionOfClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            relation: self.relation.clone_py(py),
+            term: self.term.clone_py(py),
+        }
+    }
+}
+
 impl FromPy<IntersectionOfClause> for fastobo::ast::TermClause {
     fn from_py(clause: IntersectionOfClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::IntersectionOf(
@@ -476,9 +524,17 @@ impl FromPy<IntersectionOfClause> for fastobo::ast::TermClause {
 // --- UnionOf ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct UnionOfClause {
     term: Ident,
+}
+
+impl ClonePy for UnionOfClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            term: self.term.clone_py(py)
+        }
+    }
 }
 
 impl UnionOfClause {
@@ -499,7 +555,7 @@ impl FromPy<UnionOfClause> for fastobo::ast::TermClause {
 // --- EquivalentTo ----------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct EquivalentToClause {
     term: Ident,
 }
@@ -513,6 +569,14 @@ impl EquivalentToClause {
     }
 }
 
+impl ClonePy for EquivalentToClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            term: self.term.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<EquivalentToClause> for fastobo::ast::TermClause {
     fn from_py(clause: EquivalentToClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::EquivalentTo(clause.term.into_py(py))
@@ -522,7 +586,7 @@ impl FromPy<EquivalentToClause> for fastobo::ast::TermClause {
 // --- DisjointFrom ----------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct DisjointFromClause {
     term: Ident,
 }
@@ -536,6 +600,14 @@ impl DisjointFromClause {
     }
 }
 
+impl ClonePy for DisjointFromClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            term: self.term.clone_py(py),
+        }
+    }
+}
+
 impl FromPy<DisjointFromClause> for fastobo::ast::TermClause {
     fn from_py(clause: DisjointFromClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::DisjointFrom(clause.term.into_py(py))
@@ -545,7 +617,7 @@ impl FromPy<DisjointFromClause> for fastobo::ast::TermClause {
 // --- Relationship ----------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct RelationshipClause {
     relation: Ident,
     term: Ident
@@ -561,6 +633,15 @@ impl RelationshipClause {
     }
 }
 
+impl ClonePy for RelationshipClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            relation: self.relation.clone_py(py),
+            term: self.term.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<RelationshipClause> for fastobo::ast::TermClause {
     fn from_py(clause: RelationshipClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::Relationship(
@@ -573,7 +654,7 @@ impl FromPy<RelationshipClause> for fastobo::ast::TermClause {
 // --- IsObsolete ------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct IsObsoleteClause {
     #[pyo3(get, set)]
     obsolete: bool
@@ -594,7 +675,7 @@ impl FromPy<IsObsoleteClause> for fastobo::ast::TermClause {
 // --- ReplacedBy ------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ReplacedByClause {
     term: Ident,
 }
@@ -608,6 +689,14 @@ impl ReplacedByClause {
     }
 }
 
+impl ClonePy for ReplacedByClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            term: self.term.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<ReplacedByClause> for fastobo::ast::TermClause {
     fn from_py(clause: ReplacedByClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::ReplacedBy(clause.term.into_py(py))
@@ -617,7 +706,7 @@ impl FromPy<ReplacedByClause> for fastobo::ast::TermClause {
 // --- Consider --------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ConsiderClause {
     term: Ident,
 }
@@ -631,6 +720,14 @@ impl ConsiderClause {
     }
 }
 
+impl ClonePy for ConsiderClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            term: self.term.clone_py(py)
+        }
+    }
+}
+
 impl FromPy<ConsiderClause> for fastobo::ast::TermClause {
     fn from_py(clause: ConsiderClause, py: Python) -> fastobo::ast::TermClause {
         ast::TermClause::Consider(clause.term.into_py(py))
@@ -640,7 +737,7 @@ impl FromPy<ConsiderClause> for fastobo::ast::TermClause {
 // --- CreatedBy -------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct CreatedByClause {
     name: fastobo::ast::UnquotedString
 }
@@ -661,7 +758,7 @@ impl FromPy<CreatedByClause> for fastobo::ast::TermClause {
 // --- CreationDate ----------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, Debug)]
+#[derive(Clone, ClonePy, Debug)]
 pub struct CreationDateClause {
     date: fastobo::ast::IsoDateTime,
 }

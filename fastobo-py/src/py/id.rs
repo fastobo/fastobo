@@ -16,6 +16,7 @@ use fastobo::share::Cow;
 use fastobo::share::Redeem;
 
 use crate::utils::AsGILRef;
+use crate::utils::ClonePy;
 
 // --- Module export ----------------------------------------------------------
 
@@ -50,7 +51,7 @@ macro_rules! impl_convert {
     };
 }
 
-#[derive(Debug, PartialEq, PyWrapper)]
+#[derive(ClonePy, Debug, PartialEq, PyWrapper)]
 #[wraps(BaseIdent)]
 pub enum Ident {
     Unprefixed(Py<UnprefixedIdent>),
@@ -100,11 +101,11 @@ impl FromPy<Ident> for fastobo::ast::Ident {
     fn from_py(ident: Ident, py: Python) -> Self {
         match ident {
             Ident::Unprefixed(id) => {
-                let i: UnprefixedIdent = id.as_ref(py).clone();
+                let i: UnprefixedIdent = id.as_ref(py).clone_py(py);
                 ast::Ident::Unprefixed(i.into_py(py))
             }
             Ident::Prefixed(id) => {
-                let i: PrefixedIdent = id.as_ref(py).clone();
+                let i: PrefixedIdent = id.as_ref(py).clone_py(py);
                 ast::Ident::Prefixed(i.into_py(py))
             }
             Ident::Url(id) => {
@@ -166,10 +167,8 @@ impl<'p> AsGILRef<'p, fastobo::ast::PrefixedId<'p>> for PrefixedIdent {
     }
 }
 
-impl Clone for PrefixedIdent {
-    fn clone(&self) -> Self {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
+impl ClonePy for PrefixedIdent {
+    fn clone_py(&self, py: Python) -> Self {
         Self {
             prefix: self.prefix.clone_ref(py),
             local: self.local.clone_ref(py),
@@ -328,7 +327,7 @@ impl PyObjectProtocol for PrefixedIdent {
 
     fn __str__(&self) -> PyResult<String> {
         let py = unsafe { Python::assume_gil_acquired() };
-        let id: PrefixedIdent = self.clone();
+        let id: PrefixedIdent = self.clone_py(py);
         Ok(ast::PrefixedIdent::from_py(id, py).to_string())
     }
 }
@@ -370,6 +369,12 @@ impl AsRef<ast::UnprefixedId> for UnprefixedIdent {
 impl<'p> AsGILRef<'p, &'p fastobo::ast::UnprefixedId> for UnprefixedIdent {
     fn as_gil_ref(&'p self, _py: Python<'p>) -> &'p fastobo::ast::UnprefixedId {
         self.inner.share()
+    }
+}
+
+impl ClonePy for UnprefixedIdent {
+    fn clone_py(&self, _py: Python) -> Self {
+        self.clone()
     }
 }
 
@@ -466,7 +471,7 @@ impl PyObjectProtocol for UnprefixedIdent {
 ///     ValueError: invalid url: ...
 ///
 #[pyclass(extends=BaseIdent)]
-#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
+#[derive(Clone, ClonePy, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 #[opaque_typedef(derive(FromInner, IntoInner))]
 pub struct Url{
     inner: url::Url
@@ -551,7 +556,7 @@ impl PyObjectProtocol for Url {
 
 /// The prefix of a prefixed identifier.
 #[pyclass]
-#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
+#[derive(Clone, ClonePy, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 #[opaque_typedef(derive(FromInner, IntoInner, AsRefInner))]
 pub struct IdentPrefix {
     inner: ast::IdentPrefix
@@ -612,7 +617,7 @@ impl PyObjectProtocol for IdentPrefix {
 
 /// The local component of a prefixed identifier.
 #[pyclass]
-#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
+#[derive(Clone, ClonePy, Debug, Eq, Hash, OpaqueTypedef, PartialEq)]
 #[opaque_typedef(derive(FromInner, IntoInner))]
 pub struct IdentLocal {
     inner: ast::IdentLocal,

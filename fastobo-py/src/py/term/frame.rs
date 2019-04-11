@@ -19,12 +19,13 @@ use fastobo::share::Share;
 use fastobo::share::Cow;
 use fastobo::share::Redeem;
 
-use super::super::BaseEntityFrame;
 use super::clause::TermClause;
+use super::super::BaseEntityFrame;
 use super::super::id::Ident;
+use crate::utils::ClonePy;
 
 #[pyclass(extends=BaseEntityFrame)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct TermFrame {
     id: Ident,
     clauses: Vec<TermClause>
@@ -40,11 +41,21 @@ impl TermFrame {
     }
 }
 
+impl ClonePy for TermFrame {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            id: self.id.clone_py(py),
+            clauses: self.clauses.clone_py(py),
+        }
+    }
+}
+
 impl Display for TermFrame {
     // FIXME: no clone
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let gil = Python::acquire_gil();
-        fastobo::ast::TermFrame::from_py(self.clone(), gil.python()).fmt(f)
+        let py = gil.python();
+        fastobo::ast::TermFrame::from_py(self.clone_py(py), py).fmt(f)
     }
 }
 

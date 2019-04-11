@@ -29,6 +29,8 @@ pub mod header;
 pub mod id;
 pub mod term;
 pub mod pv;
+pub mod xref;
+
 
 use self::header::frame::HeaderFrame;
 use self::term::frame::TermFrame;
@@ -59,6 +61,11 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     {
         use self::pv::*;
         m.add_wrapped(pyo3::wrap_pymodule!(pv))?;
+    }
+
+    {
+        use self::xref::*;
+        m.add_wrapped(pyo3::wrap_pymodule!(xref))?;
     }
 
     #[pyfn(m, "load")]

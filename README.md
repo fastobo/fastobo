@@ -1,4 +1,4 @@
-# `fastobo`
+# `fastobo` [![Star me](https://img.shields.io/github/stars/althonos/fastobo.svg?style=social&label=Star&maxAge=3600)](https://github.com/althonos/fastobo/stargazers)
 
 *Faultless AST for Open Biomedical Ontologies.*
 
@@ -22,6 +22,9 @@ The Rust implementation of an Abstract Syntax Tree for the OBO language.
 
 Idiomatic Python bindings to the `fastobo` Rust crate.
 
+### `fastobo-py-derive`
+
+Derive macros for the `fastobo-py` crate.
 
 ## About
 

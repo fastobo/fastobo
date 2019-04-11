@@ -1,14 +1,16 @@
-# `fastobo-py`
+# `fastobo-py` [![Star me](https://img.shields.io/github/stars/althonos/fastobo.svg?style=social&label=Star&maxAge=3600)](https://github.com/althonos/fastobo/stargazers)
 
 *Faultless AST for Open Biomedical Ontologies in Python.*
 
+[![TravisCI](https://img.shields.io/travis/althonos/fastobo/master.svg?maxAge=600&style=flat-square)](https://travis-ci.org/althonos/fastobo/branches)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/mit/)
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo/)
-[![Crate](https://img.shields.io/crates/v/fastobo-syntax.svg?maxAge=600&style=flat-square)](https://crates.io/crates/fastobo-py)
 [![PyPI](https://img.shields.io/pypi/v/fastobo.svg?style=flat-square&maxAge=600)](https://pypi.org/project/fastobo)
-[![Docs.rs](https://img.shields.io/badge/docs.rs-latest-4d76ae.svg?maxAge=2678400&style=flat-square)](https://docs.rs/fastobo/latest/fastobo-py/)
+[![Wheel](https://img.shields.io/pypi/wheel/fastobo.svg?style=flat-square&maxAge=2678400)](https://pypi.org/project/fastobo/#files)
+[![Python Versions](https://img.shields.io/pypi/pyversions/fastobo.svg?style=flat-square&maxAge=600)](https://pypi.org/project/fastobo/#files)
+[![PyPI - Implementation](https://img.shields.io/pypi/implementation/fastobo.svg?style=flat-square&maxAge=600)](https://pypi.org/project/fastobo/#files)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo/blob/master/fastobo-py/CHANGELOG.md)
-
+[![GitHub issues](https://img.shields.io/github/issues/althonos/fastobo.svg?style=flat-square)](https://github.com/althonos/fastobo/issues)
 
 ## Overview
 
@@ -52,7 +54,7 @@ Found a bug ? Have an enhancement request ? Head over to the
 [GitHub issue tracker](https://github.com/althonos/fastobo/issues) of the project if
 you need to report or ask something. If you are filling in on a bug, please include as much
 information as you can about the issue, and try to recreate the same bug in a simple, easily
-reproductible situation.
+reproducible situation.
 
 
 ## About

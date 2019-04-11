@@ -18,6 +18,8 @@ use fastobo::share::Redeem;
 use crate::utils::AsGILRef;
 use crate::py::id::Ident;
 use crate::py::pv::PropertyValue;
+use crate::py::xref::Xref;
+use crate::py::xref::XrefList;
 
 // --- Conversion Wrapper ----------------------------------------------------
 
@@ -32,7 +34,7 @@ pub enum TermClause {
     Comment(Py<CommentClause>),
     Subset(Py<SubsetClause>),
     // Synonym(Py<SynonymClause>),
-    // Xref(Py<XrefClause>),
+    Xref(Py<XrefClause>),
     Builtin(Py<BuiltinClause>),
     PropertyValue(Py<PropertyValueClause>),
     IsA(Py<IsAClause>),
@@ -74,7 +76,9 @@ impl FromPy<fastobo::ast::TermClause> for TermClause {
                 Py::new(py, SubsetClause::new(py, s))
                     .map(TermClause::Subset),
             // Synonym
-            // Xref
+            Xref(x) =>
+                Py::new(py, XrefClause::new(py, x))
+                    .map(TermClause::Xref),
             Builtin(b) =>
                 Py::new(py, BuiltinClause::new(py, b))
                     .map(TermClause::Builtin),
@@ -282,6 +286,89 @@ impl FromPy<SubsetClause> for fastobo::ast::TermClause {
 // --- Synonym ---------------------------------------------------------------
 
 // --- Xref ------------------------------------------------------------------
+
+#[pyclass(extends=BaseTermClause)]
+#[derive(Debug)]
+pub struct XrefClause {
+    xref: Py<Xref>
+}
+
+impl XrefClause {
+    pub fn new<X>(py: Python, xref: X) -> Self
+    where
+        X: IntoPy<Xref>,
+    {
+        Self::from_py(xref.into_py(py), py)
+    }
+}
+
+impl Clone for XrefClause {
+    fn clone(&self) -> Self {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        Self {
+            xref: self.xref.clone_ref(py)
+        }
+    }
+}
+
+impl FromPy<XrefClause> for fastobo::ast::TermClause {
+    fn from_py(clause: XrefClause, py: Python) -> Self {
+        fastobo::ast::TermClause::Xref(
+            clause.xref.as_ref(py).clone().into_py(py)
+        )
+    }
+}
+
+impl From<Py<Xref>> for XrefClause {
+    fn from(xref: Py<Xref>) -> Self {
+        Self { xref }
+    }
+}
+
+impl FromPy<Xref> for XrefClause {
+    fn from_py(xref: Xref, py: Python) -> Self {
+        Self {
+            xref: Py::new(py, xref)
+                .expect("could not allocate memory on Python heap for XrefClause")
+        }
+    }
+}
+
+#[pymethods]
+impl XrefClause {
+    #[new]
+    fn __init__(obj: &PyRawObject, xref: &PyAny) -> PyResult<()> {
+        if Xref::is_instance(xref) {
+            unsafe {
+                let ptr = xref.as_ptr();
+                Ok(obj.init(Self::from(Py::from_borrowed_ptr(ptr))))
+            }
+        } else {
+            let ty = xref.get_type().name();
+            TypeError::into(format!("expected Xref, found {}", ty))
+        }
+    }
+
+    #[getter]
+    fn get_xref(&self) -> PyResult<Py<Xref>> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.xref.clone_ref(py))
+    }
+
+    #[setter]
+    fn set_ref(&mut self, xref: &PyAny) -> PyResult<()> {
+        if Xref::is_instance(xref) {
+            unsafe {
+                self.xref = Py::from_borrowed_ptr(xref.as_ptr());
+                Ok(())
+            }
+        } else {
+            let ty = xref.get_type().name();
+            TypeError::into(format!("expected Xref, found {}", ty))
+        }
+    }
+}
 
 // --- Builtin ---------------------------------------------------------------
 

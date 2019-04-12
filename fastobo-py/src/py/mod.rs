@@ -1,3 +1,6 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::string::ToString;
@@ -29,11 +32,13 @@ use crate::pyfile::PyFile;
 pub mod header;
 pub mod id;
 pub mod term;
+pub mod typedef;
 pub mod pv;
 pub mod xref;
 
 use self::header::frame::HeaderFrame;
 use self::term::frame::TermFrame;
+use self::typedef::frame::TypedefFrame;
 
 // --- Module export ---------------------------------------------------------
 
@@ -56,6 +61,11 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     {
         use self::term::*;
         m.add_wrapped(pyo3::wrap_pymodule!(term))?;
+    }
+
+    {
+        use self::typedef::*;
+        m.add_wrapped(pyo3::wrap_pymodule!(typedef));
     }
 
     {
@@ -105,6 +115,7 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
 
 /// The abstract syntax tree corresponding to an OBO document.
 #[pyclass(subclass)]
+#[derive(Debug)]
 pub struct OboDoc {
     header: Py<HeaderFrame>,
     entities: Vec<EntityFrame>
@@ -119,6 +130,14 @@ impl ClonePy for OboDoc {
     }
 }
 
+impl Display for OboDoc {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        fastobo::ast::OboDoc::from_py(self.clone_py(py), py).fmt(f)
+    }
+}
+
 impl FromPy<obo::OboDoc> for OboDoc {
     fn from_py(doc: fastobo::ast::OboDoc, py: Python) -> Self {
         let header = HeaderFrame::from_py(doc.header, py);
@@ -130,6 +149,16 @@ impl FromPy<obo::OboDoc> for OboDoc {
                 .map(|frame| EntityFrame::from_py(frame, py))
                 .collect(),
         }
+    }
+}
+
+impl FromPy<OboDoc> for fastobo::ast::OboDoc {
+    fn from_py(doc: OboDoc, py: Python) -> Self {
+        let header: HeaderFrame = doc.header.as_ref(py).clone_py(py);
+        Self::with_entities(
+            fastobo::ast::HeaderFrame::from_py(header, py),
+            doc.entities.iter().map(|frame| frame.into_py(py))
+        )
     }
 }
 
@@ -150,6 +179,13 @@ impl OboDoc {
 }
 
 #[pyproto]
+impl PyObjectProtocol for OboDoc {
+    fn __str__(&self) -> PyResult<String> {
+        Ok(self.to_string())
+    }
+}
+
+#[pyproto]
 impl PySequenceProtocol for OboDoc {
     fn __len__(&self) -> PyResult<usize> {
         Ok(self.entities.len())
@@ -166,7 +202,6 @@ impl PySequenceProtocol for OboDoc {
     }
 }
 
-
 // ---------------------------------------------------------------------------
 
 
@@ -177,6 +212,7 @@ impl PySequenceProtocol for OboDoc {
 #[wraps(BaseEntityFrame)]
 pub enum EntityFrame {
     Term(Py<TermFrame>),
+    Typedef(Py<TypedefFrame>),
 }
 
 impl FromPy<fastobo::ast::EntityFrame> for EntityFrame {
@@ -185,6 +221,9 @@ impl FromPy<fastobo::ast::EntityFrame> for EntityFrame {
             fastobo::ast::EntityFrame::Term(frame) =>
                 Py::new(py, TermFrame::from_py(frame, py))
                     .map(EntityFrame::Term),
+            fastobo::ast::EntityFrame::Typedef(frame) =>
+                Py::new(py, TypedefFrame::from_py(frame, py))
+                    .map(EntityFrame::Typedef),
             _ => unimplemented!(),
         }.expect("could not allocate on Python heap")
     }

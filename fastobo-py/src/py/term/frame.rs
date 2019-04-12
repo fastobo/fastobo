@@ -72,8 +72,15 @@ impl FromPy<fastobo::ast::TermFrame> for TermFrame {
 
 impl FromPy<TermFrame> for fastobo::ast::TermFrame {
     fn from_py(frame: TermFrame, py: Python) -> Self {
-        let id = fastobo::ast::Ident::from_py(frame.id, py);
-        fastobo::ast::TermFrame::new(fastobo::ast::ClassIdent::from(id))
+        fastobo::ast::TermFrame::with_clauses(
+            fastobo::ast::ClassIdent::new(frame.id.into_py(py)),
+            frame
+                .clauses
+                .iter()
+                .map(|f| fastobo::ast::TermClause::from_py(f, py))
+                .map(fastobo::ast::Line::from)
+                .collect()
+        )
     }
 }
 
@@ -85,9 +92,16 @@ impl FromPy<TermFrame> for fastobo::ast::EntityFrame {
 
 #[pymethods]
 impl TermFrame {
+
+    // FIXME: should accept any iterable.
     #[new]
     fn __init__(obj: &PyRawObject, id: Ident, clauses: Option<Vec<TermClause>>) -> PyResult<()> {
         Ok(obj.init(Self::with_clauses(id, clauses.unwrap_or_else(Vec::new))))
+    }
+
+    #[getter]
+    fn get_id(&self) -> PyResult<&Ident> {
+        Ok(&self.id)
     }
 }
 

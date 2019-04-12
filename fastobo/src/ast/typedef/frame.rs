@@ -16,6 +16,25 @@ pub struct TypedefFrame {
     pub clauses: Vec<Line<TypedefClause>>,
 }
 
+impl TypedefFrame {
+    pub fn new<I>(id: I) -> Self
+    where
+        I: Into<Line<RelationIdent>>,
+    {
+        Self::with_clauses(id, Vec::new())
+    }
+
+    pub fn with_clauses<I>(id: I, clauses: Vec<Line<TypedefClause>>) -> Self
+    where
+        I: Into<Line<RelationIdent>>,
+    {
+        Self {
+            id: id.into(),
+            clauses: clauses,
+        }
+    }
+}
+
 impl Display for TypedefFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_str("[Typedef]\nid: ").and(self.id.fmt(f))?;

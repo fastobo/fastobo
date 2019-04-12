@@ -18,10 +18,20 @@ pub struct TermFrame {
 }
 
 impl TermFrame {
-    pub fn new(id: ClassIdent) -> Self {
+    pub fn new<I>(id: I) -> Self
+    where
+        I: Into<Line<ClassIdent>>,
+    {
+        Self::with_clauses(id, Vec::new())
+    }
+
+    pub fn with_clauses<I>(id: I, clauses: Vec<Line<TermClause>>) -> Self
+    where
+        I: Into<Line<ClassIdent>>,
+    {
         Self {
-            id: Line::from(id),
-            clauses: Vec::new(),
+            id: id.into(),
+            clauses: clauses,
         }
     }
 }

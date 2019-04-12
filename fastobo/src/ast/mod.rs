@@ -41,6 +41,10 @@ pub use self::term::*;
 pub use self::typedef::*;
 pub use self::xref::*;
 
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
+use std::fmt::Write;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
@@ -152,6 +156,20 @@ impl OboDoc {
     }
 }
 
+impl Display for OboDoc {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.header.fmt(f).and(f.write_char('\n'))?;
+        let mut entities = self.entities.iter().peekable();
+        while let Some(entity) = entities.next() {
+            entity.fmt(f)?;
+            if entities.peek().is_some() {
+                f.write_char('\n')?;
+            }
+        }
+        Ok(())
+    }
+}
+
 impl<'i> FromPair<'i> for OboDoc {
     const RULE: Rule = Rule::OboDoc;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
@@ -175,6 +193,17 @@ pub enum EntityFrame {
     Term(TermFrame),
     Typedef(TypedefFrame),
     Instance(InstanceFrame),
+}
+
+impl Display for EntityFrame {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use self::EntityFrame::*;
+        match self {
+            Term(t) => t.fmt(f),
+            Typedef(t) => t.fmt(f) ,
+            Instance(i) => i.fmt(f),
+        }
+    }
 }
 
 impl From<TermFrame> for EntityFrame {

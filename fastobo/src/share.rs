@@ -1,5 +1,10 @@
 //! Enhanced `Borrow`, `ToOwned` and `Cow` to use in tree structures.
 //!
+//! This module define two traits:
+//! - `Share`, related to `std::borrow::Borrow`
+//! - `Redeem`, related to `std::borrow::ToOwned`
+//! as well as the `Cow` enum with an interface close to `std::borrow::Cow`.
+//!
 //! The main differences with traits from `std::borrow` are that:
 //! - `Share::share` does not need to return a reference.
 //! - `Share::share` has access to the lifetime of the referenced owner.

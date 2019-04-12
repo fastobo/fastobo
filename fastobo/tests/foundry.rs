@@ -62,7 +62,11 @@ macro_rules! foundrytest {
                     Err(e) => panic!("{}", e),
                 }
             } else {
-                panic!("not an OBO file")
+                let mut lines = String::new();
+                for _ in 0..20 {
+                    buf.read_line(&mut lines);
+                }
+                panic!("not an OBO file ({})\n: {}", url, lines);
             }
         }
     }
@@ -139,4 +143,4 @@ foundrytest!(to);
 foundrytest!(ddpheno);
 foundrytest!(ncit);
 foundrytest!(zeco);
-foundrytest!(eo);
+// foundrytest!(eo); DEPRECATED and UNREACHABLE

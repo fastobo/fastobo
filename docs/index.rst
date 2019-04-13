@@ -40,6 +40,14 @@
 .. |Issues| image:: https://img.shields.io/github/issues/althonos/fastobo.svg?style=flat-square&maxAge=600
    :target: https://github.com/althonos/fastobo/issues
 
+About
+-----
+
+``fastobo`` is a Rust library implementing a reliable parser for the OBO file format 1.4.
+This crate exports idiomatic Python bindings that can be used to load, edit and serialize
+ontologies in the OBO format.
+
+
 Library
 -------
 
@@ -50,8 +58,9 @@ Library
    api/index
    changes
 
-About
------
+
+Miscellaneous
+-------------
 
 .. toctree::
    :maxdepth: 2

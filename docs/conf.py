@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, project_dir)))
 
 # -- Imports -----------------------------------------------------------------
 
+import configparser
 import datetime
 import shutil
 import sphinx_bootstrap_theme
@@ -28,13 +29,26 @@ import fastobo
 
 # -- Project information -----------------------------------------------------
 
-project = fastobo.__name__
-author = 'Martin Larralde'
+# `setup.cfg` parser
+_parser = configparser.ConfigParser()
+_parser.read(os.path.join(project_dir, "setup.cfg"))
+
+# General information
+project = _parser.get("metadata", "name")
+author = _parser.get("metadata", "author")
 year = datetime.date.today().year
 copyright = '{}, {}'.format(
     '2019-{}'.format(year) if year > 2019 else '2019',
     author,
 )
+
+# Project URLs
+project_urls = dict(
+    map(str.strip, line.split(" = ", 1))
+    for line in _parser.get("metadata", "project_urls").splitlines()
+    if line.strip()
+)
+
 
 # -- Setup -------------------------------------------------------------------
 
@@ -129,11 +143,24 @@ html_theme_options = {
     # Render the current pages TOC in the navbar. (Default: true)
     "navbar_pagenav": False,
     # A list of tuples containing pages or urls to link to.
-    "navbar_links": [],
-    #     ("GitHub", _parser.get("metadata", "home-page").strip(), True)
-    # ] + [
-    #     (k, v, True) for k, v in project_urls.items() if k != "Documentation"
-    # ],
+    "navbar_links": [
+        ("GitHub", _parser.get("metadata", "home-page").strip(), True)
+    ] + [
+        (k, v, True) for k, v in project_urls.items() if k != "Documentation"
+    ],
+}
+
+# Custom sidebar templates, must be a dictionary that maps document names
+# to template names.
+#
+# The default sidebars (for documents that don't match any pattern) are
+# defined by theme itself.  Builtin themes are using these templates by
+# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
+# 'searchbox.html']``.
+#
+html_sidebars = {
+    "*": ["localtoc.html"],
+    os.path.join("api", "*"): ["localtoc.html"],
 }
 
 # -- Extension configuration -------------------------------------------------

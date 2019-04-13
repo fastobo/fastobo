@@ -183,6 +183,12 @@ impl FromPy<XrefList> for fastobo::ast::XrefList {
     }
 }
 
+impl ToPyObject for XrefList {
+    fn to_object(&self, py: Python) -> PyObject {
+        PyList::new(py, &self.xrefs).into_object(py)
+    }
+}
+
 #[pymethods]
 impl XrefList {
     #[new]
@@ -201,6 +207,21 @@ impl XrefList {
         } else {
             Ok(obj.init(Self::new(obj.py(), Vec::new())))
         }
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for XrefList {
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        let fmt = PyString::new(py, "XrefList({!r})").to_object(py);
+        fmt.call_method1(py, "format", (self.to_object(py),))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        let frame: fastobo::ast::XrefList = self.clone_py(py).into_py(py);
+        Ok(frame.to_string())
     }
 }
 

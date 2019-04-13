@@ -82,6 +82,8 @@ jobs:
       <<: *test-rust
     - rust: nightly
       <<: *test-rust
+      after_success:
+        - ci/travis/deploy.sh
     - python: 3.5
       <<: *test-python
     - python: 3.6

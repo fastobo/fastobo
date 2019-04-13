@@ -41,7 +41,7 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 ///
 /// Example:
 ///     >>> xref = fastobo.xref.Xref(
-///     ...     fastobo.id.PrefixedIdent("ISBN", "978-0-321-84268-8"),
+///     ...     fastobo.id.PrefixedIdent('ISBN', '978-0-321-84268-8'),
 ///     ... )
 #[pyclass]
 #[derive(Debug)]

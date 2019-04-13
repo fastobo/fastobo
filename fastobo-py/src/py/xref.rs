@@ -33,6 +33,16 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 
 // --- Xref ------------------------------------------------------------------
 
+/// A cross-reference to another entity or an external resource.
+///
+/// Xrefs can be used in a `~fastobo.term.DefClause` to indicate the provenance
+/// of the definition, or in a `~fastobo.syn.Synonym` to add evidence from
+/// literature supporting the origin of the synonym.
+///
+/// Example:
+///     >>> xref = fastobo.xref.Xref(
+///     ...     fastobo.id.PrefixedIdent("ISBN", "978-0-321-84268-8"),
+///     ... )
 #[pyclass]
 #[derive(Debug)]
 pub struct Xref {
@@ -93,6 +103,12 @@ impl FromPy<Xref> for fastobo::ast::Xref {
 
 #[pymethods]
 impl Xref {
+
+    /// Create a new `Xref` instance from an ID and an optional description.
+    ///
+    /// Arguments:
+    ///     id (~fastobo.id.Ident): the identifier of the reference.
+    ///     desc (str, optional): an optional description for the reference.
     #[new]
     fn __init__(obj: &PyRawObject, id: Ident, desc: Option<String>) -> PyResult<()> {
         Ok(obj.init(
@@ -100,11 +116,13 @@ impl Xref {
         ))
     }
 
+    /// Ident: the identifier of the reference.
     #[getter]
     fn get_id(&self) -> PyResult<&Ident> {
         Ok(&self.id)
     }
 
+    /// str or None: the description of the reference, if any.
     #[getter]
     fn get_desc(&self) -> PyResult<Option<&str>> {
         match &self.desc {

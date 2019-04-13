@@ -10,7 +10,8 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/fastobo.svg?style=flat-square&maxAge=600)](https://pypi.org/project/fastobo/#files)
 [![PyPI - Implementation](https://img.shields.io/pypi/implementation/fastobo.svg?style=flat-square&maxAge=600)](https://pypi.org/project/fastobo/#files)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo/blob/master/fastobo-py/CHANGELOG.md)
-[![GitHub issues](https://img.shields.io/github/issues/althonos/fastobo.svg?style=flat-square)](https://github.com/althonos/fastobo/issues)
+[![Documentation](https://img.shields.io/readthedocs/fastobo.svg?maxAge=3600&style=flat-square)](https://fastobo.readthedocs.io/)
+[![GitHub issues](https://img.shields.io/github/issues/althonos/fastobo.svg?style=flat-square&maxAge=600)](https://github.com/althonos/fastobo/issues)
 
 ## Overview
 

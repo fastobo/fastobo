@@ -17,10 +17,11 @@ use fastobo::share::Redeem;
 
 use crate::utils::AsGILRef;
 use crate::utils::ClonePy;
-use crate::py::id::Ident;
-use crate::py::pv::PropertyValue;
-use crate::py::xref::Xref;
-use crate::py::xref::XrefList;
+use super::super::id::Ident;
+use super::super::pv::PropertyValue;
+use super::super::xref::Xref;
+use super::super::xref::XrefList;
+use super::super::syn::Synonym;
 
 // --- Conversion Wrapper ----------------------------------------------------
 
@@ -68,7 +69,7 @@ impl FromPy<fastobo::ast::TermClause> for TermClause {
                 Py::new(py, AltIdClause::new(py, id))
                     .map(TermClause::AltId),
             Def(desc, xrefs) =>
-                Py::new(py, DefClause::new(py, desc))
+                Py::new(py, DefClause::new(py, desc, xrefs))
                     .map(TermClause::Def),
             Comment(c) =>
                 Py::new(py, CommentClause::new(py, c))
@@ -241,22 +242,36 @@ impl FromPy<AltIdClause> for fastobo::ast::TermClause {
 // --- Def -------------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, ClonePy, Debug)]
+#[derive(Debug)]
 pub struct DefClause {
-    definition: fastobo::ast::QuotedString
-    // xrefs: XrefList // TODO
+    definition: fastobo::ast::QuotedString,
+    xrefs: XrefList,
 }
 
 impl DefClause {
-    pub fn new(_py: Python, definition: fastobo::ast::QuotedString) -> Self {
-        Self { definition }
+    pub fn new<X>(py: Python, definition: fastobo::ast::QuotedString, xrefs: X) -> Self
+    where
+        X: IntoPy<XrefList>,
+    {
+        Self { definition, xrefs: xrefs.into_py(py) }
+    }
+}
+
+impl ClonePy for DefClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            definition: self.definition.clone(),
+            xrefs: self.xrefs.clone_py(py)
+        }
     }
 }
 
 impl FromPy<DefClause> for fastobo::ast::TermClause {
     fn from_py(clause: DefClause, py: Python) -> Self {
-        // FIXME: xrefs
-        fastobo::ast::TermClause::Def(clause.definition, Default::default())
+        fastobo::ast::TermClause::Def(
+            clause.definition,
+            clause.xrefs.into_py(py)
+        )
     }
 }
 
@@ -314,19 +329,33 @@ impl FromPy<SubsetClause> for fastobo::ast::TermClause {
 // --- Synonym ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
-#[derive(Clone, ClonePy, Debug)]
-pub struct SynonymClause {}
+#[derive(Debug)]
+pub struct SynonymClause {
+    synonym: Synonym,
+}
 
 impl SynonymClause {
-    pub fn new<S>(py: Python, synonym: S) -> Self {
-        SynonymClause {}
+    pub fn new<S>(py: Python, synonym: S) -> Self
+    where
+        S: IntoPy<Synonym>,
+    {
+        Self {
+            synonym: synonym.into_py(py)
+        }
+    }
+}
+
+impl ClonePy for SynonymClause {
+    fn clone_py(&self, py: Python) -> Self {
+        Self {
+            synonym: self.synonym.clone_py(py)
+        }
     }
 }
 
 impl FromPy<SynonymClause> for fastobo::ast::TermClause {
     fn from_py(clause: SynonymClause, py: Python) -> Self {
-        // fastobo::ast::TermClause::Synonym(clause.synonym.into_py(py))
-        unimplemented!()
+        fastobo::ast::TermClause::Synonym(clause.synonym.into_py(py))
     }
 }
 

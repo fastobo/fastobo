@@ -149,17 +149,17 @@ pub struct XrefList {
     xrefs: Vec<Py<Xref>>
 }
 
+impl XrefList {
+    fn new(_py: Python, xrefs: Vec<Py<Xref>>) -> Self {
+        Self { xrefs }
+    }
+}
+
 impl ClonePy for XrefList {
     fn clone_py(&self, py: Python) -> Self {
         XrefList {
             xrefs: self.xrefs.clone_py(py)
         }
-    }
-}
-
-impl XrefList {
-    fn new(_py: Python, xrefs: Vec<Py<Xref>>) -> Self {
-        Self { xrefs }
     }
 }
 

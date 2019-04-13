@@ -34,11 +34,20 @@ pub mod id;
 pub mod term;
 pub mod typedef;
 pub mod pv;
+pub mod syn;
 pub mod xref;
 
 use self::header::frame::HeaderFrame;
 use self::term::frame::TermFrame;
 use self::typedef::frame::TypedefFrame;
+
+use self::header::PyInit_header;
+use self::typedef::PyInit_typedef;
+use self::term::PyInit_term;
+use self::id::PyInit_id;
+use self::syn::PyInit_syn;
+use self::pv::PyInit_pv;
+use self::xref::PyInit_xref;
 
 // --- Module export ---------------------------------------------------------
 
@@ -48,35 +57,13 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<BaseEntityFrame>()?;
     m.add_class::<OboDoc>()?;
 
-    {
-        use self::header::*;
-        m.add_wrapped(pyo3::wrap_pymodule!(header))?;
-    }
-
-    {
-        use self::id::*;
-        m.add_wrapped(pyo3::wrap_pymodule!(id))?;
-    }
-
-    {
-        use self::term::*;
-        m.add_wrapped(pyo3::wrap_pymodule!(term))?;
-    }
-
-    {
-        use self::typedef::*;
-        m.add_wrapped(pyo3::wrap_pymodule!(typedef));
-    }
-
-    {
-        use self::pv::*;
-        m.add_wrapped(pyo3::wrap_pymodule!(pv))?;
-    }
-
-    {
-        use self::xref::*;
-        m.add_wrapped(pyo3::wrap_pymodule!(xref))?;
-    }
+    m.add_wrapped(pyo3::wrap_pymodule!(header))?;
+    m.add_wrapped(pyo3::wrap_pymodule!(id))?;
+    m.add_wrapped(pyo3::wrap_pymodule!(pv))?;
+    m.add_wrapped(pyo3::wrap_pymodule!(syn));
+    m.add_wrapped(pyo3::wrap_pymodule!(term))?;
+    m.add_wrapped(pyo3::wrap_pymodule!(typedef));
+    m.add_wrapped(pyo3::wrap_pymodule!(xref))?;
 
     #[pyfn(m, "load")]
     fn load(py: Python, fh: &PyAny) -> PyResult<OboDoc> {

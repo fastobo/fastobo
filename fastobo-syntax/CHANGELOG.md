@@ -10,11 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix invalid header values being successfully parsed into `Unreserved` nonetheless.
 
-[Unreleased]: https://github.com/althonos/obofoundry.rs/compare/syntax/v0.1.0-syntax...HEAD
+[Unreleased]: https://github.com/althonos/fastobo/compare/syntax/v0.1.0-syntax...HEAD
 
 
 ## [v0.1.0-syntax] - 2019-03-30
 
 Initial release.
 
-[v0.1.0-syntax]: https://github.com/althonos/obofoundry.rs/compare/40aa9b0...v0.1.0-syntax
+[v0.1.0-syntax]: https://github.com/althonos/fastobo/compare/40aa9b0...v0.1.0-syntax

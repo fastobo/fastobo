@@ -50,14 +50,36 @@ impl_fromstr!(SynonymScope);
 /// A synonym, denoting an alternative name for the embedding entity.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Synonym {
-    desc: QuotedString,
-    scope: SynonymScope,
-    ty: Option<SynonymTypeIdent>,
-    xrefs: XrefList,
+    pub desc: QuotedString,
+    pub scope: SynonymScope,
+    pub ty: Option<SynonymTypeIdent>,
+    pub xrefs: XrefList,
 }
 
 impl Synonym {
-    pub fn new(desc: QuotedString, scope: SynonymScope, xrefs: XrefList) -> Self {
+
+    pub fn new(desc: QuotedString, scope: SynonymScope) -> Self {
+        Self {
+            desc,
+            scope,
+            ty: Default::default(),
+            xrefs: Default::default(),
+        }
+    }
+
+    pub fn with_type<T>(desc: QuotedString, scope: SynonymScope, ty: T) -> Self
+    where
+        T: Into<Option<SynonymTypeIdent>>,
+    {
+        Self {
+            desc,
+            scope,
+            ty: ty.into(),
+            xrefs: Default::default(),
+        }
+    }
+
+    pub fn with_xrefs(desc: QuotedString, scope: SynonymScope, xrefs: XrefList) -> Self {
         Self {
             desc,
             scope,
@@ -66,16 +88,19 @@ impl Synonym {
         }
     }
 
-    pub fn with_type(
+    pub fn with_type_and_xrefs<T>(
         desc: QuotedString,
         scope: SynonymScope,
-        ty: SynonymTypeIdent,
+        ty: T,
         xrefs: XrefList,
-    ) -> Self {
+    ) -> Self
+    where
+        T: Into<Option<SynonymTypeIdent>>,
+    {
         Self {
             desc,
             scope,
-            ty: Some(ty),
+            ty: ty.into(),
             xrefs,
         }
     }

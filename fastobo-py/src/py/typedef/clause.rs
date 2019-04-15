@@ -188,7 +188,6 @@ impl FromPy<fastobo::ast::TypedefClause> for TypedefClause {
             CreationDate(dt) =>
                 Py::new(py, CreationDateClause::new(py, dt))
                     .map(TypedefClause::CreationDate),
-
             ExpandAssertionTo(d, xrefs) =>
                 Py::new(py, ExpandAssertionToClause::new(py, d, xrefs))
                     .map(TypedefClause::ExpandAssertionTo),

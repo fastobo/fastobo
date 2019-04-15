@@ -338,9 +338,9 @@ impl PyObjectProtocol for PrefixedIdent {
 ///
 /// Example:
 ///     >>> import fastobo
-///     >>> ident = fastobo.id.UnprefixedIdent(\"hello world\")
+///     >>> ident = fastobo.id.UnprefixedIdent("hello world")
 ///     >>> print(ident.escaped)
-///     hello\\ world
+///     hello\ world
 ///     >>> print(ident.unescaped)
 ///     hello world
 ///

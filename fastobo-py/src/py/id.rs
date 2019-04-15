@@ -261,7 +261,7 @@ impl PrefixedIdent {
         Ok(obj.init(Self::new(p, l)))
     }
 
-    /// `str`: the IDspace of the identifier.
+    /// `~fastobo.id.IdentPrefix`: the IDspace of the identifier.
     #[getter]
     fn get_prefix(&self) -> PyResult<Py<IdentPrefix>> {
         let py = unsafe { Python::assume_gil_acquired() };
@@ -284,7 +284,7 @@ impl PrefixedIdent {
         Ok(())
     }
 
-    /// `str`: the local part of the identifier.
+    /// `~fastobo.id.IdentLocal`: the local part of the identifier.
     #[getter]
     fn get_local(&self) -> PyResult<Py<IdentLocal>> {
         let py = unsafe { Python::assume_gil_acquired() };

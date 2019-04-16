@@ -22,8 +22,8 @@ use super::IdentLocal;
 /// An identifier with a prefix.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct PrefixedIdent {
-    prefix: IdentPrefix,
-    local: IdentLocal,
+    pub prefix: IdentPrefix,
+    pub local: IdentLocal,
 }
 
 impl PrefixedIdent {
@@ -48,15 +48,15 @@ impl PrefixedIdent {
         self.prefix.is_canonical() && self.local.is_canonical()
     }
 
-    /// The prefix of the prefixed identifier.
-    pub fn prefix(&self) -> IdPrefix<'_> {
-        self.prefix.share()
-    }
-
-    /// The local part of the prefixed identifier.
-    pub fn local(&self) -> IdLocal<'_> {
-        self.local.share()
-    }
+    // /// The prefix of the prefixed identifier.
+    // pub fn prefix(&self) -> IdPrefix<'_> {
+    //     self.prefix.share()
+    // }
+    //
+    // /// The local part of the prefixed identifier.
+    // pub fn local(&self) -> IdLocal<'_> {
+    //     self.local.share()
+    // }
 }
 
 impl Display for PrefixedIdent {

@@ -64,9 +64,10 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// ```rust
 /// # extern crate fastobo;
 /// # use fastobo::ast::PrefixedIdent;
-/// let id = PrefixedIdent::from_str("GO:0046154");
+/// # use std::str::FromStr;
+/// let id = PrefixedIdent::from_str("GO:0046154").unwrap();
 /// assert!(id.local.is_canonical());
-/// assert_eq!(id.local, "0046154");
+/// assert_eq!(&id.local, "0046154");
 /// ```
 #[derive(Clone, Debug, Ord, PartialEq, Hash, Eq)]
 pub struct IdentLocal {

@@ -1,4 +1,6 @@
-
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::string::ToString;
@@ -48,7 +50,53 @@ impl SynonymScope {
     }
 }
 
-// --
+impl Display for SynonymScope {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.inner.fmt(f)
+    }
+}
+
+impl From<fastobo::ast::SynonymScope> for SynonymScope {
+    fn from(scope: fastobo::ast::SynonymScope) -> Self {
+        Self::new(scope)
+    }
+}
+
+impl FromPy<fastobo::ast::SynonymScope> for SynonymScope {
+    fn from_py(scope: fastobo::ast::SynonymScope, _py: Python) -> Self {
+        Self::from(scope)
+    }
+}
+
+impl From<SynonymScope> for fastobo::ast::SynonymScope {
+    fn from(scope: SynonymScope) -> Self {
+        scope.inner
+    }
+}
+
+impl FromPy<SynonymScope> for fastobo::ast::SynonymScope {
+    fn from_py(scope: SynonymScope, _py: Python) -> Self {
+        Self::from(scope)
+    }
+}
+
+impl FromStr for SynonymScope {
+    type Err = PyErr;
+    fn from_str(s: &str) -> PyResult<Self> {
+        match s {
+            "EXACT" => Ok(Self::new(fastobo::ast::SynonymScope::Exact)),
+            "BROAD" => Ok(Self::new(fastobo::ast::SynonymScope::Broad)),
+            "NARROW" => Ok(Self::new(fastobo::ast::SynonymScope::Narrow)),
+            "RELATED" => Ok(Self::new(fastobo::ast::SynonymScope::Related)),
+            _ => ValueError::into(format!(
+                "expected 'EXACT', 'BROAD', 'NARROW' or 'RELATED', found {:?}",
+                s
+            ))
+        }
+    }
+}
+
+// --- Synonym ---------------------------------------------------------------
 
 #[pyclass]
 #[derive(Debug)]

@@ -126,6 +126,19 @@ where
 //     }
 // }
 
+impl<'a, B> Share<'a, &'a B> for Cow<'a, &'a B>
+where
+    &'a B: Redeem<'a>,
+    <&'a B as Redeem<'a>>::Owned: Share<'a, &'a B>,
+{
+    fn share(&'a self) -> &'a B {
+        match self {
+            Cow::Borrowed(b) => b,
+            Cow::Owned(o) => o.share(),
+        }
+    }
+}
+
 impl<'a, B> Redeem<'a> for Cow<'a, B>
 where
     B: Redeem<'a>,
@@ -200,7 +213,7 @@ where
         match self {
             Cow::Borrowed(b) => b.hash(state),
             Cow::Owned(o) => o.hash(state),
-        }
+        };
     }
 }
 
@@ -250,7 +263,6 @@ impl<'a> PartialEq for Cow<'a, &'a str> {
         self.as_str() == other.as_str()
     }
 }
-
 
 // --- Cow<[T]> --------------------------------------------------------------
 

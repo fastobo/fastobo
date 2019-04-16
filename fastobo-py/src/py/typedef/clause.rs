@@ -54,12 +54,10 @@ pub enum TypedefClause {
     UnionOf(Py<UnionOfClause>),
     EquivalentTo(Py<EquivalentToClause>),
     DisjointFrom(Py<DisjointFromClause>),
-
     InverseOf(Py<InverseOfClause>),
     TransitiveOver(Py<TransitiveOverClause>),
     EquivalentToChain(Py<EquivalentToChainClause>),
     DisjointOver(Py<DisjointOverClause>),
-
     Relationship(Py<RelationshipClause>),
     IsObsolete(Py<IsObsoleteClause>),
     ReplacedBy(Py<ReplacedByClause>),

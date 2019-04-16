@@ -61,6 +61,7 @@ use crate::parser::OboParser;
 use crate::parser::Rule;
 
 /// A complete OBO document in format version 1.4.
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct OboDoc {
     pub header: HeaderFrame,
     pub entities: Vec<EntityFrame>,
@@ -189,6 +190,7 @@ impl<'i> FromPair<'i> for OboDoc {
 impl_fromstr!(OboDoc);
 
 /// An entity frame, either for a term, an instance, or a typedef.
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum EntityFrame {
     Term(TermFrame),
     Typedef(TypedefFrame),

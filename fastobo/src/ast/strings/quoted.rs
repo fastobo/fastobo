@@ -66,22 +66,16 @@ impl AsRef<QuotedStr> for QuotedString {
     }
 }
 
-impl Deref for QuotedString {
-    type Target = QuotedStr;
-    fn deref(&self) -> &Self::Target {
-        self.as_ref()
-    }
-}
-
 impl Borrow<QuotedStr> for QuotedString {
     fn borrow(&self) -> &QuotedStr {
         QuotedStr::new(self.as_ref())
     }
 }
 
-impl<'a> Share<'a, &'a QuotedStr> for QuotedString {
-    fn share(&'a self) -> &'a QuotedStr {
-        QuotedStr::new(&self.value)
+impl Deref for QuotedString {
+    type Target = QuotedStr;
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
     }
 }
 
@@ -104,6 +98,24 @@ impl<'i> FromPair<'i> for QuotedString {
     }
 }
 impl_fromstr!(QuotedString);
+
+impl PartialEq<str> for QuotedString {
+    fn eq(&self, other: &str) -> bool {
+        &self.value == other
+    }
+}
+
+impl PartialEq<String> for QuotedString {
+    fn eq(&self, other: &String) -> bool {
+        &self.value == other.as_str()
+    }
+}
+
+impl<'a> Share<'a, &'a QuotedStr> for QuotedString {
+    fn share(&'a self) -> &'a QuotedStr {
+        QuotedStr::new(&self.value)
+    }
+}
 
 /// A borrowed `QuotedString`.
 #[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
@@ -139,16 +151,28 @@ impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
 }
 impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
 
-impl ToOwned for QuotedStr {
-    type Owned = QuotedString;
-    fn to_owned(&self) -> QuotedString {
-        QuotedString::new(self.0.to_owned())
+impl PartialEq<str> for QuotedStr {
+    fn eq(&self, other: &str) -> bool {
+        &self.0 == other
+    }
+}
+
+impl PartialEq<String> for QuotedStr {
+    fn eq(&self, other: &String) -> bool {
+        &self.0 == other.as_str()
     }
 }
 
 impl<'a> Redeem<'a> for &'a QuotedStr {
     type Owned = QuotedString;
     fn redeem(&self) -> QuotedString {
+        QuotedString::new(self.0.to_owned())
+    }
+}
+
+impl ToOwned for QuotedStr {
+    type Owned = QuotedString;
+    fn to_owned(&self) -> QuotedString {
         QuotedString::new(self.0.to_owned())
     }
 }

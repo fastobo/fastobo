@@ -59,6 +59,15 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// * A canonical local ID only contains digits (`[0-9]`).
 /// * A non-canonical local ID can contain any character excepting
 ///   whitespaces and newlines.
+///
+/// # Example
+/// ```rust
+/// # extern crate fastobo;
+/// # use fastobo::ast::PrefixedIdent;
+/// let id = PrefixedIdent::from_str("GO:0046154");
+/// assert!(id.local.is_canonical());
+/// assert_eq!(id.local, "0046154");
+/// ```
 #[derive(Clone, Debug, Ord, PartialEq, Hash, Eq)]
 pub struct IdentLocal {
     value: String,
@@ -96,12 +105,6 @@ impl AsRef<str> for IdentLocal {
     }
 }
 
-impl<'a> Share<'a, IdLocal<'a>> for IdentLocal {
-    fn share(&'a self) -> IdLocal<'a> {
-        unsafe { IdLocal::new_unchecked(&self.value, self.canonical) }
-    }
-}
-
 impl Display for IdentLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.share().fmt(f)
@@ -128,9 +131,21 @@ impl<'i> FromPair<'i> for IdentLocal {
 }
 impl_fromstr!(IdentLocal);
 
+impl PartialEq<str> for IdentLocal {
+    fn eq(&self, other: &str) -> bool {
+        &self.value == other
+    }
+}
+
 impl PartialOrd for IdentLocal {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.value.partial_cmp(&other.value)
+    }
+}
+
+impl<'a> Share<'a, IdLocal<'a>> for IdentLocal {
+    fn share(&'a self) -> IdLocal<'a> {
+        unsafe { IdLocal::new_unchecked(&self.value, self.canonical) }
     }
 }
 
@@ -187,6 +202,12 @@ impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
     }
 }
 impl_fromslice!('i, Cow<'i, IdLocal<'i>>);
+
+impl<'a> PartialEq<str> for IdLocal<'a> {
+    fn eq(&self, other: &str) -> bool {
+        self.value == other
+    }
+}
 
 impl<'a> PartialOrd for IdLocal<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

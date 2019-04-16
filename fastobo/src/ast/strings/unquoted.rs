@@ -20,15 +20,32 @@ use super::escape;
 use super::unescape;
 
 /// A string without delimiters, used as values in different clauses.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+///
+/// This type is mostly just a wrapper for `String` that patches `FromStr` and
+/// `Display` so that it can read and write unquoted strings in OBO documents.
+///
+/// # Usage
+/// Use `FromStr` to parse the serialized representation of a `UnquotedString`,
+/// and `UnquotedString::new` to create a quoted string with its content set
+/// from a Rust `String` passed as argument.
+///
+/// # Example
+/// ```rust
+/// # extern crate fastobo;
+/// # use fastobo::ast::UnquotedString;
+/// let s = UnquotedString::new(String::from("Hello, world!"));
+/// assert_eq!(s.to_string(), "Hello, world!");
+/// ```
+#[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
+#[opaque_typedef(derive(AsRef(Inner, Self)))]
 pub struct UnquotedString {
-    value: Cow<'static, &'static str>,
+    value: String,
 }
 
 impl UnquotedString {
     /// Create a new `UnquotedString`.
     pub fn new(s: String) -> Self {
-        UnquotedString { value: s.into() }
+        UnquotedString { value: s }
     }
 
     /// Extracts a string slice containing the `UnquotedString` value.
@@ -88,7 +105,7 @@ impl<'i> FromPair<'i> for UnquotedString {
 impl_fromstr!(UnquotedString);
 
 /// A borrowed `UnquotedString`.
-#[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
+#[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
 #[repr(transparent)]
 pub struct UnquotedStr(str);

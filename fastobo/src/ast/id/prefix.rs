@@ -66,6 +66,15 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// * A canonical ID prefix only contains alphabetic characters (`[a-zA-Z]`)
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
+///
+/// # Example
+/// ```rust
+/// # extern crate fastobo;
+/// # use fastobo::ast::PrefixedIdent;
+/// let id = PrefixedIdent::from_str("GO:0046154");
+/// assert!(id.prefix.is_canonical());
+/// assert_eq!(id.prefix, "0046154");
+/// ```
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct IdentPrefix {
     value: String,
@@ -128,6 +137,12 @@ impl<'i> FromPair<'i> for IdentPrefix {
     }
 }
 impl_fromstr!(IdentPrefix);
+
+impl PartialEq<str> for IdentPrefix {
+    fn eq(&self, other: &str) -> bool {
+        &self.value == other
+    }
+}
 
 impl PartialOrd for IdentPrefix {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -204,6 +219,12 @@ impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
     }
 }
 impl_fromslice!('i, Cow<'i, IdPrefix<'i>>);
+
+impl<'a> PartialEq<str> for IdPrefix<'a> {
+    fn eq(&self, other: &str) -> bool {
+        self.value == other
+    }
+}
 
 impl<'a> PartialOrd for IdPrefix<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

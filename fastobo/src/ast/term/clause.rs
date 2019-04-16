@@ -234,7 +234,7 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
-        let expected = TermClause::Synonym(Synonym::new(
+        let expected = TermClause::Synonym(Synonym::with_xrefs(
             QuotedString::new(String::from("chemical entity")),
             SynonymScope::Exact,
             XrefList::from(vec![Xref::new(Ident::from(UnprefixedIdent::new(String::from("UniProt"))))]),

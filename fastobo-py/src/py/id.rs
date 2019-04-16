@@ -62,20 +62,18 @@ pub enum Ident {
 
 impl<'p> AsGILRef<'p, fastobo::ast::Id<'p>> for Ident {
     fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::Id<'p> {
-        unsafe {
-            match self {
-                Ident::Unprefixed(ref id) => {
-                    let x: &UnprefixedIdent = id.as_gil_ref(py);
-                    fastobo::ast::Id::Unprefixed(Cow::Borrowed(x.as_gil_ref(py)))
-                }
-                Ident::Prefixed(ref id) => {
-                    let x: &PrefixedIdent = id.as_gil_ref(py);
-                    fastobo::ast::Id::Prefixed(Cow::Borrowed(x.as_gil_ref(py)))
-                }
-                Ident::Url(ref url) => {
-                    let x: &Url = url.as_gil_ref(py);
-                    fastobo::ast::Id::Url(Cow::Borrowed(x.as_gil_ref(py)))
-                }
+        match self {
+            Ident::Unprefixed(ref id) => {
+                let x: &UnprefixedIdent = id.as_gil_ref(py);
+                fastobo::ast::Id::Unprefixed(Cow::Borrowed(x.as_gil_ref(py)))
+            }
+            Ident::Prefixed(ref id) => {
+                let x: &PrefixedIdent = id.as_gil_ref(py);
+                fastobo::ast::Id::Prefixed(Cow::Borrowed(x.as_gil_ref(py)))
+            }
+            Ident::Url(ref url) => {
+                let x: &Url = url.as_gil_ref(py);
+                fastobo::ast::Id::Url(Cow::Borrowed(x.as_gil_ref(py)))
             }
         }
     }

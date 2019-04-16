@@ -54,7 +54,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 
 
 /// An identifier without a prefix.
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, Ord, PartialEq, PartialOrd, Hash, Eq)]
 pub struct UnprefixedIdent {
     value: String,
 }
@@ -121,7 +121,7 @@ impl<'a> Share<'a, &'a UnprefixedId> for UnprefixedIdent {
 }
 
 /// A borrowed `UnprefixedIdentifier`.
-#[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd, OpaqueTypedefUnsized)]
 #[repr(transparent)]
 pub struct UnprefixedId(str);
 

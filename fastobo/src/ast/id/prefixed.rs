@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -19,7 +20,7 @@ use super::IdLocal;
 use super::IdentLocal;
 
 /// An identifier with a prefix.
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct PrefixedIdent {
     prefix: IdentPrefix,
     local: IdentLocal,
@@ -75,6 +76,16 @@ impl<'i> FromPair<'i> for PrefixedIdent {
 }
 impl_fromstr!(PrefixedIdent);
 
+impl PartialOrd for PrefixedIdent {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.prefix.partial_cmp(&other.prefix) {
+            None => None,
+            Some(Ordering::Equal) => self.local.partial_cmp(&other.local),
+            Some(ord) => Some(ord),
+        }
+    }
+}
+
 impl<'a> Share<'a, PrefixedId<'a>> for PrefixedIdent {
     fn share(&'a self) -> PrefixedId<'a> {
         PrefixedId::new(
@@ -85,7 +96,7 @@ impl<'a> Share<'a, PrefixedId<'a>> for PrefixedIdent {
 }
 
 /// A borrowed `PrefixedIdentifier`
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash)]
 pub struct PrefixedId<'a> {
     prefix: Cow<'a, IdPrefix<'a>>,
     local: Cow<'a, IdLocal<'a>>,

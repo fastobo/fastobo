@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -65,7 +66,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// * A canonical ID prefix only contains alphabetic characters (`[a-zA-Z]`)
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct IdentPrefix {
     value: String,
     canonical: bool,
@@ -128,6 +129,12 @@ impl<'i> FromPair<'i> for IdentPrefix {
 }
 impl_fromstr!(IdentPrefix);
 
+impl PartialOrd for IdentPrefix {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
+
 impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
     fn share(&'a self) -> IdPrefix<'a> {
         unsafe { IdPrefix::new_unchecked(&self.value, self.canonical) }
@@ -136,7 +143,7 @@ impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
 
 
 /// A borrowed `IdentPrefix`
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct IdPrefix<'a> {
     value: &'a str,
     canonical: bool,
@@ -197,6 +204,12 @@ impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
     }
 }
 impl_fromslice!('i, Cow<'i, IdPrefix<'i>>);
+
+impl<'a> PartialOrd for IdPrefix<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
 
 impl<'a> Redeem<'a> for IdPrefix<'a> {
     type Owned = IdentPrefix;

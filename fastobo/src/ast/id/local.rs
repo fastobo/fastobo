@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -58,7 +59,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// * A canonical local ID only contains digits (`[0-9]`).
 /// * A non-canonical local ID can contain any character excepting
 ///   whitespaces and newlines.
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, Ord, PartialEq, Hash, Eq)]
 pub struct IdentLocal {
     value: String,
     canonical: bool,
@@ -127,8 +128,14 @@ impl<'i> FromPair<'i> for IdentLocal {
 }
 impl_fromstr!(IdentLocal);
 
+impl PartialOrd for IdentLocal {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
+
 /// A borrowed `IdLocal`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Ord, PartialEq, Hash, Eq)]
 pub struct IdLocal<'a> {
     value: &'a str,
     canonical: bool,
@@ -180,6 +187,12 @@ impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
     }
 }
 impl_fromslice!('i, Cow<'i, IdLocal<'i>>);
+
+impl<'a> PartialOrd for IdLocal<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
 
 impl<'a> Redeem<'a> for IdLocal<'a> {
     type Owned = IdentLocal;

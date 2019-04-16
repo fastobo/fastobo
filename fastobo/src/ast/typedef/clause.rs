@@ -132,7 +132,7 @@ impl<'i> FromPair<'i> for Line<TypedefClause> {
         let mut inner = pair.into_inner();
         let clause = TypedefClause::from_pair_unchecked(inner.next().unwrap())?;
         let eol = inner.next().unwrap();
-        Ok(Line::<()>::from_pair_unchecked(eol)?.with_content(clause))
+        Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
     }
 }
 impl_fromstr!(Line<TypedefClause>);

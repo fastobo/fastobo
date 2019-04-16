@@ -92,11 +92,22 @@ impl IdentPrefix {
     }
 
     /// Check if the identifier prefix is canonical or not.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::IdentPrefix;
+    /// assert!(IdentPrefix::new(String::from("GO")).is_canonical());
+    /// ```
     pub fn is_canonical(&self) -> bool {
         self.canonical
     }
 
     /// Create a new `IdPrefix` without checking if it is canonical or not.
+    ///
+    /// This is unsafe because the `canonical` flag will be used to determine
+    /// if the prefix needs escaping. If not set right, the syntax of the
+    /// produced serialization could be invalid.
     pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
         Self { value: s, canonical }
     }
@@ -239,5 +250,29 @@ impl<'a> Redeem<'a> for IdPrefix<'a> {
         unsafe {
             IdentPrefix::new_unchecked(self.value.to_string(), self.canonical)
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+
+    use std::str::FromStr;
+    use super::*;
+
+    #[test]
+    fn from_str() {
+        let prefix = IdentPrefix::from_str("GO").unwrap();
+        assert_eq!(prefix, IdentPrefix::new(String::from("GO")));
+        assert!(IdentPrefix::from_str("GO:").is_err());
+    }
+
+    #[test]
+    fn to_string() {
+        let prefix = IdentPrefix::new(String::from("GO"));
+        assert_eq!(prefix.to_string(), "GO");
+
+        let prefix = IdentPrefix::new(String::from("some thing"));
+        assert_eq!(prefix.to_string(), "some\\ thing");
     }
 }

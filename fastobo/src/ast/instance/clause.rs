@@ -151,7 +151,8 @@ impl<'i> FromPair<'i> for Line<InstanceClause> {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clause = InstanceClause::from_pair_unchecked(inner.next().unwrap())?;
-        Line::<()>::from_pair_unchecked(inner.next().unwrap()).map(|line| line.with_content(clause))
+        let eol = inner.next().unwrap();
+        Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
     }
 }
 impl_fromstr!(Line<InstanceClause>);

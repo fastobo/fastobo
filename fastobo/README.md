@@ -35,7 +35,7 @@ extern crate reqwest;
 
 fn main() {
     let response = reqwest::get("http://purl.obolibrary.org/obo/go.obo").unwrap();
-    let mut reader = std::io::BufRead::new(response);
+    let mut reader = std::io::BufReader::new(response);
 
     match fastobo::ast::OboDoc::from_stream(&mut reader) {
         Ok(doc) => println!("Number of GO entities: {}", doc.entities.len()),

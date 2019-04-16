@@ -61,7 +61,7 @@ use crate::parser::OboParser;
 use crate::parser::Rule;
 
 /// A complete OBO document in format version 1.4.
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
 pub struct OboDoc {
     pub header: HeaderFrame,
     pub entities: Vec<EntityFrame>,

@@ -2,6 +2,9 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::iter::IntoIterator;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 use pest::iterators::Pair;
 
@@ -13,11 +16,26 @@ use crate::parser::Rule;
 /// A term frame, describing a class.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TermFrame {
-    pub id: Line<ClassIdent>,
-    pub clauses: Vec<Line<TermClause>>,
+    id: Line<ClassIdent>,
+    clauses: Vec<Line<TermClause>>,
 }
 
 impl TermFrame {
+    /// Create a new term frame with the given ID but without any clause.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use std::str::FromStr;
+    /// # use fastobo::ast::*;
+    /// let id = ClassIdent::from_str("MS:1000031").unwrap();
+    /// let frame = TermFrame::new(id);
+    /// assert_eq!(frame.to_string(),
+    /// "[Term]
+    /// id: MS:1000031
+    /// "
+    /// )
+    /// ```
     pub fn new<I>(id: I) -> Self
     where
         I: Into<Line<ClassIdent>>,
@@ -25,6 +43,7 @@ impl TermFrame {
         Self::with_clauses(id, Vec::new())
     }
 
+    /// Create a new term frame with the provided ID and clauses.
     pub fn with_clauses<I>(id: I, clauses: Vec<Line<TermClause>>) -> Self
     where
         I: Into<Line<ClassIdent>>,
@@ -33,6 +52,41 @@ impl TermFrame {
             id: id.into(),
             clauses: clauses,
         }
+    }
+
+    /// Get the identifier of the `TermFrame`.
+    pub fn id(&self) -> &Line<ClassIdent> {
+        &self.id
+    }
+
+    /// Get the `TermClause`s of the `TermFrame`.
+    pub fn clauses(&self) -> &Vec<Line<TermClause>> {
+        &self.clauses
+    }
+}
+
+impl AsRef<Vec<Line<TermClause>>> for TermFrame {
+    fn as_ref(&self) -> &Vec<Line<TermClause>> {
+        &self.clauses
+    }
+}
+
+impl AsRef<[Line<TermClause>]> for TermFrame {
+    fn as_ref(&self) -> &[Line<TermClause>] {
+        &self.clauses
+    }
+}
+
+impl Deref for TermFrame {
+    type Target = Vec<Line<TermClause>>;
+    fn deref(&self) -> &Self::Target {
+        &self.clauses
+    }
+}
+
+impl DerefMut for TermFrame {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.clauses
     }
 }
 
@@ -43,12 +97,26 @@ impl Display for TermFrame {
     }
 }
 
+/// Create a new term frame with the frame ID given as a `Line`.
+impl From<Line<ClassIdent>> for TermFrame {
+    fn from(line: Line<ClassIdent>) -> Self {
+        Self::new(line)
+    }
+}
+
+/// Create a new term frame with the frame ID given as a `ClassIdent`.
+impl From<ClassIdent> for TermFrame {
+    fn from(id: ClassIdent) -> Self {
+        Self::new(id)
+    }
+}
+
 impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let clsid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(clsid);
+        let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(clsid);
 
         let mut clauses = Vec::new();
         for pair in inner {
@@ -59,6 +127,22 @@ impl<'i> FromPair<'i> for TermFrame {
     }
 }
 impl_fromstr!(TermFrame);
+
+impl IntoIterator for TermFrame {
+    type Item = Line<TermClause>;
+    type IntoIter = <Vec<Line<TermClause>> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a TermFrame {
+    type Item = &'a Line<TermClause>;
+    type IntoIter = <&'a Vec<Line<TermClause>> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.as_slice().into_iter()
+    }
+}
 
 #[cfg(test)]
 mod tests {

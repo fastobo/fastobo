@@ -63,9 +63,19 @@ impl<'i> FromPair<'i> for Xref {
 impl_fromstr!(Xref);
 
 /// A list of containing zero or more `Xref`s.
-#[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Hash, Eq, PartialEq, OpaqueTypedef)]
+#[opaque_typedef(allow_mut_ref)]
+#[opaque_typedef(derive(
+    AsRef(Inner, Self),
+    AsMut(Inner, Self),
+    Deref,
+    DerefMut,
+    Into(Inner),
+    FromInner,
+    PartialEq(Inner),
+))]
 pub struct XrefList {
-    pub xrefs: Vec<Xref>,
+    xrefs: Vec<Xref>,
 }
 
 impl XrefList {
@@ -76,13 +86,6 @@ impl XrefList {
 
 impl AsRef<[Xref]> for XrefList {
     fn as_ref(&self) -> &[Xref] {
-        &self.xrefs
-    }
-}
-
-impl Deref for XrefList {
-    type Target = Vec<Xref>;
-    fn deref(&self) -> &Vec<Xref> {
         &self.xrefs
     }
 }
@@ -102,12 +105,6 @@ impl Display for XrefList {
             }
         }
         f.write_char(']')
-    }
-}
-
-impl From<Vec<Xref>> for XrefList {
-    fn from(v: Vec<Xref>) -> XrefList {
-        Self::new(v)
     }
 }
 

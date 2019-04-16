@@ -3,6 +3,7 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::iter::FromIterator;
+use std::iter::IntoIterator;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
@@ -16,14 +17,30 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// The header frame, containing metadata about an OBO document.
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, OpaqueTypedef)]
+#[opaque_typedef(allow_mut_ref)]
+#[opaque_typedef(derive(
+    AsRef(Inner, Self),
+    AsMut(Inner, Self),
+    Deref,
+    DerefMut,
+    Into(Inner),
+    FromInner,
+    PartialEq(Inner),
+))]
 pub struct HeaderFrame {
-    pub clauses: Vec<HeaderClause>,
+    clauses: Vec<HeaderClause>,
 }
 
 impl HeaderFrame {
     pub fn new(clauses: Vec<HeaderClause>) -> Self {
         Self { clauses }
+    }
+}
+
+impl AsRef<[HeaderClause]> for HeaderFrame {
+    fn as_ref(&self) -> &[HeaderClause] {
+        &self.clauses
     }
 }
 
@@ -43,6 +60,22 @@ impl FromIterator<HeaderClause> for HeaderFrame {
         T: IntoIterator<Item = HeaderClause>
     {
         Self::new(iter.into_iter().collect())
+    }
+}
+
+impl IntoIterator for HeaderFrame {
+    type Item = HeaderClause;
+    type IntoIter = <Vec<HeaderClause> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a HeaderFrame {
+    type Item = &'a HeaderClause;
+    type IntoIter = <&'a Vec<HeaderClause> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.as_slice().into_iter()
     }
 }
 

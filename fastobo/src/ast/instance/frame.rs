@@ -29,7 +29,7 @@ impl<'i> FromPair<'i> for InstanceFrame {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let iid = InstanceIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(iid);
+        let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(iid);
 
         let mut clauses = Vec::new();
         for pair in inner {

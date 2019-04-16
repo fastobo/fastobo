@@ -44,9 +44,26 @@ impl<'i> FromPair<'i> for Qualifier {
 }
 impl_fromstr!(Qualifier);
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+/// A list containing zero or more `Qualifier`s.
+#[derive(Clone, Default, Debug, Hash, Eq, PartialEq, OpaqueTypedef)]
+#[opaque_typedef(allow_mut_ref)]
+#[opaque_typedef(derive(
+    AsRef(Inner, Self),
+    AsMut(Inner, Self),
+    Deref,
+    DerefMut,
+    Into(Inner),
+    FromInner,
+    PartialEq(Inner),
+))]
 pub struct QualifierList {
     qualifiers: Vec<Qualifier>,
+}
+
+impl QualifierList {
+    pub fn new(qualifiers: Vec<Qualifier>) -> Self {
+        Self { qualifiers }
+    }
 }
 
 impl Display for QualifierList {

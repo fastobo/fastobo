@@ -2,6 +2,8 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 use pest::iterators::Pair;
 
@@ -12,8 +14,8 @@ use crate::parser::Rule;
 /// A typedef clause, describing a relationship.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypedefFrame {
-    pub id: Line<RelationIdent>,
-    pub clauses: Vec<Line<TypedefClause>>,
+    id: Line<RelationIdent>,
+    clauses: Vec<Line<TypedefClause>>,
 }
 
 impl TypedefFrame {
@@ -33,6 +35,41 @@ impl TypedefFrame {
             clauses: clauses,
         }
     }
+
+    /// Get the identifier of the `TypedefFrame`.
+    pub fn id(&self) -> &Line<RelationIdent> {
+        &self.id
+    }
+
+    /// Get the `TypedefClause`s of the `TypedefFrame`.
+    pub fn clauses(&self) -> &Vec<Line<TypedefClause>> {
+        &self.clauses
+    }
+}
+
+impl AsRef<Vec<Line<TypedefClause>>> for TypedefFrame {
+    fn as_ref(&self) -> &Vec<Line<TypedefClause>> {
+        &self.clauses
+    }
+}
+
+impl AsRef<[Line<TypedefClause>]> for TypedefFrame {
+    fn as_ref(&self) -> &[Line<TypedefClause>] {
+        &self.clauses
+    }
+}
+
+impl Deref for TypedefFrame {
+    type Target = Vec<Line<TypedefClause>>;
+    fn deref(&self) -> &Self::Target {
+        &self.clauses
+    }
+}
+
+impl DerefMut for TypedefFrame {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.clauses
+    }
 }
 
 impl Display for TypedefFrame {
@@ -47,7 +84,7 @@ impl<'i> FromPair<'i> for TypedefFrame {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut inner = pair.into_inner();
         let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Line::<()>::from_pair_unchecked(inner.next().unwrap())?.with_content(relid);
+        let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(relid);
 
         let mut clauses = Vec::new();
         for pair in inner {
@@ -58,3 +95,19 @@ impl<'i> FromPair<'i> for TypedefFrame {
     }
 }
 impl_fromstr!(TypedefFrame);
+
+impl IntoIterator for TypedefFrame {
+    type Item = Line<TypedefClause>;
+    type IntoIter = <Vec<Line<TypedefClause>> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a TypedefFrame {
+    type Item = &'a Line<TypedefClause>;
+    type IntoIter = <&'a Vec<Line<TypedefClause>> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.as_slice().into_iter()
+    }
+}

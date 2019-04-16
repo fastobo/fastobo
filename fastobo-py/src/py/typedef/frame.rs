@@ -28,7 +28,7 @@ use crate::utils::ClonePy;
 #[derive(Debug)]
 pub struct TypedefFrame {
     id: Ident,
-    // clauses: Vec<TypedefClause>,
+    clauses: Vec<TypedefClause>,
 }
 
 impl TypedefFrame {
@@ -37,8 +37,7 @@ impl TypedefFrame {
     }
 
     pub fn with_clauses(id: Ident, clauses: Vec<TypedefClause>) -> Self {
-        Self { id }
-        // Self { id, clauses }
+        Self { id, clauses }
     }
 }
 
@@ -46,7 +45,7 @@ impl ClonePy for TypedefFrame {
     fn clone_py(&self, py: Python) -> Self {
         Self {
             id: self.id.clone_py(py),
-            // clauses: self.clauses.clone_py(py),
+            clauses: self.clauses.clone_py(py),
         }
     }
 }
@@ -61,22 +60,28 @@ impl Display for TypedefFrame {
 
 impl FromPy<fastobo::ast::TypedefFrame> for TypedefFrame {
     fn from_py(frame: fastobo::ast::TypedefFrame, py: Python) -> Self {
-        // FIXME: clauses !
-        // let clauses = frame
-        //     .clauses
-        //     .into_iter()
-        //     .map(|line| TermClause::from_py(line.inner, py))
-        //     .collect():
-        // Self::with_clauses(frame.id.inner.into_py(py), py)
-        Self::new(frame.id.inner.into_py(py))
+        Self::with_clauses(
+            Ident::from_py(frame.id.inner, py),
+            frame
+                .clauses
+                .into_iter()
+                .map(|line| TypedefClause::from_py(line.inner, py))
+                .collect()
+        )
     }
 }
 
 impl FromPy<TypedefFrame> for fastobo::ast::TypedefFrame {
     fn from_py(frame: TypedefFrame, py: Python) -> Self {
-        // FIXME: clauses !
-        let id = fastobo::ast::RelationIdent::from_py(frame.id, py);
-        Self::new(id)
+        fastobo::ast::TypedefFrame::with_clauses(
+            fastobo::ast::RelationIdent::new(frame.id.into_py(py)),
+            frame
+                .clauses
+                .iter()
+                .map(|f| fastobo::ast::TypedefClause::from_py(f, py))
+                .map(fastobo::ast::Line::from)
+                .collect()
+        )
     }
 }
 

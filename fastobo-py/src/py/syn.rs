@@ -38,7 +38,7 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 
 // --- SynonymScope ----------------------------------------------------------
 
-#[pyclass]
+#[pyclass] // FIXME(@althonos): probably not needed since it is not exposed.
 #[derive(Clone, ClonePy, Debug)]
 pub struct SynonymScope {
     inner: fastobo::ast::SynonymScope

@@ -9,6 +9,7 @@ use pyo3::exceptions::TypeError;
 use pyo3::exceptions::ValueError;
 use pyo3::types::PyAny;
 use pyo3::types::PyString;
+use pyo3::class::basic::CompareOp;
 
 use fastobo::ast;
 use fastobo::share::Share;
@@ -416,7 +417,6 @@ impl FromPy<ast::UnprefixedIdent> for UnprefixedIdent {
 
 #[pymethods]
 impl UnprefixedIdent {
-
     /// Create a new `UnprefixedIdent` instance.
     ///
     /// Arguments:
@@ -451,6 +451,29 @@ impl PyObjectProtocol for UnprefixedIdent {
 
     fn __str__(&self) -> PyResult<String> {
         Ok(self.inner.to_string())
+    }
+
+    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<bool> {
+        if let Ok(u) = other.downcast_ref::<UnprefixedIdent>() {
+            match op {
+                 CompareOp::Lt => Ok(self.inner < u.inner),
+                 CompareOp::Le => Ok(self.inner <= u.inner),
+                 CompareOp::Eq => Ok(self.inner == u.inner),
+                 CompareOp::Ne => Ok(self.inner != u.inner),
+                 CompareOp::Gt => Ok(self.inner > u.inner),
+                 CompareOp::Ge => Ok(self.inner >= u.inner),
+            }
+        } else {
+            match op {
+                CompareOp::Eq => Ok(false),
+                CompareOp::Ne => Ok(true),
+                _ => {
+                    let n = other.get_type().name();
+                    let msg = format!("expected UnprefixedIdent, found {}", n);
+                    TypeError::into(msg)
+                }
+            }
+        }
     }
 }
 
@@ -519,7 +542,6 @@ impl FromPy<Url> for url::Url {
 
 #[pymethods]
 impl Url {
-
     /// Create a new URL identifier.
     ///
     /// Arguments:
@@ -529,7 +551,7 @@ impl Url {
     /// Raises:
     ///     ValueError: when the given string is not a valid URL.
     #[new]
-    fn __init__(obj: &PyRawObject, value: &str) -> PyResult<()> {
+    fn __new__(obj: &PyRawObject, value: &str) -> PyResult<()> {
         match url::Url::from_str(value) {
             Ok(url) => Ok(obj.init(Url::new(url))),
             Err(e) => ValueError::into(format!("invalid url: {}", e)),
@@ -549,6 +571,30 @@ impl PyObjectProtocol for Url {
     /// Retrieve the URL in a serialized form.
     fn __str__(&self) -> PyResult<String> {
         Ok(self.inner.to_string())
+    }
+
+    /// Compare to another `Url` or `str` instance.
+    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<bool> {
+        if let Ok(u) = other.downcast_ref::<Url>() {
+            match op {
+                 CompareOp::Lt => Ok(self.inner < u.inner),
+                 CompareOp::Le => Ok(self.inner <= u.inner),
+                 CompareOp::Eq => Ok(self.inner == u.inner),
+                 CompareOp::Ne => Ok(self.inner != u.inner),
+                 CompareOp::Gt => Ok(self.inner > u.inner),
+                 CompareOp::Ge => Ok(self.inner >= u.inner),
+            }
+        } else {
+            match op {
+                CompareOp::Eq => Ok(false),
+                CompareOp::Ne => Ok(true),
+                _ => {
+                    let n = other.get_type().name();
+                    let msg = format!("expected str or Url, found {}", n);
+                    TypeError::into(msg)
+                }
+            }
+        }
     }
 }
 

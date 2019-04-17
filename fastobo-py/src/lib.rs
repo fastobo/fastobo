@@ -1,5 +1,5 @@
 #![recursion_limit="128"]
-#![allow(unused_imports)]
+#![allow(unused_imports, unused_unsafe, unused_variables)]
 
 extern crate fastobo;
 extern crate pyo3;

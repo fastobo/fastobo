@@ -60,9 +60,9 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(pyo3::wrap_pymodule!(header))?;
     m.add_wrapped(pyo3::wrap_pymodule!(id))?;
     m.add_wrapped(pyo3::wrap_pymodule!(pv))?;
-    m.add_wrapped(pyo3::wrap_pymodule!(syn));
+    m.add_wrapped(pyo3::wrap_pymodule!(syn))?;
     m.add_wrapped(pyo3::wrap_pymodule!(term))?;
-    m.add_wrapped(pyo3::wrap_pymodule!(typedef));
+    m.add_wrapped(pyo3::wrap_pymodule!(typedef))?;
     m.add_wrapped(pyo3::wrap_pymodule!(xref))?;
 
     #[pyfn(m, "load")]

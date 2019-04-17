@@ -27,17 +27,17 @@
 //! from a [`BufRead`](https://doc.rust-lang.org/std/io/trait.BufRead.html) implementor
 //! (use [`std::io::BufReader`](https://doc.rust-lang.org/std/io/struct.BufReader.html) if needed):
 //!
-//! ```rust,ignore
+//! ```rust
 //! extern crate fastobo;
 //! extern crate reqwest;
 //!
 //! fn main() {
-//!     let response = reqwest::get("http://purl.obolibrary.org/obo/go.obo").unwrap();
+//!     let response = reqwest::get("http://purl.obolibrary.org/obo/ms.obo").unwrap();
 //!     let mut reader = std::io::BufReader::new(response);
 //!
 //!     match fastobo::ast::OboDoc::from_stream(&mut reader) {
-//!         Ok(doc) => println!("Number of GO entities: {}", doc.entities.len()),
-//!         Err(e) => panic!("Could not parse the Gene Ontology: {}", e),
+//!         Ok(doc) => println!("Number of MS entities: {}", doc.entities.len()),
+//!         Err(e) => panic!("Could not parse the Mass-Spec Ontology: {}", e),
 //!     }
 //! }
 //! ```

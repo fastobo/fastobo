@@ -24,36 +24,30 @@ stages:
       - $SCCACHE_DIR
       - $HOME/.cargo
   install:
-    - ci/travis/setup.sh
+    - ci/travis/rust/install.sh
   script:
-    - cargo tarpaulin -v -p fastobo --out Xml --ciserver travis-ci
+    - ci/travis/rust/script.sh
   after_script:
-    - curl -SsL "https://codecov.io/bash" | bash
+    - ci/travis/rust/after_script.sh
+  after_success:
+    - ci/travis/rust/after_success.sh
 
 .test-python: &test-python
   stage: Python
   language: python
-  env:
-    - PYTHON=python
   cache:
     directories:
-      - $SCCACHE_DIR
-      - $HOME/.cargo
-      - $HOME/.cache/pip
-      - $HOME/Library/Caches/Homebrew
       - $TRAVIS_BUILD_DIR/target
   services:
     - docker
+  before_install:
+    - ci/travis/manylinux/before_install.sh
   install:
-    - ci/travis/setup.sh
-  before_script:
-    - python setup.py build_ext --inplace
+    - ci/travis/manylinux/install.sh
   script:
-    - python setup.py test
-  before_cache:
-    - brew cleanup
+    - ci/travis/manylinux/script.sh
   after_success:
-    - ci/travis/deploy.sh
+    - ci/travis/manylinux/after_success.sh
 
 .test-python-osx: &test-python-osx
   stage: Python on OSX
@@ -62,17 +56,17 @@ stages:
   cache:
     directories:
       - $SCCACHE_DIR
-      - $HOME/.cargo
       - $HOME/.cache/pip
       - $TRAVIS_BUILD_DIR/target
+      - $HOME/Library/Caches/Homebrew
   install:
-    - ci/travis/setup.sh
-  before_script:
-    - python3 setup.py build_ext --inplace
+    - ci/travis/osx/install.sh
   script:
-    - python3 setup.py test
+    - ci/travis/osx/script.sh
+  before_cache:
+    - ci/travis/osx/before_cache.sh
   after_success:
-    - ci/travis/deploy.sh
+    - ci/travis/osx/after_success.sh
 
 jobs:
   include:
@@ -82,8 +76,6 @@ jobs:
       <<: *test-rust
     - rust: nightly
       <<: *test-rust
-      after_success:
-        - ci/travis/deploy.sh
     - python: 3.5
       <<: *test-python
     - python: 3.6
@@ -93,9 +85,6 @@ jobs:
     - env: PYTHON=python3.6
       <<: *test-python-osx
     - env: PYTHON=python3.7
-      before_install:
-        - brew unlink python
-        - brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/python.rb
       <<: *test-python-osx
 
 notifications:

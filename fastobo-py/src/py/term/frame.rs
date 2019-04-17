@@ -62,11 +62,10 @@ impl Display for TermFrame {
 impl FromPy<fastobo::ast::TermFrame> for TermFrame {
     fn from_py(frame: fastobo::ast::TermFrame, py: Python) -> Self {
         Self::with_clauses(
-            Ident::from_py(frame.id.inner, py),
+            Ident::from_py(frame.id().as_ref().clone(), py),
             frame
-                .clauses
                 .into_iter()
-                .map(|line| TermClause::from_py(line.inner, py))
+                .map(|line| TermClause::from_py(line.into_inner(), py))
                 .collect()
         )
     }

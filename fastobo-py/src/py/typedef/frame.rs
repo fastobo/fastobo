@@ -61,11 +61,10 @@ impl Display for TypedefFrame {
 impl FromPy<fastobo::ast::TypedefFrame> for TypedefFrame {
     fn from_py(frame: fastobo::ast::TypedefFrame, py: Python) -> Self {
         Self::with_clauses(
-            Ident::from_py(frame.id.inner, py),
+            Ident::from_py(frame.id().as_ref().clone(), py),
             frame
-                .clauses
                 .into_iter()
-                .map(|line| TypedefClause::from_py(line.inner, py))
+                .map(|line| TypedefClause::from_py(line.into_inner(), py))
                 .collect()
         )
     }

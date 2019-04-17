@@ -153,9 +153,6 @@ impl FromPy<fastobo::ast::TypedefClause> for TypedefClause {
             DisjointFrom(cls) =>
                 Py::new(py, DisjointFromClause::new(py, cls))
                     .map(TypedefClause::DisjointFrom),
-            InverseOf(r) =>
-                Py::new(py, InverseOfClause::new(py, r))
-                    .map(TypedefClause::InverseOf),
             TransitiveOver(r) =>
                 Py::new(py, TransitiveOverClause::new(py, r))
                     .map(TypedefClause::TransitiveOver),

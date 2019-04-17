@@ -353,10 +353,6 @@ impl UnprefixedIdent {
     fn new(id: ast::UnprefixedIdent) -> Self {
         UnprefixedIdent { inner: id }
     }
-
-    fn as_ref<'p>(&'p self, _py: Python<'p>) -> &'p ast::UnprefixedId {
-        self.inner.share()
-    }
 }
 
 impl AsRef<ast::UnprefixedId> for UnprefixedIdent {

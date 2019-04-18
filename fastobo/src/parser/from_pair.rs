@@ -63,14 +63,36 @@ impl<'i> FromPair<'i> for Url {
 mod tests {
 
     use super::*;
-    use crate::parser::OboParser;
 
-    #[test]
-    fn from_pair() {
-        let mut pairs = OboParser::parse(Rule::UnquotedString, "http://not an url");
-        let pair = pairs.unwrap().next().unwrap();
-        unsafe {
-            assert!(Url::from_pair_unchecked(pair).is_err())
+    mod url {
+
+        use super::*;
+        use crate::parser::OboParser;
+
+        #[test]
+        fn from_pair() {
+            let mut pairs = OboParser::parse(Rule::UnquotedString, "http://not an url");
+            let pair = pairs.unwrap().next().unwrap();
+            unsafe {
+                assert!(Url::from_pair_unchecked(pair).is_err())
+            }
+        }
+    }
+
+    mod boolean {
+
+        use super::*;
+        use crate::parser::OboParser;
+
+        #[test]
+        fn from_pair() {
+            let mut pairs = OboParser::parse(Rule::Boolean, "true");
+            let pair = pairs.unwrap().next().unwrap();
+            assert_eq!(bool::from_pair(pair).unwrap(), true);
+
+            let mut pairs = OboParser::parse(Rule::Boolean, "false");
+            let pair = pairs.unwrap().next().unwrap();
+            assert_eq!(bool::from_pair(pair).unwrap(), false);
         }
     }
 }

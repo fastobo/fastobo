@@ -100,7 +100,6 @@ impl_fromstr!(HeaderFrame);
 mod tests {
 
     use super::*;
-    use crate::ast::UnquotedString;
 
     #[test]
     fn from_str() {
@@ -120,6 +119,19 @@ mod tests {
         assert_eq!(
             actual.clauses[0],
             HeaderClause::FormatVersion(UnquotedString::new(String::from("1.2"))),
+        );
+
+        assert_eq!(
+            actual.clauses[1],
+            HeaderClause::DataVersion(UnquotedString::new(String::from("releases/2019-03-17"))),
+        );
+
+        assert_eq!(
+            actual.clauses[2],
+            HeaderClause::Subsetdef(
+                SubsetIdent::from(UnprefixedIdent::new(String::from("gocheck_do_not_annotate"))),
+                QuotedString::new(String::from("Term not to be used for direct annotation")),
+            )
         );
     }
 }

@@ -38,7 +38,6 @@ impl<'i> FromPair<'i> for Url {
 mod tests {
 
     use super::*;
-    use crate::parser::Parser;
     use crate::parser::OboParser;
 
     #[test]

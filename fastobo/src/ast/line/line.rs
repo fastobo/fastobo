@@ -128,6 +128,8 @@ where
     }
 }
 
+
+
 /// The optional part of a line, holding a qualifier list and a comment.
 ///
 /// It can be used as a builder to create a fully-fledged `Line`.
@@ -219,71 +221,5 @@ impl From<Comment> for Eol {
 impl From<QualifierList> for Eol {
     fn from(qualifiers: QualifierList) -> Self {
         Self::with_qualifiers(qualifiers)
-    }
-}
-
-/// An inline comment without semantic value.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, OpaqueTypedef)]
-#[opaque_typedef(allow_mut_ref)]
-#[opaque_typedef(derive(
-    AsRef(Inner, Self),
-    AsMut(Inner, Self),
-    Deref,
-    DerefMut,
-    Into(Inner),
-    FromInner,
-    PartialEq(Inner),
-))]
-pub struct Comment {
-    value: String,
-}
-
-impl Comment {
-    pub fn new<S>(value: S) -> Self
-    where
-        S: Into<String>,
-    {
-        Comment { value: value.into() }
-    }
-}
-
-impl Display for Comment {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        f.write_str("! ").and(self.value.fmt(f)) // FIXME(@althonos): escape newlines
-    }
-}
-
-impl<'i> FromPair<'i> for Comment {
-    const RULE: Rule = Rule::HiddenComment;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-        // FIXME(@althonos): Check for trailing spaces ?
-        Ok(Comment::new(pair.as_str()[1..].trim().to_string()))
-    }
-}
-impl_fromstr!(Comment);
-
-#[cfg(test)]
-mod tests {
-
-    use std::str::FromStr;
-    use std::string::ToString;
-
-    use super::*;
-
-    mod comment {
-
-        use super::*;
-
-        #[test]
-        fn from_str() {
-            let comment = Comment::from_str("! something").unwrap();
-            assert_eq!(comment, Comment::new(String::from("something")));
-        }
-
-        #[test]
-        fn to_string() {
-            let comment = Comment::new(String::from("something"));
-            assert_eq!(comment.to_string(), "! something");
-        }
     }
 }

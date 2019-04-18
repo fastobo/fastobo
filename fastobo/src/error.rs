@@ -46,6 +46,16 @@ impl Error {
             }
         }
     }
+
+    /// Update the path of the error, if needed.
+    pub(crate) fn with_path(self, path: &str) -> Self {
+        use self::Error::*;
+        match self {
+            IOError { error } => IOError { error },
+            UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
+            ParserError { error } => ParserError { error: error.with_path(path) },
+        }
+    }
 }
 
 impl From<PestError<Rule>> for Error {

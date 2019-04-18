@@ -68,7 +68,7 @@ pub struct OboDoc {
 }
 
 impl OboDoc {
-    /// Create a new OBO document.
+    /// Create a new OBO document with the provided frame.
     pub fn new(header: HeaderFrame) -> Self {
         Self {
             header,
@@ -174,8 +174,11 @@ impl OboDoc {
     where
         P: AsRef<Path>,
     {
-        let mut f = File::open(path).map(BufReader::new)?;
-        Self::from_stream(&mut f)
+        let pathref: &Path = path.as_ref();
+        File::open(pathref)
+            .map_err(Error::from)
+            .and_then(|f| Self::from_stream(&mut BufReader::new(f)))
+            .map_err(|e| e.with_path(&pathref.to_string_lossy()))
     }
 
     pub fn header(&self) -> &HeaderFrame {

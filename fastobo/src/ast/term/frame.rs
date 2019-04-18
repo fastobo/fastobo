@@ -168,7 +168,7 @@ mod tests {
             )))
         );
 
-        let actual = TermFrame::from_str(
+        assert!(TermFrame::from_str(
             "[Term]
             id: PO:0000067
             name: proteoid root
@@ -177,7 +177,6 @@ mod tests {
             is_a: PO:0009005 ! root
             created_by: austinmeier
             creation_date: 2015-08-11T15:05:12Z\n",
-        )
-        .unwrap();
+        ).is_ok());
     }
 }

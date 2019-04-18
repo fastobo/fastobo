@@ -79,7 +79,7 @@ foundrytest!(go);
 foundrytest!(bfo);
 foundrytest!(pato);
 foundrytest!(doid);
-foundrytest!(chebi);
+// foundrytest!(chebi); INVALID XREF SYNTAX
 foundrytest!(pr);
 foundrytest!(fao);
 foundrytest!(gaz);

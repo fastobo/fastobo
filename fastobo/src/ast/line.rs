@@ -24,6 +24,15 @@ pub struct Line<T> {
 
 impl<T> Line<T> {
     /// Update the line comment with the given one.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let line = Line::from(TermClause::IsObsolete(true))
+    ///     .and_comment(Comment::new("deprecated in v3"));
+    /// assert_eq!(line.to_string(), "is_obsolete: true ! deprecated in v3\n");
+    /// ```
     pub fn and_comment<C>(self, comment: C) -> Self
     where
         C: Into<Option<Comment>>
@@ -121,7 +130,7 @@ where
 
 /// The optional part of a line, holding a qualifier list and a comment.
 ///
-/// It can be used as a builder pattern to create a fully-fledged `Line`.
+/// It can be used as a builder to create a fully-fledged `Line`.
 ///
 /// # Example
 /// ```rust

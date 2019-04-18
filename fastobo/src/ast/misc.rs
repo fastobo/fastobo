@@ -44,6 +44,8 @@ mod tests {
     fn from_pair() {
         let mut pairs = OboParser::parse(Rule::UnquotedString, "http://not an url");
         let pair = pairs.unwrap().next().unwrap();
-        assert!(Url::from_pair_unchecked(pair).is_err())
+        unsafe {
+            assert!(Url::from_pair_unchecked(pair).is_err())
+        }
     }
 }

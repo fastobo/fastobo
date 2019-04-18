@@ -3,6 +3,8 @@
 use std::io::Error as IOError;
 
 use pest::error::Error as PestError;
+use pest::error::InputLocation;
+use pest::error::LineColLocation;
 
 use crate::parser::Rule;
 
@@ -15,6 +17,35 @@ pub enum Error {
     ParserError { error: PestError<Rule> },
     #[fail(display = "IO error: {}", error)]
     IOError { error: IOError },
+}
+
+impl Error {
+    /// Update the line of the error, if needed.
+    pub(crate) fn with_offsets(self, line_offset: usize, offset: usize) -> Self {
+        use self::Error::*;
+        use pest::error::InputLocation;
+        use pest::error::LineColLocation;
+        match self {
+            IOError { error } => IOError { error },
+            UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
+            ParserError { mut error } => {
+                error.location = match error.location {
+                    InputLocation::Pos(s) =>
+                        InputLocation::Pos(s + offset),
+                    InputLocation::Span((s, e)) =>
+                        InputLocation::Span((s + offset, e + offset))
+                };
+                println!("{:?}", error.location);
+                error.line_col = match error.line_col {
+                    LineColLocation::Pos((l, c)) =>
+                        LineColLocation::Pos((l + line_offset, c)),
+                    LineColLocation::Span((ls, cs), (le, ce)) =>
+                        LineColLocation::Span((ls + line_offset, cs), (le + line_offset, ce))
+                };
+                ParserError { error }
+            }
+        }
+    }
 }
 
 impl From<PestError<Rule>> for Error {

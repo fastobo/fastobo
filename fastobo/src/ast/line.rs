@@ -257,7 +257,7 @@ impl<'i> FromPair<'i> for Comment {
     const RULE: Rule = Rule::HiddenComment;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         // FIXME(@althonos): Check for trailing spaces ?
-        Ok(Comment::new(pair.as_str()[1..].to_string()))
+        Ok(Comment::new(pair.as_str()[1..].trim().to_string()))
     }
 }
 impl_fromstr!(Comment);
@@ -277,12 +277,12 @@ mod tests {
         #[test]
         fn from_str() {
             let comment = Comment::from_str("! something").unwrap();
-            assert_eq!(comment, Comment::new(String::from(" something")));
+            assert_eq!(comment, Comment::new(String::from("something")));
         }
 
         #[test]
         fn to_string() {
-            let comment = Comment::new(String::from(" something"));
+            let comment = Comment::new(String::from("something"));
             assert_eq!(comment.to_string(), "! something");
         }
     }

@@ -339,12 +339,12 @@ mod tests {
                         IdentLocal::new(String::from("0020039")),
                     ))),
                 ),
-            ).and_comment(Comment::new(" leaf lamina"));
+            ).and_comment(Comment::new("leaf lamina"));
             assert_eq!(actual, expected);
 
             let actual =
                 Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n").unwrap();
-            let expected = Line::with_comment(Comment::new(String::from(" leaf epidermis"))).and_inner(
+            let expected = Line::with_comment(Comment::new(String::from("leaf epidermis"))).and_inner(
                 TermClause::IntersectionOf(
                     None,
                     ClassIdent::from(Ident::from(PrefixedIdent::new(

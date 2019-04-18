@@ -152,7 +152,7 @@ impl_fromstr!(IdentPrefix);
 
 impl PartialEq<str> for IdentPrefix {
     fn eq(&self, other: &str) -> bool {
-        &self.value == other
+        self.value == other
     }
 }
 

@@ -44,8 +44,8 @@ pub struct QuotedString {
 
 impl QuotedString {
     /// Create a new `QuotedString`.
-    pub fn new(s: String) -> Self {
-        QuotedString { value: s.into() }
+    pub fn new(value: String) -> Self {
+        QuotedString { value }
     }
 
     /// Extracts a string slice containing the `QuotedString` value.
@@ -101,13 +101,13 @@ impl_fromstr!(QuotedString);
 
 impl PartialEq<str> for QuotedString {
     fn eq(&self, other: &str) -> bool {
-        &self.value == other
+        self.value == other
     }
 }
 
 impl PartialEq<String> for QuotedString {
     fn eq(&self, other: &String) -> bool {
-        &self.value == other.as_str()
+        self.value == other.as_str()
     }
 }
 
@@ -127,7 +127,7 @@ impl QuotedStr {
     /// Create a new `QuotedStr`.
     pub fn new(s: &str) -> &Self {
         // Using `unchecked` because there is no validation needed.
-        unsafe { QuotedStr::from_inner_unchecked(s.as_ref()) }
+        unsafe { QuotedStr::from_inner_unchecked(s) }
     }
 }
 
@@ -143,7 +143,7 @@ impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
     const RULE: Rule = Rule::QuotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         if pair.as_str().quickfind(b'\\').is_some() {
-            QuotedString::from_pair_unchecked(pair).map(|s| Cow::Owned(s))
+            QuotedString::from_pair_unchecked(pair).map(Cow::Owned)
         } else {
             Ok(Cow::Borrowed(QuotedStr::new(pair.as_str())))
         }

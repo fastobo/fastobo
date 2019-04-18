@@ -50,7 +50,7 @@ impl TermFrame {
     {
         Self {
             id: id.into(),
-            clauses: clauses,
+            clauses,
         }
     }
 
@@ -140,7 +140,7 @@ impl<'a> IntoIterator for &'a TermFrame {
     type Item = &'a Line<TermClause>;
     type IntoIter = <&'a Vec<Line<TermClause>> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
-        self.clauses.as_slice().into_iter()
+        self.clauses.as_slice().iter()
     }
 }
 

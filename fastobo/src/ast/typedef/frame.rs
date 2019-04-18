@@ -32,7 +32,7 @@ impl TypedefFrame {
     {
         Self {
             id: id.into(),
-            clauses: clauses,
+            clauses,
         }
     }
 
@@ -108,6 +108,6 @@ impl<'a> IntoIterator for &'a TypedefFrame {
     type Item = &'a Line<TypedefClause>;
     type IntoIter = <&'a Vec<Line<TypedefClause>> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
-        self.clauses.as_slice().into_iter()
+        self.clauses.as_slice().iter()
     }
 }

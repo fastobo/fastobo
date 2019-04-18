@@ -134,7 +134,7 @@ impl_fromstr!(IdentLocal);
 
 impl PartialEq<str> for IdentLocal {
     fn eq(&self, other: &str) -> bool {
-        &self.value == other
+        self.value == other
     }
 }
 

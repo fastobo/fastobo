@@ -46,8 +46,7 @@ impl AsRef<[HeaderClause]> for HeaderFrame {
 
 impl Display for HeaderFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        let mut clauses = self.clauses.iter().peekable();
-        while let Some(clause) = clauses.next() {
+        for clause in self.clauses.iter() {
             clause.fmt(f).and(f.write_char('\n'))?;
         }
         Ok(())
@@ -75,7 +74,7 @@ impl<'a> IntoIterator for &'a HeaderFrame {
     type Item = &'a HeaderClause;
     type IntoIter = <&'a Vec<HeaderClause> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
-        self.clauses.as_slice().into_iter()
+        self.clauses.as_slice().iter()
     }
 }
 

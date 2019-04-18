@@ -128,7 +128,7 @@ pub struct UnprefixedId(str);
 impl UnprefixedId {
     /// Create a new `UnprefixedId`.
     pub fn new(s: &str) -> &Self {
-        unsafe { UnprefixedId::from_inner_unchecked(s.as_ref()) }
+        unsafe { UnprefixedId::from_inner_unchecked(s) }
     }
 
     /// Return a reference to the underlying string slice.

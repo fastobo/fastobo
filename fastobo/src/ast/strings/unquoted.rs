@@ -113,7 +113,7 @@ pub struct UnquotedStr(str);
 impl UnquotedStr {
     /// Create a new `QuotedStr`.
     pub fn new(s: &str) -> &Self {
-        unsafe { UnquotedStr::from_inner_unchecked(s.as_ref()) }
+        unsafe { UnquotedStr::from_inner_unchecked(s) }
     }
 }
 
@@ -127,7 +127,7 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
     const RULE: Rule = Rule::UnquotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         if pair.as_str().quickfind(b'\\').is_some() {
-            UnquotedString::from_pair_unchecked(pair).map(|s| Cow::Owned(s))
+            UnquotedString::from_pair_unchecked(pair).map(Cow::Owned)
         } else {
             Ok(Cow::Borrowed(UnquotedStr::new(pair.as_str())))
         }

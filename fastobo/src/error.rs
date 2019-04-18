@@ -35,7 +35,6 @@ impl Error {
                     InputLocation::Span((s, e)) =>
                         InputLocation::Span((s + offset, e + offset))
                 };
-                println!("{:?}", error.location);
                 error.line_col = match error.line_col {
                     LineColLocation::Pos((l, c)) =>
                         LineColLocation::Pos((l + line_offset, c)),

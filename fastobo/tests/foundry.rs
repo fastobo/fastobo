@@ -64,7 +64,7 @@ macro_rules! foundrytest {
             } else {
                 let mut lines = String::new();
                 for _ in 0..20 {
-                    buf.read_line(&mut lines);
+                    buf.read_line(&mut lines).unwrap();
                 }
                 panic!("not an OBO file ({})\n: {}", url, lines);
             }

@@ -148,12 +148,7 @@ impl<'a> IntoIterator for &'a TermFrame {
 mod tests {
 
     use std::str::FromStr;
-
     use super::*;
-    use crate::ast::Ident;
-    use crate::ast::IdentLocal;
-    use crate::ast::IdentPrefix;
-    use crate::ast::PrefixedIdent;
 
     #[test]
     fn from_str() {
@@ -185,5 +180,4 @@ mod tests {
         )
         .unwrap();
     }
-
 }

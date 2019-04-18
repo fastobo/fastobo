@@ -261,3 +261,29 @@ impl<'i> FromPair<'i> for Comment {
     }
 }
 impl_fromstr!(Comment);
+
+#[cfg(test)]
+mod tests {
+
+    use std::str::FromStr;
+    use std::string::ToString;
+
+    use super::*;
+
+    mod comment {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let comment = Comment::from_str("! something").unwrap();
+            assert_eq!(comment, Comment::new(String::from(" something")));
+        }
+
+        #[test]
+        fn to_string() {
+            let comment = Comment::new(String::from(" something"));
+            assert_eq!(comment.to_string(), "! something");
+        }
+    }
+}

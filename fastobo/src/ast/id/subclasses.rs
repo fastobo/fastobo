@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use pest::iterators::Pair;
+use url::Url;
 
 use crate::ast::*;
 use crate::error::Result;
@@ -39,7 +40,25 @@ macro_rules! ident_subclass {
 
         impl From<Ident> for $name {
             fn from(id: Ident) -> Self {
-                $name { id }
+                $name::new(id)
+            }
+        }
+
+        impl From<UnprefixedIdent> for $name {
+            fn from(id: UnprefixedIdent) -> Self {
+                $name::new(Ident::from(id))
+            }
+        }
+
+        impl From<PrefixedIdent> for $name {
+            fn from(id: PrefixedIdent) -> Self {
+                $name::new(Ident::from(id))
+            }
+        }
+
+        impl From<Url> for $name {
+            fn from(id: Url) -> Self {
+                $name::new(Ident::from(id))
             }
         }
 

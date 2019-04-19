@@ -156,3 +156,80 @@ impl<'i> FromPair<'i> for Synonym {
         }
     }
 }
+impl_fromstr!(Synonym);
+
+
+
+#[cfg(test)]
+mod tests {
+
+    use std::str::FromStr;
+    use super::*;
+
+    mod scope {
+
+        use super::*;
+        use self::SynonymScope::*;
+
+        #[test]
+        fn from_str() {
+            assert_eq!(SynonymScope::from_str("EXACT").unwrap(), Exact);
+            assert_eq!(SynonymScope::from_str("BROAD").unwrap(), Broad);
+            assert_eq!(SynonymScope::from_str("NARROW").unwrap(), Narrow);
+            assert_eq!(SynonymScope::from_str("RELATED").unwrap(), Related);
+            assert!(SynonymScope::from_str("something").is_err());
+        }
+
+        #[test]
+        fn to_string() {
+            assert_eq!(Exact.to_string(), "EXACT");
+            assert_eq!(Broad.to_string(), "BROAD");
+            assert_eq!(Narrow.to_string(), "NARROW");
+            assert_eq!(Related.to_string(), "RELATED");
+        }
+    }
+
+    mod synonym {
+
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            let actual = Synonym::from_str("\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]").unwrap();
+            let expected = Synonym::with_xrefs(
+                QuotedString::new(String::from("ssDNA-specific endodeoxyribonuclease activity")),
+                SynonymScope::Related,
+                XrefList::new(vec![Xref::new(
+                    Ident::from(
+                        PrefixedIdent::new(
+                            IdentPrefix::new(String::from("GOC")),
+                            IdentLocal::new(String::from("mah"))
+                        )
+                    )
+                )])
+            );
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn to_string() {
+            let s = Synonym::with_xrefs(
+                QuotedString::new(String::from("ssDNA-specific endodeoxyribonuclease activity")),
+                SynonymScope::Related,
+                XrefList::new(vec![Xref::new(
+                    Ident::from(
+                        PrefixedIdent::new(
+                            IdentPrefix::new(String::from("GOC")),
+                            IdentLocal::new(String::from("mah"))
+                        )
+                    )
+                )])
+            );
+
+            assert_eq!(s.to_string(), "\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]");
+        }
+
+    }
+
+
+}

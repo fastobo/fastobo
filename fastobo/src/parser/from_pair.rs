@@ -63,11 +63,12 @@ impl<'i> FromPair<'i> for Url {
 mod tests {
 
     use super::*;
+    use crate::ast::*;
+    use crate::parser::OboParser;
 
     mod url {
 
         use super::*;
-        use crate::parser::OboParser;
 
         #[test]
         fn from_pair() {
@@ -82,7 +83,6 @@ mod tests {
     mod boolean {
 
         use super::*;
-        use crate::parser::OboParser;
 
         #[test]
         fn from_pair() {
@@ -95,4 +95,22 @@ mod tests {
             assert_eq!(bool::from_pair(pair).unwrap(), false);
         }
     }
+
+
+    #[test]
+    fn unexpected_rule() {
+        let pairs = OboParser::parse(Rule::Boolean, "true");
+        let pair = pairs.unwrap().next().unwrap();
+
+        let err = Ident::from_pair(pair).unwrap_err();
+        match err {
+            Error::UnexpectedRule { ref actual, ref expected } => {
+                assert_eq!(actual, &Rule::Boolean);
+                assert_eq!(expected, &Rule::Id);
+            }
+            e => panic!("unexpected error: {:?}", e),
+        }
+    }
+
+
 }

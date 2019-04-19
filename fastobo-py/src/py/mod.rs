@@ -25,6 +25,7 @@ use fastobo::ast as obo;
 
 use crate::utils::AsGILRef;
 use crate::utils::ClonePy;
+use crate::error::Error;
 use crate::pyfile::PyFile;
 
 // ---------------------------------------------------------------------------
@@ -71,14 +72,14 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
             let path = s.to_string()?;
             match obo::OboDoc::from_file(path.as_ref()) {
                 Ok(doc) => Ok(doc.into_py(py)),
-                Err(e) => ValueError::into(format!("load failed: {}", e)),
+                Err(e) => Error::from(e).into(),
             }
 
         } else if let Ok(f) = PyFile::from_object(fh.py(), fh) {
             let mut bufreader = std::io::BufReader::new(f);
             match obo::OboDoc::from_stream(&mut bufreader) {
                 Ok(doc) => Ok(doc.into_py(py)),
-                Err(e) => ValueError::into(format!("load failed: {}", e)),
+                Err(e) => Error::from(e).into(),
             }
         } else {
             pyo3::exceptions::NotImplementedError::into(
@@ -91,7 +92,7 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     fn loads(py: Python, s: &str) -> PyResult<OboDoc> {
         match fastobo::ast::OboDoc::from_str(s) {
             Ok(doc) => Ok(doc.into_py(py)),
-            Err(e) => ValueError::into(format!("loads failed: {}", e)),
+            Err(e) => Error::from(e).into(),
         }
     }
 

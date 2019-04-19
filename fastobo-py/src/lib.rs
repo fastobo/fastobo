@@ -3,6 +3,7 @@
 
 extern crate fastobo;
 extern crate pyo3;
+extern crate pest;
 extern crate libc;
 extern crate url;
 
@@ -16,3 +17,4 @@ extern crate fastobo_py_derive;
 pub mod utils;
 pub mod py;
 pub mod pyfile;
+pub mod error;

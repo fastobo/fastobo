@@ -1,3 +1,5 @@
+//! Definition of the Python classes exported in the `fastobo` module.
+
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;

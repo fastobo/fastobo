@@ -498,10 +498,6 @@ impl Url {
     pub fn new(url: url::Url) -> Self {
         Self { inner: url }
     }
-
-    pub fn as_ref<'p>(&'p self, py: Python<'p>) -> &'p url::Url {
-        &self.inner
-    }
 }
 
 impl<'p> AsGILRef<'p, &'p url::Url> for Url {
@@ -556,8 +552,9 @@ impl Url {
 #[pyproto]
 impl PyObjectProtocol for Url {
     fn __repr__(&self) -> PyResult<PyObject> {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
+        let py = unsafe {
+            Python::assume_gil_acquired()
+        };
         let fmt = PyString::new(py, "Url({!r})").to_object(py);
         fmt.call_method1(py, "format", (self.inner.as_str(),))
     }
@@ -666,10 +663,6 @@ pub struct IdentLocal {
 impl IdentLocal {
     pub fn new(local: ast::IdentLocal) -> Self {
         Self { inner: local }
-    }
-
-    pub fn as_ref(&self, _py: Python) -> fastobo::ast::IdLocal<'_> {
-        self.inner.share()
     }
 }
 

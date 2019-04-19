@@ -33,7 +33,7 @@ use super::unescape;
 /// ```rust
 /// # extern crate fastobo;
 /// # use fastobo::ast::UnquotedString;
-/// let s = UnquotedString::new(String::from("Hello, world!"));
+/// let s = UnquotedString::new("Hello, world!");
 /// assert_eq!(s.to_string(), "Hello, world!");
 /// ```
 #[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
@@ -43,9 +43,12 @@ pub struct UnquotedString {
 }
 
 impl UnquotedString {
-    /// Create a new `UnquotedString`.
-    pub fn new(s: String) -> Self {
-        UnquotedString { value: s }
+    /// Create a new `UnquotedString` from an unescaped string.
+    pub fn new<S>(s: S) -> Self
+    where
+        S: Into<String>
+    {
+        UnquotedString { value: s.into() }
     }
 
     /// Extracts a string slice containing the `UnquotedString` value.

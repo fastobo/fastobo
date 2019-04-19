@@ -23,16 +23,20 @@ pub struct Xref {
 }
 
 impl Xref {
-    pub fn new(id: Ident) -> Self {
-        Self { id, desc: None }
+    pub fn new<I>(id: I) -> Self
+    where
+        I: Into<Ident>,
+    {
+        Self::with_desc(id, None)
     }
 
-    pub fn with_desc<D>(id: Ident, desc: D) -> Self
+    pub fn with_desc<I, D>(id: I, desc: D) -> Self
     where
+        I: Into<Ident>,
         D: Into<Option<QuotedString>>,
     {
         Self {
-            id,
+            id: id.into(),
             desc: desc.into(),
         }
     }
@@ -158,9 +162,7 @@ mod tests {
             assert_eq!(actual, expected);
 
             let actual = XrefList::from_str("[PSI:MS]").unwrap();
-            let expected = XrefList::from(vec![Xref::new(
-                PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS"))).into(),
-            )]);
+            let expected = XrefList::from(vec![Xref::new(PrefixedIdent::new("PSI", "MS"))]);
             assert_eq!(actual, expected);
 
             let actual = XrefList::from_str(
@@ -168,11 +170,10 @@ mod tests {
             )
             .unwrap();
             let expected = XrefList::from(vec![
-                Xref::new(PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS"))).into()),
+                Xref::new(PrefixedIdent::new("PSI", "MS")),
                 Xref::with_desc(
-                    PrefixedIdent::new(IdentPrefix::new(String::from("reactome")), IdentLocal::new(String::from("R-HSA-8983680")))
-                        .into(),
-                    QuotedString::new(String::from("OAS1 produces oligoadenylates")),
+                    PrefixedIdent::new("reactome", "R-HSA-8983680"),
+                    QuotedString::new("OAS1 produces oligoadenylates"),
                 ),
             ]);
             assert_eq!(actual, expected);

@@ -77,10 +77,14 @@ pub struct IdentLocal {
 
 impl IdentLocal {
     /// Create a new local identifier.
-    pub fn new(s: String) -> Self {
+    pub fn new<S>(local: S) -> Self
+    where
+        S: Into<String>,
+    {
+        let value = local.into();
         Self {
-            canonical: is_canonical(&s),
-            value: s,
+            canonical: is_canonical(&value),
+            value
         }
     }
 
@@ -103,6 +107,15 @@ impl IdentLocal {
 impl AsRef<str> for IdentLocal {
     fn as_ref(&self) -> &str {
         &self.value
+    }
+}
+
+impl<S> From<S> for IdentLocal
+where
+    S: Into<String>
+{
+    fn from(s: S) -> Self {
+        Self::new(s)
     }
 }
 

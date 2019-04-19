@@ -302,8 +302,8 @@ mod tests {
 
         let actual = HeaderClause::from_str("subsetdef: GO_SLIM \"GO Slim\"").unwrap();
         let expected = HeaderClause::Subsetdef(
-            SubsetIdent::from(Ident::from(UnprefixedIdent::new(String::from("GO_SLIM")))),
-            QuotedString::new(String::from("GO Slim")),
+            SubsetIdent::from(UnprefixedIdent::new("GO_SLIM")),
+            QuotedString::new("GO Slim"),
         );
         assert_eq!(actual, expected);
 
@@ -314,8 +314,8 @@ mod tests {
         let actual =
             HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
         let expected = HeaderClause::Unreserved(
-            UnquotedString::new(String::from("namespace-id-rule")),
-            UnquotedString::new(String::from("* XAO:$sequence(7,5000,9999999)$")),
+            UnquotedString::new("namespace-id-rule"),
+            UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"),
         );
         assert_eq!(actual, expected);
     }

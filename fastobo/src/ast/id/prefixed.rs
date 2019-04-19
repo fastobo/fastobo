@@ -28,8 +28,15 @@ pub struct PrefixedIdent {
 
 impl PrefixedIdent {
     /// Create a new `PrefixedIdentifier` from a prefix and a local identifier.
-    pub fn new(prefix: IdentPrefix, local: IdentLocal) -> Self {
-        Self { prefix, local }
+    pub fn new<P, L>(prefix: P, local: L) -> Self
+    where
+        P: Into<IdentPrefix>,
+        L: Into<IdentLocal>
+    {
+        Self {
+            prefix: prefix.into(),
+            local: local.into()
+        }
     }
 
     /// Check if the prefixed identifier is canonical or not.

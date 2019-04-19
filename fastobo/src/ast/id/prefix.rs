@@ -84,10 +84,14 @@ pub struct IdentPrefix {
 
 impl IdentPrefix {
     /// Create a new identifier prefix.
-    pub fn new(s: String) -> Self {
+    pub fn new<S>(prefix: S) -> Self
+    where
+        S: Into<String>
+    {
+        let value = prefix.into();
         Self {
-            canonical: is_canonical(&s),
-            value: s,
+            canonical: is_canonical(&value),
+            value,
         }
     }
 
@@ -127,6 +131,15 @@ impl AsRef<str> for IdentPrefix {
 impl Display for IdentPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.share().fmt(f)
+    }
+}
+
+impl<S> From<S> for IdentPrefix
+where
+    S: Into<String>
+{
+    fn from(s: S) -> Self {
+        Self::new(s)
     }
 }
 

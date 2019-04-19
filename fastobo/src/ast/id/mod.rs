@@ -165,12 +165,6 @@ impl<'a> Redeem<'a> for Id<'a> {
             Id::Prefixed(cow) => Ident::Prefixed(cow.redeem()),
             Id::Unprefixed(cow) => Ident::Unprefixed(cow.redeem()),
             Id::Url(cow) => Ident::Url(cow.redeem())
-            // Id::Prefixed(Cow::Owned(id)) => Ident::Prefixed(id.clone()),
-            // Id::Prefixed(Cow::Borrowed(id)) => Ident::Prefixed(<PrefixedId as crate::borrow::ToOwned>::to_owned(id)),
-            // Id::Unprefixed(Cow::Owned(id)) => Ident::Unprefixed(id.clone()),
-            // Id::Unprefixed(Cow::Borrowed(id)) => Ident::Unprefixed(<&UnprefixedId as crate::borrow::ToOwned>::to_owned(id)),
-            // Id::Url(Cow::Owned(url)) => Ident::Url(url.clone()),
-            // Id::Url(Cow::Borrowed(url)) => Ident::Url((*url).clone()),
         }
     }
 }
@@ -189,14 +183,11 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = Ident::from_str("GO:0046154").unwrap();
-        let expected = Ident::Prefixed(PrefixedIdent::new(
-            IdentPrefix::new(String::from("GO")),
-            IdentLocal::new(String::from("0046154")),
-        ));
+        let expected = Ident::from(PrefixedIdent::new("GO", "0046154"));
         assert_eq!(actual, expected);
 
         let actual = Ident::from_str("goslim_plant").unwrap();
-        let expected = Ident::Unprefixed(UnprefixedIdent::new(String::from("goslim_plant")));
+        let expected = Ident::from(UnprefixedIdent::new("goslim_plant"));
         assert_eq!(actual, expected);
     }
 }

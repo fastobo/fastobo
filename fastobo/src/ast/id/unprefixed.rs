@@ -61,8 +61,11 @@ pub struct UnprefixedIdent {
 
 impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
-    pub fn new(id: String) -> Self {
-        Self { value: id }
+    pub fn new<S>(id: S) -> Self
+    where
+        S: Into<String>
+    {
+        Self { value: id.into() }
     }
 
     /// Return a reference to the underlying `str`.
@@ -99,6 +102,15 @@ impl Deref for UnprefixedIdent {
 impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.share().fmt(f)
+    }
+}
+
+impl<S> From<S> for UnprefixedIdent
+where
+    S: Into<String>
+{
+    fn from(s: S) -> Self {
+        Self::new(s)
     }
 }
 

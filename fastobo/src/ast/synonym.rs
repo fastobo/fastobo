@@ -197,16 +197,9 @@ mod tests {
         fn from_str() {
             let actual = Synonym::from_str("\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]").unwrap();
             let expected = Synonym::with_xrefs(
-                QuotedString::new(String::from("ssDNA-specific endodeoxyribonuclease activity")),
+                QuotedString::new("ssDNA-specific endodeoxyribonuclease activity"),
                 SynonymScope::Related,
-                XrefList::new(vec![Xref::new(
-                    Ident::from(
-                        PrefixedIdent::new(
-                            IdentPrefix::new(String::from("GOC")),
-                            IdentLocal::new(String::from("mah"))
-                        )
-                    )
-                )])
+                XrefList::new(vec![Xref::new(PrefixedIdent::new("GOC", "mah"))]),
             );
             assert_eq!(actual, expected);
         }

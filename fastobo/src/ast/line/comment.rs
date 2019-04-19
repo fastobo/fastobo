@@ -65,12 +65,12 @@ mod tests {
     #[test]
     fn from_str() {
         let comment = Comment::from_str("! something").unwrap();
-        assert_eq!(comment, Comment::new(String::from("something")));
+        assert_eq!(comment, Comment::new("something"));
     }
 
     #[test]
     fn to_string() {
-        let comment = Comment::new(String::from("something"));
+        let comment = Comment::new("something");
         assert_eq!(comment.to_string(), "! something");
     }
 }

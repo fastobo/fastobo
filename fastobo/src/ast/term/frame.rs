@@ -28,13 +28,9 @@ impl TermFrame {
     /// # extern crate fastobo;
     /// # use std::str::FromStr;
     /// # use fastobo::ast::*;
-    /// let id = ClassIdent::from_str("MS:1000031").unwrap();
+    /// let id = ClassIdent::from(PrefixedIdent::new("MS", "1000031"));
     /// let frame = TermFrame::new(id);
-    /// assert_eq!(frame.to_string(),
-    /// "[Term]
-    /// id: MS:1000031
-    /// "
-    /// )
+    /// assert_eq!(frame.to_string(), "[Term]\nid: MS:1000031\n");
     /// ```
     pub fn new<I>(id: I) -> Self
     where
@@ -162,10 +158,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             actual.id.as_ref(),
-            &ClassIdent::from(Ident::from(PrefixedIdent::new(
-                IdentPrefix::new(String::from("MS")),
-                IdentLocal::new(String::from("1000008"))
-            )))
+            &ClassIdent::from(Ident::from(PrefixedIdent::new("MS", "1000008")))
         );
 
         assert!(TermFrame::from_str(

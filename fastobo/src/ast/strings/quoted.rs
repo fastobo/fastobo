@@ -27,13 +27,13 @@ use super::unescape;
 /// # Usage
 /// Use `FromStr` to parse the serialized representation of a `QuotedString`,
 /// and `QuotedString::new` to create a quoted string with its content set
-/// from a Rust `String` passed as argument.
+/// from an `Into<String>` implementor.
 ///
 /// # Example
 /// ```rust
 /// # extern crate fastobo;
 /// # use fastobo::ast::QuotedString;
-/// let s = QuotedString::new(String::from("Hello, world!"));
+/// let s = QuotedString::new("Hello, world!");
 /// assert_eq!(s.as_str(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
@@ -43,9 +43,12 @@ pub struct QuotedString {
 }
 
 impl QuotedString {
-    /// Create a new `QuotedString`.
-    pub fn new(value: String) -> Self {
-        QuotedString { value }
+    /// Create a new `QuotedString` from an unescaped string.
+    pub fn new<S>(s: S) -> Self
+    where
+        S: Into<String>
+    {
+        QuotedString { value: s.into() }
     }
 
     /// Extracts a string slice containing the `QuotedString` value.
@@ -83,6 +86,15 @@ impl Display for QuotedString {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let s: &QuotedStr = self.borrow();
         s.fmt(f)
+    }
+}
+
+impl<S> From<S> for QuotedString
+where
+    S: Into<String>
+{
+    fn from(s: S) -> Self {
+        Self::new(s)
     }
 }
 

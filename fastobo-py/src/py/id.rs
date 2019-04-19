@@ -191,8 +191,8 @@ impl Eq for PrefixedIdent {}
 impl FromPy<PrefixedIdent> for ast::PrefixedIdent {
     fn from_py(ident: PrefixedIdent, py: Python) -> Self {
         ast::PrefixedIdent::new(
-            ident.prefix.as_ref(py).clone().into(),
-            ident.local.as_ref(py).clone().into(),
+            ident.prefix.as_ref(py).clone(),
+            ident.local.as_ref(py).clone(),
         )
     }
 }

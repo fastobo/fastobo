@@ -97,7 +97,8 @@ impl FromPy<fastobo::ast::Xref> for Xref {
 
 impl FromPy<Xref> for fastobo::ast::Xref {
     fn from_py(xref: Xref, py: Python) -> Self {
-        Self::with_desc(xref.id.into_py(py), xref.desc)
+        let id: fastobo::ast::Ident = xref.id.into_py(py);
+        Self::with_desc(id, xref.desc)
     }
 }
 

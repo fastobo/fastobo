@@ -7,11 +7,14 @@ use std::str::FromStr;
 use pyo3::AsPyPointer;
 use pyo3::PyNativeType;
 use pyo3::PyObjectProtocol;
+use pyo3::PySequenceProtocol;
 use pyo3::PyTypeInfo;
 use pyo3::prelude::*;
+use pyo3::exceptions::IndexError;
 use pyo3::exceptions::TypeError;
 use pyo3::exceptions::ValueError;
 use pyo3::types::PyAny;
+use pyo3::types::PyIterator;
 use pyo3::types::PyString;
 
 use fastobo::ast;
@@ -92,9 +95,22 @@ impl FromPy<TypedefFrame> for fastobo::ast::EntityFrame {
 
 #[pymethods]
 impl TypedefFrame {
+
+    // FIXME: should accept any iterable.
+    #[new]
+    fn __init__(obj: &PyRawObject, id: Ident, clauses: Option<Vec<TypedefClause>>) -> PyResult<()> {
+        Ok(obj.init(Self::with_clauses(id, clauses.unwrap_or_else(Vec::new))))
+    }
+
     #[getter]
     fn get_id(&self) -> PyResult<&Ident> {
         Ok(&self.id)
+    }
+
+    #[setter]
+    fn set_id(&mut self, id: Ident) -> PyResult<()> {
+        self.id = id;
+        Ok(())
     }
 }
 
@@ -109,5 +125,56 @@ impl PyObjectProtocol for TypedefFrame {
 
     fn __str__(&self) -> PyResult<String> {
         Ok(self.to_string())
+    }
+}
+
+#[pyproto]
+impl PySequenceProtocol for TypedefFrame {
+    fn __len__(&self) -> PyResult<usize> {
+        Ok(self.clauses.len())
+    }
+
+    fn __getitem__(&self, index: isize) -> PyResult<PyObject> {
+
+        let py = unsafe {
+            Python::assume_gil_acquired()
+        };
+
+        if index < self.clauses.len() as isize {
+            let item = &self.clauses[index as usize];
+            Ok(item.to_object(py))
+        } else {
+            IndexError::into("list index out of range")
+        }
+    }
+
+    fn __setitem__(&mut self, index: isize, elem: &PyAny) -> PyResult<()> {
+        if index as usize > self.clauses.len() {
+            return IndexError::into("list index out of range");
+        }
+        let clause = TypedefClause::extract(elem)?;
+        self.clauses[index as usize] = clause;
+        Ok(())
+    }
+
+    fn __delitem__(&mut self, index: isize) -> PyResult<()> {
+        if index as usize > self.clauses.len() {
+            return IndexError::into("list index out of range");
+        }
+        self.clauses.remove(index as usize);
+        Ok(())
+    }
+
+    fn __concat__(&self, other: &PyAny) -> PyResult<Self> {
+
+        let py = other.py();
+
+        let iterator = PyIterator::from_object(py, other)?;
+        let mut new_clauses = self.clauses.clone_py(py);
+        for item in iterator {
+            new_clauses.push(TypedefClause::extract(item?)?);
+        }
+
+        Ok(Self::with_clauses(self.id.clone_py(py), new_clauses))
     }
 }

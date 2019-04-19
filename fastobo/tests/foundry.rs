@@ -29,10 +29,9 @@ lazy_static! {
 }
 
 macro_rules! foundrytest {
-    ($ont:ident) => {
-
+    ( $(#[$attr:meta])* $ont:ident) => (
+        $(#[$attr])*
         #[test]
-        #[ignore]
         fn $ont() {
             // get the URL to the OBO product
             let ref url = FOUNDRY
@@ -69,78 +68,99 @@ macro_rules! foundrytest {
                 panic!("not an OBO file ({})\n: {}", url, lines);
             }
         }
-    }
+    )
 }
 
 foundrytest!(po);
 foundrytest!(xao);
 foundrytest!(zfa);
-foundrytest!(go);
 foundrytest!(bfo);
 foundrytest!(pato);
-foundrytest!(doid);
-// foundrytest!(chebi); INVALID XREF SYNTAX
-foundrytest!(pr);
 foundrytest!(fao);
-foundrytest!(gaz);
-foundrytest!(hao);
-foundrytest!(rs);
-foundrytest!(rnao);
 foundrytest!(eco);
-foundrytest!(sibo);
 foundrytest!(ceph);
 foundrytest!(wbbt);
-foundrytest!(ro);
 foundrytest!(ddanat);
 foundrytest!(ms);
 foundrytest!(cio);
-foundrytest!(fix);
-foundrytest!(mi);
 foundrytest!(zfs);
-foundrytest!(mco);
 foundrytest!(emapa);
-foundrytest!(trans);
-foundrytest!(cl);
 foundrytest!(xpo);
-foundrytest!(mp);
-foundrytest!(xco);
 foundrytest!(exo);
 foundrytest!(wbls);
-foundrytest!(pw);
 foundrytest!(olatdv);
-foundrytest!(fbcv);
 foundrytest!(planp);
 foundrytest!(fbbt);
 foundrytest!(pdumdv);
-foundrytest!(ecocore);
 foundrytest!(oba);
 foundrytest!(cmo);
 foundrytest!(hp);
 foundrytest!(phipo);
 foundrytest!(so);
-foundrytest!(omp);
-foundrytest!(ncbitaxon);
-foundrytest!(vto);
 foundrytest!(mmusdv);
-foundrytest!(fypo);
-foundrytest!(zp);
 foundrytest!(hsapdv);
 foundrytest!(peco);
-foundrytest!(mondo);
 foundrytest!(apo);
 foundrytest!(ehdaa2);
-foundrytest!(fbdv);
-foundrytest!(symp);
-foundrytest!(xlmod);
 foundrytest!(wbphenotype);
-foundrytest!(uberon);
-foundrytest!(mmo);
 foundrytest!(taxrank);
-foundrytest!(tto);
-foundrytest!(envo);
 foundrytest!(plana);
-foundrytest!(to);
 foundrytest!(ddpheno);
-foundrytest!(ncit);
-foundrytest!(zeco);
-// foundrytest!(eo); DEPRECATED and UNREACHABLE
+
+// --- Too large to run casually ---------------------------------------------
+
+foundrytest!(#[ignore] mondo);
+foundrytest!(#[ignore] ncbitaxon);
+foundrytest!(#[ignore] ncit);
+foundrytest!(#[ignore] go);
+foundrytest!(#[ignore] vto);
+foundrytest!(#[ignore] pr);
+foundrytest!(#[ignore] tto);
+
+
+
+// --- Expected failures -----------------------------------------------------
+
+// Outdated syntax (`exact_synonym`, `xref_analog`)
+foundrytest!(#[ignore] trans);
+foundrytest!(#[ignore] fix);
+// Invalid syntax caused by ChEBI
+foundrytest!(#[ignore] fypo);
+foundrytest!(#[ignore] sibo);
+foundrytest!(#[ignore] fbcv);
+// Invalid syntax caused by ENVO
+foundrytest!(#[ignore] ecocore);
+// Invalid Xref syntax
+foundrytest!(#[ignore] chebi);
+foundrytest!(#[ignore] uberon);
+foundrytest!(#[ignore] xco);
+foundrytest!(#[ignore] to);
+foundrytest!(#[ignore] pw);
+// Invalid syntax (WIP)
+foundrytest!(#[ignore] envo);
+foundrytest!(#[ignore] mmo);
+foundrytest!(#[ignore] mi);
+foundrytest!(#[ignore] mco);
+// Invalid date
+foundrytest!(#[ignore] doid);
+// Invalid syntax (reported)
+foundrytest!(#[ignore] cl);
+foundrytest!(#[ignore] omp);
+// Invalid syntax
+foundrytest!(#[ignore] gaz);
+foundrytest!(#[ignore] hao);
+foundrytest!(#[ignore] mp);
+foundrytest!(#[ignore] symp);
+foundrytest!(#[ignore] zp);
+foundrytest!(#[ignore] zeco);
+// Unescaped quotes in QuotedString
+foundrytest!(#[ignore] rnao);
+// Undefined "is_asymmetric"
+foundrytest!(#[ignore] ro);
+// Download error
+foundrytest!(#[ignore] rs);
+// OBO Foundry related error
+foundrytest!(#[ignore] fbdv);
+foundrytest!(#[ignore] xlmod);
+// Deprecated and unreachable
+foundrytest!(#[ignore] eo);

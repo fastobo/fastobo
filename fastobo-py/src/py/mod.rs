@@ -121,18 +121,6 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     ///     TypeError: when the argument is not a `str`.
     ///     SyntaxError: when the document is not a valid OBO syntax.
     ///
-    /// Example:
-    ///     >>> doc = fastobo.loads("""
-    ///     ... format-version: 1.4
-    ///     ...
-    ///     ... [Term]
-    ///     ... id: EXAMPLE:001
-    ///     ... """)
-    ///     >>> doc.header[0].version
-    ///     "1.4"
-    ///     >>> doc[0].id
-    ///     PrefixedIdent("EXAMPLE", "001")
-
     #[pyfn(m, "loads")]
     fn loads(py: Python, document: &str) -> PyResult<OboDoc> {
         match fastobo::ast::OboDoc::from_str(document) {

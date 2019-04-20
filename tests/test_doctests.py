@@ -15,16 +15,22 @@ import fastobo
 
 def _load_tests_from_module(tests, module, globs, setUp=None, tearDown=None):
     """Load tests from module, iterating through submodules"""
+
+    module.__test__ = {}
     for attr in (getattr(module, x) for x in dir(module) if not x.startswith('_')):
         if isinstance(attr, types.ModuleType):
-            attr.__test__ = {x: getattr(attr, x) for x in attr.__all__}
-            tests.addTests(doctest.DocTestSuite(
-                attr,
-                globs=globs,
-                setUp=setUp,
-                tearDown=tearDown,
-                optionflags=doctest.ELLIPSIS,
-            ))
+            _load_tests_from_module(tests, attr, globs, setUp, tearDown)
+        else:
+            module.__test__[attr.__name__] = attr
+
+    tests.addTests(doctest.DocTestSuite(
+        module,
+        globs=globs,
+        setUp=setUp,
+        tearDown=tearDown,
+        optionflags=doctest.ELLIPSIS,
+    ))
+
     return tests
 
 

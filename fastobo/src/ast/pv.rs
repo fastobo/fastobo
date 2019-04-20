@@ -19,7 +19,9 @@ use crate::parser::Rule;
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum PropertyValue {
+    /// A property-value binding where the value is specified with an ID.
     Identified(RelationIdent, Ident),
+    /// A property-value binding where the value is given by a typed string.
     Typed(RelationIdent, QuotedString, Ident),
 }
 

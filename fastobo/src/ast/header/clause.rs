@@ -18,6 +18,11 @@ use crate::parser::Rule;
 
 
 /// A clause appearing in a header frame.
+///
+/// Header clauses are used to add metadata to OBO documents. They are all
+/// optional, but every document should *at least* contain a `FormatVersion`
+/// clause, to help with interoperability and to make sure the semantics of
+/// the right OBO specification are in use.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum HeaderClause {
     FormatVersion(UnquotedString),

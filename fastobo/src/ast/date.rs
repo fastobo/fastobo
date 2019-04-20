@@ -12,6 +12,9 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A naive datetime, as found in header frames.
+///
+/// For historical reasons, OBO headers do not contain ISO datetimes but
+/// *day-month-year* dates, which can be confusing for US-based users.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct NaiveDateTime {
     day: u8,

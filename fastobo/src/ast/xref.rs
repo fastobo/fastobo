@@ -16,6 +16,13 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A database cross-reference definition.
+///
+/// Cross-references can be used in `Def` or `Synonym` clauses of entity
+/// frames to add sources for the provided definition or evidence to show the
+/// actual existence of a synonym. They can also be found in `Xref` clauses
+/// when the cross-reference is directly relevant to the annotated entity
+/// (e.g. when exporting an ontology from a knowledge-base to add an hyperlink
+/// to the original resource).
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Xref {
     pub id: Ident,
@@ -23,6 +30,8 @@ pub struct Xref {
 }
 
 impl Xref {
+
+    /// Create a new `Xref` from the given ID, without description.
     pub fn new<I>(id: I) -> Self
     where
         I: Into<Ident>,
@@ -30,6 +39,7 @@ impl Xref {
         Self::with_desc(id, None)
     }
 
+    /// Create a new `Xref` with the given ID and optional description.
     pub fn with_desc<I, D>(id: I, desc: D) -> Self
     where
         I: Into<Ident>,

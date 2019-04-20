@@ -14,6 +14,17 @@ Library Reference
    xref
 
 
+Functions
+^^^^^^^^^
+
+.. autofunction:: fastobo.load
+
+.. autofunction:: fastobo.loads
+
+
+Data structures
+^^^^^^^^^^^^^^^
+
 Header (`fastobo.header`)
 -------------------------
 

@@ -68,6 +68,27 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(pyo3::wrap_pymodule!(typedef))?;
     m.add_wrapped(pyo3::wrap_pymodule!(xref))?;
 
+    /// load(fh)
+    /// --
+    //
+    /// Load an OBO document from the given path or file handle.
+    ///
+    /// Arguments:
+    ///     fh (str or file-handle): the path to an OBO file, or a **binary**
+    ///         stream that contains a serialized OBO document. *A binary
+    ///         stream needs a ``read(x)`` method that return ``x`` bytes*.
+    ///
+    /// Raises:
+    ///     TypeError: when the argument is not a `str` or a binary stream.
+    ///     SyntaxError: when the document is not a valid OBO syntax.
+    ///     OSError: when an underlying OS error occurs, or if ``fh.read``
+    ///         raises any exception (which will be wrapped).
+    ///
+    /// Example:
+    ///     >>> import requests
+    ///     >>> res = requests.get("http://ontologies.berkeleybop.org/pw.obo")
+    ///     >>> doc = fastobo.load(res.raw)
+    ///
     #[pyfn(m, "load")]
     fn load(py: Python, fh: &PyAny) -> PyResult<OboDoc> {
         if let Ok(s) = fh.downcast_ref::<PyString>() {
@@ -84,15 +105,37 @@ fn fastobo(py: Python, m: &PyModule) -> PyResult<()> {
                 Err(e) => Error::from(e).into(),
             }
         } else {
-            pyo3::exceptions::NotImplementedError::into(
-                "cannot only use load with a path right now"
-            )
+            pyo3::exceptions::TypeError::into("expected path or file handle")
         }
     }
 
+    /// loads(document)
+    /// --
+    ///
+    /// Load an OBO document from a string.
+    ///
+    /// Arguments:
+    ///     document (str): a string containing an OBO document.
+    ///
+    /// Raises:
+    ///     TypeError: when the argument is not a `str`.
+    ///     SyntaxError: when the document is not a valid OBO syntax.
+    ///
+    /// Example:
+    ///     >>> doc = fastobo.loads("""
+    ///     ... format-version: 1.4
+    ///     ...
+    ///     ... [Term]
+    ///     ... id: EXAMPLE:001
+    ///     ... """)
+    ///     >>> doc.header[0].version
+    ///     "1.4"
+    ///     >>> doc[0].id
+    ///     PrefixedIdent("EXAMPLE", "001")
+
     #[pyfn(m, "loads")]
-    fn loads(py: Python, s: &str) -> PyResult<OboDoc> {
-        match fastobo::ast::OboDoc::from_str(s) {
+    fn loads(py: Python, document: &str) -> PyResult<OboDoc> {
+        match fastobo::ast::OboDoc::from_str(document) {
             Ok(doc) => Ok(doc.into_py(py)),
             Err(e) => Error::from(e).into(),
         }

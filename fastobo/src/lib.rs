@@ -11,9 +11,24 @@
 //!
 //! ## Overview
 //!
-//! This library provides an abstract syntax tree for the
+//! This library provides a mostly-complete implementation of the
 //! [OBO flat file format 1.4](http://owlcollab.github.io/oboformat/doc/obo-syntax.html).
 //!
+//! * **Data structures** - `fastobo` provides a complete owned AST for the
+//!   OBO language, with constructors and covenience traits where applicable.
+//!   There is a plan to provide borrowed data structures as well, to be able
+//!   to build a view of an OBO document from borrowed data.
+//! * **Parsing** - The parser is implemented using [pest](http://pest.rs/),
+//!   and is reexported from the [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax)
+//!   crate. Most structures implement the [`FromPair`](./parser/trait.FromPair.html)
+//!   trait which allows to build a data structure from a stream of pest tokens.
+//! * **Errors** - All functions in that crate that return a `Result` will
+//!   always use the `Error` struct defined in the `error` module. Errors
+//!   reported by pest are very meaningful, and can give the exact location
+//!   of a syntax error encountered by the parser.
+//!
+//! *Warning: this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html),
+//!  but the API is likely to change a lot before the release of a stable 1.0.*
 //!
 //! ## Usage
 //!
@@ -23,9 +38,11 @@
 //! fastobo = "0.1.0"
 //! ```
 //!
-//! The `OboDoc` struct acts as the root of the AST. Use `OboDoc::from_stream` to load an OBO document
-//! from a [`BufRead`](https://doc.rust-lang.org/std/io/trait.BufRead.html) implementor
-//! (use [`std::io::BufReader`](https://doc.rust-lang.org/std/io/struct.BufReader.html) if needed):
+//! The [`OboDoc`](./ast/struct.OboDoc.html) struct acts as the root of the AST.
+//! Use [`OboDoc::from_stream`](ast/struct.OboDoc.html#method.from_stream) to load
+//! an OBO document from a [`BufRead`](https://doc.rust-lang.org/std/io/trait.BufRead.html)
+//! implementor (use [`std::io::BufReader`](https://doc.rust-lang.org/std/io/struct.BufReader.html)
+//! if needed to adapt from a raw stream):
 //!
 //! ```rust
 //! extern crate fastobo;
@@ -42,10 +59,9 @@
 //! }
 //! ```
 //!
+//!
 //! ## See also
 //!
-//! * [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser for the OBO
-//!   format version 1.4.
 //! * [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to this crate.
 //!
 //!

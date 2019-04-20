@@ -85,7 +85,7 @@ impl OboDoc {
         }
     }
 
-    /// Consume an OBO stream to produce the corresponding AST.
+    /// Consume a buffered stream containing an OBO document into an AST.
     pub fn from_stream<B>(stream: &mut B) -> Result<Self>
     where
         B: BufRead,
@@ -167,7 +167,7 @@ impl OboDoc {
         Ok(obodoc)
     }
 
-    /// Read
+    /// Read an OBO file located somwhere in the filesystem.
     pub fn from_file<P>(path: P) -> Result<Self>
     where
         P: AsRef<Path>,
@@ -179,14 +179,17 @@ impl OboDoc {
             .map_err(|e| e.with_path(&pathref.to_string_lossy()))
     }
 
+    /// Get a reference to the header of the OBO document.
     pub fn header(&self) -> &HeaderFrame {
         &self.header
     }
 
+    /// Get a mutable reference to the header of the OBO document.
     pub fn header_mut(&mut self) -> &mut HeaderFrame {
         &mut self.header
     }
 
+    /// Set the header of the OBO document.
     pub fn set_header(&mut self, header: HeaderFrame) {
         self.header = header
     }

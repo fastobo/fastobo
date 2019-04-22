@@ -39,6 +39,8 @@
 //!     checker.used.difference(&checker.declared).cloned().collect()
 //! }
 //!
+//! let doc = OboDoc::from_file("../tests/data/ms.obo").unwrap();
+//! assert!(undeclared_synonym_types(&doc).is_empty());
 //! ```
 //!
 //! # See also

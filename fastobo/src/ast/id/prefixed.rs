@@ -27,7 +27,21 @@ pub struct PrefixedIdent {
 }
 
 impl PrefixedIdent {
-    /// Create a new `PrefixedIdentifier` from a prefix and a local identifier.
+    /// Create a new `PrefixedIdent` from a prefix and a local identifier.
+    ///
+    /// Thanks to conversion traits, the `prefix` and `local` arguments can be
+    /// passed either as strings or `ast` structures:
+    ///
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let id1 = PrefixedIdent::new("MS", "1000031");
+    /// let id2 = PrefixedIdent::new(IdentPrefix::new("MS"), IdentLocal::new("1000031"));
+    /// assert_eq!(id1, id2);
+    /// ```
+    ///
+    /// # Example
+    ///
     pub fn new<P, L>(prefix: P, local: L) -> Self
     where
         P: Into<IdentPrefix>,

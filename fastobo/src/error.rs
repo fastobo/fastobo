@@ -11,10 +11,56 @@ use crate::parser::Rule;
 /// The error type for this crate.
 #[derive(Debug, Fail)]
 pub enum Error {
+    /// An unexpected rule was used in `FromPair::from_pair`.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// # use fastobo::parser::*;
+    /// let pairs = OboParser::parse(Rule::UnquotedString, "hello, world!");
+    /// # let err =
+    /// QuotedString::from_pair(pairs.unwrap().next().unwrap()).unwrap_err();
+    /// # match err {
+    /// #   fastobo::error::Error::UnexpectedRule { expected, actual } => {
+    /// #       assert_eq!(expected, Rule::QuotedString);
+    /// #       assert_eq!(actual, Rule::UnquotedString);
+    /// #   }
+    /// #   e => panic!("unexpected error: {:?}", e),
+    /// # };
+    /// ```
     #[fail(display = "unexpected rule: {:?} (expected {:?})", actual, expected)]
     UnexpectedRule { expected: Rule, actual: Rule },
+
+    /// The underlying parser encountered an error.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use std::str::FromStr;
+    /// # use fastobo::ast::*;
+    /// # let err =
+    /// QuotedString::from_str("definitely not a quoted string").unwrap_err();
+    /// # match err {
+    /// #   fastobo::error::Error::ParserError { error } => (),
+    /// #   e => panic!("unexpected error: {:?}", e),
+    /// # };
+    /// ```
     #[fail(display = "parser error: {}", error)]
     ParserError { error: PestError<Rule> },
+
+    /// An IO error occurred.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// # let err =
+    /// OboDoc::from_file("some/non-existing/path").unwrap_err();
+    /// # match err {
+    /// #   fastobo::error::Error::IOError { error } => (),
+    /// #   e => panic!("unexpected error: {:?}", e),
+    /// # };
     #[fail(display = "IO error: {}", error)]
     IOError { error: IOError },
 }

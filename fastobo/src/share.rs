@@ -37,6 +37,10 @@
 //!         MyOwner(self.0.to_string())
 //!     }
 //! }
+//!
+//! # let s1 = MyOwner(String::from("abc"));
+//! # let s2 = s1.share().redeem();
+//! # assert_eq!(s1.0, s2.0);
 //! ```
 
 
@@ -51,6 +55,7 @@ use std::ops::Deref;
 
 // --- Share -----------------------------------------------------------------
 
+/// A trait for obtaining a data view from a reference to an owned `struct`.
 pub trait Share<'a, Shared: 'a> {
     fn share(&'a self) -> Shared;
 }
@@ -63,6 +68,7 @@ impl<'a> Share<'a, &'a str> for String {
 
 // --- Redeem ----------------------------------------------------------------
 
+/// A trait for taking ownership over viewed data with possibly expensives costs.
 pub trait Redeem<'a>
 where
     Self: 'a,

@@ -30,6 +30,7 @@
 //! *Warning: this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html),
 //!  but the API is likely to change a lot before the release of a stable 1.0.*
 //!
+//!
 //! ## Usage
 //!
 //! Add `fastobo` to the `[dependencies]` sections of your `Cargo.toml` manifest:

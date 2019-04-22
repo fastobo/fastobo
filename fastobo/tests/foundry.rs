@@ -105,6 +105,8 @@ foundrytest!(ehdaa2);
 foundrytest!(taxrank);
 foundrytest!(plana);
 foundrytest!(ddpheno);
+foundrytest!(fbdv);
+
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -115,7 +117,6 @@ foundrytest!(#[ignore] go);
 foundrytest!(#[ignore] vto);
 foundrytest!(#[ignore] pr);
 foundrytest!(#[ignore] tto);
-
 
 
 // --- Expected failures -----------------------------------------------------
@@ -153,14 +154,12 @@ foundrytest!(#[ignore] mp);
 foundrytest!(#[ignore] symp);
 foundrytest!(#[ignore] zp);
 foundrytest!(#[ignore] zeco);
+foundrytest!(#[ignore] xlmod);
 // Unescaped quotes in QuotedString
 foundrytest!(#[ignore] rnao);
 // Undefined "is_asymmetric"
 foundrytest!(#[ignore] ro);
 // Download error
 foundrytest!(#[ignore] rs);
-// OBO Foundry related error
-foundrytest!(#[ignore] fbdv);
-foundrytest!(#[ignore] xlmod);
 // Deprecated and unreachable
 foundrytest!(#[ignore] eo);

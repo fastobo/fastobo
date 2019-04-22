@@ -48,6 +48,9 @@ import gzip
 gzdoc = fastobo.load(gzip.open("../data/cl.obo.gz"))
 ```
 
+*Comments are not supported currently, because of a limitation with `pyo3` (the library used to
+generate the Python bindings). They are partially supported in the Rust version of `fastobo`.*
+
 
 ## Feedback
 

@@ -102,7 +102,6 @@ foundrytest!(hsapdv);
 foundrytest!(peco);
 foundrytest!(apo);
 foundrytest!(ehdaa2);
-foundrytest!(wbphenotype);
 foundrytest!(taxrank);
 foundrytest!(plana);
 foundrytest!(ddpheno);
@@ -141,6 +140,7 @@ foundrytest!(#[ignore] envo);
 foundrytest!(#[ignore] mmo);
 foundrytest!(#[ignore] mi);
 foundrytest!(#[ignore] mco);
+foundrytest!(#[ignore] wbphenotype);
 // Invalid date
 foundrytest!(#[ignore] doid);
 // Invalid syntax (reported)

@@ -51,7 +51,11 @@ impl Display for TermClause {
             Name(name) => f.write_str("name: ").and(name.fmt(f)),
             Namespace(id) => f.write_str("namespace: ").and(id.fmt(f)),
             AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xreflist) => f.write_str("def: ").and(desc.fmt(f)).and(xreflist.fmt(f)),
+            Def(desc, xreflist) => f
+                .write_str("def: ")
+                .and(desc.fmt(f))
+                .and(f.write_char(' '))
+                .and(xreflist.fmt(f)),
             Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
             Subset(subset) => f.write_str("subset: ").and(subset.fmt(f)),
             Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),

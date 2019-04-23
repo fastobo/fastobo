@@ -50,7 +50,9 @@ impl<'i> FromPair<'i> for Url {
         Url::parse(pair.as_str()).map_err(|e| {
             Error::from(
                 PestError::new_from_span(
-                    ErrorVariant::CustomError { message: e.to_string() },
+                    ErrorVariant::CustomError {
+                        message: format!("could not parse URL: {}", e)
+                    },
                     pair.as_span(),
                 )
             )

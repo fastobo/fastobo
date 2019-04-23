@@ -96,6 +96,8 @@ extern crate memchr;
 extern crate opaque_typedef;
 extern crate pest;
 extern crate url;
+#[cfg(test)]
+extern crate textwrap;
 
 #[macro_use]
 pub mod parser;

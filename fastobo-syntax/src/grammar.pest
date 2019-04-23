@@ -158,7 +158,7 @@ XrefList     = {"[" ~ (XrefListItem ~ ws?)? ~ ("," ~ ws ~ XrefListItem)* ~ ws? ~
 
 // 3.1 Obo Document Structure
 
-OboDoc      = { HeaderFrame ~ (EntityFrame)* ~ nl* ~ EOI }
+OboDoc      = { nl* ~ HeaderFrame ~ (EntityFrame)* ~ EOI }
 EntityFrame = { TermFrame | InstanceFrame | TypedefFrame }
 
 EntitySingle = _{ nl* ~ EntityFrame ~ nl* ~ EOI }  // NB(@althonos): for iterative parsers.
@@ -234,7 +234,7 @@ Unreserved = {
 TermFrame = { nl*
     ~ "[Term]" ~ nl
     ~ ws? ~ "id:" ~ ws ~ ClassId ~ EOL
-    ~ TermClauseLine*
+    ~ (TermClauseLine | nl)*
 }
 TermClauseLine = {
     ws? ~ TermClause ~ EOL
@@ -270,7 +270,7 @@ TermClause = {
 TypedefFrame = { nl*
     ~ "[Typedef]" ~ nl
     ~  ws? ~ "id:" ~ ws ~ ClassId ~ EOL
-    ~ TypedefClauseLine*
+    ~ (TypedefClauseLine | nl)*
 }
 TypedefClauseLine = {
     ws? ~ TypedefClause ~ EOL
@@ -324,7 +324,7 @@ TypedefClause = {
 InstanceFrame = { nl*
     ~ "[Instance]" ~ nl
     ~ ws? ~ "id:" ~ ws ~ InstanceId ~ EOL
-    ~ InstanceClauseLine*
+    ~ (InstanceClauseLine | nl)*
 }
 InstanceClauseLine = {
     ws? ~ InstanceClause ~ EOL

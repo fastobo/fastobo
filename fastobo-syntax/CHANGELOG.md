@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [Unreleased]: https://github.com/althonos/fastobo/compare/syntax/v0.1.1-syntax...HEAD
 
+### Fixed
+- Allow newlines between clause lines and between frames.
 
 ## [v0.1.1-syntax] - 2019-04-12
 

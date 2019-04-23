@@ -90,7 +90,7 @@ impl<'i> FromPair<'i> for Ident {
             Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner).map(From::from),
             Rule::UnprefixedId => UnprefixedIdent::from_pair_unchecked(inner).map(From::from),
             // FIXME(@althonos): need proper error report if the parser fails.
-            Rule::UrlId => Ok(Ident::Url(Url::parse(inner.as_str()).unwrap())),
+            Rule::UrlId => Url::from_pair_unchecked(inner).map(Ident::Url),
             _ => unreachable!(),
         }
     }

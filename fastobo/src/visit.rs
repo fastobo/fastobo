@@ -6,7 +6,7 @@
 //! parts of an OBO document.
 //!
 //! # Example
-//! The following visitor will look for all synonym types in an OBO document
+//! The following visitor will collect all synonym types of an OBO document
 //! and can be used to return a set of references to the undeclared ones:
 //! ```rust
 //! extern crate fastobo;

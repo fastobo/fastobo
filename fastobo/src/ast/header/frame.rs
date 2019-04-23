@@ -33,8 +33,19 @@ pub struct HeaderFrame {
 }
 
 impl HeaderFrame {
-    pub fn new(clauses: Vec<HeaderClause>) -> Self {
+    /// Create a new empty `HeaderFrame`.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Create a new `HeaderFrame` containing the provided clauses.
+    pub fn with_clauses(clauses: Vec<HeaderClause>) -> Self {
         Self { clauses }
+    }
+
+    /// Create a new `HeaderFrame` containing only the provided clause.
+    pub fn from_clause(clause: HeaderClause) -> Self {
+        Self::with_clauses(vec![clause])
     }
 }
 
@@ -53,12 +64,18 @@ impl Display for HeaderFrame {
     }
 }
 
+impl From<HeaderClause> for HeaderFrame {
+    fn from(clause: HeaderClause) -> Self {
+        Self::from_clause(clause)
+    }
+}
+
 impl FromIterator<HeaderClause> for HeaderFrame {
     fn from_iter<T>(iter: T) -> Self
     where
         T: IntoIterator<Item = HeaderClause>
     {
-        Self::new(iter.into_iter().collect())
+        Self::with_clauses(iter.into_iter().collect())
     }
 }
 
@@ -85,7 +102,7 @@ impl<'i> FromPair<'i> for HeaderFrame {
         for inner in pair.into_inner() {
             clauses.push(HeaderClause::from_pair_unchecked(inner)?)
         }
-        Ok(HeaderFrame { clauses })
+        Ok(HeaderFrame::with_clauses(clauses))
     }
 }
 impl_fromstr!(HeaderFrame);

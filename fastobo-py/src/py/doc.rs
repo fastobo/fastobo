@@ -73,10 +73,11 @@ impl FromPy<obo::OboDoc> for OboDoc {
 impl FromPy<OboDoc> for fastobo::ast::OboDoc {
     fn from_py(doc: OboDoc, py: Python) -> Self {
         let header: HeaderFrame = doc.header.as_ref(py).clone_py(py);
-        Self::with_entities(
-            fastobo::ast::HeaderFrame::from_py(header, py),
-            doc.entities.iter().map(|frame| frame.into_py(py))
-        )
+        doc.entities
+            .iter()
+            .map(|frame| fastobo::ast::EntityFrame::from_py(frame, py))
+            .collect::<fastobo::ast::OboDoc>()
+            .and_header(header.into_py(py))
     }
 }
 

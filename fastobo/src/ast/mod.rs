@@ -46,6 +46,7 @@ use std::fmt::Write;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::iter::FromIterator;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -66,23 +67,38 @@ pub struct OboDoc {
 }
 
 impl OboDoc {
+
+    /// Create a new empty OBO document.
+    pub fn new() -> Self {
+        Default::default()
+    }
+
     /// Create a new OBO document with the provided frame.
-    pub fn new(header: HeaderFrame) -> Self {
+    pub fn with_header(header: HeaderFrame) -> Self {
         Self {
             header,
-            entities: Vec::new(),
+            entities: Default::default(),
         }
     }
 
+    /// Use the provided frame as the header of the OBO document.
+    pub fn and_header(mut self, header: HeaderFrame) -> Self {
+        self.header = header;
+        self
+    }
+
     /// Create a new OBO document with the provided entity frames.
-    pub fn with_entities<E>(header: HeaderFrame, entities: E) -> Self
-    where
-        E: IntoIterator<Item = EntityFrame>,
-    {
+    pub fn with_entities(entities: Vec<EntityFrame>) -> Self {
         Self {
-            header,
-            entities: entities.into_iter().collect(),
+            header: Default::default(),
+            entities,
         }
+    }
+
+    /// Use the provided entity frames as the content of the OBO document.
+    pub fn and_entities(mut self, entities: Vec<EntityFrame>) -> Self {
+        self.entities = entities;
+        self
     }
 
     /// Consume a buffered stream containing an OBO document into an AST.
@@ -125,7 +141,7 @@ impl OboDoc {
         }
 
         // create the OBO document
-        let mut obodoc = Self::new(HeaderFrame::new(frame_clauses));
+        let mut obodoc = Self::with_header(HeaderFrame::with_clauses(frame_clauses));
 
         // read all entity frames
         let mut frame_lines = String::new();
@@ -197,7 +213,11 @@ impl OboDoc {
 
 impl Display for OboDoc {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.header.fmt(f).and(f.write_char('\n'))?;
+        self.header.fmt(f)?;
+        if !self.header.is_empty() && !self.entities.is_empty() {
+            f.write_char('\n')?;
+        }
+
         let mut entities = self.entities.iter().peekable();
         while let Some(entity) = entities.next() {
             entity.fmt(f)?;
@@ -206,6 +226,18 @@ impl Display for OboDoc {
             }
         }
         Ok(())
+    }
+}
+
+impl<E> FromIterator<E> for OboDoc
+where
+    E: Into<EntityFrame>
+{
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = E>
+    {
+        Self::with_entities(iter.into_iter().map(|i| i.into()).collect())
     }
 }
 
@@ -277,3 +309,63 @@ impl<'i> FromPair<'i> for EntityFrame {
     }
 }
 impl_fromstr!(EntityFrame);
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    mod doc {
+
+        use std::iter::FromIterator;
+        use textwrap::dedent;
+        use super::*;
+
+        #[test]
+        fn from_str() {
+            // Empty file should give empty `OboDoc`.
+            let doc = OboDoc::from_str("").unwrap();
+            assert_eq!(doc, Default::default());
+
+            // Empty lines should be ignored.
+            let doc = OboDoc::from_str("\n\n").unwrap();
+            assert_eq!(doc, Default::default());
+
+            // A simple file should parse.
+            let doc = OboDoc::from_str(&dedent("
+                format-version: 1.2
+
+                [Term]
+                id: TEST:001
+            ")).unwrap();
+
+            let header = HeaderFrame::from_iter(
+                vec![HeaderClause::FormatVersion(UnquotedString::new("1.2"))]
+            );
+            let term = TermFrame::new(
+                ClassIdent::from(PrefixedIdent::new("TEST", "001"))
+            );
+            assert_eq!(doc, OboDoc::from_iter(Some(term)).and_header(header));
+        }
+
+        #[test]
+        fn to_string() {
+            // Empty `OboDoc` should give empty string.
+            let doc = OboDoc::default();
+            assert_eq!(doc.to_string(), "");
+
+            // `OboDoc` with only header frame should not add newline separator.
+            let doc = OboDoc::with_header(
+                HeaderFrame::from(vec![
+                    HeaderClause::FormatVersion(UnquotedString::new("1.2")),
+                    HeaderClause::Remark(UnquotedString::new("this is a test")),
+                ])
+            );
+            assert_eq!(doc.to_string(), dedent("
+                format-version: 1.2
+                remark: this is a test
+                "
+            ).trim_start_matches('\n'));
+        }
+    }
+}

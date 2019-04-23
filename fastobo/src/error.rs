@@ -2,6 +2,8 @@
 
 use std::io::Error as IOError;
 
+use pest::Span;
+use pest::Position;
 use pest::error::Error as PestError;
 use pest::error::InputLocation;
 use pest::error::LineColLocation;
@@ -99,6 +101,24 @@ impl Error {
             IOError { error } => IOError { error },
             UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
             ParserError { error } => ParserError { error: error.with_path(path) },
+        }
+    }
+
+    /// Update the span of the error, if needed.
+    pub(crate) fn with_span<'i>(self, span: Span<'i>) -> Self {
+        use self::Error::*;
+        match self {
+            IOError { error } => IOError { error },
+            UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
+            ParserError { error } => {
+                // FIXME(@althonos): the new error should be spanned only if
+                //                   the original error is spanned, but there
+                //                   is no clean way to create an error at
+                //                   the right position with `pest::error`.
+                ParserError {
+                    error: PestError::new_from_span(error.variant, span)
+                }
+            }
         }
     }
 }

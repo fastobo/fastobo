@@ -8,6 +8,8 @@ use std::ops::Deref;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
+use pest::error::Error as PestError;
+use pest::error::InputLocation;
 
 use crate::ast::*;
 use crate::error::Error;
@@ -136,8 +138,8 @@ impl<'i> FromPair<'i> for XrefList {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
-            // FIXME(@althonos): avoid using FromStr: maybe duplicate rules ?
-            let xref = Xref::from_str(inner.as_str())?;
+            let xref = Xref::from_str(inner.as_str())
+                .map_err(|e| e.with_span(inner.as_span()))?;
             xrefs.push(xref);
         }
         Ok(Self { xrefs })

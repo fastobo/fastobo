@@ -326,11 +326,11 @@ mod tests {
         fn from_str() {
             // Empty file should give empty `OboDoc`.
             let doc = OboDoc::from_str("").unwrap();
-            assert_eq!(doc, Default::default());
+            self::assert_eq!(doc, Default::default());
 
             // Empty lines should be ignored.
             let doc = OboDoc::from_str("\n\n").unwrap();
-            assert_eq!(doc, Default::default());
+            self::assert_eq!(doc, Default::default());
 
             // A simple file should parse.
             let doc = OboDoc::from_str(&dedent("
@@ -346,14 +346,14 @@ mod tests {
             let term = TermFrame::new(
                 ClassIdent::from(PrefixedIdent::new("TEST", "001"))
             );
-            assert_eq!(doc, OboDoc::from_iter(Some(term)).and_header(header));
+            self::assert_eq!(doc, OboDoc::from_iter(Some(term)).and_header(header));
         }
 
         #[test]
         fn to_string() {
             // Empty `OboDoc` should give empty string.
             let doc = OboDoc::default();
-            assert_eq!(doc.to_string(), "");
+            self::assert_eq!(doc.to_string(), "");
 
             // `OboDoc` with only header frame should not add newline separator.
             let doc = OboDoc::with_header(
@@ -362,7 +362,7 @@ mod tests {
                     HeaderClause::Remark(UnquotedString::new("this is a test")),
                 ])
             );
-            assert_eq!(doc.to_string(), dedent("
+            self::assert_eq!(doc.to_string(), dedent("
                 format-version: 1.2
                 remark: this is a test
                 "

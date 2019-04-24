@@ -204,7 +204,7 @@ mod tests {
         #[test]
         fn from_str() {
             let naive = NaiveDateTime::from_str("12:06:2018 17:13").unwrap();
-            assert_eq!(naive, NaiveDateTime::new(12, 6, 2018, 17, 13));
+            self::assert_eq!(naive, NaiveDateTime::new(12, 6, 2018, 17, 13));
         }
 
     }

@@ -199,7 +199,7 @@ mod tests {
     fn from_str() {
         let actual = UnprefixedIdent::from_str("biological_process").unwrap();
         let expected = UnprefixedIdent::new(String::from("biological_process"));
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         assert!(UnprefixedIdent::from_str("").is_err());
         assert!(UnprefixedIdent::from_str("Some\nthing:spanning").is_err());
@@ -209,6 +209,6 @@ mod tests {
     #[test]
     fn to_string() {
         let id = UnprefixedIdent::new(String::from("something:with:colons"));
-        assert_eq!(id.to_string(), "something\\:with\\:colons");
+        self::assert_eq!(id.to_string(), "something\\:with\\:colons");
     }
 }

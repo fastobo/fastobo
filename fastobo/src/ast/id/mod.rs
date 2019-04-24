@@ -181,14 +181,14 @@ mod tests {
     fn from_str() {
         let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl").unwrap();
         let expected = Ident::Url(Url::parse("http://purl.obolibrary.org/obo/po.owl").unwrap());
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         let actual = Ident::from_str("GO:0046154").unwrap();
         let expected = Ident::from(PrefixedIdent::new("GO", "0046154"));
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         let actual = Ident::from_str("goslim_plant").unwrap();
         let expected = Ident::from(UnprefixedIdent::new("goslim_plant"));
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
     }
 }

@@ -174,19 +174,19 @@ mod tests {
 
         #[test]
         fn from_str() {
-            assert_eq!(SynonymScope::from_str("EXACT").unwrap(), Exact);
-            assert_eq!(SynonymScope::from_str("BROAD").unwrap(), Broad);
-            assert_eq!(SynonymScope::from_str("NARROW").unwrap(), Narrow);
-            assert_eq!(SynonymScope::from_str("RELATED").unwrap(), Related);
+            self::assert_eq!(SynonymScope::from_str("EXACT").unwrap(), Exact);
+            self::assert_eq!(SynonymScope::from_str("BROAD").unwrap(), Broad);
+            self::assert_eq!(SynonymScope::from_str("NARROW").unwrap(), Narrow);
+            self::assert_eq!(SynonymScope::from_str("RELATED").unwrap(), Related);
             assert!(SynonymScope::from_str("something").is_err());
         }
 
         #[test]
         fn to_string() {
-            assert_eq!(Exact.to_string(), "EXACT");
-            assert_eq!(Broad.to_string(), "BROAD");
-            assert_eq!(Narrow.to_string(), "NARROW");
-            assert_eq!(Related.to_string(), "RELATED");
+            self::assert_eq!(Exact.to_string(), "EXACT");
+            self::assert_eq!(Broad.to_string(), "BROAD");
+            self::assert_eq!(Narrow.to_string(), "NARROW");
+            self::assert_eq!(Related.to_string(), "RELATED");
         }
     }
 
@@ -202,7 +202,7 @@ mod tests {
                 SynonymScope::Related,
                 XrefList::new(vec![Xref::new(PrefixedIdent::new("GOC", "mah"))]),
             );
-            assert_eq!(actual, expected);
+            self::assert_eq!(actual, expected);
         }
 
         #[test]
@@ -220,7 +220,10 @@ mod tests {
                 )])
             );
 
-            assert_eq!(s.to_string(), "\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]");
+            self::assert_eq!(
+                s.to_string(),
+                "\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]"
+            );
         }
 
     }

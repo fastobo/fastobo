@@ -169,11 +169,11 @@ mod tests {
         fn from_str() {
             let actual = XrefList::from_str("[]").unwrap();
             let expected = XrefList::from(vec![]);
-            assert_eq!(actual, expected);
+            self::assert_eq!(actual, expected);
 
             let actual = XrefList::from_str("[PSI:MS]").unwrap();
             let expected = XrefList::from(vec![Xref::new(PrefixedIdent::new("PSI", "MS"))]);
-            assert_eq!(actual, expected);
+            self::assert_eq!(actual, expected);
 
             let actual = XrefList::from_str(
                 "[PSI:MS, reactome:R-HSA-8983680 \"OAS1 produces oligoadenylates\"]",
@@ -186,7 +186,7 @@ mod tests {
                     QuotedString::new("OAS1 produces oligoadenylates"),
                 ),
             ]);
-            assert_eq!(actual, expected);
+            self::assert_eq!(actual, expected);
         }
     }
 }

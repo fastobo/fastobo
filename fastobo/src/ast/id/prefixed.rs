@@ -172,22 +172,22 @@ mod tests {
     fn from_str() {
         let actual = PrefixedIdent::from_str("GO:0046154").unwrap();
         let expected = PrefixedIdent::new(IdentPrefix::new(String::from("GO")), IdentLocal::new(String::from("0046154")));
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         let actual = PrefixedIdent::from_str("PSI:MS").unwrap();
         let expected = PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS")));
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         let actual = PrefixedIdent::from_str("CAS:22325-47-9").unwrap();
         let expected = PrefixedIdent::new(IdentPrefix::new(String::from("CAS")), IdentLocal::new(String::from("22325-47-9")));
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         let actual = PrefixedIdent::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
         let expected = PrefixedIdent::new(
             IdentPrefix::new(String::from("Wikipedia")),
             IdentLocal::new(String::from("https://en.wikipedia.org/wiki/Gas")),
         );
-        assert_eq!(actual, expected);
+        self::assert_eq!(actual, expected);
 
         assert!(PrefixedIdent::from_str("[Term]").is_err());
         assert!(PrefixedIdent::from_str("").is_err());
@@ -198,6 +198,6 @@ mod tests {
     #[test]
     fn to_string() {
         let id = PrefixedIdent::new(IdentPrefix::new(String::from("GO")), IdentLocal::new(String::from("0046154")));
-        assert_eq!(id.to_string(), "GO:0046154")
+        self::assert_eq!(id.to_string(), "GO:0046154")
     }
 }

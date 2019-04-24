@@ -157,7 +157,7 @@ mod tests {
             relationship: part_of MS:1000458 ! source\n",
         )
         .unwrap();
-        assert_eq!(
+        self::assert_eq!(
             actual.id.as_ref(),
             &ClassIdent::from(Ident::from(PrefixedIdent::new("MS", "1000008")))
         );

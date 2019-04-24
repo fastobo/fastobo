@@ -23,11 +23,8 @@ macro_rules! roundtriptest {
                 p.push($path);
                 p
             };
-            println!("{:?}", path);
-            let txt = read_to_string(&path)
-                .expect("could not read file");
-            let doc = fastobo::ast::OboDoc::from_str(&txt)
-                .expect("could not parse file");
+            let txt = read_to_string(&path).expect("could not read file");
+            let doc = OboDoc::from_str(&txt).expect("could not parse file");
             assert_eq!(txt, doc.to_string());
         }
     }

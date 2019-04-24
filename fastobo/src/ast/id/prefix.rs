@@ -277,16 +277,16 @@ mod tests {
     #[test]
     fn from_str() {
         let prefix = IdentPrefix::from_str("GO").unwrap();
-        assert_eq!(prefix, IdentPrefix::new(String::from("GO")));
+        self::assert_eq!(prefix, IdentPrefix::new(String::from("GO")));
         assert!(IdentPrefix::from_str("GO:").is_err());
     }
 
     #[test]
     fn to_string() {
         let prefix = IdentPrefix::new(String::from("GO"));
-        assert_eq!(prefix.to_string(), "GO");
+        self::assert_eq!(prefix.to_string(), "GO");
 
         let prefix = IdentPrefix::new(String::from("some thing"));
-        assert_eq!(prefix.to_string(), "some\\ thing");
+        self::assert_eq!(prefix.to_string(), "some\\ thing");
     }
 }

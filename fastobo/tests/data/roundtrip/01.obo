@@ -1,0 +1,7 @@
+[Term]
+id: MS:1000045
+name: collision energy
+def: "Energy for an ion experiencing collision with a stationary gas particle resulting in dissociation of the ion." [PSI:MS]
+xref: value-type:xsd\:float "The allowed value-type for this CV term."
+is_a: MS:1000510 ! precursor activation attribute
+relationship: has_units UO:0000266

@@ -208,6 +208,7 @@ impl_fromstr!(TermClause);
 #[cfg(test)]
 mod tests {
 
+    use pretty_assertions::assert_eq;
     use super::*;
 
     mod is_anonymous {

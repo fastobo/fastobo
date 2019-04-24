@@ -164,6 +164,7 @@ impl_fromstr!(Synonym);
 mod tests {
 
     use std::str::FromStr;
+    use pretty_assertions::assert_eq;
     use super::*;
 
     mod scope {

@@ -158,14 +158,12 @@ impl IntoIterator for XrefList {
 #[cfg(test)]
 mod tests {
 
+    use pretty_assertions::assert_eq;
     use super::*;
 
     mod list {
 
         use super::*;
-        use crate::ast::IdLocal;
-        use crate::ast::IdPrefix;
-        use crate::ast::PrefixedId;
 
         #[test]
         fn from_str() {

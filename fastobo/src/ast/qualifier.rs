@@ -95,9 +95,8 @@ impl_fromstr!(QualifierList);
 #[cfg(test)]
 mod tests {
 
+    use pretty_assertions::assert_eq;
     use super::*;
-    use crate::ast::Ident;
-    use crate::ast::UnprefixedIdent;
 
     #[test]
     fn from_str() {

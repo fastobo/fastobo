@@ -59,7 +59,7 @@ mod tests {
 
     use std::str::FromStr;
     use std::string::ToString;
-
+    use pretty_assertions::assert_eq;
     use super::*;
 
     #[test]

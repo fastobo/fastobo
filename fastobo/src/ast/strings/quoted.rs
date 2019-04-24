@@ -192,9 +192,10 @@ impl ToOwned for QuotedStr {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
     use std::str::FromStr;
     use std::string::ToString;
+    use pretty_assertions::assert_eq;
+    use super::*;
 
     #[test]
     fn from_str() {

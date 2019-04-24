@@ -313,12 +313,13 @@ impl_fromstr!(EntityFrame);
 #[cfg(test)]
 mod tests {
 
+    use std::iter::FromIterator;
+    use pretty_assertions::assert_eq;
+    use textwrap::dedent;
     use super::*;
 
     mod doc {
 
-        use std::iter::FromIterator;
-        use textwrap::dedent;
         use super::*;
 
         #[test]

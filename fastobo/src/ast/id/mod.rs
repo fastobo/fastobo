@@ -172,9 +172,10 @@ impl<'a> Redeem<'a> for Id<'a> {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
+    use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
+    use super::*;
 
     #[test]
     fn from_str() {

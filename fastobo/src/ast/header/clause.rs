@@ -295,9 +295,8 @@ impl_fromstr!(HeaderClause);
 #[cfg(test)]
 mod tests {
 
+    use pretty_assertions::assert_eq;
     use super::*;
-    use crate::ast::UnprefixedId;
-    use crate::ast::UnquotedString;
 
     #[test]
     fn from_str() {

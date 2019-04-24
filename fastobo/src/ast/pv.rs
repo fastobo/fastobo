@@ -113,8 +113,8 @@ impl<'a> Display for PropVal<'a> {
 #[cfg(test)]
 mod tests {
 
+    use pretty_assertions::assert_eq;
     use super::*;
-
 
     #[test]
     fn from_str() {

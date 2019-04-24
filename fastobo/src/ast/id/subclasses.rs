@@ -32,6 +32,12 @@ macro_rules! ident_subclass {
             }
         }
 
+        impl AsMut<Ident> for $name {
+            fn as_mut(&mut self) -> &mut Ident {
+                &mut self.id
+            }
+        }
+
         impl ::std::fmt::Display for $name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 self.id.fmt(f)

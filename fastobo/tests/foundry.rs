@@ -1,9 +1,8 @@
-#[macro_use]
 extern crate lazy_static;
-
-extern crate fastobo;
 extern crate obofoundry;
 extern crate reqwest;
+
+extern crate fastobo;
 
 use std::io::BufRead;
 use std::io::BufReader;
@@ -11,7 +10,7 @@ use std::io::BufReader;
 use reqwest::Client;
 use reqwest::RedirectPolicy;
 
-lazy_static! {
+lazy_static::lazy_static! {
     /// The HTTP client to download test resources.
     static ref CLIENT: Client = Client::builder()
         .redirect(RedirectPolicy::limited(10))
@@ -51,9 +50,7 @@ macro_rules! foundrytest {
                 .expect(&format!("could not download {} from {}", &stringify!($ont), url));
             // parse the OBO file if it is a correct OBO file.
             let mut buf = BufReader::new(res);
-
             let peek = buf.fill_buf().expect("could not read response");
-            // println!("{:?}", std::str::from_utf8(peek));
 
             if peek.starts_with(b"format-version:") {
                 match fastobo::ast::OboDoc::from_stream(&mut buf) {
@@ -61,11 +58,7 @@ macro_rules! foundrytest {
                     Err(e) => panic!("{}", e),
                 }
             } else {
-                let mut lines = String::new();
-                for _ in 0..20 {
-                    buf.read_line(&mut lines).unwrap();
-                }
-                panic!("not an OBO file ({})\n: {}", url, lines);
+                panic!("not an OBO file ({})", url);
             }
         }
     )
@@ -105,6 +98,7 @@ foundrytest!(ehdaa2);
 foundrytest!(taxrank);
 foundrytest!(plana);
 foundrytest!(ddpheno);
+foundrytest!(wbphenotype);
 foundrytest!(fbdv);
 
 
@@ -141,7 +135,6 @@ foundrytest!(#[ignore] envo);
 foundrytest!(#[ignore] mmo);
 foundrytest!(#[ignore] mi);
 foundrytest!(#[ignore] mco);
-foundrytest!(#[ignore] wbphenotype);
 // Invalid date
 foundrytest!(#[ignore] doid);
 // Invalid syntax (reported)

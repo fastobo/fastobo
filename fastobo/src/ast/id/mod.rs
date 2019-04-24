@@ -15,8 +15,8 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
 use pest::iterators::Pair;
-use url::Url;
 
+pub use url::Url;
 pub use self::local::IdentLocal;
 pub use self::local::IdLocal;
 pub use self::prefix::IdentPrefix;

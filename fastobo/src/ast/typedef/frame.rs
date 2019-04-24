@@ -36,9 +36,14 @@ impl TypedefFrame {
         }
     }
 
-    /// Get the identifier of the `TypedefFrame`.
+    /// Get a reference to the identifier of the `TypedefFrame`.
     pub fn id(&self) -> &Line<RelationIdent> {
         &self.id
+    }
+
+    /// Get a mutable reference to the identifier of the `TypedefFrame`.
+    pub fn id_mut(&mut self) -> &mut Line<RelationIdent> {
+        &mut self.id
     }
 
     /// Get the `TypedefClause`s of the `TypedefFrame`.

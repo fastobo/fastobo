@@ -50,9 +50,14 @@ impl TermFrame {
         }
     }
 
-    /// Get the identifier of the `TermFrame`.
+    /// Get a reference to the identifier of the `TermFrame`.
     pub fn id(&self) -> &Line<ClassIdent> {
         &self.id
+    }
+
+    /// Get a mutable reference to the identifier of the `TermFrame`.
+    pub fn id_mut(&mut self) -> &mut Line<ClassIdent> {
+        &mut self.id
     }
 
     /// Get the `TermClause`s of the `TermFrame`.

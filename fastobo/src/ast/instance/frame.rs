@@ -39,14 +39,24 @@ impl InstanceFrame {
         }
     }
 
-    /// Get the identifier of the `InstanceFrame`.
+    /// Get a reference to the identifier of the `InstanceFrame`.
     pub fn id(&self) -> &Line<InstanceIdent> {
         &self.id
     }
 
-    /// Get the `InstanceClause`s of the `InstanceFrame`.
+    /// Get a mutable reference to the identifier of the `InstanceFrame`.
+    pub fn id_mut(&mut self) -> &mut Line<InstanceIdent> {
+        &mut self.id
+    }
+
+    /// Get a reference to the `InstanceClause`s of the `InstanceFrame`.
     pub fn clauses(&self) -> &Vec<Line<InstanceClause>> {
         &self.clauses
+    }
+
+    /// Get a mutable reference to the `InstanceClause`s of the `InstanceFrame`.
+    pub fn clauses_mut(&mut self) -> &mut Vec<Line<InstanceClause>> {
+        &mut self.clauses
     }
 }
 

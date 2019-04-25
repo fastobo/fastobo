@@ -64,6 +64,11 @@ impl TermFrame {
     pub fn clauses(&self) -> &Vec<Line<TermClause>> {
         &self.clauses
     }
+
+    /// Get a mutable reference to the `TermClause`s of the `TermFrame`.
+    pub fn clauses_mut(&mut self) -> &mut Vec<Line<TermClause>> {
+        &mut self.clauses
+    }
 }
 
 impl AsRef<Vec<Line<TermClause>>> for TermFrame {

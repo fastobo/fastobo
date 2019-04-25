@@ -50,6 +50,11 @@ impl TypedefFrame {
     pub fn clauses(&self) -> &Vec<Line<TypedefClause>> {
         &self.clauses
     }
+
+    /// Get a mutable reference to the `TypedefClause`s of the `TypedefFrame`.
+    pub fn clauses_mut(&mut self) -> &mut Vec<Line<TypedefClause>> {
+        &mut self.clauses
+    }
 }
 
 impl AsRef<Vec<Line<TypedefClause>>> for TypedefFrame {

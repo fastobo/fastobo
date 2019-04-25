@@ -26,6 +26,10 @@
 //!   always use the `Error` struct defined in the `error` module. Errors
 //!   reported by pest are very meaningful, and can give the exact location
 //!   of a syntax error encountered by the parser.
+//! * **Semantics** - This library exports specific traits that can be used
+//!   to edit an OBO syntax tree with the semantics expected in the format
+//!   guide: mapping identifiers to URLs, adding default namespaces, or
+//!   expanding entity frames using `treat-xrefs` macros.
 //!
 //! *Warning: this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html),
 //!  but the API is likely to change a lot before the release of a stable 1.0.*

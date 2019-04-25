@@ -193,7 +193,7 @@ where
     where
         T: IntoIterator<Item = E>
     {
-        Self::with_entities(iter.into_iter().map(|i| i.into()).collect())
+        Self::with_entities(iter.into_iter().map(Into::into).collect())
     }
 }
 

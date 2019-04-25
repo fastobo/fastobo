@@ -5,6 +5,7 @@ use std::fmt::Write;
 use std::iter::FromIterator;
 use std::iter::IntoIterator;
 use std::str::FromStr;
+use std::result::Result;
 
 use pest::iterators::Pair;
 
@@ -12,7 +13,7 @@ use crate::ast::*;
 use crate::share::Share;
 use crate::share::Cow;
 use crate::share::Redeem;
-use crate::error::Result;
+use crate::error::CardinalityError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -43,9 +44,30 @@ impl HeaderFrame {
         Self { clauses }
     }
 
-    /// Create a new `HeaderFrame` containing only the provided clause.
+    /// Create a new `HeaderFrame` containing only a single clause.
     pub fn from_clause(clause: HeaderClause) -> Self {
         Self::with_clauses(vec![clause])
+    }
+
+    /// Get the default namespace of the ontology, if any is declared.
+    ///
+    /// # Errors
+    /// - `CardinalityError::MissingClause`: if the header frame does not
+    ///   contain any default namespace definition.
+    /// - `CardinalityError::DuplicateClauses` if the header frame does
+    ///   contain more than one default namespace definition.
+    ///
+    pub fn default_namespace(&self) -> Result<&NamespaceIdent, CardinalityError> {
+        let mut namespace: Option<&NamespaceIdent> = None;
+        for clause in &self.clauses {
+            if let HeaderClause::DefaultNamespace(ns) = clause {
+                match namespace {
+                    Some(_) => return Err(CardinalityError::duplicate("default-namespace")),
+                    None => namespace = Some(ns),
+                }
+            }
+        }
+        namespace.ok_or(CardinalityError::missing("default-namespace"))
     }
 }
 
@@ -97,7 +119,7 @@ impl<'a> IntoIterator for &'a HeaderFrame {
 
 impl<'i> FromPair<'i> for HeaderFrame {
     const RULE: Rule = Rule::HeaderFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         let mut clauses = Vec::new();
         for inner in pair.into_inner() {
             clauses.push(HeaderClause::from_pair_unchecked(inner)?)

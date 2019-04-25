@@ -616,6 +616,12 @@ impl ImportClause {
             ValueError::into(format!("invalid import: {:?}", reference))
         }
     }
+
+    #[getter]
+    /// `str`: a reference to a document to import.
+    fn get_reference(&self) -> PyResult<String> {
+        Ok(self.to_string()) // FIXME ?
+    }
 }
 
 #[pyproto]
@@ -706,7 +712,7 @@ impl SubsetdefClause {
         Ok(())
     }
 
-    /// `str`: the description of the declared subset.
+    /// `str`: a description for the declared subset.
     #[getter]
     fn get_description(&self) -> PyResult<&str> {
         Ok(self.description.as_str())
@@ -1435,6 +1441,12 @@ impl OntologyClause {
     }
 }
 
+impl Display for OntologyClause {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        obo::HeaderClause::from(self.clone()).fmt(f)
+    }
+}
+
 impl From<OntologyClause> for obo::HeaderClause {
     fn from(clause: OntologyClause) -> Self {
         obo::HeaderClause::Ontology(clause.ontology)
@@ -1474,6 +1486,11 @@ impl PyObjectProtocol for OntologyClause {
         let py = gil.python();
         let fmt = PyString::new(py, "OntologyClause({!r})").to_object(py);
         fmt.call_method1(py, "format", (self.ontology.as_str(),))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.to_string())
     }
 
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {

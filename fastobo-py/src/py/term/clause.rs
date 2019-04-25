@@ -174,6 +174,21 @@ impl FromPy<NameClause> for fastobo::ast::TermClause {
     }
 }
 
+#[pymethods]
+impl NameClause {
+    #[getter]
+    /// `str`: the name of the current term.
+    fn get_name(&self) -> PyResult<&str> {
+        Ok(self.name.as_str())
+    }
+
+    #[setter]
+    fn set_name(&mut self, name: String) -> PyResult<()> {
+        self.name = fastobo::ast::UnquotedString::new(name);
+        Ok(())
+    }
+}
+
 // --- Namespace -------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
@@ -206,13 +221,22 @@ impl FromPy<NamespaceClause> for fastobo::ast::TermClause {
     }
 }
 
+#[pymethods]
+impl NamespaceClause {
+    #[getter]
+    /// `~fastobo.id.Ident`: the ID of the namespace this term is part of.
+    fn get_namespace(&self) -> PyResult<&Ident> {
+        Ok(&self.namespace)
+    }
+}
+
 
 // --- AltId -----------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
 #[derive(Debug)]
 pub struct AltIdClause {
-    id: Ident,
+    alt_id: Ident,
 }
 
 impl AltIdClause {
@@ -220,21 +244,30 @@ impl AltIdClause {
     where
         I: IntoPy<Ident>,
     {
-        Self { id: id.into_py(py) }
+        Self { alt_id: id.into_py(py) }
     }
 }
 
 impl ClonePy for AltIdClause {
     fn clone_py(&self, py: Python) -> Self {
         Self {
-            id: self.id.clone_py(py)
+            alt_id: self.alt_id.clone_py(py)
         }
     }
 }
 
 impl FromPy<AltIdClause> for fastobo::ast::TermClause {
     fn from_py(clause: AltIdClause, py: Python) -> Self {
-        fastobo::ast::TermClause::AltId(clause.id.into_py(py))
+        fastobo::ast::TermClause::AltId(clause.alt_id.into_py(py))
+    }
+}
+
+#[pymethods]
+impl AltIdClause {
+    #[getter]
+    /// `~fastobo.id.Ident`: an alternative ID used to refer to this term.
+    fn get_alt_id(&self) -> PyResult<&Ident> {
+        Ok(&self.alt_id)
     }
 }
 
@@ -275,6 +308,24 @@ impl FromPy<DefClause> for fastobo::ast::TermClause {
     }
 }
 
+#[pymethods]
+impl DefClause {
+
+    #[getter]
+    /// `str`: a textual definition for this term.
+    fn get_definition(&self) -> PyResult<&str> {
+        Ok(&self.definition.as_str())
+    }
+
+    #[getter]
+    /// `~fastobo.xrefs.XrefList`: a list of xrefs supporting the definition.
+    fn get_xrefs(&self) -> PyResult<XrefList> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.xrefs.clone_py(py))
+    }
+
+}
+
 // --- Comment ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
@@ -292,6 +343,21 @@ impl CommentClause {
 impl FromPy<CommentClause> for fastobo::ast::TermClause {
     fn from_py(clause: CommentClause, _py: Python) -> Self {
         fastobo::ast::TermClause::Comment(clause.comment)
+    }
+}
+
+#[pymethods]
+impl CommentClause {
+    #[getter]
+    /// `str`: a comment relevant to this term.
+    fn get_comment(&self) -> PyResult<&str> {
+        Ok(self.comment.as_str())
+    }
+
+    #[setter]
+    fn set_comment(&mut self, comment: String) -> PyResult<()> {
+        self.comment = fastobo::ast::UnquotedString::new(comment);
+        Ok(())
     }
 }
 
@@ -326,6 +392,21 @@ impl FromPy<SubsetClause> for fastobo::ast::TermClause {
     }
 }
 
+#[pymethods]
+impl SubsetClause {
+    #[getter]
+    /// `~fastobo.id.Ident`: the ID of the subset this term is part of.
+    fn get_subset(&self) -> PyResult<&Ident> {
+        Ok(&self.subset)
+    }
+
+    #[setter]
+    fn set_subset(&mut self, subset: Ident) -> PyResult<()> {
+        self.subset = subset;
+        Ok(())
+    }
+}
+
 // --- Synonym ---------------------------------------------------------------
 
 #[pyclass(extends=BaseTermClause)]
@@ -356,6 +437,16 @@ impl ClonePy for SynonymClause {
 impl FromPy<SynonymClause> for fastobo::ast::TermClause {
     fn from_py(clause: SynonymClause, py: Python) -> Self {
         fastobo::ast::TermClause::Synonym(clause.synonym.into_py(py))
+    }
+}
+
+#[pymethods]
+impl SynonymClause {
+    #[getter]
+    /// `~fastobo.syn.Synonym`: a possible synonym for this term.
+    fn get_synonym(&self) -> PyResult<Synonym> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.synonym.clone_py(py))
     }
 }
 
@@ -415,6 +506,7 @@ impl XrefClause {
     }
 
     #[getter]
+    /// `~fastobo.xref.Xref`: a cross-reference relevant to this term.
     fn get_xref(&self) -> PyResult<Py<Xref>> {
         let py = unsafe { Python::assume_gil_acquired() };
         Ok(self.xref.clone_ref(py))

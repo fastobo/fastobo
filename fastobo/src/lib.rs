@@ -106,3 +106,4 @@ pub mod ast;
 pub mod error;
 pub mod share;
 pub mod visit;
+pub mod ext;

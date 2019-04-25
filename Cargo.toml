@@ -7,7 +7,7 @@ members = [
 ]
 
 [profile.test]
-opt-level = 3
+opt-level = 1
 
 [profile.release]
 opt-level = 3

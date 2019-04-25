@@ -8,7 +8,45 @@ use pest::error::Error as PestError;
 use pest::error::InputLocation;
 use pest::error::LineColLocation;
 
+use crate::ast::*;
 use crate::parser::Rule;
+
+
+/// An error for cardinality violation.
+///
+/// This error is highly dependent on the function that returns it: the `name`
+/// field can provide more information about the specific clause that errored
+/// to the end-user.
+#[derive(Debug, Fail)]
+pub enum CardinalityError {
+    #[fail(display = "missing {:?} clause", name)]
+    MissingClause { name: String },
+    #[fail(display = "duplicate {:?} clauses", name)]
+    DuplicateClauses { name: String },
+    #[fail(display = "invalid single {:?} clause", name)]
+    SingleClause { name: String }
+}
+
+impl CardinalityError {
+    pub(crate) fn missing<S: Into<String>>(name: S) -> Self {
+        CardinalityError::MissingClause {
+            name: name.into()
+        }
+    }
+
+    pub(crate) fn duplicate<S: Into<String>>(name: S) -> Self {
+        CardinalityError::DuplicateClauses {
+            name: name.into()
+        }
+    }
+
+    pub(crate) fn single<S: Into<String>>(name: S) -> Self {
+        CardinalityError::DuplicateClauses {
+            name: name.into()
+        }
+    }
+}
+
 
 /// The error type for this crate.
 #[derive(Debug, Fail)]
@@ -65,6 +103,10 @@ pub enum Error {
     /// # };
     #[fail(display = "IO error: {}", error)]
     IOError { error: IOError },
+
+    ///
+    #[fail(display = "cardinality error")]
+    CardinalityError { id: Option<Ident>, inner: CardinalityError }
 }
 
 impl Error {
@@ -74,8 +116,9 @@ impl Error {
         use pest::error::InputLocation;
         use pest::error::LineColLocation;
         match self {
-            IOError { error } => IOError { error },
-            UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
+            e @ IOError { .. } => e,
+            e @ CardinalityError { .. } => e,
+            e @ UnexpectedRule { .. } => e,
             ParserError { mut error } => {
                 error.location = match error.location {
                     InputLocation::Pos(s) =>
@@ -98,8 +141,9 @@ impl Error {
     pub(crate) fn with_path(self, path: &str) -> Self {
         use self::Error::*;
         match self {
-            IOError { error } => IOError { error },
-            UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
+            e @ IOError { .. } => e,
+            e @ UnexpectedRule { .. } => e,
+            e @ CardinalityError { .. } => e,
             ParserError { error } => ParserError { error: error.with_path(path) },
         }
     }
@@ -108,8 +152,9 @@ impl Error {
     pub(crate) fn with_span<'i>(self, span: Span<'i>) -> Self {
         use self::Error::*;
         match self {
-            IOError { error } => IOError { error },
-            UnexpectedRule { expected, actual } => UnexpectedRule { expected, actual },
+            e @ IOError { .. } => e,
+            e @ UnexpectedRule { .. } => e,
+            e @ CardinalityError { .. } => e,
             ParserError { error } => {
                 // FIXME(@althonos): the new error should be spanned only if
                 //                   the original error is spanned, but there

@@ -47,7 +47,6 @@ impl CardinalityError {
     }
 }
 
-
 /// The error type for this crate.
 #[derive(Debug, Fail)]
 pub enum Error {
@@ -82,7 +81,7 @@ pub enum Error {
     /// # let err =
     /// QuotedString::from_str("definitely not a quoted string").unwrap_err();
     /// # match err {
-    /// #   fastobo::error::Error::ParserError { error } => (),
+    /// #   fastobo::error::Error::ParserError { .. } => (),
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     /// ```
@@ -98,14 +97,15 @@ pub enum Error {
     /// # let err =
     /// OboDoc::from_file("some/non-existing/path").unwrap_err();
     /// # match err {
-    /// #   fastobo::error::Error::IOError { error } => (),
+    /// #   fastobo::error::Error::IOError { .. } => (),
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     #[fail(display = "IO error: {}", error)]
     IOError { error: IOError },
 
-    ///
+    /// A cardinality-related error occurred.
     #[fail(display = "cardinality error")]
+    #[cause(inner)]
     CardinalityError { id: Option<Ident>, inner: CardinalityError }
 }
 

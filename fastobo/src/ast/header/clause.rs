@@ -120,9 +120,11 @@ impl Display for HeaderClause {
                 .and(prefix.fmt(f))
                 .and(f.write_char(' '))
                 .and(rel.fmt(f)),
-            TreatXrefsAsIsA(prefix) => f.write_str("treat-xrefs-as-is_a: ").and(prefix.fmt(f)),
+            TreatXrefsAsIsA(prefix) => f
+                .write_str("treat-xrefs-as-is_a: ")
+                .and(prefix.fmt(f)),
             TreatXrefsAsHasSubclass(prefix) => f
-                .write_str("treat-xrefs-as-has-subclass")
+                .write_str("treat-xrefs-as-has-subclass: ")
                 .and(prefix.fmt(f)),
             PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
             Remark(remark) => f.write_str("remark: ").and(remark.fmt(f)),

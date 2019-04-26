@@ -5,3 +5,8 @@
 # --- Test with coverage -----------------------------------------------------
 
 cargo tarpaulin -v -p fastobo --out Xml --ciserver travis-ci
+
+# --- Run examples -----------------------------------------------------------
+
+log Running librarian.rs on ms.obo
+cargo script examples/librarian.rs -- tests/data/ms.obo

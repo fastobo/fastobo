@@ -10,6 +10,7 @@ use crate::ast::*;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::parser::QuickFind;
 
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]

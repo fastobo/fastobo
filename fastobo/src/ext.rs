@@ -198,7 +198,7 @@ mod macros {
         // Macro to reduce code duplication
         macro_rules! process {
             ($frame:ident, $clause:ident, $ident:ident) => ({
-                let mut new = Vec::new();
+                let mut new = Vec::with_capacity($frame.clauses().len());
                 for clause in $frame.clauses() {
                     if let $clause::Xref(xref) = clause.as_ref() {
                         if let Ident::Prefixed(p) = &xref.id {
@@ -238,7 +238,7 @@ mod macros {
         // Macro to reduce code duplication
         macro_rules! process {
             ($frame:ident, $clause:ident, $ident:ident) => ({
-                let mut new = Vec::new();
+                let mut new = Vec::with_capacity($frame.clauses().len());
                 for clause in $frame.clauses() {
                     if let $clause::Xref(xref) = clause.as_ref() {
                         if let Ident::Prefixed(p) = &xref.id {

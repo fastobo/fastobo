@@ -149,11 +149,16 @@ impl From<ClassIdent> for TermFrame {
 impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+
+        use crate::parser::QuickFind;
+        let n = pair.as_str().quickcount(b'\n');
+
         let mut inner = pair.into_inner();
         let clsid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
         let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(clsid);
 
-        let mut clauses = Vec::new();
+        let mut clauses = Vec::with_capacity(n-1);
+
         for pair in inner {
             clauses.push(Line::<TermClause>::from_pair_unchecked(pair)?);
         }

@@ -2,6 +2,7 @@
 
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use crate::ast::*;
 use crate::error::CardinalityError;
@@ -143,7 +144,6 @@ impl OboSemantics for OboDoc {
 
     fn assign_namespaces(&mut self) -> Result<(), CardinalityError>{
 
-
         macro_rules! expand {
             ($frame:ident, $clause:ident, $ns:ident, $outer:lifetime) => ({
                 for clause in $frame.iter() {
@@ -174,6 +174,10 @@ impl OboSemantics for OboDoc {
             match clause {
                 TreatXrefsAsEquivalent(prefix) =>
                     macros::process_treat_xrefs_as_equivalent(&mut self.entities, &prefix),
+                TreatXrefsAsIsA(prefix) =>
+                    macros::process_treat_xrefs_as_is_a(&mut self.entities, &prefix),
+                TreatXrefsAsHasSubclass(prefix) =>
+                    macros::process_treat_xrefs_as_has_subclass(&mut self.entities, &prefix),
                 _ => (),
             }
         }
@@ -184,6 +188,7 @@ impl OboSemantics for OboDoc {
 mod macros {
 
     use super::*;
+    use self::EntityFrame::*;
 
     /// Apply a single `treat-xrefs-as-equivalent` macro to the whole document.
     pub fn process_treat_xrefs_as_equivalent(
@@ -207,11 +212,15 @@ mod macros {
                         }
                     }
                 }
-                $frame.clauses_mut().extend(new);
+                let clauses = $frame.clauses_mut();
+                for new_clause in new.into_iter() {
+                    if !clauses.contains(&new_clause) {
+                        clauses.push(new_clause);
+                    }
+                }
             });
         }
 
-        use self::EntityFrame::*;
         for entity in entities.iter_mut() {
             match entity {
                 Term(x) => process!(x, TermClause, ClassIdent),
@@ -219,5 +228,205 @@ mod macros {
                 Instance(_) => (),
             }
         }
+    }
+
+    /// Apply a single `treat-xrefs-as-is_a` macro to the whole document.
+    pub fn process_treat_xrefs_as_is_a(
+        entities: &mut Vec<EntityFrame>,
+        prefix: &IdentPrefix
+    ) {
+        // Macro to reduce code duplication
+        macro_rules! process {
+            ($frame:ident, $clause:ident, $ident:ident) => ({
+                let mut new = Vec::new();
+                for clause in $frame.clauses() {
+                    if let $clause::Xref(xref) = clause.as_ref() {
+                        if let Ident::Prefixed(p) = &xref.id {
+                            if &p.prefix == prefix {
+                                new.push(Line::from(
+                                    $clause::IsA($ident::from(xref.id.clone()))
+                                ));
+                            }
+                        }
+                    }
+                }
+
+                let clauses = $frame.clauses_mut();
+                for new_clause in new.into_iter() {
+                    if !clauses.contains(&new_clause) {
+                        clauses.push(new_clause);
+                    }
+                }
+            });
+        }
+
+        for entity in entities.iter_mut() {
+            match entity {
+                Term(x) => process!(x, TermClause, ClassIdent),
+                Typedef(x) => process!(x, TypedefClause, RelationIdent),
+                Instance(_) => (),
+            }
+        }
+    }
+
+    /// Apply a single `treat-xrefs-as-is_a` macro to the whole document.
+    pub fn process_treat_xrefs_as_has_subclass(
+        entities: &mut Vec<EntityFrame>,
+        prefix: &IdentPrefix
+    ) {
+        // Collect subclass info into a mapping where `key is_a value`
+        macro_rules! collect {
+            ($frame:ident, $clause:ident, $ident:ident) => ({
+                let mut new: HashMap<Ident, Ident> = HashMap::new();
+                for clause in $frame.clauses() {
+                    if let $clause::Xref(xref) = clause.as_ref() {
+                        if let Ident::Prefixed(p) = &xref.id {
+                            if &p.prefix == prefix {
+                                new.insert(
+                                    $frame.id().clone().into_inner().into(),
+                                    xref.id.clone().into(),
+                                );
+                            }
+                        }
+                    }
+                }
+                new
+            })
+        }
+
+        // Collect a complete map of all `is_a` clauses that must be added.
+        let mut subclass_map: HashMap<Ident, HashSet<Ident>> = HashMap::new();
+        let mut entities_map: HashMap<Ident, &mut EntityFrame> = HashMap::new();
+        for entity in entities.iter_mut() {
+
+            let entity_mapping = match entity {
+                Term(x) => collect!(x, TermClause, ClassIdent),
+                Typedef(x) => collect!(x, TypedefClause, RelationIdent),
+                Instance(x) => collect!(x, InstanceClause, InstanceIdent),
+            };
+
+            for (key, value) in entity_mapping.into_iter() {
+                subclass_map.entry(key).or_default().insert(value);
+            }
+
+            entities_map.insert(entity.id().clone(), entity);
+        }
+
+        // Patch all entity frames with the xref id `is_a` clause.
+        for (subclass, superclasses) in subclass_map.into_iter() {
+            for superclass in superclasses.into_iter() {
+                match entities_map.get_mut(&superclass) {
+                    Some(Term(ref mut x)) => {
+                        x.clauses_mut().push(Line::from(
+                            TermClause::IsA(subclass.clone().into())
+                        ))
+                    }
+                    Some(Typedef(ref mut x)) => {
+                        x.clauses_mut().push(Line::from(
+                            TypedefClause::IsA(subclass.clone().into())
+                        ))
+                    }
+                    _ => ()
+                }
+            }
+        }
+    }
+
+}
+
+
+#[cfg(test)]
+mod tests {
+
+    use std::str::FromStr;
+    use std::string::ToString;
+
+    use pretty_assertions::assert_eq;
+    use textwrap::dedent;
+
+    use super::*;
+
+    #[test]
+    fn process_treat_xrefs_as_equivalent() {
+        let mut doc = OboDoc::from_str(&dedent("
+            treat-xrefs-as-equivalent: TEST
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+
+            [Term]
+            id: TEST:002
+        ")).unwrap();
+
+        doc.process_macros();
+
+        self::assert_eq!(dedent("
+            treat-xrefs-as-equivalent: TEST
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+            equivalent_to: TEST:002
+
+            [Term]
+            id: TEST:002
+        ").trim_start_matches('\n'), doc.to_string());
+    }
+
+    #[test]
+    fn process_treat_xrefs_as_is_a() {
+        let mut doc = OboDoc::from_str(&dedent("
+            treat-xrefs-as-is_a: TEST
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+
+            [Term]
+            id: TEST:002
+        ")).unwrap();
+
+        doc.process_macros();
+
+        self::assert_eq!(dedent("
+            treat-xrefs-as-is_a: TEST
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+            is_a: TEST:002
+
+            [Term]
+            id: TEST:002
+        ").trim_start_matches('\n'), doc.to_string());
+    }
+
+    #[test]
+    fn process_treat_xrefs_as_has_subclass() {
+        let mut doc = OboDoc::from_str(&dedent("
+            treat-xrefs-as-has-subclass: TEST
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+
+            [Term]
+            id: TEST:002
+        ")).unwrap();
+
+        doc.process_macros();
+
+        self::assert_eq!(dedent("
+            treat-xrefs-as-has-subclass: TEST
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+
+            [Term]
+            id: TEST:002
+            is_a: TEST:001
+        ").trim_start_matches('\n'), doc.to_string());
     }
 }

@@ -69,6 +69,35 @@ impl TermFrame {
     pub fn clauses_mut(&mut self) -> &mut Vec<Line<TermClause>> {
         &mut self.clauses
     }
+
+    /// Check if the class has a *genus-differentia* definition.
+    ///
+    /// *Genus-differentia* definition is a method of intensional definition
+    /// which uses an existing definition (the *genus*) and portions of the
+    /// new definition not provided by the *genera* (the *differentia*).
+    ///
+    /// A frame has such a definition if it contains some `intersection_of`
+    /// clauses, but only one in the form `intersection_of: <ClassIdent>`.
+    ///
+    /// # See also
+    /// - [Genus differentia definition](https://en.wikiversity.org/wiki/Dominant_group/Genus_differentia_definition)
+    ///   on [Wikiversity](https://en.wikiversity.org/).
+    pub fn is_genus_differentia(&self) -> bool {
+        let mut has_differentia = false;
+        let mut genus_count = 0;
+
+        for clause in &self.clauses {
+            if let TermClause::IntersectionOf(r, _) = clause.as_ref() {
+                match r {
+                    Some(_) => has_differentia = true,
+                    None => genus_count += 1,
+                }
+            }
+        }
+
+        genus_count == 1 && has_differentia
+    }
+
 }
 
 impl AsRef<Vec<Line<TermClause>>> for TermFrame {
@@ -156,6 +185,49 @@ mod tests {
     use std::str::FromStr;
     use pretty_assertions::assert_eq;
     use super::*;
+
+    #[test]
+    fn is_genus_differentia() {
+
+        // Genus w/ 1 differentia
+        let term = TermFrame::from_str(
+            "[Term]
+            id: TEST:01
+            intersection_of: TEST:02
+            intersection_of: part_of TEST:03\n"
+        ).unwrap();
+        assert!(term.is_genus_differentia());
+
+        // Genus w/ 1+ differentia
+        let term = TermFrame::from_str(
+            "[Term]
+            id: TEST:01
+            intersection_of: TEST:02
+            intersection_of: part_of TEST:03
+            intersection_of: has_part TEST:04\n"
+        ).unwrap();
+        assert!(term.is_genus_differentia());
+
+        // Genus w/o differentia (cardinality error)
+        let term = TermFrame::from_str(
+            "[Term]
+            id: TEST:01
+            intersection_of: TEST:02\n"
+        ).unwrap();
+        assert!(!term.is_genus_differentia());
+
+        // Differentia w/o genus (cardinality error)
+        let term = TermFrame::from_str(
+            "[Term]
+            id: TEST:01
+            intersection_of: part_of TEST:03\n"
+        ).unwrap();
+        assert!(!term.is_genus_differentia());
+
+        // No intersection_of clause
+        let term = TermFrame::from_str("[Term]\nid: TEST:01\n").unwrap();
+        assert!(!term.is_genus_differentia());
+    }
 
     #[test]
     fn from_str() {

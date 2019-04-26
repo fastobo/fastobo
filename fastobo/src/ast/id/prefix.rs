@@ -76,7 +76,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.prefix.is_canonical());
 /// assert_eq!(&id.prefix, "GO");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord)]
 pub struct IdentPrefix {
     value: String,
     canonical: bool,
@@ -113,7 +113,7 @@ impl IdentPrefix {
     /// if the prefix needs escaping. If not set right, the syntax of the
     /// produced serialization could be invalid.
     pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
-        Self { value: s, canonical }
+        Self { canonical, value: s }
     }
 
     /// Get the prefix as a string slice.
@@ -152,16 +152,24 @@ impl<'i> FromPair<'i> for IdentPrefix {
             return Ok(Self::new_unchecked(inner.as_str().to_string(), true));
         }
 
-        // Unescape the prefix if is non canonical.
+        // Unescape the prefix if it was not produced by CanonicalIdPrefix.
         let s = inner.as_str();
         let escaped = s.quickcount(b'\\');
         let mut local = String::with_capacity(s.len() + escaped);
         unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
-
-        Ok(Self::new_unchecked(local, false))
+        // FIXME(@althonos): possible syntax issue, which uses a non-canonical
+        //                   rule on canonical prefixes (workaround is to check
+        //                   one more time if the prefix is canonical)
+        Ok(Self::new(local))
     }
 }
 impl_fromstr!(IdentPrefix);
+
+impl PartialEq for IdentPrefix {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
 
 impl PartialEq<str> for IdentPrefix {
     fn eq(&self, other: &str) -> bool {
@@ -275,9 +283,19 @@ mod tests {
     use super::*;
 
     #[test]
+    fn is_canonical() {
+        assert!(IdentPrefix::from_str("GO").unwrap().is_canonical());
+        assert!(IdentPrefix::new("GO").is_canonical());
+
+        assert!(!IdentPrefix::from_str("n°t").unwrap().is_canonical());
+        assert!(!IdentPrefix::new("n°t").is_canonical());
+    }
+
+    #[test]
     fn from_str() {
         let prefix = IdentPrefix::from_str("GO").unwrap();
         self::assert_eq!(prefix, IdentPrefix::new(String::from("GO")));
+        assert!(prefix.is_canonical());
         assert!(IdentPrefix::from_str("GO:").is_err());
     }
 

@@ -69,7 +69,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.local.is_canonical());
 /// assert_eq!(&id.local, "0046154");
 /// ```
-#[derive(Clone, Debug, Ord, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, Ord, Hash, Eq)]
 pub struct IdentLocal {
     value: String,
     canonical: bool,
@@ -140,10 +140,19 @@ impl<'i> FromPair<'i> for IdentLocal {
         let mut local = String::with_capacity(s.len() + escaped);
         unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
 
-        Ok(Self::new_unchecked(local, false))
+        // FIXME(@althonos): possible syntax issue, which uses a non-canonical
+        //                   rule on canonical local IDs (workaround is to check
+        //                   one more time if the local ID is canonical)
+        Ok(Self::new(local))
     }
 }
 impl_fromstr!(IdentLocal);
+
+impl PartialEq for IdentLocal {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
 
 impl PartialEq<str> for IdentLocal {
     fn eq(&self, other: &str) -> bool {
@@ -236,4 +245,40 @@ impl<'a> Redeem<'a> for IdLocal<'a> {
             IdentLocal::new_unchecked(self.value.to_owned(), self.canonical)
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use std::str::FromStr;
+    use std::string::ToString;
+
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    #[test]
+    fn from_str() {
+        let local = IdentLocal::from_str("0001").unwrap();
+        self::assert_eq!(local.as_ref(), "0001");
+        assert!(local.is_canonical());
+
+        let local = IdentLocal::from_str("\\0001").unwrap();
+        self::assert_eq!(local.as_ref(), "0001");
+        assert!(local.is_canonical());
+
+        let local = IdentLocal::from_str("0F").unwrap();
+        self::assert_eq!(local.as_ref(), "0F");
+        assert!(!local.is_canonical());
+
+        assert!(IdentLocal::from_str("ABC\nDEF").is_err());
+    }
+
+    #[test]
+    fn to_string() {
+        self::assert_eq!(IdentLocal::new("0001").to_string(), "0001");
+        self::assert_eq!(IdentLocal::new(":001").to_string(), "\\:001");
+        self::assert_eq!(IdentLocal::new("0 01").to_string(), "0\\ 01");
+    }
+
 }

@@ -2,13 +2,12 @@
 //!
 //! ```cargo
 //! [dependencies]
-//! fastobo = { path = "../fastobo" }
+//! fastobo = { git = "http://github.com/althonos/fastobo", default-features = false }
 //! isbn = "0.2.0"
 //! ```
 
 extern crate fastobo;
 extern crate isbn;
-extern crate flame;
 
 use std::collections::HashSet;
 use std::collections::HashMap;

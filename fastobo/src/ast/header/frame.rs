@@ -141,6 +141,34 @@ mod tests {
     use super::*;
 
     #[test]
+    fn default_namespace() {
+        let mut frame = HeaderFrame::new();
+        self::assert_eq!(
+            frame.default_namespace(),
+            Err(CardinalityError::missing("default-namespace"))
+        );
+
+        let ns = NamespaceIdent::from(UnprefixedIdent::new("TEST"));
+        frame.push(HeaderClause::DefaultNamespace(ns.clone()));
+        self::assert_eq!(frame.default_namespace(), Ok(&ns));
+
+        frame.push(HeaderClause::DefaultNamespace(ns.clone()));
+        self::assert_eq!(
+            frame.default_namespace(),
+            Err(CardinalityError::duplicate("default-namespace"))
+        );
+    }
+
+    #[test]
+    fn from_clause() {
+        let clause = HeaderClause::FormatVersion(UnquotedString::new("1.0"));
+
+        let frame = HeaderFrame::from_clause(clause.clone());
+        self::assert_eq!(frame.clauses, vec![clause.clone()]);
+        self::assert_eq!(frame, HeaderFrame::from(clause));
+    }
+
+    #[test]
     fn from_str() {
         let actual = HeaderFrame::from_str(
             "format-version: 1.2
@@ -172,5 +200,11 @@ mod tests {
                 QuotedString::new("Term not to be used for direct annotation"),
             )
         );
+    }
+
+    #[test]
+    fn new() {
+        let frame = HeaderFrame::new();
+        self::assert_eq!(frame.clauses, Vec::new());
     }
 }

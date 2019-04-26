@@ -27,6 +27,31 @@ pub enum EntityFrame {
     Instance(InstanceFrame),
 }
 
+impl EntityFrame {
+    /// Get a reference to the identifier of the entity.
+    ///
+    /// This is made possible because all entities in OBO documents have an
+    /// identifier.
+    pub fn id(&self) -> &Ident {
+        use self::EntityFrame::*;
+        match self {
+            Term(x) => x.id().as_ref().as_ref(),
+            Typedef(x) => x.id().as_ref().as_ref(),
+            Instance(x) => x.id().as_ref().as_ref(),
+        }
+    }
+
+    /// Get a mutable reference to the identifier of the entity.
+    pub fn id_mut(&mut self) -> &mut Ident {
+        use self::EntityFrame::*;
+        match self {
+            Term(x) => x.id_mut().as_mut().as_mut(),
+            Typedef(x) => x.id_mut().as_mut().as_mut(),
+            Instance(x) => x.id_mut().as_mut().as_mut(),
+        }
+    }
+}
+
 impl Display for EntityFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::EntityFrame::*;

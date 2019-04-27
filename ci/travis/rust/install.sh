@@ -35,12 +35,12 @@ fi
 
 # --- Setup cargo-script -----------------------------------------------------
 
-LATEST=$(cargo search cargo-script | grep cargo-script | cut -f2 -d"\"")
+LATEST=$(cargo search cargo-script | grep cargo-script | head -n1 | cut -f2 -d"\"")
 LOCAL=$(cargo script --version 2>/dev/null | cut -d" " -f3 || echo "none")
 
 if [ "$LATEST" != "$LOCAL" ]; then
 	log Installing cargo-script v$LATEST
-	cargo install --root "$HOME/.cargo" --debug cargo-script
+	cargo install --root "$HOME/.cargo" --debug cargo-script --force
 else
         log Using cached cargo-tarpaulin v$LOCAL
 fi

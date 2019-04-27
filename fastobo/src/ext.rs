@@ -173,11 +173,27 @@ impl OboSemantics for OboDoc {
         for clause in self.header.iter_mut() {
             match clause {
                 TreatXrefsAsEquivalent(prefix) =>
-                    macros::process_treat_xrefs_as_equivalent(&mut self.entities, &prefix),
+                    macros::process_treat_xrefs_as_equivalent(
+                        &mut self.entities,
+                        &prefix
+                    ),
                 TreatXrefsAsIsA(prefix) =>
-                    macros::process_treat_xrefs_as_is_a(&mut self.entities, &prefix),
+                    macros::process_treat_xrefs_as_is_a(
+                        &mut self.entities,
+                        &prefix
+                    ),
                 TreatXrefsAsHasSubclass(prefix) =>
-                    macros::process_treat_xrefs_as_has_subclass(&mut self.entities, &prefix),
+                    macros::process_treat_xrefs_as_has_subclass(
+                        &mut self.entities,
+                        &prefix
+                    ),
+                TreatXrefsAsGenusDifferentia(prefix, rel, cls) =>
+                    macros::process_treat_xrefs_as_genus_differentia(
+                        &mut self.entities,
+                        &prefix,
+                        &rel,
+                        &cls
+                    ),
                 _ => (),
             }
         }
@@ -332,6 +348,49 @@ mod macros {
         }
     }
 
+    /// Apply a single `treat-xrefs-as-genus-differentia` macro to the whole document.
+    pub fn process_treat_xrefs_as_genus_differentia(
+        entities: &mut Vec<EntityFrame>,
+        prefix: &IdentPrefix,
+        relid: &RelationIdent,
+        classid: &ClassIdent,
+    ) {
+        for entity in entities.iter_mut() {
+            if let Term(x) = entity {
+                // Collect xrefs with the appropriate prefix
+                let mut has_intersection_of = false;
+                let mut new = Vec::with_capacity(x.clauses().len());
+                for clause in x.clauses() {
+                    if let TermClause::Xref(xref) = clause.as_ref() {
+                        if let Ident::Prefixed(p) = &xref.id {
+                            if &p.prefix == prefix {
+                                // add genus from Xref
+                                new.push(Line::from(TermClause::IntersectionOf(
+                                    None, xref.id.clone().into()
+                                )));
+                                // add differentia from header
+                                new.push(Line::from(TermClause::IntersectionOf(
+                                    Some(relid.clone()), classid.clone()
+                                )));
+                            }
+                        }
+                    } else if let TermClause::IntersectionOf(_, _) = clause.as_ref() {
+                        has_intersection_of = true;
+                    }
+                }
+                // Apply the genus-differentia clause
+                // if the frame has no `intersection_of`
+                if !has_intersection_of {
+                    let clauses = x.clauses_mut();
+                    for new_clause in new.into_iter() {
+                        if !clauses.contains(&new_clause) {
+                            clauses.push(new_clause);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -427,6 +486,35 @@ mod tests {
             [Term]
             id: TEST:002
             is_a: TEST:001
+        ").trim_start_matches('\n'), doc.to_string());
+    }
+
+    #[test]
+    fn process_treat_xrefs_as_genus_differentia() {
+        let mut doc = OboDoc::from_str(&dedent("
+            treat-xrefs-as-genus-differentia: TEST part_of something
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+
+            [Term]
+            id: TEST:002
+        ")).unwrap();
+
+        doc.process_macros();
+
+        self::assert_eq!(dedent("
+            treat-xrefs-as-genus-differentia: TEST part_of something
+
+            [Term]
+            id: TEST:001
+            xref: TEST:002
+            intersection_of: TEST:002
+            intersection_of: part_of something
+
+            [Term]
+            id: TEST:002
         ").trim_start_matches('\n'), doc.to_string());
     }
 }

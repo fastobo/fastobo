@@ -324,6 +324,12 @@ mod tests {
             UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"),
         );
         assert_eq!(actual, expected);
-    }
 
+        let actual = HeaderClause::from_str("treat-xrefs-as-relationship: TEST rel").unwrap();
+        let expected = HeaderClause::TreatXrefsAsRelationship(
+            IdentPrefix::new("TEST"),
+            RelationIdent::from(UnprefixedIdent::new("rel"))
+        );
+        assert_eq!(actual, expected);
+    }
 }

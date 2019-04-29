@@ -67,7 +67,7 @@ TreatXrefsAsGenusDifferentiaTag        = { "treat-xrefs-as-genus-differentia:" }
 TreatXrefsAsHasSubclassTag             = { "treat-xrefs-as-has-subclass:" }
 TreatXrefsAsIsATag                     = { "treat-xrefs-as-is_a:" }
 TreatXrefsAsReverseGenusDifferentiaTag = { "treat-xrefs-as-reverse-genus-differentia:" }
-TreatXrefsAsRelationshipTag            = { "treat-xrefs-as-relationship: " }
+TreatXrefsAsRelationshipTag            = { "treat-xrefs-as-relationship:" }
 UnionOfTag                             = { "union_of:" }
 XrefTag                                = { "xref:" }
 

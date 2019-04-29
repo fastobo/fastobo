@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Allow newlines between clause lines and between frames.
+- Fixed invalid whitespace in `TreatXrefsAsRelationshipTag` causing parser to fail
+  on some `treat-xrefs-as-relationship` header clauses.
 
 ## [v0.1.1-syntax] - 2019-04-12
 

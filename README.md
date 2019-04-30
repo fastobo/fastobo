@@ -29,6 +29,12 @@ but as a Python package on PyPI.
 
 Unreleased derive macros for the `fastobo-py` crate.
 
+### `fastobo2owl`
+
+Work-in-progress conversion crate to map an OBO document to an equivalent OWL document
+using the [`horned-owl`](https://docs.rs/horned-owl/latest/horned_owl/model/index.html)
+Rust library.
+
 ## About
 
 This project is currently being developed by [Martin Larralde](https://github.com/althonos)

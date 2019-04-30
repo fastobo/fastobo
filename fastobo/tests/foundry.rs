@@ -100,6 +100,7 @@ foundrytest!(plana);
 foundrytest!(ddpheno);
 foundrytest!(wbphenotype);
 foundrytest!(fbdv);
+foundrytest!(omp);
 
 
 // --- Too large to run casually ---------------------------------------------
@@ -139,7 +140,6 @@ foundrytest!(#[ignore] mco);
 foundrytest!(#[ignore] doid);
 // Invalid syntax (reported)
 foundrytest!(#[ignore] cl);
-foundrytest!(#[ignore] omp);
 // Invalid syntax
 foundrytest!(#[ignore] gaz);
 foundrytest!(#[ignore] hao);

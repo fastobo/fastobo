@@ -1,3 +1,6 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
 use std::str::FromStr;
 
 use pyo3::PyObjectProtocol;
@@ -34,6 +37,22 @@ fn module(_py: Python, m: &PyModule) -> PyResult<()> {
 pub enum PropertyValue {
     Typed(Py<TypedPropertyValue>),
     Identified(Py<IdentifiedPropertyValue>),
+}
+
+impl<'p> AsGILRef<'p, fastobo::ast::PropVal<'p>> for PropertyValue {
+    fn as_gil_ref(&'p self, py: Python<'p>) -> fastobo::ast::PropVal<'p> {
+        match self {
+            PropertyValue::Typed(pv) => pv.as_gil_ref(py).as_gil_ref(py),
+            PropertyValue::Identified(pv) => pv.as_gil_ref(py).as_gil_ref(py),
+        }
+    }
+}
+
+impl Display for PropertyValue {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
+    }
 }
 
 impl FromPy<fastobo::ast::PropertyValue> for PropertyValue {
@@ -108,6 +127,13 @@ impl ClonePy for TypedPropertyValue {
             value: self.value.clone(),
             datatype: self.datatype.clone_py(py)
         }
+    }
+}
+
+impl Display for TypedPropertyValue {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
     }
 }
 
@@ -226,6 +252,13 @@ impl ClonePy for IdentifiedPropertyValue {
             relation: self.relation.clone_py(py),
             value: self.value.clone_py(py),
         }
+    }
+}
+
+impl Display for IdentifiedPropertyValue {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
     }
 }
 

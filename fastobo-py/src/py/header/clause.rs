@@ -786,7 +786,7 @@ impl SubsetdefClause {
     }
 
     fn raw_value(&self) -> PyResult<String> {
-        Ok(format!("{} {}", self.reference, self.description))
+        Ok(format!("{} {}", self.subset, self.description))
     }
 }
 

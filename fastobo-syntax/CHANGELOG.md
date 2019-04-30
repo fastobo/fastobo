@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [Unreleased]: https://github.com/althonos/fastobo/compare/syntax/v0.1.1-syntax...HEAD
 
+### Changed
+- Use builtin `pest` whitespace interpolation in `grammar.pest`.
+
 ### Fixed
 - Allow newlines between clause lines and between frames.
 - Fixed invalid whitespace in `TreatXrefsAsRelationshipTag` causing parser to fail

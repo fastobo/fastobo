@@ -156,10 +156,10 @@ XrefList     = {"[" ~ XrefListItem? ~ ("," ~ XrefListItem)* ~ "]"}
 
 // 3.1 Obo Document Structure
 
-OboDoc      = { nl* ~ HeaderFrame ~ (EntityFrame)* ~ EOI }
+OboDoc      = { HeaderFrame ~ EntityFrame* ~ EOI }
 EntityFrame = { TermFrame | InstanceFrame | TypedefFrame }
 
-EntitySingle = _{ nl* ~ EntityFrame ~ nl* ~ EOI }  // NB(@althonos): for iterative parsers.
+EntitySingle = _{ EntityFrame ~ EOI }  // NB(@althonos): for iterative parsers.
 
 
 // 3.2 Obo Headers

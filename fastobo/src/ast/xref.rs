@@ -16,6 +16,7 @@ use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::share::Share;
 
 /// A database cross-reference definition.
 ///
@@ -27,8 +28,8 @@ use crate::parser::Rule;
 /// to the original resource).
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Xref {
-    pub id: Ident,
-    pub desc: Option<QuotedString>,
+    id: Ident,
+    desc: Option<QuotedString>,
 }
 
 impl Xref {
@@ -50,6 +51,30 @@ impl Xref {
         Self {
             id: id.into(),
             desc: desc.into(),
+        }
+    }
+
+    /// Get a reference to the identifier of the cross-reference.
+    pub fn id(&self) -> &Ident {
+        &self.id
+    }
+
+    pub fn id_mut(&mut self) -> &mut Ident {
+        &mut self.id
+    }
+
+    /// Get a reference to the description of the cross-reference, if any.
+    pub fn description(&self) -> Option<&QuotedString> {
+        match self.desc {
+            Some(ref d) => Some(d),
+            None => None,
+        }
+    }
+
+    pub fn description_mut(&mut self) -> Option<&mut QuotedString> {
+        match self.desc {
+            Some(ref mut d) => Some(d),
+            None => None,
         }
     }
 }
@@ -112,8 +137,8 @@ impl Display for XrefList {
         let mut xrefs = self.xrefs.iter().peekable();
         while let Some(xref) = xrefs.next() {
             // FIXME(@althonos): commas in id need escaping.
-            xref.id.fmt(f)?;
-            if let Some(ref desc) = xref.desc {
+            xref.id().fmt(f)?;
+            if let Some(ref desc) = xref.description() {
                 f.write_char(' ').and(desc.fmt(f))?;
             }
             if xrefs.peek().is_some() {

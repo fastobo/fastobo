@@ -16,10 +16,10 @@ pub fn as_equivalent(
             let mut new = Vec::with_capacity($frame.clauses().len());
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
-                    if let Ident::Prefixed(p) = &xref.id {
+                    if let Ident::Prefixed(p) = xref.id() {
                         if &p.prefix == prefix {
                             new.push(Line::from(
-                                $clause::EquivalentTo(xref.id.clone().into())
+                                $clause::EquivalentTo(xref.id().clone().into())
                             ));
                         }
                     }
@@ -54,10 +54,10 @@ pub fn as_is_a(
             let mut new = Vec::with_capacity($frame.clauses().len());
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
-                    if let Ident::Prefixed(p) = &xref.id {
+                    if let Ident::Prefixed(p) = xref.id() {
                         if &p.prefix == prefix {
                             new.push(Line::from(
-                                $clause::IsA(xref.id.clone().into())
+                                $clause::IsA(xref.id().clone().into())
                             ));
                         }
                     }
@@ -94,11 +94,11 @@ pub fn as_has_subclass(
             let mut new: HashMap<Ident, Ident> = HashMap::new();
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
-                    if let Ident::Prefixed(p) = &xref.id {
+                    if let Ident::Prefixed(p) = xref.id() {
                         if &p.prefix == prefix {
                             new.insert(
                                 $frame.id().clone().into_inner().into(),
-                                xref.id.clone().into(),
+                                xref.id().clone().into(),
                             );
                         }
                     }
@@ -164,11 +164,11 @@ pub fn as_genus_differentia(
             let mut new = Vec::with_capacity(x.clauses().len());
             for clause in x.clauses() {
                 if let TermClause::Xref(xref) = clause.as_ref() {
-                    if let Ident::Prefixed(p) = &xref.id {
+                    if let Ident::Prefixed(p) = xref.id() {
                         if &p.prefix == prefix {
                             // add genus from Xref
                             new.push(Line::from(TermClause::IntersectionOf(
-                                None, xref.id.clone().into()
+                                None, xref.id().clone().into()
                             )));
                             // add differentia from header
                             new.push(Line::from(TermClause::IntersectionOf(
@@ -209,11 +209,11 @@ pub fn as_reverse_genus_differentia(
             let mut new: HashMap<Ident, Ident> = HashMap::new();
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
-                    if let Ident::Prefixed(p) = &xref.id {
+                    if let Ident::Prefixed(p) = xref.id() {
                         if &p.prefix == prefix {
                             new.insert(
                                 $frame.id().clone().into_inner().into(),
-                                xref.id.clone().into(),
+                                xref.id().clone().into(),
                             );
                         }
                     }
@@ -280,12 +280,12 @@ pub fn as_relationship(
             let mut new = Vec::with_capacity($frame.clauses().len());
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
-                    if let Ident::Prefixed(p) = &xref.id {
+                    if let Ident::Prefixed(p) = xref.id() {
                         if &p.prefix == prefix {
                             new.push(Line::from(
                                 $clause::Relationship(
                                     relid.clone(),
-                                    xref.id.clone().into()
+                                    xref.id().clone().into()
                                 )
                             ));
                         }

@@ -90,8 +90,16 @@ impl ClonePy for Xref {
 }
 
 impl FromPy<fastobo::ast::Xref> for Xref {
-    fn from_py(xref: fastobo::ast::Xref, py: Python) -> Self {
-        Self::with_desc(py, xref.id.into_py(py), xref.desc)
+    fn from_py(mut xref: fastobo::ast::Xref, py: Python) -> Self {
+        // Take ownership over `xref.description` w/o reallocation or clone.
+        let empty = fastobo::ast::QuotedString::new(String::new());
+        let desc = xref.description_mut().map(|d| std::mem::replace(d, empty));
+
+        // Take ownership over `xref.id` w/o reallocation or clone.
+        let empty = fastobo::ast::UnprefixedIdent::new(String::new());
+        let id = std::mem::replace(xref.id_mut(), empty.into());
+
+        Self::with_desc(py, id.into_py(py), desc)
     }
 }
 

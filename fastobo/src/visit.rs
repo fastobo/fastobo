@@ -374,8 +374,8 @@ pub trait Visit<'ast> {
     fn visit_url(&mut self, url: &'ast Url) {}
 
     fn visit_xref(&mut self, xref: &'ast Xref) {
-        self.visit_ident(&xref.id);
-        if let Some(ref d) = xref.desc {
+        self.visit_ident(xref.id());
+        if let Some(ref d) = xref.description() {
             self.visit_quoted_string(d);
         }
     }
@@ -715,8 +715,8 @@ pub trait VisitMut {
     fn visit_url(&mut self, url: &mut Url) {}
 
     fn visit_xref(&mut self, xref: &mut Xref) {
-        self.visit_ident(&mut xref.id);
-        if let Some(d) = &mut xref.desc {
+        self.visit_ident(xref.id_mut());
+        if let Some(d) = xref.description_mut() {
             self.visit_quoted_string(d);
         }
     }

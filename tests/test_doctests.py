@@ -4,6 +4,7 @@
 
 import os
 import sys
+import datetime
 import doctest
 import shutil
 import re
@@ -39,6 +40,7 @@ def load_tests(loader, tests, ignore):
 
     globs = {
         "fastobo": fastobo,
+        "datetime": datetime,
     }
 
     if not sys.argv[0].endswith('green'):

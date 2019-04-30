@@ -1,4 +1,8 @@
 use std::str::FromStr;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
+use std::fmt::Write;
 
 use pyo3::AsPyPointer;
 use pyo3::PyNativeType;
@@ -76,6 +80,13 @@ impl<'p> AsGILRef<'p, fastobo::ast::Id<'p>> for Ident {
                 fastobo::ast::Id::Url(Cow::Borrowed(x.as_gil_ref(py)))
             }
         }
+    }
+}
+
+impl Display for Ident {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
     }
 }
 
@@ -172,6 +183,13 @@ impl ClonePy for PrefixedIdent {
             prefix: self.prefix.clone_ref(py),
             local: self.local.clone_ref(py),
         }
+    }
+}
+
+impl Display for PrefixedIdent {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
     }
 }
 
@@ -373,6 +391,13 @@ impl ClonePy for UnprefixedIdent {
     }
 }
 
+impl Display for UnprefixedIdent {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
+    }
+}
+
 impl From<UnprefixedIdent> for ast::UnprefixedIdent {
     fn from(id: UnprefixedIdent) -> Self {
         id.inner
@@ -506,6 +531,13 @@ impl<'p> AsGILRef<'p, &'p url::Url> for Url {
     }
 }
 
+impl Display for Url {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
+    }
+}
+
 impl FromPy<url::Url> for Url {
     fn from_py(url: url::Url, _py: Python) -> Self {
         Self::new(url)
@@ -611,6 +643,13 @@ impl<'p> AsGILRef<'p, fastobo::ast::IdPrefix<'p>> for IdentPrefix {
     }
 }
 
+impl Display for IdentPrefix {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
+    }
+}
+
 #[pymethods]
 impl IdentPrefix {
 
@@ -669,6 +708,13 @@ impl IdentLocal {
 impl<'p> AsGILRef<'p, fastobo::ast::IdLocal<'p>> for IdentLocal {
     fn as_gil_ref(&'p self, _py: Python<'p>) -> fastobo::ast::IdLocal<'p> {
         self.inner.share()
+    }
+}
+
+impl Display for IdentLocal {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        self.as_gil_ref(gil.python()).fmt(f)
     }
 }
 

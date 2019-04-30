@@ -15,8 +15,8 @@ use crate::parser::QuickFind;
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Qualifier {
-    key: RelationIdent,
-    value: QuotedString,
+    pub key: RelationIdent,
+    pub value: QuotedString,
 }
 
 impl Qualifier {
@@ -81,6 +81,18 @@ impl Display for QualifierList {
     }
 }
 
+impl<Q> FromIterator<Q> for QualifierList
+where
+    Q: Into<Qualifier>
+{
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Q>
+    {
+        Self::new(iter.into_iter().map(Into::into).collect())
+    }
+}
+
 impl<'i> FromPair<'i> for QualifierList {
     const RULE: Rule = Rule::QualifierList;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
@@ -92,6 +104,16 @@ impl<'i> FromPair<'i> for QualifierList {
     }
 }
 impl_fromstr!(QualifierList);
+
+impl IntoIterator for QualifierList {
+    type Item = Qualifier;
+    type IntoIter = <Vec<Qualifier> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.qualifiers.into_iter()
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {

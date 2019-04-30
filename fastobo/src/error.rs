@@ -11,7 +11,6 @@ use pest::error::LineColLocation;
 use crate::ast::*;
 use crate::parser::Rule;
 
-
 /// An error for cardinality violation.
 ///
 /// This error is highly dependent on the function that returns it: the `name`

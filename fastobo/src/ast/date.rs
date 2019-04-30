@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -55,7 +56,6 @@ impl NaiveDateTime {
     pub fn minute(&self) -> u8 {
         self.minute
     }
-
 }
 
 impl Display for NaiveDateTime {
@@ -88,6 +88,17 @@ impl<'i> FromPair<'i> for NaiveDateTime {
     }
 }
 impl_fromstr!(NaiveDateTime);
+
+impl PartialOrd for NaiveDateTime {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.year.partial_cmp(&other.year).unwrap()
+            .then(self.month.partial_cmp(&other.month).unwrap())
+            .then(self.day.partial_cmp(&other.month).unwrap())
+            .then(self.hour.partial_cmp(&other.month).unwrap())
+            .then(self.minute.partial_cmp(&other.month).unwrap())
+            .into()
+    }
+}
 
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

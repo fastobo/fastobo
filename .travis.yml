@@ -23,7 +23,9 @@ stages:
   cache:
     directories:
       - $SCCACHE_DIR
-      - $HOME/.cargo
+      #- $HOME/.cargo
+      - $HOME/.cargo/bin
+      - $TRAVIS_BUILD_DIR/target
   install:
     - ci/travis/rust/install.sh
   script:

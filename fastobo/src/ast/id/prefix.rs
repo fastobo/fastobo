@@ -120,6 +120,11 @@ impl IdentPrefix {
     pub fn as_str(&self) -> &str {
         &self.value
     }
+
+    /// Extract the unescaped prefix as a `String`.
+    pub fn into_string(self) -> String {
+        self.value
+    }
 }
 
 impl AsRef<str> for IdentPrefix {
@@ -134,11 +139,14 @@ impl Display for IdentPrefix {
     }
 }
 
-impl<S> From<S> for IdentPrefix
-where
-    S: Into<String>
-{
-    fn from(s: S) -> Self {
+impl From<IdentPrefix> for String {
+    fn from(prefix: IdentPrefix) -> String {
+        prefix.value
+    }
+}
+
+impl From<String> for IdentPrefix {
+    fn from(s: String) -> Self {
         Self::new(s)
     }
 }

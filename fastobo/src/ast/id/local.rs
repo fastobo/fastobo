@@ -102,6 +102,11 @@ impl IdentLocal {
     pub fn as_str(&self) -> &str {
         &self.value
     }
+
+    /// Extract the unescaped local identifier as a `String`.
+    pub fn into_string(self) -> String {
+        self.value
+    }
 }
 
 impl AsRef<str> for IdentLocal {
@@ -110,11 +115,14 @@ impl AsRef<str> for IdentLocal {
     }
 }
 
-impl<S> From<S> for IdentLocal
-where
-    S: Into<String>
-{
-    fn from(s: S) -> Self {
+impl From<IdentLocal> for String {
+    fn from(id: IdentLocal) -> Self {
+        id.value
+    }
+}
+
+impl From<String> for IdentLocal {
+    fn from(s: String) -> Self {
         Self::new(s)
     }
 }

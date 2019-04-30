@@ -29,6 +29,10 @@ use super::unescape;
 /// and `UnquotedString::new` to create a quoted string with its content set
 /// from a Rust `String` passed as argument.
 ///
+/// To get the the unescaped `String`, use `UnquotedString::into_string`, or
+/// use `ToString::to_string` to obtained a serialized (escaped) version of
+/// the unquoted string.
+///
 /// # Example
 /// ```rust
 /// # extern crate fastobo;
@@ -37,7 +41,7 @@ use super::unescape;
 /// assert_eq!(s.to_string(), "Hello, world!");
 /// ```
 #[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(AsRef(Inner, Self)))]
+#[opaque_typedef(derive(AsRef(Inner, Self), Into(Inner)))]
 pub struct UnquotedString {
     value: String,
 }
@@ -55,6 +59,11 @@ impl UnquotedString {
     pub fn as_str(&self) -> &str {
         &self.value
     }
+
+    /// Retrieve the underlying unescaped string from the `UnquotedString`.
+    pub fn into_string(self) -> String {
+        self.value
+    }
 }
 
 impl AsRef<str> for UnquotedString {
@@ -69,22 +78,16 @@ impl AsRef<UnquotedStr> for UnquotedString {
     }
 }
 
-impl Deref for UnquotedString {
-    type Target = UnquotedStr;
-    fn deref(&self) -> &Self::Target {
-        self.as_ref()
-    }
-}
-
 impl Borrow<UnquotedStr> for UnquotedString {
     fn borrow(&self) -> &UnquotedStr {
         UnquotedStr::new(self.as_ref())
     }
 }
 
-impl<'a> Share<'a, &'a UnquotedStr> for UnquotedString {
-    fn share(&'a self) -> &'a UnquotedStr {
-        UnquotedStr::new(&self.value)
+impl Deref for UnquotedString {
+    type Target = UnquotedStr;
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
     }
 }
 
@@ -106,6 +109,12 @@ impl<'i> FromPair<'i> for UnquotedString {
     }
 }
 impl_fromstr!(UnquotedString);
+
+impl<'a> Share<'a, &'a UnquotedStr> for UnquotedString {
+    fn share(&'a self) -> &'a UnquotedStr {
+        UnquotedStr::new(&self.value)
+    }
+}
 
 /// A borrowed `UnquotedString`.
 #[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]

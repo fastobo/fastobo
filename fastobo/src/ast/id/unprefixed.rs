@@ -105,11 +105,14 @@ impl Display for UnprefixedIdent {
     }
 }
 
-impl<S> From<S> for UnprefixedIdent
-where
-    S: Into<String>
-{
-    fn from(s: S) -> Self {
+impl From<UnprefixedIdent> for String {
+    fn from(id: UnprefixedIdent) -> Self {
+        id.value
+    }
+}
+
+impl From<String> for UnprefixedIdent {
+    fn from(s: String) -> Self {
         Self::new(s)
     }
 }

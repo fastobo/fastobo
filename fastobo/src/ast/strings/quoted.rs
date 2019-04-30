@@ -29,6 +29,10 @@ use super::unescape;
 /// and `QuotedString::new` to create a quoted string with its content set
 /// from an `Into<String>` implementor.
 ///
+/// To get the the unescaped `String`, use `QuotedString::into_string`, or
+/// use `ToString::to_string` to obtained a serialized (escaped) version of
+/// the quoted string.
+///
 /// # Example
 /// ```rust
 /// # extern crate fastobo;
@@ -37,7 +41,8 @@ use super::unescape;
 /// assert_eq!(s.as_str(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
+#[opaque_typedef(derive(AsRef(Inner, Self), Into(Inner)))]
 pub struct QuotedString {
     value: String,
 }
@@ -54,6 +59,11 @@ impl QuotedString {
     /// Extracts a string slice containing the `QuotedString` value.
     pub fn as_str(&self) -> &str {
         &self.value
+    }
+
+    /// Retrieve the underlying unescaped string from the `QuotedString`.
+    pub fn into_string(self) -> String {
+        self.value
     }
 }
 
@@ -89,11 +99,8 @@ impl Display for QuotedString {
     }
 }
 
-impl<S> From<S> for QuotedString
-where
-    S: Into<String>
-{
-    fn from(s: S) -> Self {
+impl From<String> for QuotedString {
+    fn from(s: String) -> Self {
         Self::new(s)
     }
 }
@@ -130,7 +137,7 @@ impl<'a> Share<'a, &'a QuotedStr> for QuotedString {
 }
 
 /// A borrowed `QuotedString`.
-#[derive(Debug, Eq, Hash, PartialEq, OpaqueTypedefUnsized)]
+#[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
 #[repr(transparent)]
 pub struct QuotedStr(str);

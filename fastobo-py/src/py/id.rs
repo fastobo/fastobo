@@ -344,8 +344,7 @@ impl PyObjectProtocol for PrefixedIdent {
 
     fn __str__(&self) -> PyResult<String> {
         let py = unsafe { Python::assume_gil_acquired() };
-        let id: PrefixedIdent = self.clone_py(py);
-        Ok(ast::PrefixedIdent::from_py(id, py).to_string())
+        Ok(self.as_gil_ref(py).to_string())
     }
 }
 
@@ -454,8 +453,8 @@ impl UnprefixedIdent {
 
     /// `str`: the unescaped representation of the identifier.
     #[getter]
-    fn unescaped(&self) -> PyResult<String> {
-        Ok(self.inner.as_str().to_string())
+    fn unescaped(&self) -> PyResult<&str> {
+        Ok(self.inner.as_str())
     }
 }
 
@@ -469,7 +468,8 @@ impl PyObjectProtocol for UnprefixedIdent {
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(self.inner.to_string())
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.as_gil_ref(py).to_string())
     }
 
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<bool> {
@@ -743,13 +743,13 @@ impl IdentLocal {
 #[pyproto]
 impl PyObjectProtocol for IdentLocal {
     fn __repr__(&self) -> PyResult<PyObject> {
-        let gil = Python::acquire_gil();
-        let py = gil.python();
+        let py = unsafe { Python::assume_gil_acquired() };
         let fmt = PyString::new(py, "IdentLocal({!r})").to_object(py);
         fmt.call_method1(py, "format", (self.inner.as_str(),))
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(self.inner.to_string())
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.as_gil_ref(py).fmt(f))
     }
 }

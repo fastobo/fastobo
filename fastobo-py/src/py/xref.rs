@@ -1,3 +1,6 @@
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result as FmtResult;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::string::ToString;
@@ -89,6 +92,14 @@ impl ClonePy for Xref {
     }
 }
 
+impl Display for Xref {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        fastobo::ast::Xref::from_py(self.clone_py(py), py).fmt(f)
+    }
+}
+
 impl FromPy<fastobo::ast::Xref> for Xref {
     fn from_py(mut xref: fastobo::ast::Xref, py: Python) -> Self {
         // Take ownership over `xref.description` w/o reallocation or clone.
@@ -156,15 +167,14 @@ impl PyObjectProtocol for Xref {
                 .to_object(py)
                 .call_method1(py, "format", (&self.id, d.as_str()))
         } else {
-            PyString::new(py, "Xref({!r}, {!r})")
+            PyString::new(py, "Xref({!r})")
                 .to_object(py)
                 .call_method1(py, "format", (&self.id,))
         }
     }
 
     fn __str__(&self) -> PyResult<String> {
-        let py = unsafe { Python::assume_gil_acquired() };
-        Ok(fastobo::ast::Xref::from_py(self.clone_py(py), py).to_string())
+        Ok(self.to_string())
     }
 }
 

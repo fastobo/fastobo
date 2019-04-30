@@ -690,7 +690,6 @@ impl FromPy<SubsetdefClause> for obo::HeaderClause {
     }
 }
 
-
 #[pymethods]
 impl SubsetdefClause {
     #[new]
@@ -932,6 +931,7 @@ impl DefaultNamespaceClause {
         Ok(obj.init(Self::new(py, ident)))
     }
 
+    /// `~fastobo.id.Ident`: the default namespace for this ontology.
     #[getter]
     fn get_namespace(&self) -> PyResult<&Ident> {
         Ok(&self.namespace)
@@ -1033,6 +1033,34 @@ impl FromPy<IdspaceClause> for obo::HeaderClause {
     }
 }
 
+#[pymethods]
+impl IdspaceClause {
+
+    /// `~fastobo.id.IdentPrefix`: the prefix used in prefixed IDs.
+    #[getter]
+    fn get_prefix(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.prefix.clone_py(py))
+    }
+
+    /// `~fastobo.id.Url`: the URL used to expand IDs of this IDspace.
+    #[getter]
+    fn get_url(&self) -> PyResult<Url> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.url.clone_py(py))
+    }
+
+    /// `str`, optional: a description of this IDspace.
+    #[getter]
+    fn get_description(&self) -> PyResult<Option<&str>> {
+        match &self.description {
+            Some(ref s) => Ok(Some(s.as_str())),
+            None => Ok(None)
+        }
+    }
+
+}
+
 #[pyproto]
 impl PyObjectProtocol for IdspaceClause {
     fn __str__(&self) -> PyResult<String> {
@@ -1064,7 +1092,7 @@ impl PyObjectProtocol for IdspaceClause {
 #[pyclass(extends=BaseHeaderClause)]
 #[derive(Clone, ClonePy, Debug)]
 pub struct TreatXrefsAsEquivalentClause {
-    idspace: IdentPrefix,   // Should be `IdentPrefix`
+    idspace: IdentPrefix,
 }
 
 impl TreatXrefsAsEquivalentClause {
@@ -1085,6 +1113,16 @@ impl From<TreatXrefsAsEquivalentClause> for obo::HeaderClause {
 impl FromPy<TreatXrefsAsEquivalentClause> for obo::HeaderClause {
     fn from_py(clause: TreatXrefsAsEquivalentClause, _py: Python) -> Self {
         Self::from(clause)
+    }
+}
+
+#[pymethods]
+impl TreatXrefsAsEquivalentClause {
+    /// `~fastobo.id.IdentPrefix`: the ID prefix to select some Xrefs with.
+    #[getter]
+    fn get_idspace(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.idspace.clone_py(py))
     }
 }
 
@@ -1133,6 +1171,16 @@ impl FromPy<TreatXrefsAsGenusDifferentiaClause> for obo::HeaderClause {
     }
 }
 
+#[pymethods]
+impl TreatXrefsAsGenusDifferentiaClause {
+    /// `~fastobo.id.IdentPrefix`: the ID prefix to select some Xrefs with.
+    #[getter]
+    fn get_idspace(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.idspace.clone_py(py))
+    }
+}
+
 // --- TreatXrefsAsReverseGenusDifferentiaClause -----------------------------
 
 #[pyclass(extends=BaseHeaderClause)]
@@ -1178,6 +1226,16 @@ impl FromPy<TreatXrefsAsReverseGenusDifferentiaClause> for obo::HeaderClause {
     }
 }
 
+#[pymethods]
+impl TreatXrefsAsReverseGenusDifferentiaClause {
+    /// `~fastobo.id.IdentPrefix`: the ID prefix to select some Xrefs with.
+    #[getter]
+    fn get_idspace(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.idspace.clone_py(py))
+    }
+}
+
 // --- TreatXrefsAsRelationshipClause ----------------------------------------
 
 #[pyclass(extends=BaseHeaderClause)]
@@ -1218,6 +1276,16 @@ impl FromPy<TreatXrefsAsRelationshipClause> for obo::HeaderClause {
     }
 }
 
+#[pymethods]
+impl TreatXrefsAsRelationshipClause {
+    /// `~fastobo.id.IdentPrefix`: the ID prefix to select some Xrefs with.
+    #[getter]
+    fn get_idspace(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.idspace.clone_py(py))
+    }
+}
+
 // --- TreatXrefsAsIsA -------------------------------------------------------
 
 #[pyclass(extends=BaseHeaderClause)]
@@ -1237,6 +1305,14 @@ impl TreatXrefsAsIsAClause {
     }
 }
 
+impl Display for TreatXrefsAsIsAClause {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        obo::HeaderClause::from_py(self.clone_py(py), py).fmt(f)
+    }
+}
+
 impl From<TreatXrefsAsIsAClause> for obo::HeaderClause {
     fn from(clause: TreatXrefsAsIsAClause) -> obo::HeaderClause {
         obo::HeaderClause::TreatXrefsAsIsA(clause.idspace.into())
@@ -1246,6 +1322,23 @@ impl From<TreatXrefsAsIsAClause> for obo::HeaderClause {
 impl FromPy<TreatXrefsAsIsAClause> for obo::HeaderClause {
     fn from_py(clause: TreatXrefsAsIsAClause, _py: Python) -> obo::HeaderClause {
         Self::from(clause)
+    }
+}
+
+#[pymethods]
+impl TreatXrefsAsIsAClause {
+    /// `~fastobo.id.IdentPrefix`: the ID prefix to select some Xrefs with.
+    #[getter]
+    fn get_idspace(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.idspace.clone_py(py))
+    }
+}
+
+#[pyproto]
+impl PyObjectProtocol for TreatXrefsAsIsAClause {
+    fn __str__(&self) -> PyResult<String> {
+        Ok(self.to_string())
     }
 }
 
@@ -1268,7 +1361,7 @@ impl TreatXrefsAsHasSubclassClause {
 
 impl From<TreatXrefsAsHasSubclassClause> for obo::HeaderClause {
     fn from(clause: TreatXrefsAsHasSubclassClause) -> Self {
-        obo::HeaderClause::TreatXrefsAsIsA(clause.idspace.into())
+        obo::HeaderClause::TreatXrefsAsHasSubclass(clause.idspace.into())
     }
 }
 
@@ -1280,18 +1373,11 @@ impl FromPy<TreatXrefsAsHasSubclassClause> for obo::HeaderClause {
 
 #[pymethods]
 impl TreatXrefsAsHasSubclassClause {
-    #[setter]
-    pub fn set_idspace(&mut self, idspace: &PyAny) -> PyResult<()> {
-        if let Ok(i) = idspace.downcast_ref::<IdentPrefix>() {
-            self.idspace = i.clone();
-            Ok(())
-        } else if let Ok(s) = idspace.downcast_ref::<PyString>() {
-            let i = ast::IdentPrefix::new(s.to_string()?.to_string());
-            self.idspace = IdentPrefix::new(i);
-            Ok(())
-        } else {
-            TypeError::into("expected str or IdentPrefix")
-        }
+    /// `~fastobo.id.IdentPrefix`: the ID prefix to select some Xrefs with.
+    #[getter]
+    fn get_idspace(&self) -> PyResult<IdentPrefix> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.idspace.clone_py(py))
     }
 }
 

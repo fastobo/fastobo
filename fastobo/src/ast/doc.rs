@@ -18,8 +18,8 @@ use crate::parser::Rule;
 /// A complete OBO document in format version 1.4.
 #[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
 pub struct OboDoc {
-    pub header: HeaderFrame,
-    pub entities: Vec<EntityFrame>,
+    header: HeaderFrame,
+    entities: Vec<EntityFrame>,
 }
 
 impl OboDoc {
@@ -161,9 +161,32 @@ impl OboDoc {
         &mut self.header
     }
 
-    /// Set the header of the OBO document.
-    pub fn set_header(&mut self, header: HeaderFrame) {
-        self.header = header
+    /// Get a reference to the entities of the OBO document.
+    pub fn entities(&self) -> &Vec<EntityFrame> {
+        &self.entities
+    }
+
+    /// Get a reference to the entities of the OBO document.
+    pub fn entities_mut(&mut self) -> &mut Vec<EntityFrame> {
+        &mut self.entities
+    }
+}
+
+impl AsRef<[EntityFrame]> for OboDoc {
+    fn as_ref(&self) -> &[EntityFrame] {
+        self.entities.as_slice()
+    }
+}
+
+impl AsRef<Vec<EntityFrame>> for OboDoc {
+    fn as_ref(&self) -> &Vec<EntityFrame> {
+        &self.entities
+    }
+}
+
+impl AsMut<Vec<EntityFrame>> for OboDoc {
+    fn as_mut(&mut self) -> &mut Vec<EntityFrame> {
+        &mut self.entities
     }
 }
 

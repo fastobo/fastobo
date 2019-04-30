@@ -117,6 +117,14 @@ impl<'a> IntoIterator for &'a HeaderFrame {
     }
 }
 
+impl<'a> IntoIterator for &'a mut HeaderFrame {
+    type Item = &'a mut HeaderClause;
+    type IntoIter = <&'a mut Vec<HeaderClause> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.clauses.as_mut_slice().iter_mut()
+    }
+}
+
 impl<'i> FromPair<'i> for HeaderFrame {
     const RULE: Rule = Rule::HeaderFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {

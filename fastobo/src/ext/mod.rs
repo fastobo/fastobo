@@ -3,6 +3,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::ptr::NonNull;
 
 use crate::ast::*;
 use crate::error::CardinalityError;
@@ -115,13 +116,15 @@ impl OboSemantics for OboDoc {
 
     fn preprocess(&mut self) {
 
+        let header = self.header_mut();
+
         let bfo_idspace = HeaderClause::Idspace(
             IdentPrefix::new("BFO"),
             Url::parse("http://purl.obolibrary.org/obo/BFO_").unwrap(),
             None
         );
-        if !self.header.contains(&bfo_idspace) {
-            self.header.push(bfo_idspace);
+        if !header.contains(&bfo_idspace) {
+            header.push(bfo_idspace);
         }
 
         let ro_idspace = HeaderClause::Idspace(
@@ -129,18 +132,18 @@ impl OboSemantics for OboDoc {
             Url::parse("http://purl.obolibrary.org/obo/RO_").unwrap(),
             None
         );
-        if !self.header.contains(&ro_idspace) {
-            self.header.push(ro_idspace);
+        if !header.contains(&ro_idspace) {
+            header.push(ro_idspace);
         }
 
         let bfo_macro = HeaderClause::TreatXrefsAsEquivalent(IdentPrefix::new("BFO"));
-        if !self.header.contains(&bfo_macro) {
-            self.header.push(bfo_macro);
+        if !header.contains(&bfo_macro) {
+            header.push(bfo_macro);
         }
 
         let ro_macro =  HeaderClause::TreatXrefsAsEquivalent(IdentPrefix::new("RO"));
-        if !self.header.contains(&ro_macro) {
-            self.header.push(ro_macro);
+        if !header.contains(&ro_macro) {
+            header.push(ro_macro);
         }
     }
 
@@ -158,8 +161,19 @@ impl OboSemantics for OboDoc {
         }
 
         use self::EntityFrame::*;
-        let ns = self.header.default_namespace()?;
-        'outer: for entity in &mut self.entities {
+
+        // Force borrowck to split borrows: we shoudl be able to borrow
+        // the header AND the entities at the same time.
+        let ns = self.header().default_namespace()?;
+        let entities = unsafe {
+            &mut *(
+                self.entities()
+                as *const Vec<EntityFrame>
+                as *mut Vec<EntityFrame>
+            )
+        };
+
+        'outer: for entity in entities {
             match entity {
                 Term(x) => expand!(x, TermClause, ns, 'outer),
                 Typedef(x) => expand!(x, TypedefClause, ns, 'outer),
@@ -172,40 +186,52 @@ impl OboSemantics for OboDoc {
 
     fn treat_xrefs(&mut self) {
         use self::HeaderClause::*;
-        for clause in self.header.iter_mut() {
+
+        // Force borrowck to split borrows: we shoudl be able to borrow
+        // the header AND the entities at the same time.
+        let entities = unsafe {
+            &mut *(
+                self.entities()
+                as *const Vec<EntityFrame>
+                as *mut Vec<EntityFrame>
+            )
+        };
+
+        // Apply all `treat-xrefs` macros to the document.
+        for clause in self.header() {
             match clause {
                 TreatXrefsAsEquivalent(prefix) =>
                     self::treat_xrefs::as_equivalent(
-                        &mut self.entities,
+                        entities,
                         &prefix
                     ),
                 TreatXrefsAsIsA(prefix) =>
                     self::treat_xrefs::as_is_a(
-                        &mut self.entities,
+                        entities,
                         &prefix
                     ),
                 TreatXrefsAsHasSubclass(prefix) =>
                     self::treat_xrefs::as_has_subclass(
-                        &mut self.entities,
+                        entities,
                         &prefix
                     ),
                 TreatXrefsAsGenusDifferentia(prefix, rel, cls) =>
                     self::treat_xrefs::as_genus_differentia(
-                        &mut self.entities,
+                        entities,
                         &prefix,
                         &rel,
                         &cls
                     ),
                 TreatXrefsAsReverseGenusDifferentia(prefix, rel, cls) =>
                     self::treat_xrefs::as_reverse_genus_differentia(
-                        &mut self.entities,
+                        entities,
                         &prefix,
                         &rel,
                         &cls
                     ),
                 TreatXrefsAsRelationship(prefix, rel) =>
                     self::treat_xrefs::as_relationship(
-                        &mut self.entities,
+                        entities,
                         &prefix,
                         &rel,
                     ),
@@ -213,4 +239,5 @@ impl OboSemantics for OboDoc {
             }
         }
     }
+
 }

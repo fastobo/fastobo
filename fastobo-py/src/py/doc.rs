@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
+use std::mem::replace;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::string::ToString;
@@ -57,15 +58,18 @@ impl Display for OboDoc {
 }
 
 impl FromPy<obo::OboDoc> for OboDoc {
-    fn from_py(doc: fastobo::ast::OboDoc, py: Python) -> Self {
-        let header = HeaderFrame::from_py(doc.header, py);
+    fn from_py(mut doc: fastobo::ast::OboDoc, py: Python) -> Self {
+        // Take ownership of header and entities w/o reallocation or clone.
+        let header = replace(doc.header_mut(), Default::default()).into_py(py);
+        let entities = replace(doc.entities_mut(), Default::default())
+            .into_iter()
+            .map(|frame| EntityFrame::from_py(frame, py))
+            .collect();
+
         Self {
             header: Py::new(py, header)
                 .expect("could not move header to Python heap"),
-            entities: doc.entities
-                .into_iter()
-                .map(|frame| EntityFrame::from_py(frame, py))
-                .collect(),
+            entities
         }
     }
 }

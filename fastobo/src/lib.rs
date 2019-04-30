@@ -58,7 +58,7 @@
 //!     let mut reader = std::io::BufReader::new(response);
 //!
 //!     match fastobo::ast::OboDoc::from_stream(&mut reader) {
-//!         Ok(doc) => println!("Number of MS entities: {}", doc.entities.len()),
+//!         Ok(doc) => println!("Number of MS entities: {}", doc.entities().len()),
 //!         Err(e) => panic!("Could not parse the Mass-Spec Ontology: {}", e),
 //!     }
 //! }

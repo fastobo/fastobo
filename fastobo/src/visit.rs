@@ -60,8 +60,8 @@ pub trait Visit<'ast> {
     }
 
     fn visit_doc(&mut self, doc: &'ast OboDoc) {
-        self.visit_header_frame(&doc.header);
-        for frame in doc.entities.iter() {
+        self.visit_header_frame(doc.header());
+        for frame in doc.entities().iter() {
             self.visit_entity_frame(frame)
         }
     }
@@ -397,8 +397,8 @@ pub trait VisitMut {
     }
 
     fn visit_doc(&mut self, doc: &mut OboDoc) {
-        self.visit_header_frame(&mut doc.header);
-        for frame in doc.entities.iter_mut() {
+        self.visit_header_frame(doc.header_mut());
+        for frame in doc.entities_mut().iter_mut() {
             self.visit_entity_frame(frame)
         }
     }

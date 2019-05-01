@@ -11,7 +11,7 @@ name = "fastobo_py"
 [dependencies]
 pyo3 = { git = "https://github.com/PyO3/pyo3" }
 pest = "2.1.1"
-libc = "0.2.51"
+libc = "0.2.53"
 url = "1.7.2"
 
 opaque_typedef = "0.0.5"

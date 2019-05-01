@@ -8,6 +8,6 @@ workspace = ".."
 [dependencies]
 fastobo = { path = "../fastobo" }
 horned-owl = "0.5.0"
-failure = "*"
-curie = "*"
-either = "*"
+failure = "0.1.5"
+curie = "0.0.8"
+either = "1.5.2"

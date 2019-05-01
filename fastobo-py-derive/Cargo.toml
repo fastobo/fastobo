@@ -9,5 +9,5 @@ publish = false
 proc-macro = true
 
 [dependencies]
-syn = "0.15.32"
+syn = "0.15.33"
 quote = "0.6.12"

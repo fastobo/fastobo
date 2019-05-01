@@ -117,6 +117,12 @@ impl From<String> for UnprefixedIdent {
     }
 }
 
+impl From<&str> for UnprefixedIdent {
+    fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
 impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {

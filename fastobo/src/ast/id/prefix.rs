@@ -151,6 +151,12 @@ impl From<String> for IdentPrefix {
     }
 }
 
+impl From<&str> for IdentPrefix {
+    fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
 impl<'i> FromPair<'i> for IdentPrefix {
     const RULE: Rule = Rule::IdPrefix;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {

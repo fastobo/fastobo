@@ -750,6 +750,6 @@ impl PyObjectProtocol for IdentLocal {
 
     fn __str__(&self) -> PyResult<String> {
         let py = unsafe { Python::assume_gil_acquired() };
-        Ok(self.as_gil_ref(py).fmt(f))
+        Ok(self.as_gil_ref(py).to_string())
     }
 }

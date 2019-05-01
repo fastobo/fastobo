@@ -127,6 +127,12 @@ impl From<String> for IdentLocal {
     }
 }
 
+impl From<&str> for IdentLocal {
+    fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
 impl Display for IdentLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.share().fmt(f)

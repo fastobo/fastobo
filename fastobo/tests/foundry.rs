@@ -1,28 +1,18 @@
 extern crate lazy_static;
 extern crate obofoundry;
-extern crate reqwest;
+extern crate ureq;
 
 extern crate fastobo;
 
 use std::io::BufRead;
 use std::io::BufReader;
 
-use reqwest::Client;
-use reqwest::RedirectPolicy;
-
 lazy_static::lazy_static! {
-    /// The HTTP client to download test resources.
-    static ref CLIENT: Client = Client::builder()
-        .redirect(RedirectPolicy::limited(10))
-        .build()
-        .unwrap();
-
     /// The latest OBO Foundry listing.
     static ref FOUNDRY: obofoundry::Foundry = {
-        let response = CLIENT.get("http://www.obofoundry.org/registry/ontologies.yml")
-            .send()
-            .expect("could not download the OBO Foundry listing");
-        serde_yaml::from_reader(response)
+        let response = ureq::get("http://www.obofoundry.org/registry/ontologies.yml")
+            .call();
+        serde_yaml::from_reader(response.into_reader())
             .expect("could not read the OBO Foundry listing")
     };
 }
@@ -43,13 +33,12 @@ macro_rules! foundrytest {
                 .find(|prod| prod.id.ends_with(".obo"))
                 .expect("could not find obo product")
                 .ontology_purl;
-            // request the OBO file
-            let res = CLIENT
-                .get(url.as_str())
-                .send()
-                .expect(&format!("could not download {} from {}", &stringify!($ont), url));
+
+            // get the OBO document
+            let res = ureq::get(url.as_str()).call();
+
             // parse the OBO file if it is a correct OBO file.
-            let mut buf = BufReader::new(res);
+            let mut buf = BufReader::new(res.into_reader());
             let peek = buf.fill_buf().expect("could not read response");
 
             if peek.starts_with(b"format-version:") {

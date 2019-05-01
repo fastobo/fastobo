@@ -51,11 +51,11 @@
 //!
 //! ```rust
 //! extern crate fastobo;
-//! extern crate reqwest;
+//! extern crate ureq;
 //!
 //! fn main() {
-//!     let response = reqwest::get("http://purl.obolibrary.org/obo/ms.obo").unwrap();
-//!     let mut reader = std::io::BufReader::new(response);
+//!     let response = ureq::get("http://purl.obolibrary.org/obo/ms.obo").call();
+//!     let mut reader = std::io::BufReader::new(response.into_reader());
 //!
 //!     match fastobo::ast::OboDoc::from_stream(&mut reader) {
 //!         Ok(doc) => println!("Number of MS entities: {}", doc.entities().len()),

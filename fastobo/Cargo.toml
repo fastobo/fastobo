@@ -43,6 +43,6 @@ default = ["memchr"]
 lazy_static = "1.3.0"
 obofoundry = "0.1.2"
 pretty_assertions = "0.6.1"
-reqwest = "0.9.15"
 serde_yaml = "0.8.8"
 textwrap = "0.11.0"
+ureq = "0.9.1"

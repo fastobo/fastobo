@@ -20,7 +20,7 @@ pub enum IntoOwlError {
     MissingOntologyIri,
 }
 
-/// A context to pass as argument to `into_owl`.
+/// A context to pass as argument to `to_owl` and `into_owl`.
 #[derive(Default)]
 pub struct Context {
     build: owl::Build,
@@ -41,16 +41,33 @@ pub trait IntoOwl {
     fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError>;
 }
 
+pub trait ToOwl {
+    type Owl;
+    fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError>;
+}
+
+//
+
+impl IntoOwl for obo::EntityFrame {
+    type Owl = Vec<owl::Axiom>;
+    fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
+        unimplemented!()
+    }
+}
+
 impl IntoOwl for obo::OboDoc {
     type Owl = owl::Ontology;
-    fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
+    fn into_owl(mut self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
 
         let mut ont = owl::Ontology::new();
-        for clause in self.header.into_iter() {
+
+        let header = std::mem::replace(self.header_mut(), Default::default());
+        for clause in header.into_iter() {
             ont.insert(clause.into_owl(ctx)?);
         }
 
-        for entity in self.entities.into_iter() {
+        let entities = std::mem::replace(self.entities_mut(), Default::default());
+        for entity in entities.into_iter() {
             match entity {
                 obo::EntityFrame::Term(frame) => {
                     for axiom in frame.into_owl(ctx)? {
@@ -104,11 +121,11 @@ impl IntoOwl for obo::TermFrame {
 
         // The expanded IRI for the ID.
         let iri_id = self.id().as_ref().clone().into_owl(ctx)?;
-        let ctx = ctx.in_frame(iri_id.0.clone());
+        let ctx = ctx.in_frame(iri_id.clone());
 
-        // Create the frame axiom.
+        // Create the class declaration axiom.
         let mut decl = owl::AnnotatedAxiom {
-            axiom: owl::Axiom::from(owl::DeclareClass(iri_id)),
+            axiom: owl::Axiom::from(owl::DeclareClass(owl::Class(iri_id))),
             annotation: BTreeSet::default(),
         };
 
@@ -146,29 +163,76 @@ impl IntoOwl for obo::TermClause {
     fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
         match self {
             obo::TermClause::Name(name) => Ok(Either::Left(owl::Annotation {
-                annotation_property: owl::AnnotationProperty(
-                    ctx.build.iri("rdfs:label")
-                ),
+                annotation_property: ctx.build.annotation_property("rdfs:label"),
                 annotation_value: owl::AnnotationValue::Literal(owl::Literal {
                     datatype_iri: Some(ctx.build.iri("xsd:string")),
-                    literal: Some(name.as_str().to_string()),
+                    literal: Some(name.into_string()),
                     lang: None
                 }),
             })),
-
+            obo::TermClause::Def(def, xrefs) => Ok(Either::Left(owl::Annotation {
+                annotation_property: ctx.build.annotation_property("obo:IAO_0000115"),
+                annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                    datatype_iri: Some(ctx.build.iri("xsd:string")),
+                    literal: Some(def.into_string()),
+                    lang: None,
+                })
+            })),
             obo::TermClause::IsA(supercls) => Ok(Either::Right(From::from(
                 owl::SubClassOf::new(
-                    owl::ClassExpression::Class(supercls.into_owl(ctx)?),
+                    owl::ClassExpression::Class(owl::Class(
+                        supercls.into_owl(ctx)?
+                    )),
                     owl::ClassExpression::Class(owl::Class(
                         ctx.current_frame.as_ref().unwrap().clone()
                     )),
                 )
             ))),
-
+            obo::TermClause::Synonym(syn) => Ok(Either::Left(syn.into_owl(ctx)?)),
+            obo::TermClause::Comment(comm) => Ok(Either::Left(owl::Annotation {
+                annotation_property: ctx.build.annotation_property("rdfs:comment"),
+                annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                    datatype_iri: Some(ctx.build.iri("xsd:string")),
+                    literal: Some(comm.into_string()),
+                    lang: None
+                })
+            })),
+            // IsAnonymous(bool),
+            // Namespace(NamespaceIdent),
+            obo::TermClause::AltId(id) => Ok(Either::Left(owl::Annotation {
+                annotation_property: ctx.build.annotation_property("oboInOwl:hasAlternativeId"),
+                annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                    datatype_iri: Some(ctx.build.iri("xsd:string")),
+                    literal: Some(id.to_string()), // FIXME ?
+                    lang: None,
+                })
+            })),
+            // Subset(SubsetIdent),
+            // Xref(Xref),
+            // Builtin(bool),
+            // PropertyValue(PropertyValue),
+            // IntersectionOf(Option<RelationIdent>, ClassIdent),
+            // UnionOf(ClassIdent),
+            // EquivalentTo(ClassIdent),
+            // DisjointFrom(ClassIdent),
+            // Relationship(RelationIdent, ClassIdent),
+            // IsObsolete(bool),
+            obo::TermClause::ReplacedBy(id) => Ok(Either::Left(owl::Annotation {
+                annotation_property: ctx.build.annotation_property("obo:IAO_0100001"),
+                annotation_value: owl::AnnotationValue::IRI(id.into_owl(ctx)?),
+            })),
+            obo::TermClause::Consider(id) => Ok(Either::Left(owl::Annotation {
+                annotation_property: ctx.build.annotation_property("oboInOwl:consider"),
+                annotation_value: owl::AnnotationValue::IRI(id.into_owl(ctx)?),
+            })),
+            // CreatedBy(UnquotedString),
+            // CreationDate(IsoDateTime),
             _ => unimplemented!(),
         }
     }
 }
+
+// ---
 
 impl IntoOwl for obo::QualifierList {
     type Owl = BTreeSet<owl::Annotation>;
@@ -188,14 +252,14 @@ impl IntoOwl for obo::Qualifier {
     fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
         // The qualifiers that are not translated as-is (see section 5.7
         // of the OBO Flat File Format 1.4 Syntax and Semantics).
-        let IGNORED = [
+        let ignored = [
             obo::UnprefixedIdent::new("cardinality").into(),
             obo::UnprefixedIdent::new("maxCardinality").into(),
             obo::UnprefixedIdent::new("minCardinality").into(),
             obo::UnprefixedIdent::new("gci_relation").into(),
             obo::UnprefixedIdent::new("gci_relation").into(),
         ];
-        if IGNORED.contains(&self.key) {
+        if ignored.contains(&self.key) {
             Ok(None)
         } else {
             Ok(Some(owl::Annotation{
@@ -212,10 +276,61 @@ impl IntoOwl for obo::Qualifier {
     }
 }
 
-impl IntoOwl for obo::ClassIdent {
-    type Owl = owl::Class;
+// ---
+
+impl IntoOwl for obo::TypedefClause {
+    type Owl = Either<owl::Annotation, owl::Axiom>;
     fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
-        obo::Ident::from(self).into_owl(ctx).map(owl::Class)
+        match self {
+            obo::TypedefClause::IsFunctional(true) => Ok(Either::Right(
+                owl::Axiom::from(
+                    owl::FunctionalObjectProperty(
+                        owl::ObjectPropertyExpression::ObjectProperty(
+                            horned_owl::model::ObjectProperty(
+                                ctx.current_frame.as_ref().unwrap().clone()
+                            )
+                        )
+                    )
+                )
+            )),
+            _ => unimplemented!(),
+        }
+    }
+}
+
+// ---
+
+/// AnnotationAssertion(T(ann( [Type] Xrefs Qualifiers)) T(exactSynonyn) T(ID) T(String))
+impl IntoOwl for obo::Synonym {
+    type Owl = owl::Annotation;
+    fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
+        Ok(owl::Annotation {
+                annotation_property: ctx.build.annotation_property(
+                    match self.scope {
+                        obo::SynonymScope::Exact => "oboInOwl:hasExactSynonym",
+                        obo::SynonymScope::Narrow => "oboInOwl:hasNarrowSynonym",
+                        obo::SynonymScope::Broad => "oboInOwl:hasBroadSynonym",
+                        obo::SynonymScope::Related => "oboInOwl:hasRelatedSynonym",
+                    }
+                ),
+                annotation_value: owl::AnnotationValue::Literal(
+                    owl::Literal {
+                        datatype_iri: Some(ctx.build.iri("xsd:string")),
+                        lang: None,
+                        literal: Some(self.desc.into_string()),
+                    }
+                )
+        })
+    }
+}
+
+
+// --- Ident -----------------------------------------------------------------
+
+impl IntoOwl for obo::ClassIdent {
+    type Owl = owl::IRI;
+    fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
+        obo::Ident::from(self).into_owl(ctx)
     }
 }
 
@@ -241,6 +356,7 @@ impl IntoOwl for obo::UnprefixedIdent {
     }
 }
 
+/// Convert an OBO URL identifier to an OWL IRI.
 impl IntoOwl for obo::Url {
     type Owl = owl::IRI;
     fn into_owl(self, ctx: &mut Context) -> Result<Self::Owl, IntoOwlError> {
@@ -263,32 +379,42 @@ impl IntoOwl for obo::PrefixedIdent {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//
-//     use std::str::FromStr;
-//     use super::*;
-//
-//     #[test]
-//     fn test() {
-//
-//         let doc = obo::OboDoc::from_str(
-//             "format-version: 1.2\n[Term]\nid: MS:1000031\nname: instrument\n[Term]\nid: MS:1000032\nis_a: MS:1000031\n"
-//         ).unwrap();
-//
-//         let mut ctx = Context::default();
-//         let ont = doc.into_owl(&mut ctx).unwrap();
-//
-//         let mut map = curie::PrefixMapping::default();
-//         map.add_prefix("obo", "http://purl.obolibrary.org/obo/");
-//         map.add_prefix("owl", "http://www.w3.org/2002/07/owl#");
-//         map.add_prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-//         map.add_prefix("xsd", "http://www.w3.org/2001/XMLSchema#");
-//
-//         horned_owl::io::writer::write(&mut std::io::stdout(), &ont, Some(&map));
-//         // panic!()
-//     }
-// }
+
+
+
+
+#[cfg(test)]
+mod tests {
+
+    use std::str::FromStr;
+    use super::*;
+
+    // #[test]
+    fn test() {
+
+        let obodoc = obo::OboDoc::from_str(
+            "format-version: 1.2\n[Term]\nid: MS:1000031\nname: instrument model\nsynonym: \"instrument\" BROAD []\n[Term]\nid: MS:1000121\nname: SCIEX instrument model\nis_a: MS:1000031\n"
+        ).unwrap();
+
+        println!("- Source -----------\n{}\n", &obodoc);
+
+        let mut ctx = Context::default();
+        let ont = obodoc.into_owl(&mut ctx).unwrap();
+
+        let mut map = curie::PrefixMapping::default();
+        map.add_prefix("obo", "http://purl.obolibrary.org/obo/");
+        map.add_prefix("owl", "http://www.w3.org/2002/07/owl#");
+        map.add_prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        map.add_prefix("xsd", "http://www.w3.org/2001/XMLSchema#");
+
+        let mut dest = std::io::Cursor::new(Vec::<u8>::new());
+        horned_owl::io::writer::write(&mut dest, &ont, Some(&map));
+        let owlstr = String::from_utf8(dest.into_inner()).unwrap();
+        println!("- OWL --------------\n{}\n", owlstr);
+
+        panic!()
+    }
+}
 
 // impl IntoOwl for obo::Url {
 //     type Owl = owl::IRI;

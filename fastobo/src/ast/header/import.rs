@@ -24,11 +24,11 @@ impl Import {
     ///
     /// If the import is already an URL reference, the underlying URL is simply returned. Otherwise,
     /// an URL is built using the default OBO prefix (`http://purl.obolibrary.org/obo/`).
-    pub fn into_url(self) {
+    pub fn into_url(self) -> Url {
         match self {
             Import::Url(u) => u,
             Import::Abbreviated(id) => Url::parse(
-                format!("http://purl.obolibrary.org/obo/{}.owl", id)
+                &format!("http://purl.obolibrary.org/obo/{}.owl", id)
             ).unwrap(),
         }
     }
@@ -74,3 +74,19 @@ impl<'i> FromPair<'i> for Import {
     }
 }
 impl_fromstr!(Import);
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn into_url() {
+        let i = Import::Abbreviated(Ident::from(UnprefixedIdent::new("go")));
+        assert_eq!(i.into_url(), Url::parse("http://purl.obolibrary.org/obo/go.owl").unwrap());
+
+        let i = Import::Url(Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap());
+        assert_eq!(i.into_url(), Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap());
+    }
+}

@@ -16,7 +16,22 @@ use crate::parser::Rule;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Import {
     Url(Url),
-    Abbreviated(Ident), // QUESTION(@althonos): UnprefixedID ?
+    Abbreviated(Ident), // QUESTION(@althonos): IdentPrefix ?
+}
+
+impl Import {
+    /// Convert an import clause value into an URL.
+    ///
+    /// If the import is already an URL reference, the underlying URL is simply returned. Otherwise,
+    /// an URL is built using the default OBO prefix (`http://purl.obolibrary.org/obo/`).
+    pub fn into_url(self) {
+        match self {
+            Import::Url(u) => u,
+            Import::Abbreviated(id) => Url::parse(
+                format!("http://purl.obolibrary.org/obo/{}.owl", id)
+            ).unwrap(),
+        }
+    }
 }
 
 impl From<Url> for Import {
@@ -28,6 +43,12 @@ impl From<Url> for Import {
 impl From<Ident> for Import {
     fn from(id: Ident) -> Self {
         Import::Abbreviated(id)
+    }
+}
+
+impl From<Import> for Url {
+    fn from(import: Import) -> Self {
+        import.into_url()
     }
 }
 

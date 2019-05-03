@@ -11,7 +11,6 @@ use super::OwlEntity;
 impl IntoOwlCtx for obo::HeaderClause {
     type Owl = OwlEntity;
     fn into_owl(self, ctx: &mut Context) -> Self::Owl {
-
         match self {
             // `oboInOwl:hasOBOFormatVersion` annotation
             obo::HeaderClause::FormatVersion(v) => OwlEntity::Annotation(
@@ -171,6 +170,7 @@ impl IntoOwlCtx for obo::HeaderClause {
                 }
             ),
 
+            // translate as an annotation
             obo::HeaderClause::PropertyValue(pv) => OwlEntity::Annotation(
                 match pv {
                     obo::PropertyValue::Identified(rel, id) => owl::Annotation {

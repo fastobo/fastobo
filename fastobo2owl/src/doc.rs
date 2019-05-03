@@ -11,6 +11,12 @@ impl IntoOwlCtx for obo::OboDoc {
 
         let mut ont = owl::Ontology::new();
 
+        // TODO: declare the IRI and Version IRI for the ontology.
+        // ont.id = owl::OntologyID {
+        //     iri: Some(), // http://purl.obolibrary.org/obo/{ontology}.owl
+        //     viri: Some(), // http://purl.obolibrary.org/obo/{ontology}/{data-version}/{ontology}.owl
+        // }:
+
         let header = std::mem::replace(self.header_mut(), Default::default());
         for clause in header.into_iter() {
             match clause.into_owl(ctx) {

@@ -5,6 +5,7 @@ extern crate horned_owl;
 mod doc;
 mod header;
 mod id;
+mod term;
 
 use std::collections::HashMap;
 

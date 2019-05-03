@@ -28,6 +28,7 @@ impl IntoOwlCtx for obo::HeaderClause {
             ),
 
             // no equivalent
+            // --> should be added as the Ontology IRI
             obo::HeaderClause::DataVersion(_) => OwlEntity::None,
 
             // `oboInOwl:hasDate` annotation
@@ -77,8 +78,19 @@ impl IntoOwlCtx for obo::HeaderClause {
                 }
             ),
 
-            // TODO
-            // obo::HeaderClause::Import(import)
+            // `owl::imports`:
+            // --> if in abbreviated form, use default http://purl.obolibrary.org/obo/ prefix
+            // --> if URL, simply use that
+            obo::HeaderClause::Import(import) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: owl::AnnotationProperty(
+                        ctx.build.iri("owl:imports")
+                    ),
+                    annotation_value: owl::AnnotationValue::IRI(
+                        obo::Url::from(import).into_owl(ctx)
+                    )
+                }
+            ),
 
             // `owl:AnnotationProperty`
             //     <owl:AnnotationProperty rdf:about=T(subset)>
@@ -159,17 +171,33 @@ impl IntoOwlCtx for obo::HeaderClause {
                 }
             ),
 
-            // TODO
-            // Ontology(UnquotedString),
+            obo::HeaderClause::PropertyValue(pv) => OwlEntity::Annotation(
+                match pv {
+                    obo::PropertyValue::Identified(rel, id) => owl::Annotation {
+                        annotation_property: owl::AnnotationProperty(obo::Ident::from(rel).into_owl(ctx)),
+                        annotation_value: owl::AnnotationValue::IRI(id.into_owl(ctx))
+                    },
+                    obo::PropertyValue::Typed(rel, value, dty) => owl::Annotation {
+                        annotation_property: owl::AnnotationProperty(obo::Ident::from(rel).into_owl(ctx)),
+                        annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                            datatype_iri: Some(obo::Ident::from(dty).into_owl(ctx)),
+                            literal: Some(value.into_string()),
+                            lang: None,
+                        })
+                    }
+                }
+            ),
 
-            // TODO
-            // OwlAxioms(UnquotedString),
+            // no equivalent:
+            // --> should be added as the Ontology IRI
+            obo::HeaderClause::Ontology(_) => OwlEntity::None,
 
-            // TODO
-            // Unreserved(UnquotedString, UnquotedString),
+            // should be added as-is but needs a Manchester-syntax parser
+            obo::HeaderClause::OwlAxioms(_) => unimplemented!("cannot translate `owl-axioms` currently"),
 
-            // FIXME
-            _ => unimplemented!(),
+            // no equivalent
+            // --> FIXME: namespace-id-rule ?
+            obo::HeaderClause::Unreserved(_, _) => OwlEntity::None, // FIXME ?
         }
     }
 }

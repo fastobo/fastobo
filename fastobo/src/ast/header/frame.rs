@@ -69,6 +69,34 @@ impl HeaderFrame {
         }
         namespace.ok_or(CardinalityError::missing("default-namespace"))
     }
+
+    /// Get the format version of the ontology, if any is declared.
+    pub fn format_version(&self) -> Result<&str, CardinalityError> {
+        let mut version: Option<&str> = None;
+        for clause in &self.clauses {
+            if let HeaderClause::FormatVersion(v) = clause {
+                match version {
+                    Some(_) => return Err(CardinalityError::duplicate("format-version")),
+                    None => version = Some(v.as_str()),
+                }
+            }
+        }
+        version.ok_or(CardinalityError::missing("format-version"))
+    }
+
+    /// Get the data version of the ontology, if any is declared.
+    pub fn data_version(&self) -> Result<&str, CardinalityError> {
+        let mut version: Option<&str> = None;
+        for clause in &self.clauses {
+            if let HeaderClause::DataVersion(v) = clause {
+                match version {
+                    Some(_) => return Err(CardinalityError::duplicate("data-version")),
+                    None => version = Some(v.as_str()),
+                }
+            }
+        }
+        version.ok_or(CardinalityError::missing("data-version"))
+    }
 }
 
 impl AsRef<[HeaderClause]> for HeaderFrame {

@@ -87,7 +87,7 @@ macro_rules! impl_repr {
 
 macro_rules! impl_raw_value {
     ($fmt:literal, $($attr:ident),*) => (
-        fn raw_value(&self) -> PyResult<String> {
+        pub fn raw_value(&self) -> PyResult<String> {
            Ok(format!($fmt, $(self . $attr,)*))
         }
     )
@@ -95,7 +95,7 @@ macro_rules! impl_raw_value {
 
 macro_rules! impl_raw_tag {
     ($tag:literal) => (
-        fn raw_tag(&self) -> PyResult<&str> {
+        pub fn raw_tag(&self) -> PyResult<&str> {
            Ok($tag)
         }
     )
@@ -229,7 +229,7 @@ impl BaseHeaderClause {
     ///     "ontology"
     ///     >>> str(clause)
     ///     "ontology: test"
-    fn raw_tag(&self) -> PyResult<String> {
+    pub fn raw_tag(&self) -> PyResult<String> {
         NotImplementedError::into("BaseHeaderClause.raw_tag")
     }
 
@@ -246,7 +246,7 @@ impl BaseHeaderClause {
     ///     datetime(2019, 4, 29, 21, 52)
     ///     >>> dt.raw_value()
     ///     '29:04:2019 21:52'
-    fn raw_value(&self) -> PyResult<String> {
+    pub fn raw_value(&self) -> PyResult<String> {
         NotImplementedError::into("BaseHeaderClause.raw_value")
     }
 
@@ -946,7 +946,7 @@ impl SynonymTypedefClause {
     }
 
     impl_raw_tag!("synonymtypedef");
-    fn raw_value(&self) -> PyResult<String> {
+    pub fn raw_value(&self) -> PyResult<String> {
         if let Some(scope) = &self.scope {
             Ok(format!("{} {} {}", self.typedef, self.description, scope))
         } else {
@@ -1168,7 +1168,7 @@ impl IdspaceClause {
         }
     }
 
-    fn raw_value(&self) -> PyResult<String> {
+    pub fn raw_value(&self) -> PyResult<String> {
         if let Some(desc) = &self.description {
             Ok(format!("{} {} {}", self.prefix, self.url, desc))
         } else {
@@ -1870,7 +1870,7 @@ impl UnreservedClause {
         Ok(())
     }
 
-    fn raw_tag(&self) -> PyResult<&str> {
+    pub fn raw_tag(&self) -> PyResult<&str> {
         Ok(self.tag.as_str())
     }
 

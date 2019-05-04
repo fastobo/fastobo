@@ -4,10 +4,11 @@
 
 # --- Test with coverage -----------------------------------------------------
 
-cargo tarpaulin -v -p fastobo-syntax --out Xml --ciserver travis-ci
-cargo tarpaulin -v -p fastobo --out Xml --ciserver travis-ci
+for pkg in 'fastobo' 'fastobo-syntax' 'fastobo2owl'; do
+	cargo tarpaulin -v -p $pkg --out Xml --ciserver travis-ci
+done
 
 # --- Run examples -----------------------------------------------------------
 
 log Running librarian.rs on ms.obo
-cargo script examples/librarian.rs -- tests/data/ms.obo
+cargo script examples/librarian.rs -- tests/data/plana.obo

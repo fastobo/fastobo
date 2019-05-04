@@ -32,7 +32,7 @@ impl IntoOwlCtx for obo::OboDoc {
         // Convert each entity to a set of OWL axioms that are then added to the ontologys
         let entities = std::mem::replace(self.entities_mut(), Default::default());
         for entity in entities.into_iter() {
-            ctx.current_frame = Some(entity.id().clone().into_owl(ctx));
+            ctx.current_frame = entity.id().clone().into_owl(ctx);
             match entity {
                 obo::EntityFrame::Term(frame) => {
                     for axiom in frame.into_owl(ctx) {
@@ -53,11 +53,16 @@ impl IntoOwl for obo::OboDoc {
     type Owl = owl::Ontology;
     fn into_owl(self) -> Self::Owl {
 
+        let build: horned_owl::model::Build = Default::default();
+        let ontology_iri = obo::Url::parse("http://purl.obolibrary.org/obo/something.obo").unwrap();
+        let current_frame = build.iri(ontology_iri.clone().into_string());
+        let idspaces = Default::default();
+
         let mut ctx = Context {
-            build: Default::default(),
-            idspaces: Default::default(),
-            ontology_iri: obo::Url::parse("http://purl.obolibrary.org/obo/something.obo").unwrap(),
-            current_frame: None,
+            build,
+            idspaces,
+            ontology_iri,
+            current_frame,
         };
 
         <Self as IntoOwlCtx>::into_owl(self, &mut ctx)

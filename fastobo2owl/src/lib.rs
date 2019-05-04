@@ -36,7 +36,7 @@ struct Context {
     build: owl::Build,
     idspaces: HashMap<obo::IdentPrefix, obo::Url>,
     ontology_iri: obo::Url,
-    current_frame: Option<owl::IRI>,
+    current_frame: owl::IRI,
 }
 
 /// An entity produced by a certain clause.

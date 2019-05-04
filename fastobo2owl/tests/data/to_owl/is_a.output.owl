@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Annotation>
+    <AnnotationProperty IRI="oboInOwl:hasOBOFormatVersion"/>
+    <Literal datatypeIRI="xsd:string">1.4</Literal>
+  </Annotation>
+  <Declaration>
+      <Annotation>
+          <AnnotationProperty IRI="oboInOwl:id"/>
+          <Literal datatypeIRI="xsd:string">TST:001</Literal>
+      </Annotation>
+      <Class IRI="http://purl.obolibrary.org/obo/TST_001"/>
+  </Declaration>
+  <Declaration>
+      <Annotation>
+          <AnnotationProperty IRI="oboInOwl:id"/>
+          <Literal datatypeIRI="xsd:string">TST:002</Literal>
+      </Annotation>
+      <Class IRI="http://purl.obolibrary.org/obo/TST_002"/>
+  </Declaration>
+
+
+  <SubClassOf>
+    <!-- This is the superexpression -->
+      <Class abbreviatedIRI="http://purl.obolibrary.org/obo/TST_001"/>
+      <!-- This is the subexpression -->
+      <Class abbreviatedIRI="http://purl.obolibrary.org/obo/TST_002"/>
+  </SubClassOf>
+
+</Ontology>

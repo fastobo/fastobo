@@ -29,7 +29,7 @@ lazy_static::lazy_static! {
 
 
 macro_rules! converttest {
-    ($name:ident, $path:expr) => {
+    ($name:ident) => {
         #[test]
         fn $name() {
 
@@ -41,8 +41,8 @@ macro_rules! converttest {
                 p
             };
 
-            let input_path = dir.join(format!("{}.input.obo", $path));
-            let output_path = dir.join(format!("{}.output.owl", $path));
+            let input_path = dir.join(format!("{}.input.obo", stringify!($name)));
+            let output_path = dir.join(format!("{}.output.owl", stringify!($name)));
 
             // Parse the OBO doc and convert it to OWL.
             let obo_doc = OboDoc::from_file(&input_path)
@@ -67,5 +67,6 @@ macro_rules! converttest {
 
 
 
-converttest!(convert_01, "01");
-converttest!(convert_02, "02");
+converttest!(header);
+converttest!(name);
+converttest!(is_a);

@@ -122,7 +122,22 @@ impl IntoOwlCtx for obo::TermClause {
             // Xref(Xref),
             // Builtin(bool),
             // PropertyValue(PropertyValue),
-            // IsA(ClassIdent),
+
+
+            obo::TermClause::IsA(supercls) => OwlEntity::Axiom(
+                owl::Axiom::from(
+                    owl::SubClassOf {
+                        super_class: owl::ClassExpression::Class(
+                            owl::Class(supercls.into_owl(ctx))
+                        ),
+                        sub_class: owl::ClassExpression::Class(
+                            owl::Class(ctx.current_frame.clone())
+                        )
+                    }
+                )
+            ),
+
+
             // IntersectionOf(Option<RelationIdent>, ClassIdent),
             // UnionOf(ClassIdent),
             // EquivalentTo(ClassIdent),

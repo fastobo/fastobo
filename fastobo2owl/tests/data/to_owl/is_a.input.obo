@@ -1,0 +1,10 @@
+format-version: 1.4
+created-by: Martin Larralde
+ontology: tst
+
+[Term]
+id: TST:001
+
+[Term]
+id: TST:002
+is_a: TST:001

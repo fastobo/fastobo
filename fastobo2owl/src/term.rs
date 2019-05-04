@@ -22,7 +22,7 @@ impl IntoOwlCtx for obo::TermFrame {
             )),
         };
 
-        // Add the initial OBO ID as an annotation.
+        // Add the original OBO ID as an annotation.
         cls.annotation.insert(owl::Annotation {
             annotation_property: owl::AnnotationProperty(
                 ctx.build.iri("oboInOwl:id")
@@ -65,12 +65,60 @@ impl IntoOwlCtx for obo::TermClause {
                     })
                 }
             ),
-            // Namespace(NamespaceIdent),
-            // AltId(Ident),
-            // Def(QuotedString, XrefList),
-            // Comment(UnquotedString),
-            // Subset(SubsetIdent),
-            // Synonym(Synonym),
+            obo::TermClause::Namespace(ns) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property(
+                        "oboInOwl:hasOBONamespace"
+                    ),
+                    annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                        datatype_iri: Some(ctx.build.iri("xsd:string")),
+                        literal: Some(ns.to_string()),
+                        lang: None,
+                    })
+                }
+            ),
+            obo::TermClause::AltId(id) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property(
+                        "oboInOwl:hasAlternativeId"
+                    ),
+                    annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                        datatype_iri: Some(ctx.build.iri("xsd:string")),
+                        literal: Some(id.to_string()),
+                        lang: None,
+                    })
+                }
+            ),
+            obo::TermClause::Def(desc, xrefs) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property("obo:IAO_0000115"),
+                    annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                        datatype_iri: Some(ctx.build.iri("xsd:string")),
+                        literal: Some(desc.into_string()),
+                        lang: None,
+                    })
+                }
+            ),
+            obo::TermClause::Comment(comment) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property("rdfs:comment"),
+                    annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                        datatype_iri: Some(ctx.build.iri("xsd:string")),
+                        literal: Some(comment.into_string()),
+                        lang: None,
+                    })
+                }
+            ),
+
+
+            obo::TermClause::Subset(subset) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property("oboInOwl:inSubset"),
+                    annotation_value: owl::AnnotationValue::IRI(
+                        obo::Ident::from(subset).into_owl(ctx),
+                    )
+                }
+            ),
             // Xref(Xref),
             // Builtin(bool),
             // PropertyValue(PropertyValue),

@@ -25,6 +25,12 @@ trait IntoOwlCtx {
     fn into_owl(self, ctx: &mut Context) -> Self::Owl;
 }
 
+/// The public conversion trait for structs that can be converted to OWL.
+pub trait IntoOwl {
+    type Owl;
+    fn into_owl(self) -> Self::Owl;
+}
+
 /// An opaque structure to pass context arguments required for OWL conversion.
 struct Context {
     build: owl::Build,
@@ -42,7 +48,6 @@ enum OwlEntity {
     Axiom(owl::Axiom),
     None
 }
-
 
 impl From<owl::Annotation> for OwlEntity {
     fn from(a: owl::Annotation) -> Self {

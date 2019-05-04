@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Annotation>
+    <AnnotationProperty IRI="oboInOwl:hasOBOFormatVersion"/>
+    <Literal datatypeIRI="xsd:string">1.4</Literal>
+  </Annotation>
+</Ontology>

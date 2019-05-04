@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Annotation>
+    <AnnotationProperty IRI="oboInOwl:hasOBOFormatVersion"/>
+    <Literal datatypeIRI="xsd:string">1.4</Literal>
+  </Annotation>
+  <Declaration>
+      <Annotation>
+          <AnnotationProperty IRI="oboInOwl:id"/>
+          <Literal datatypeIRI="xsd:string">TST:001</Literal>
+      </Annotation>
+      <Annotation>
+          <AnnotationProperty IRI="rdfs:label"/>
+          <Literal datatypeIRI="xsd:string">test item</Literal>
+      </Annotation>
+      <Class IRI="http://purl.obolibrary.org/obo/TST_001"/>
+  </Declaration>
+</Ontology>

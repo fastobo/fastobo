@@ -49,6 +49,8 @@ macro_rules! converttest {
                 .expect("could not parse input file");
             let actual = obo_doc.into_owl();
 
+            // horned_owl::io::writer::write(&mut std::io::stdout(), &actual, Some(&PREFIXES));
+
             // Read the expected OWL
             let (expected, prefixes) = horned_owl::io::reader::read(
                 &mut std::io::BufReader::new(
@@ -66,3 +68,4 @@ macro_rules! converttest {
 
 
 converttest!(convert_01, "01");
+converttest!(convert_02, "02");

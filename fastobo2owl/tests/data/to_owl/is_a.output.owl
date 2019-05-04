@@ -19,7 +19,6 @@
       <Class IRI="http://purl.obolibrary.org/obo/TST_002"/>
   </Declaration>
 
-
   <SubClassOf>
     <!-- This is the superexpression -->
       <Class abbreviatedIRI="http://purl.obolibrary.org/obo/TST_001"/>

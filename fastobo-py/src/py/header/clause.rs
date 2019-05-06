@@ -457,7 +457,7 @@ impl DateClause {
 
     /// `~datetime.datetime`: the date this document was last modified.
     #[getter]
-    fn get_date(&self) -> PyResult<Py<PyDateTime>> {
+    fn get_date<'p>(&self) -> PyResult<&'p PyDateTime> {
         let py = unsafe { Python::assume_gil_acquired() };
         PyDateTime::new(
             py,

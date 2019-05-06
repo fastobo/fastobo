@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/althonos/fastobo/compare/syntax/v0.1.1-syntax...HEAD
+[Unreleased]: https://github.com/althonos/fastobo/compare/syntax/v0.2.0-syntax...HEAD
+
+## [v0.2.0-syntax] - 2019-05-06
+
+### Added
+- Explicit support for `namespace-id-rule` header clause.
 
 ### Changed
 - Use builtin `pest` whitespace interpolation in `grammar.pest`.
@@ -16,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Allow newlines between clause lines and between frames.
 - Fixed invalid whitespace in `TreatXrefsAsRelationshipTag` causing parser to fail
   on some `treat-xrefs-as-relationship` header clauses.
+
+[v0.2.0-syntax]: https://github.com/althonos/fastobo/compare/v0.1.1-syntax...v0.2.0-syntax
 
 ## [v0.1.1-syntax] - 2019-04-12
 

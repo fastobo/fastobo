@@ -144,6 +144,19 @@ impl IntoOwlCtx for obo::HeaderClause {
                 }
             ),
 
+            obo::HeaderClause::NamespaceIdRule(r) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: owl::AnnotationProperty(
+                        ctx.build.iri("oboInOwl:NamespaceIdRule")
+                    ),
+                    annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                        datatype_iri: Some(ctx.build.iri("xsd:string")),
+                        literal: Some(r.into_string()),
+                        lang: None,
+                    })
+                }
+            ),
+
             // no equivalent...
             // --> should we use an XML namespace here ?
             obo::HeaderClause::Idspace(_, _, _) => OwlEntity::None,

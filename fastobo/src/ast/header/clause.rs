@@ -34,6 +34,7 @@ pub enum HeaderClause {
     Subsetdef(SubsetIdent, QuotedString),
     SynonymTypedef(SynonymTypeIdent, QuotedString, Option<SynonymScope>),
     DefaultNamespace(NamespaceIdent),
+    NamespaceIdRule(UnquotedString),
     Idspace(IdentPrefix, Url, Option<QuotedString>),
     TreatXrefsAsEquivalent(IdentPrefix),
     TreatXrefsAsGenusDifferentia(IdentPrefix, RelationIdent, ClassIdent),
@@ -88,6 +89,7 @@ impl Display for HeaderClause {
                 }
             }
             DefaultNamespace(ns) => f.write_str("default-namespace: ").and(ns.fmt(f)),
+            NamespaceIdRule(r) => f.write_str("namespace-id-rule: ").and(r.fmt(f)),
             Idspace(prefix, url, optdesc) => {
                 f.write_str("idspace: ")
                     .and(prefix.fmt(f))
@@ -182,6 +184,10 @@ impl<'i> FromPair<'i> for HeaderClause {
             Rule::DefaultNamespaceTag => {
                 let id = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(HeaderClause::DefaultNamespace(id))
+            }
+            Rule::NamespaceIdRuleTag => {
+                let value = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(HeaderClause::NamespaceIdRule(value))
             }
             Rule::IdspaceTag => {
                 let prefix = IdentPrefix::from_pair_unchecked(inner.next().unwrap())?;

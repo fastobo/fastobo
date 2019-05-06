@@ -52,6 +52,7 @@ IsSymmetricTag                         = @{ "is_symmetric:" }
 IsTransitiveTag                        = @{ "is_transitive:" }
 NameTag                                = @{ "name:" }
 NamespaceTag                           = @{ "namespace:" }
+NamespaceIdRuleTag                     = @{ "namespace-id-rule:" }
 OntologyTag                            = @{ "ontology:" }
 OwlAxiomsTag                           = @{ "owl-axioms:" }
 PropertyValueTag                       = @{ "property_value:" }
@@ -186,6 +187,7 @@ HeaderClause = {
   | SynonymTypedefTag ~ SynonymTypeId ~ QuotedString ~ SynonymScope?
   | DefaultNamespaceTag ~ NamespaceId
   | IdspaceTag ~ IdPrefix ~ Iri ~ QuotedString?
+  | NamespaceIdRuleTag ~ UnquotedString
   | TreatXrefsAsEquivalentTag ~ IdPrefix
   | TreatXrefsAsGenusDifferentiaTag ~ IdPrefix ~ RelationId ~ ClassId
   | TreatXrefsAsReverseGenusDifferentiaTag ~ IdPrefix ~ RelationId ~ ClassId
@@ -211,6 +213,7 @@ Unreserved = @{
     !SynonymTypedefTag ~
     !DefaultNamespaceTag ~
     !IdspaceTag ~
+    !NamespaceIdRuleTag ~
     !TreatXrefsAsEquivalentTag ~
     !TreatXrefsAsGenusDifferentiaTag ~
     !TreatXrefsAsReverseGenusDifferentiaTag ~

@@ -96,6 +96,7 @@ pub trait Visit<'ast> {
                 }
             }
             DefaultNamespace(ns) => self.visit_namespace_ident(ns),
+            NamespaceIdRule(r) => self.visit_unquoted_string(r),
             Idspace(id, url, d) => {
                 self.visit_ident_prefix(id);
                 self.visit_url(url);
@@ -433,6 +434,7 @@ pub trait VisitMut {
                 }
             }
             DefaultNamespace(ns) => self.visit_namespace_ident(ns),
+            NamespaceIdRule(r) => self.visit_unquoted_string(r),
             Idspace(id, url, d) => {
                 self.visit_ident_prefix(id);
                 self.visit_url(url);

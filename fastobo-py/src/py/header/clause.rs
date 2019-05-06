@@ -116,6 +116,7 @@ pub enum HeaderClause {
     Subsetdef(Py<SubsetdefClause>),
     SynonymTypedef(Py<SynonymTypedefClause>),
     DefaultNamespace(Py<DefaultNamespaceClause>),
+    NamespaceIdRule(Py<NamespaceIdRuleClause>),
     Idspace(Py<IdspaceClause>),
     TreatXrefsAsEquivalent(Py<TreatXrefsAsEquivalentClause>),
     TreatXrefsAsGenusDifferentia(Py<TreatXrefsAsGenusDifferentiaClause>),
@@ -162,6 +163,9 @@ impl FromPy<fastobo::ast::HeaderClause> for HeaderClause {
             DefaultNamespace(ns) =>
                 Py::new(py, DefaultNamespaceClause::new(py, ns))
                     .map(HeaderClause::DefaultNamespace),
+            NamespaceIdRule(r) =>
+                Py::new(py, NamespaceIdRuleClause::new(py, r))
+                    .map(HeaderClause::NamespaceIdRule),
             Idspace(prefix, url, desc) =>
                 Py::new(py, IdspaceClause::with_description(py, prefix, url, desc))
                     .map(HeaderClause::Idspace),
@@ -1070,6 +1074,86 @@ impl PyObjectProtocol for DefaultNamespaceClause {
 
     fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
         impl_richmp!(self, other, op, self.namespace)
+    }
+}
+
+// --- NamespaceIdRuleClause -------------------------------------------------
+
+#[pyclass(extends=BaseHeaderClause)]
+#[derive(Clone, ClonePy, Debug)]
+pub struct NamespaceIdRuleClause {
+    rule: fastobo::ast::UnquotedString,
+}
+
+impl NamespaceIdRuleClause {
+    pub fn new(_py: Python, rule: fastobo::ast::UnquotedString) -> Self {
+        Self { rule }
+    }
+}
+
+impl Display for NamespaceIdRuleClause {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        let gil = Python::acquire_gil();
+        let py = gil.python();
+        obo::HeaderClause::from_py(self.clone_py(py), py).fmt(f)
+    }
+}
+
+impl FromPy<NamespaceIdRuleClause> for obo::HeaderClause {
+    fn from_py(clause: NamespaceIdRuleClause, _py: Python) -> Self {
+        obo::HeaderClause::NamespaceIdRule(clause.rule)
+    }
+}
+
+impl From<NamespaceIdRuleClause> for obo::HeaderClause {
+    fn from(clause: NamespaceIdRuleClause) -> Self {
+        obo::HeaderClause::NamespaceIdRule(clause.rule)
+    }
+}
+
+#[pymethods]
+impl NamespaceIdRuleClause {
+    #[new]
+    fn __init__(obj: &PyRawObject, rule: String) -> PyResult<()> {
+        unsafe {
+            Ok(obj.init(Self::new(
+                Python::assume_gil_acquired(),
+                fastobo::ast::UnquotedString::new(rule),
+            )))
+        }
+    }
+
+    /// `str`: the default namespace for this ontology.
+    #[getter]
+    fn get_rule(&self) -> PyResult<&str> {
+        Ok(self.rule.as_str())
+    }
+
+    #[setter]
+    fn set_namespace(&mut self, rule: String) -> PyResult<()> {
+        self.rule = fastobo::ast::UnquotedString::new(rule);
+        Ok(())
+    }
+
+    impl_raw_tag!("namespace-id-rule");
+    impl_raw_value!("{}", rule);
+}
+
+#[pyproto]
+impl PyObjectProtocol for NamespaceIdRuleClause {
+    fn __repr__(&self) -> PyResult<PyObject> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        let fmt = PyString::new(py, "NamespaceIdRuleClause({})").to_object(py);
+        fmt.call_method1(py, "format", (self.rule.as_str(),))
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        let py = unsafe { Python::assume_gil_acquired() };
+        Ok(self.clone_py(py).to_string())
+    }
+
+    fn __richcmp__(&self, other: &PyAny, op: CompareOp) -> PyResult<PyObject> {
+        impl_richmp!(self, other, op, self.rule)
     }
 }
 

@@ -325,8 +325,7 @@ mod tests {
 
         let actual =
             HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
-        let expected = HeaderClause::Unreserved(
-            UnquotedString::new("namespace-id-rule"),
+        let expected = HeaderClause::NamespaceIdRule(
             UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"),
         );
         assert_eq!(actual, expected);
@@ -335,6 +334,14 @@ mod tests {
         let expected = HeaderClause::TreatXrefsAsRelationship(
             IdentPrefix::new("TEST"),
             RelationIdent::from(UnprefixedIdent::new("rel"))
+        );
+        assert_eq!(actual, expected);
+
+        let actual =
+            HeaderClause::from_str("tag: value").unwrap();
+        let expected = HeaderClause::Unreserved(
+            UnquotedString::new("tag"),
+            UnquotedString::new("value"),
         );
         assert_eq!(actual, expected);
     }

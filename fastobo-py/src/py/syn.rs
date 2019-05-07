@@ -141,7 +141,7 @@ impl FromPy<Synonym> for fastobo::ast::Synonym {
             syn.desc,
             syn.scope.inner,
             syn.ty.map(|ty| ty.into_py(py)),
-            syn.xrefs.into_py(py),
+            fastobo::ast::XrefList::from_py(syn.xrefs, py),
         )
     }
 }

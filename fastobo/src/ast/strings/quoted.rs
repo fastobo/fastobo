@@ -42,7 +42,7 @@ use super::unescape;
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
 #[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(AsRef(Inner, Self), Into(Inner)))]
+#[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
 pub struct QuotedString {
     value: String,
 }
@@ -99,8 +99,8 @@ impl Display for QuotedString {
     }
 }
 
-impl From<String> for QuotedString {
-    fn from(s: String) -> Self {
+impl From<&str> for QuotedString {
+    fn from(s: &str) -> Self {
         Self::new(s)
     }
 }

@@ -54,16 +54,17 @@ impl Xref {
         }
     }
 
-    /// Get a reference to the identifier of the cross-reference.
+    /// Get a mutable reference to the identifier of the xref.
     pub fn id(&self) -> &Ident {
         &self.id
     }
 
+    /// Get a reference to the identifier of the xref.
     pub fn id_mut(&mut self) -> &mut Ident {
         &mut self.id
     }
 
-    /// Get a reference to the description of the cross-reference, if any.
+    /// Get a reference to the description of the xref, if any.
     pub fn description(&self) -> Option<&QuotedString> {
         match self.desc {
             Some(ref d) => Some(d),
@@ -71,6 +72,7 @@ impl Xref {
         }
     }
 
+    /// Get a mutable reference to the description of the xref, if any.
     pub fn description_mut(&mut self) -> Option<&mut QuotedString> {
         match self.desc {
             Some(ref mut d) => Some(d),

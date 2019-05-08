@@ -11,7 +11,7 @@ impl IntoOwlCtx for obo::PrefixedIdent {
     fn into_owl(self, ctx: &mut Context) -> Self::Owl {
         let iri = match ctx.idspaces.get(&self.prefix) {
             Some(url) => format!("{}{}", url, self.local.as_str()),
-            None => format!("{}{}{}",
+            None => format!("{}{}_{}",
                 crate::constants::uri::OBO,
                 self.prefix.as_str(),
                 self.local.as_str()

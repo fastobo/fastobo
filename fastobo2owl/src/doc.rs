@@ -1,6 +1,7 @@
 use fastobo::ast as obo;
 use horned_owl::model as owl;
 
+use crate::constants::uri;
 use super::Context;
 use super::IntoOwl;
 use super::IntoOwlCtx;
@@ -56,14 +57,14 @@ impl IntoOwl for obo::OboDoc {
 
         // Create prefix mapping with default prefixes
         let mut prefixes = curie::PrefixMapping::default();
-        prefixes.add_prefix("xsd", "http://www.w3.org/2001/XMLSchema#").unwrap();
-        prefixes.add_prefix("owl", "http://www.w3.org/2002/07/owl#").unwrap();
-        prefixes.add_prefix("obo", "http://purl.obolibrary.org/obo/").unwrap();
-        prefixes.add_prefix("oboInOwl", "http://www.geneontology.org/formats/oboInOwl#").unwrap();
-        prefixes.add_prefix("xml", "http://www.w3.org/XML/1998/namespace").unwrap();
-        prefixes.add_prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#").unwrap();
-        prefixes.add_prefix("dc", "http://purl.org/dc/elements/1.1/").unwrap();
-        prefixes.add_prefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#").unwrap();
+        prefixes.add_prefix("xsd", uri::XSD).unwrap();
+        prefixes.add_prefix("owl", uri::OWL).unwrap();
+        prefixes.add_prefix("obo", uri::OBO).unwrap();
+        prefixes.add_prefix("oboInOwl", uri::OBO_IN_OWL).unwrap();
+        prefixes.add_prefix("xml", uri::XML).unwrap();
+        prefixes.add_prefix("rdf", uri::RDF).unwrap();
+        prefixes.add_prefix("dc", uri::DC).unwrap();
+        prefixes.add_prefix("rdfs", uri::RDFS).unwrap();
 
         // Add the prefixes from the OBO header
         for clause in self.header() {
@@ -74,7 +75,7 @@ impl IntoOwl for obo::OboDoc {
 
         // Create context
         let build: horned_owl::model::Build = Default::default();
-        let ontology_iri = obo::Url::parse("http://purl.obolibrary.org/obo/something.obo").unwrap();
+        let ontology_iri = obo::Url::parse(uri::OBO).unwrap(); // FIXME
         let current_frame = build.iri(ontology_iri.clone().into_string());
         let idspaces = Default::default();
         let mut ctx = Context {

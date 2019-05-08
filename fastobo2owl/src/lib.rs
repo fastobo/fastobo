@@ -2,6 +2,8 @@ extern crate curie;
 extern crate fastobo;
 extern crate horned_owl;
 
+pub mod constants;
+
 mod doc;
 mod header;
 mod id;

@@ -3,6 +3,8 @@ use std::collections::BTreeSet;
 use fastobo::ast as obo;
 use horned_owl::model as owl;
 
+use crate::constants::datatype::xsd;
+use crate::constants::property::obo_in_owl;
 use super::Context;
 use super::IntoOwlCtx;
 use super::OwlEntity;
@@ -14,7 +16,7 @@ impl IntoOwlCtx for obo::TermFrame {
         // The ID of this frame translated to an IRI.
         let id = obo::Ident::from(self.id().clone().into_inner()).into_owl(ctx);
 
-        // The produced axiom.
+        // The translated axioms.
         let mut axioms: Self::Owl = BTreeSet::new();
 
         // Build the annotated class declaration.
@@ -30,12 +32,10 @@ impl IntoOwlCtx for obo::TermFrame {
                     annotation_subject: id.clone(),
                     annotation: owl::Annotation {
                         annotation_property: ctx.build.annotation_property(
-                            ctx.prefixes.expand_curie_string("oboInOwl:id").unwrap()
+                            obo_in_owl::ID
                         ),
                         annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-                            datatype_iri: Some(ctx.build.iri(
-                                ctx.prefixes.expand_curie_string("xsd:string").unwrap()
-                            )),
+                            datatype_iri: Some(ctx.build.iri(xsd::STRING)),
                             literal: Some(self.id_mut().as_ref().to_string()),
                             lang: None,
                         })
@@ -43,18 +43,8 @@ impl IntoOwlCtx for obo::TermFrame {
                 }
             )
         );
-        // cls.annotation.insert(owl::Annotation {
-        //     annotation_property: owl::AnnotationProperty(
-        //         ctx.build.iri("oboInOwl:id")
-        //     ),
-        //     annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-        //         datatype_iri: Some(ctx.build.iri("xsd:string")),
-        //         literal: Some(self.id().as_ref().to_string()),
-        //         lang: None,
-        //     })
-        // });
 
-        // Convert remaining clauses to annotations or axioms.
+        // Convert remaining clauses to axioms.
         for line in self.into_iter() {
             match line.into_inner().into_owl(ctx) {
                 OwlEntity::Annotation(annot) => axioms.insert(
@@ -82,9 +72,7 @@ impl IntoOwlCtx for obo::TermClause {
                         ctx.prefixes.expand_curie_string("rdfs:label").unwrap()
                     ),
                     annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-                        datatype_iri: Some(ctx.build.iri(
-                            ctx.prefixes.expand_curie_string("xsd:string").unwrap()
-                        )),
+                        datatype_iri: Some(ctx.build.iri(xsd::STRING)),
                         literal: Some(name.into_string()),
                         lang: None,
                     })
@@ -124,9 +112,7 @@ impl IntoOwlCtx for obo::TermClause {
                         ctx.prefixes.expand_curie_string("obo:IAO_0000115").unwrap()
                     ),
                     annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-                        datatype_iri: Some(ctx.build.iri(
-                            ctx.prefixes.expand_curie_string("xsd:string").unwrap()
-                        )),
+                        datatype_iri: Some(ctx.build.iri(xsd::STRING)),
                         literal: Some(desc.into_string()),
                         lang: None,
                     })
@@ -138,16 +124,12 @@ impl IntoOwlCtx for obo::TermClause {
                         ctx.prefixes.expand_curie_string("rdfs:comment").unwrap()
                     ),
                     annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-                        datatype_iri: Some(ctx.build.iri(
-                            ctx.prefixes.expand_curie_string("xsd:string").unwrap()
-                        )),
+                        datatype_iri: Some(ctx.build.iri(xsd::STRING)),
                         literal: Some(comment.into_string()),
                         lang: None,
                     })
                 }
             ),
-
-
             obo::TermClause::Subset(subset) => OwlEntity::Annotation(
                 owl::Annotation {
                     annotation_property: ctx.build.annotation_property(
@@ -158,7 +140,22 @@ impl IntoOwlCtx for obo::TermClause {
                     )
                 }
             ),
-            // Xref(Xref),
+
+
+            // obo::TermClause::Xref(xref) => OwlEntity::Axiom(
+            //     owl::AnnotationAssertion{
+            //         annotation_subject: ctx.current_frame.clone(),
+            //         annotation: owl::Annotation {
+            //             annotation_property: ctx.build.annotation_property(
+            //                 ctx.prefixes.expand_curie_string("oboInOwl:hasDbXref").unwrap(),
+            //             ),
+            //             annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+            //                 // datatype_iri: ctx.build.
+            //             }),
+            //         }
+            //     }
+            // ),
+
             // Builtin(bool),
             // PropertyValue(PropertyValue),
 
@@ -188,9 +185,7 @@ impl IntoOwlCtx for obo::TermClause {
                         ctx.prefixes.expand_curie_string("owl:deprecated").unwrap()
                     ),
                     annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-                        datatype_iri: Some(ctx.build.iri(
-                            ctx.prefixes.expand_curie_string("xsd:boolean").unwrap()
-                        )),
+                        datatype_iri: Some(ctx.build.iri(xsd::BOOLEAN)),
                         literal: Some(b.to_string()),
                         lang: None,
                     })

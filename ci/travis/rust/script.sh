@@ -4,9 +4,7 @@
 
 # --- Test with coverage -----------------------------------------------------
 
-for pkg in 'fastobo' 'fastobo-syntax' 'fastobo2owl'; do
-	cargo tarpaulin -v -p $pkg --out Xml --ciserver travis-ci
-done
+cargo tarpaulin -v -p "fastobo" -p "fastobo-syntax" -p "fastobo2owl" --out Xml --ciserver travis-ci
 
 # --- Run examples -----------------------------------------------------------
 

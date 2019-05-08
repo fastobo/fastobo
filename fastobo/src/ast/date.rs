@@ -12,6 +12,20 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
+/// A trait for common operations on OBO datetimes.
+pub trait DateTime {
+    /// Generate an XML Schema datetime serialization of the `DateTime`.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let dt = NaiveDateTime::new(8, 5, 2019, 13, 2);
+    /// assert_eq!(dt.to_xsd_datetime(), "2019-05-08T13:02:00");
+    /// ```
+    fn to_xsd_datetime(&self) -> String;
+}
+
 /// A naive datetime, as found in header frames.
 ///
 /// For historical reasons, OBO headers do not contain ISO datetimes but
@@ -37,24 +51,59 @@ impl NaiveDateTime {
         }
     }
 
+    /// Change the date component of the `NaiveDateTime`.
+    pub fn with_date(mut self, day: u8, month: u8, year: u16) -> Self {
+        self.day = day;
+        self.month = month;
+        self.year = year;
+        self
+    }
+
+    /// Change the time component of the `NaiveDateTime`.
+    pub fn with_time(mut self, hour: u8, minute: u8) -> Self {
+        self.hour = hour;
+        self.minute = minute;
+        self
+    }
+
+    /// Get the day of the `NaiveDateTime`.
     pub fn day(&self) -> u8 {
         self.day
     }
 
+    /// Get the month of the `NaiveDateTime`.
     pub fn month(&self) -> u8 {
         self.month
     }
 
+    /// Get the year of the `NaiveDateTime`.
     pub fn year(&self) -> u16 {
         self.year
     }
 
+    /// Get the hour of the `NaiveDateTime`.
     pub fn hour(&self) -> u8 {
         self.hour
     }
 
+    /// Get the minute of the `NaiveDateTime`.
     pub fn minute(&self) -> u8 {
         self.minute
+    }
+}
+
+impl DateTime for NaiveDateTime {
+    /// Generate an XML Schema datetime serialization of the `DateTime`.
+    ///
+    /// # Note
+    /// While `NaiveDateTime` structs do not store seconds, the `xsd:dateTime`
+    /// format requires all components to be present in the serialization, so
+    /// the date is initialized with seconds set to `0`.
+    fn to_xsd_datetime(&self) -> String {
+        format!(
+            "{:04}-{:02}-{:02}T{:02}:{:02}:00",
+            self.year, self.month, self.day, self.hour, self.minute
+        )
     }
 }
 
@@ -200,6 +249,35 @@ impl<'i> FromPair<'i> for IsoTimezone {
     }
 }
 impl_fromstr!(IsoTimezone);
+
+impl DateTime for IsoDateTime {
+    /// Generate an XML Schema datetime serialization of the `DateTime`.
+    ///
+    /// # Note
+    /// While `NaiveDateTime` structs do not store seconds, the `xsd:dateTime`
+    /// format requires all components to be present in the serialization, so
+    /// the date is initialized with seconds set to `0`.
+    fn to_xsd_datetime(&self) -> String {
+
+        let ref tz = match self.timezone {
+            None => String::new(),
+            Some(IsoTimezone::Utc) => String::from("Z"),
+            Some(IsoTimezone::Plus(h, m)) => format!("+{:02}:{:02}", h, m),
+            Some(IsoTimezone::Minus(h, m)) => format!("-{:02}:{:02}", h, m),
+        };
+
+        format!(
+            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}",
+            self.year,
+            self.month,
+            self.day,
+            self.hour,
+            self.minute,
+            self.second,
+            tz,
+        )
+    }
+}
 
 #[cfg(test)]
 mod tests {

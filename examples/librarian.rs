@@ -28,7 +28,7 @@ struct IsbnChecker<'a> {
 impl<'a> Visit<'a> for IsbnChecker<'a> {
     fn visit_prefixed_ident(&mut self, id: &'a PrefixedIdent) {
         if id.prefix.as_str() == "ISBN" {
-            if let Err(e) = Isbn::from_str(id.local.as_str()) {
+            if let Err(e) = Isbn::from_str(id.local().as_str()) {
                 self.invalid.insert(id, e);
             } else {
                 self.valid.insert(id);

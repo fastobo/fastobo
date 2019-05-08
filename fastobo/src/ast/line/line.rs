@@ -56,6 +56,11 @@ impl<T> Line<T> {
         }
     }
 
+    /// Get a reference to the OBO clause wrapped in the line.
+    pub fn as_inner(&self) -> &T {
+        &self.inner
+    }
+
     /// Get the actual OBO clause wrapped in the line.
     pub fn into_inner(self) -> T {
         self.inner
@@ -127,8 +132,6 @@ where
         f.write_char('\n')
     }
 }
-
-
 
 /// The optional part of a line, holding a qualifier list and a comment.
 ///

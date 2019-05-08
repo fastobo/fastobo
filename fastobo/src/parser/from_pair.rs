@@ -10,7 +10,7 @@ use crate::parser::Rule;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
-/// [`pest::Pair`]: https://docs.rs/pest/2.1.0/pest/iterators/struct.Pair.html
+/// [`pest::Pair`]: https://docs.rs/pest/latest/pest/iterators/struct.Pair.html
 pub trait FromPair<'i>: Sized {
     const RULE: Rule;
 

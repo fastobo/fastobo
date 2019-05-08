@@ -93,7 +93,7 @@ impl NaiveDateTime {
 }
 
 impl DateTime for NaiveDateTime {
-    /// Generate an XML Schema datetime serialization of the `DateTime`.
+    /// Generate an XML Schema datetime serialization of the `NaiveDateTime`.
     ///
     /// # Note
     /// While `NaiveDateTime` structs do not store seconds, the `xsd:dateTime`
@@ -251,12 +251,7 @@ impl<'i> FromPair<'i> for IsoTimezone {
 impl_fromstr!(IsoTimezone);
 
 impl DateTime for IsoDateTime {
-    /// Generate an XML Schema datetime serialization of the `DateTime`.
-    ///
-    /// # Note
-    /// While `NaiveDateTime` structs do not store seconds, the `xsd:dateTime`
-    /// format requires all components to be present in the serialization, so
-    /// the date is initialized with seconds set to `0`.
+    /// Generate an XML Schema datetime serialization of the `IsoDateTime`.
     fn to_xsd_datetime(&self) -> String {
 
         let ref tz = match self.timezone {

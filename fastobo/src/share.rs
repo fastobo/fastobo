@@ -132,14 +132,14 @@ where
 //     }
 // }
 
-impl<'a, B> Share<'a, &'a B> for Cow<'a, &'a B>
+impl<'a, B> Share<'a, B> for Cow<'a, B>
 where
-    &'a B: Redeem<'a>,
-    <&'a B as Redeem<'a>>::Owned: Share<'a, &'a B>,
+    B: Redeem<'a> + Clone,
+    <B as Redeem<'a>>::Owned: Share<'a, B>,
 {
-    fn share(&'a self) -> &'a B {
+    fn share(&'a self) -> B {
         match self {
-            Cow::Borrowed(b) => b,
+            Cow::Borrowed(b) => b.clone(),
             Cow::Owned(o) => o.share(),
         }
     }

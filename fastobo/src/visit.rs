@@ -227,8 +227,8 @@ pub trait Visit<'ast> {
     }
 
     fn visit_prefixed_ident(&mut self, id: &'ast PrefixedIdent) {
-        self.visit_ident_prefix(&id.prefix);
-        self.visit_ident_local(&id.local);
+        self.visit_ident_prefix(id.prefix());
+        self.visit_ident_local(id.local());
     }
 
     #[allow(unused_variables)]
@@ -565,8 +565,8 @@ pub trait VisitMut {
     }
 
     fn visit_prefixed_ident(&mut self, id: &mut PrefixedIdent) {
-        self.visit_ident_prefix(&mut id.prefix);
-        self.visit_ident_local(&mut id.local);
+        self.visit_ident_prefix(id.prefix_mut());
+        self.visit_ident_local(id.local_mut());
     }
 
     #[allow(unused_variables)]

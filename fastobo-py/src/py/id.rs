@@ -224,8 +224,8 @@ impl FromPy<PrefixedIdent> for ast::Ident {
 impl FromPy<ast::PrefixedIdent> for PrefixedIdent {
     fn from_py(id: ast::PrefixedIdent, py: Python) -> Self {
 
-        let prefix = id.prefix.clone();
-        let local = id.local.clone();
+        let prefix = id.prefix().clone();
+        let local = id.local().clone();
 
         Self::new(
             Py::new(py, prefix.into())

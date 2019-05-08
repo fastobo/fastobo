@@ -22,8 +22,8 @@ use super::IdentLocal;
 /// An identifier with a prefix.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct PrefixedIdent {
-    pub prefix: IdentPrefix,
-    pub local: IdentLocal,
+    prefix: IdentPrefix,
+    local: IdentLocal,
 }
 
 impl PrefixedIdent {
@@ -78,6 +78,26 @@ impl PrefixedIdent {
     // pub fn local(&self) -> IdLocal<'_> {
     //     self.local.share()
     // }
+
+    /// Get a reference to the prefix of the `PrefixedIdent`.
+    pub fn prefix(&self) -> &IdentPrefix {
+        &self.prefix
+    }
+
+    /// Get a mutable reference to the prefix of the `PrefixedIdent`.
+    pub fn prefix_mut(&mut self) -> &mut IdentPrefix {
+        &mut self.prefix
+    }
+
+    /// Get a reference to the local component of the `PrefixedIdent`.
+    pub fn local(&self) -> &IdentLocal {
+        &self.local
+    }
+
+    /// Get a mutable reference to the local component of the `PrefixedIdent`.
+    pub fn local_mut(&mut self) -> &mut IdentLocal {
+        &mut self.local
+    }
 }
 
 impl Display for PrefixedIdent {
@@ -130,6 +150,16 @@ impl<'a> PrefixedId<'a> {
             prefix: Cow::Borrowed(prefix),
             local: Cow::Borrowed(local),
         }
+    }
+
+    /// Get a reference to the prefix of the `PrefixedId`.
+    pub fn prefix(&'a self) -> IdPrefix<'a> {
+        self.prefix.share()
+    }
+
+    /// Get a reference to the local component of the `PrefixedId`.
+    pub fn local(&'a self) -> IdLocal<'a> {
+        self.local.share()
     }
 }
 

@@ -136,7 +136,7 @@ impl<'a> Share<'a, PrefixedId<'a>> for PrefixedIdent {
     }
 }
 
-/// A borrowed `PrefixedIdentifier`
+/// A borrowed `PrefixedIdent`.
 #[derive(Clone, Debug, Hash)]
 pub struct PrefixedId<'a> {
     prefix: Cow<'a, IdPrefix<'a>>,

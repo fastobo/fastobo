@@ -15,13 +15,34 @@ use crate::parser::QuickFind;
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct Qualifier {
-    pub key: RelationIdent,
-    pub value: QuotedString,
+    key: RelationIdent,
+    value: QuotedString,
 }
 
 impl Qualifier {
+    /// Create a new `Qualifier` from the given identifier and value.
     pub fn new(key: RelationIdent, value: QuotedString) -> Self {
         Self { key, value }
+    }
+
+    /// Get a reference to the key of the qualifier.
+    pub fn key(&self) -> &RelationIdent {
+        &self.key
+    }
+
+    /// Get a mutable reference to the key of the qualifier.
+    pub fn key_mut(&mut self) -> &mut RelationIdent {
+        &mut self.key
+    }
+
+    /// Get a reference to the value of the qualifier.
+    pub fn value(&self) -> &QuotedString {
+        &self.value
+    }
+
+    /// Get a mutable reference to the value of the qualifier.
+    pub fn value_mut(&mut self) -> &mut QuotedString {
+        &mut self.value
     }
 }
 
@@ -112,8 +133,6 @@ impl IntoIterator for QualifierList {
         self.qualifiers.into_iter()
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

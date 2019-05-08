@@ -34,6 +34,7 @@ pub trait IntoOwl {
 /// An opaque structure to pass context arguments required for OWL conversion.
 struct Context {
     build: owl::Build,
+    prefixes: curie::PrefixMapping,
     idspaces: HashMap<obo::IdentPrefix, obo::Url>,
     ontology_iri: obo::Url,
     current_frame: owl::IRI,

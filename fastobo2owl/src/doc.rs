@@ -39,7 +39,8 @@ impl IntoOwlCtx for obo::OboDoc {
                         ont.insert(axiom);
                     }
                 }
-                _ => unimplemented!(),
+                // _ => unimplemented!(),
+                _ => (),
             };
         }
 
@@ -53,13 +54,32 @@ impl IntoOwl for obo::OboDoc {
     type Owl = owl::Ontology;
     fn into_owl(self) -> Self::Owl {
 
+        // Create prefix mapping with default prefixes
+        let mut prefixes = curie::PrefixMapping::default();
+        prefixes.add_prefix("xsd", "http://www.w3.org/2001/XMLSchema#").unwrap();
+        prefixes.add_prefix("owl", "http://www.w3.org/2002/07/owl#").unwrap();
+        prefixes.add_prefix("obo", "http://purl.obolibrary.org/obo/").unwrap();
+        prefixes.add_prefix("oboInOwl", "http://www.geneontology.org/formats/oboInOwl#").unwrap();
+        prefixes.add_prefix("xml", "http://www.w3.org/XML/1998/namespace").unwrap();
+        prefixes.add_prefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#").unwrap();
+        prefixes.add_prefix("dc", "http://purl.org/dc/elements/1.1/").unwrap();
+        prefixes.add_prefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#").unwrap();
+
+        // Add the prefixes from the OBO header
+        for clause in self.header() {
+            if let obo::HeaderClause::Idspace(prefix, url, _) = clause {
+                prefixes.add_prefix(prefix.as_str(), url.as_str()).unwrap();
+            }
+        }
+
+        // Create context
         let build: horned_owl::model::Build = Default::default();
         let ontology_iri = obo::Url::parse("http://purl.obolibrary.org/obo/something.obo").unwrap();
         let current_frame = build.iri(ontology_iri.clone().into_string());
         let idspaces = Default::default();
-
         let mut ctx = Context {
             build,
+            prefixes,
             idspaces,
             ontology_iri,
             current_frame,

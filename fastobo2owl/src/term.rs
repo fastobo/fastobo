@@ -4,6 +4,7 @@ use fastobo::ast as obo;
 use horned_owl::model as owl;
 
 use crate::constants::datatype::xsd;
+use crate::constants::property::dc;
 use crate::constants::property::obo_in_owl;
 use super::Context;
 use super::IntoOwlCtx;
@@ -106,6 +107,8 @@ impl IntoOwlCtx for obo::TermClause {
                     })
                 }
             ),
+
+            // FIXME: add xrefs to translated axiom.
             obo::TermClause::Def(desc, xrefs) => OwlEntity::Annotation(
                 owl::Annotation {
                     annotation_property: ctx.build.annotation_property(
@@ -141,24 +144,27 @@ impl IntoOwlCtx for obo::TermClause {
                 }
             ),
 
-
-            // obo::TermClause::Xref(xref) => OwlEntity::Axiom(
-            //     owl::AnnotationAssertion{
-            //         annotation_subject: ctx.current_frame.clone(),
-            //         annotation: owl::Annotation {
-            //             annotation_property: ctx.build.annotation_property(
-            //                 ctx.prefixes.expand_curie_string("oboInOwl:hasDbXref").unwrap(),
-            //             ),
-            //             annotation_value: owl::AnnotationValue::Literal(owl::Literal {
-            //                 // datatype_iri: ctx.build.
-            //             }),
-            //         }
-            //     }
-            // ),
+            // FIXME: add xref description to translated axiom.
+            obo::TermClause::Xref(xref) => OwlEntity::Axiom(
+                owl::Axiom::from(
+                    owl::AnnotationAssertion{
+                        annotation_subject: ctx.current_frame.clone(),
+                        annotation: owl::Annotation {
+                            annotation_property: ctx.build.annotation_property(
+                                obo_in_owl::HAS_DBXREF
+                            ),
+                            annotation_value: owl::AnnotationValue::Literal(owl::Literal {
+                                datatype_iri: Some(ctx.build.iri(xsd::STRING)),
+                                literal: Some(xref.id().to_string()),
+                                lang: None,
+                            }),
+                        }
+                    }
+                )
+            ),
 
             // Builtin(bool),
             // PropertyValue(PropertyValue),
-
 
             obo::TermClause::IsA(supercls) => OwlEntity::Axiom(
                 owl::Axiom::from(
@@ -197,7 +203,7 @@ impl IntoOwlCtx for obo::TermClause {
             obo::TermClause::Consider(id) => OwlEntity::Annotation(
                 owl::Annotation {
                     annotation_property: ctx.build.annotation_property(
-                        ctx.prefixes.expand_curie_string("oboInOwl:consider").unwrap()
+                        obo_in_owl::CONSIDER
                     ),
                     annotation_value: owl::AnnotationValue::IRI(
                         obo::Ident::from(id).into_owl(ctx),
@@ -205,8 +211,35 @@ impl IntoOwlCtx for obo::TermClause {
                 }
             ),
 
-            // CreatedBy(UnquotedString),
-            // CreationDate(IsoDateTime),
+            obo::TermClause::CreatedBy(c) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property(
+                        dc::CREATOR
+                    ),
+                    annotation_value: owl::AnnotationValue::Literal(
+                        owl::Literal {
+                            datatype_iri: Some(ctx.build.iri(xsd::STRING)),
+                            literal: Some(c.into_string()),
+                            lang: None,
+                        }
+                    )
+                }
+            ),
+
+            obo::TermClause::CreationDate(dt) => OwlEntity::Annotation(
+                owl::Annotation {
+                    annotation_property: ctx.build.annotation_property(
+                        dc::DATE
+                    ),
+                    annotation_value: owl::AnnotationValue::Literal(
+                        owl::Literal {
+                            datatype_iri: Some(ctx.build.iri(xsd::DATETIME)),
+                            lang: None,
+                            literal: Some(obo::DateTime::to_xsd_datetime(&dt)),
+                        }
+                    )
+                }
+            ),
 
             _ => OwlEntity::None,
         }

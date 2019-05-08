@@ -41,10 +41,7 @@ impl IntoOwlCtx for obo::HeaderClause {
                     annotation_value: owl::AnnotationValue::Literal(owl::Literal {
                         datatype_iri: Some(ctx.build.iri(xsd::DATETIME)),
                         lang: None,
-                        literal: Some(format!(
-                            "{:04}-{:02}-{:02}T{:02}:{:02}:00",
-                            dt.year(), dt.month(), dt.day(), dt.hour(), dt.minute()
-                        ))
+                        literal: Some(obo::DateTime::to_xsd_datetime(&dt)),
                     })
                 }
             ),

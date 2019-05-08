@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use fastobo::ast as obo;
+use fastobo::ext::OboSemantics;
 use horned_owl::model as owl;
 
 use crate::constants::uri;
@@ -30,7 +33,7 @@ impl IntoOwlCtx for obo::OboDoc {
             };
         }
 
-        // Convert each entity to a set of OWL axioms that are then added to the ontologys
+        // Convert each entity to a set of OWL axioms that are then added to the ontology.
         let entities = std::mem::replace(self.entities_mut(), Default::default());
         for entity in entities.into_iter() {
             ctx.current_frame = entity.id().clone().into_owl(ctx);
@@ -45,17 +48,22 @@ impl IntoOwlCtx for obo::OboDoc {
             };
         }
 
-        // Return the produced OWL ontology
+        // Return the produced OWL ontology.
         ont
     }
 }
 
-
 impl IntoOwl for obo::OboDoc {
     type Owl = owl::Ontology;
-    fn into_owl(self) -> Self::Owl {
+    fn into_owl(mut self) -> Self::Owl {
 
-        // Create prefix mapping with default prefixes
+        // Process the xref header macros.
+        // Assigning the default namespace is not needed since we are only
+        // processing the current document, so there should be no namespace
+        // collision.
+        self.treat_xrefs();
+
+        // Create idspace and prefix mapping with default prefixes.
         let mut prefixes = curie::PrefixMapping::default();
         prefixes.add_prefix("xsd", uri::XSD).unwrap();
         prefixes.add_prefix("owl", uri::OWL).unwrap();
@@ -66,18 +74,29 @@ impl IntoOwl for obo::OboDoc {
         prefixes.add_prefix("dc", uri::DC).unwrap();
         prefixes.add_prefix("rdfs", uri::RDFS).unwrap();
 
-        // Add the prefixes from the OBO header
+        // Create idspace mapping with implicit IDspaces.
+        let mut idspaces = HashMap::new();
+        idspaces.insert(
+            obo::IdentPrefix::new("BFO"),
+            obo::Url::parse(&format!("{}BFO_", uri::OBO, )).unwrap()
+        );
+        idspaces.insert(
+            obo::IdentPrefix::new("RO"),
+            obo::Url::parse(&format!("{}RO", uri::OBO, )).unwrap()
+        );
+
+        // Add the prefixes and IDspaces from the OBO header.
         for clause in self.header() {
             if let obo::HeaderClause::Idspace(prefix, url, _) = clause {
                 prefixes.add_prefix(prefix.as_str(), url.as_str()).unwrap();
+                idspaces.insert(prefix.clone(), url.clone());
             }
         }
 
-        // Create context
+        // Create the conversion context.
         let build: horned_owl::model::Build = Default::default();
         let ontology_iri = obo::Url::parse(uri::OBO).unwrap(); // FIXME
         let current_frame = build.iri(ontology_iri.clone().into_string());
-        let idspaces = Default::default();
         let mut ctx = Context {
             build,
             prefixes,
@@ -86,6 +105,7 @@ impl IntoOwl for obo::OboDoc {
             current_frame,
         };
 
+        // Return the converted document.
         <Self as IntoOwlCtx>::into_owl(self, &mut ctx)
     }
 }

@@ -243,12 +243,12 @@ pub trait Visit<'ast> {
     }
 
     fn visit_synonym(&mut self, syn: &'ast Synonym) {
-        self.visit_quoted_string(&syn.desc);
-        self.visit_synonym_scope(&syn.scope);
-        if let Some(ref id) = syn.ty {
+        self.visit_quoted_string(syn.description());
+        self.visit_synonym_scope(syn.scope());
+        if let Some(ref id) = syn.ty() {
             self.visit_synonymtype_ident(id);
         }
-        self.visit_xref_list(&syn.xrefs)
+        self.visit_xref_list(syn.xrefs())
     }
 
     #[allow(unused_variables)]
@@ -581,12 +581,12 @@ pub trait VisitMut {
     }
 
     fn visit_synonym(&mut self, syn: &mut Synonym) {
-        self.visit_quoted_string(&mut syn.desc);
-        self.visit_synonym_scope(&mut syn.scope);
-        if let Some(id) = &mut syn.ty {
+        self.visit_quoted_string(syn.description_mut());
+        self.visit_synonym_scope(syn.scope_mut());
+        if let Some(id) = syn.ty_mut() {
             self.visit_synonymtype_ident(id);
         }
-        self.visit_xref_list(&mut syn.xrefs)
+        self.visit_xref_list(syn.xrefs_mut())
     }
 
     #[allow(unused_variables)]

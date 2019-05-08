@@ -50,14 +50,14 @@ impl_fromstr!(SynonymScope);
 /// A synonym, denoting an alternative name for the embedding entity.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Synonym {
-    pub desc: QuotedString,
-    pub scope: SynonymScope,
-    pub ty: Option<SynonymTypeIdent>,
-    pub xrefs: XrefList,
+    desc: QuotedString,
+    scope: SynonymScope,
+    ty: Option<SynonymTypeIdent>,
+    xrefs: XrefList,
 }
 
 impl Synonym {
-
+    /// Create a `Synonym` with the given description and scope.
     pub fn new<D>(desc: D, scope: SynonymScope) -> Self
     where
         D: Into<QuotedString>,
@@ -70,6 +70,7 @@ impl Synonym {
         }
     }
 
+    /// Create a `Synonym` with the given description, scope, and type.
     pub fn with_type<D, T>(desc: D, scope: SynonymScope, ty: T) -> Self
     where
         D: Into<QuotedString>,
@@ -83,6 +84,7 @@ impl Synonym {
         }
     }
 
+    /// Create a `Synonym` with the given description, scope, and xrefs.
     pub fn with_xrefs<D, L>(desc: D, scope: SynonymScope, xrefs: L) -> Self
     where
         D: Into<QuotedString>,
@@ -96,6 +98,7 @@ impl Synonym {
         }
     }
 
+    /// Create a `Synonym` with the given description, scope, type, and xrefs.
     pub fn with_type_and_xrefs<D, T, L>(
         desc: D,
         scope: SynonymScope,
@@ -113,6 +116,54 @@ impl Synonym {
             ty: ty.into(),
             xrefs: xrefs.into(),
         }
+    }
+}
+
+impl Synonym {
+    /// Get a reference to the description of the `Synonym`.
+    pub fn description(&self) -> &QuotedString {
+        &self.desc
+    }
+
+    /// Get a mutable reference to the description of the `Synonym`.
+    pub fn description_mut(&mut self) -> &mut QuotedString {
+        &mut self.desc
+    }
+
+    /// Get a reference to the scope of the `Synonym`.
+    pub fn scope(&self) -> &SynonymScope {
+        &self.scope
+    }
+
+    /// Get a mutable reference to the scope of the `Synonym`.
+    pub fn scope_mut(&mut self) -> &mut SynonymScope {
+        &mut self.scope
+    }
+
+    /// Get a reference to the type of the `Synonym`, if any.
+    pub fn ty(&self) -> Option<&SynonymTypeIdent> {
+        match self.ty {
+            Some(ref id) => Some(id),
+            None => None,
+        }
+    }
+
+    /// Get a mutable reference to the type of the `Synonym`, if any.
+    pub fn ty_mut(&mut self) -> Option<&mut SynonymTypeIdent> {
+        match self.ty {
+            Some(ref mut id) => Some(id),
+            None => None,
+        }
+    }
+
+    /// Get a reference to the xrefs of the `Synonym`.
+    pub fn xrefs(&self) -> &XrefList {
+        &self.xrefs
+    }
+
+    /// Get a mutable reference to the xrefs of the `Synonym`.
+    pub fn xrefs_mut(&mut self) -> &mut XrefList {
+        &mut self.xrefs
     }
 }
 
@@ -167,8 +218,6 @@ impl<'i> FromPair<'i> for Synonym {
     }
 }
 impl_fromstr!(Synonym);
-
-
 
 #[cfg(test)]
 mod tests {

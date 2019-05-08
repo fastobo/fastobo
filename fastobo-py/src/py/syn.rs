@@ -125,12 +125,18 @@ impl ClonePy for Synonym {
 }
 
 impl FromPy<fastobo::ast::Synonym> for Synonym {
-    fn from_py(syn: fastobo::ast::Synonym, py: Python) -> Self {
+    fn from_py(mut syn: fastobo::ast::Synonym, py: Python) -> Self {
         Self {
-            desc: syn.desc,
-            scope: SynonymScope::new(syn.scope),
-            ty: syn.ty.map(|id| id.into_py(py)),
-            xrefs: syn.xrefs.into_py(py),
+            desc: std::mem::replace(
+                syn.description_mut(),
+                fastobo::ast::QuotedString::new(String::new())
+            ),
+            scope: SynonymScope::new(syn.scope().clone()),
+            ty: syn.ty().map(|id| id.clone().into_py(py)),
+            xrefs: std::mem::replace(
+                syn.xrefs_mut(),
+                fastobo::ast::XrefList::new(Vec::new())
+            ).into_py(py),
         }
     }
 }

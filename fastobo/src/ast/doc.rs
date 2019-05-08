@@ -22,6 +22,39 @@ pub struct OboDoc {
     entities: Vec<EntityFrame>,
 }
 
+/// Constructors and builder methods.
+///
+/// # Parser
+/// Use `from_file` to parse a file on the local filesystem, or `from_stream`
+/// to parse a `BufRead` implementor (`BufRead` is needed instead of `Read` as
+/// the parser is line-based):
+/// ```rust
+/// # extern crate fastobo;
+/// # use std::io::BufReader;
+/// # use std::fs::File;
+/// # use fastobo::ast::*;
+/// let doc1 = OboDoc::from_file("../tests/data/ms.obo").unwrap();
+///
+/// // This is equivalent to (but with the file path set in eventual errors):
+/// let mut r = BufReader::new(File::open("../tests/data/ms.obo").unwrap());
+/// let doc2 = OboDoc::from_stream(&mut r).unwrap();
+///
+/// assert_eq!(doc1, doc2);
+/// ```
+///
+/// # Builder Pattern
+/// The builder pattern makes it easy to create an `OboDoc` from an interator
+/// of `EntityFrame`, in order to add an `HeaderFrame` after all the entities
+/// where collected:
+/// ```rust
+/// # extern crate fastobo;
+/// # use fastobo::ast::*;
+/// use std::iter::FromIterator;
+///
+/// let entities = vec![TermFrame::new(ClassIdent::from(PrefixedIdent::new("TEST", "001")))];
+/// let doc = OboDoc::from_iter(entities.into_iter())
+///     .and_header(HeaderFrame::from(HeaderClause::FormatVersion("1.4".into())));
+/// ```
 impl OboDoc {
 
     /// Create a new empty OBO document.
@@ -150,7 +183,9 @@ impl OboDoc {
             .and_then(|f| Self::from_stream(&mut BufReader::new(f)))
             .map_err(|e| e.with_path(&pathref.to_string_lossy()))
     }
+}
 
+impl OboDoc {
     /// Get a reference to the header of the OBO document.
     pub fn header(&self) -> &HeaderFrame {
         &self.header

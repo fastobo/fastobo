@@ -48,7 +48,7 @@ fn clonepy_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream 
     TokenStream::from(expanded)
 }
 
-fn clonepy_impl_struct(ast: &syn::DeriveInput, en: &syn::DataStruct) -> TokenStream {
+fn clonepy_impl_struct(ast: &syn::DeriveInput, _en: &syn::DataStruct) -> TokenStream {
 
     let name = &ast.ident;
     let expanded = quote::quote! {
@@ -84,35 +84,6 @@ pub fn pywrapper_derive(input: TokenStream) -> TokenStream {
     }
 
     output
-}
-
-fn clone_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {
-    let mut variants = Vec::new();
-
-    // Build clone for each variant
-    for variant in &en.variants {
-        let name = &variant.ident;
-        variants.push(quote::quote!(#name(x) => #name(x.clone_ref(py))));
-    }
-
-    // Build clone implementation
-    let name = &ast.ident;
-    let expanded = quote::quote! {
-        #[automatically_derived]
-        impl Clone for #name {
-            fn clone(&self) -> Self {
-                use self::#name::*;
-                let gil = pyo3::Python::acquire_gil();
-                let py = gil.python();
-
-                match self {
-                    #(#variants,)*
-                }
-            }
-        }
-    };
-
-    TokenStream::from(expanded)
 }
 
 fn aspyptr_impl_enum(ast: &syn::DeriveInput, en: &syn::DataEnum) -> TokenStream {

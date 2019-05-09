@@ -12,18 +12,19 @@ use fastobo::ast::OboDoc;
 
 
 macro_rules! roundtriptest {
-    ($name:ident, $path:expr) => {
+    ($name:ident) => {
         #[test]
         fn $name() {
-            let path = {
+            let dir = {
                 let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
                 p.push("tests");
                 p.push("data");
                 p.push("roundtrip");
-                p.push($path);
                 p
             };
-            let txt = read_to_string(&path).expect("could not read file");
+
+            let input = dir.join(format!("{}.obo", stringify!($name)));
+            let txt = read_to_string(&input).expect("could not read file");
             let doc = OboDoc::from_str(&txt).expect("could not parse file");
             assert_eq!(txt, doc.to_string());
         }
@@ -32,4 +33,4 @@ macro_rules! roundtriptest {
 
 
 
-roundtriptest!(roundtrip01, "01.obo");
+roundtriptest!(msterm);

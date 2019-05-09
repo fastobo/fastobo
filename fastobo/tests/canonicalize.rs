@@ -14,7 +14,6 @@ macro_rules! canonicalizetest {
     ($name:ident) => {
         #[test]
         fn $name() {
-
             let dir = {
                 let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
                 p.push("tests");

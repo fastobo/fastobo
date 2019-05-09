@@ -4,9 +4,11 @@ version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-cachan.fr>"]
 edition = "2018"
 publish = false
+workspace = "../.."
 
 [lib]
 proc-macro = true
+path = "lib.rs"
 
 [dependencies]
 syn = "0.15.33"

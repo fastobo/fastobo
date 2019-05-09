@@ -4,7 +4,6 @@ include COPYING
 
 recursive-include fastobo *
 recursive-include fastobo-py *
-recursive-include fastobo-py-derive *
 recursive-include fastobo-syntax *
 
 exclude target

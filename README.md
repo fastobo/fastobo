@@ -25,10 +25,6 @@ The Rust implementation of an Abstract Syntax Tree for the OBO language.
 Idiomatic Python bindings to the `fastobo` Rust crate. This module is not released as a Rust crate,
 but as a Python package on PyPI.
 
-### `fastobo-py-derive`
-
-Unreleased derive macros for the `fastobo-py` crate.
-
 ### `fastobo2owl`
 
 Work-in-progress conversion crate to map an OBO document to an equivalent OWL document

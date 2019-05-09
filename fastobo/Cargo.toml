@@ -8,7 +8,8 @@ description = "Faultless AST for Open Biomedical Ontologies."
 repository = "https://github.com/althonos/fastobo"
 readme = "README.md"
 keywords = ["obo", "ontology", "obofoundry", "ast", "syntax", "parser"]
-categories   = ["science", "parser-implementations"]
+categories = ["science", "parser-implementations"]
+workspace = ".."
 
 [package.metadata.docs.rs]
 features = ["docs"]

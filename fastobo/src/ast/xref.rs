@@ -26,7 +26,7 @@ use crate::share::Share;
 /// when the cross-reference is directly relevant to the annotated entity
 /// (e.g. when exporting an ontology from a knowledge-base to add an hyperlink
 /// to the original resource).
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Xref {
     id: Ident,
     desc: Option<QuotedString>,
@@ -106,7 +106,7 @@ impl<'i> FromPair<'i> for Xref {
 impl_fromstr!(Xref);
 
 /// A list of containing zero or more `Xref`s.
-#[derive(Clone, Default, Debug, Hash, Eq, PartialEq, OpaqueTypedef)]
+#[derive(Clone, Default, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialOrd, PartialEq)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),

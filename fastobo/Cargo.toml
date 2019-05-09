@@ -11,9 +11,6 @@ keywords = ["obo", "ontology", "syntax", "ast", "parser"]
 categories = ["science", "parser-implementations"]
 workspace = ".."
 
-[package.metadata.docs.rs]
-features = ["docs"]
-
 [lib]
 name = "fastobo"
 path = "src/lib.rs"

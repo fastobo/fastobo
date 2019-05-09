@@ -1,3 +1,5 @@
+use std::cmp::PartialOrd;
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -17,12 +19,23 @@ use crate::parser::Rule;
 
 
 /// A clause value binding a property to a value in the relevant entity.
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
 pub enum PropertyValue {
     /// A property-value binding where the value is specified with an ID.
     Identified(RelationIdent, Ident),
     /// A property-value binding where the value is given by a typed string.
     Typed(RelationIdent, QuotedString, Ident),
+}
+
+impl PropertyValue {
+    /// Get the identifier of the declared property annotation.
+    pub fn property(&self) -> &RelationIdent {
+        use self::PropertyValue::*;
+        match self {
+            Identified(ref prop, _) => prop,
+            Typed(ref prop, _, _) => prop,
+        }
+    }
 }
 
 impl<'a> Share<'a, PropVal<'a>> for PropertyValue {
@@ -73,6 +86,14 @@ impl<'i> FromPair<'i> for PropertyValue {
     }
 }
 impl_fromstr!(PropertyValue);
+
+impl PartialOrd for PropertyValue {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.property().cmp(&other.property())
+            .then_with(|| self.to_string().cmp(&other.to_string()))
+            .into()
+    }
+}
 
 /// A borrowed `PropertyValue`.
 pub enum PropVal<'a> {
@@ -135,5 +156,24 @@ mod tests {
             )),
         );
         assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn partial_cmp() {
+        let l1 = PropertyValue::from_str("engaged_to heather").unwrap();
+        let r1 = PropertyValue::from_str("married_to heather").unwrap();
+        assert!(l1 < r1);
+
+        let l2 = PropertyValue::from_str("married_to ashley").unwrap();
+        let r2 = PropertyValue::from_str("married_to heather").unwrap();
+        assert!(l2 < r2);
+
+        let l3 = PropertyValue::from_str("has_kids \"8\" xsd:positiveInteger").unwrap();
+        let r3 = PropertyValue::from_str("married_to heather").unwrap();
+        assert!(l3 < r3);
+
+        let l4 = PropertyValue::from_str("has_kid \"true\" xsd:boolean").unwrap();
+        let r4 = PropertyValue::from_str("has_kid jenny").unwrap();
+        assert!(l4 < r4);
     }
 }

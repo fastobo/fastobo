@@ -1,5 +1,5 @@
 [package]
-name = "fastobo2owl"
+name = "fastobo-owl"
 version = "0.1.0"
 authors = ["Martin Larralde <martin.larralde@ens-cachan.fr>"]
 edition = "2018"

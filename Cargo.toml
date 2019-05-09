@@ -4,7 +4,7 @@ members = [
   "fastobo-syntax",
   "fastobo-py",
   "fastobo-py/derive",
-  "fastobo2owl",
+  "fastobo-owl",
 ]
 
 [profile.test]

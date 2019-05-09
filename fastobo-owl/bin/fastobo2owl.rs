@@ -1,11 +1,11 @@
 extern crate curie;
 extern crate horned_owl;
 extern crate fastobo;
-extern crate fastobo2owl;
+extern crate fastobo_owl;
 
 use fastobo::ast::*;
-use fastobo2owl::IntoOwl;
-use fastobo2owl::constants::uri;
+use fastobo_owl::IntoOwl;
+use fastobo_owl::constants::uri;
 
 fn main() {
 

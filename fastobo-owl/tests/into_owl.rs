@@ -1,5 +1,5 @@
 extern crate fastobo;
-extern crate fastobo2owl;
+extern crate fastobo_owl;
 extern crate lazy_static;
 extern crate pretty_assertions;
 
@@ -10,7 +10,7 @@ use std::fs::read_to_string;
 use pretty_assertions::assert_eq;
 
 use fastobo::ast::OboDoc;
-use fastobo2owl::IntoOwl;
+use fastobo_owl::IntoOwl;
 
 
 

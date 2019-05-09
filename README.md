@@ -25,7 +25,7 @@ The Rust implementation of an Abstract Syntax Tree for the OBO language.
 Idiomatic Python bindings to the `fastobo` Rust crate. This module is not released as a Rust crate,
 but as a Python package on PyPI.
 
-### `fastobo2owl`
+### `fastobo-owl`
 
 Work-in-progress conversion crate to map an OBO document to an equivalent OWL document
 using the [`horned-owl`](https://docs.rs/horned-owl/latest/horned_owl/model/index.html)

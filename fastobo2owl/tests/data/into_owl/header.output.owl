@@ -6,4 +6,8 @@
     <AnnotationProperty IRI="oboInOwl:hasOBOFormatVersion"/>
     <Literal datatypeIRI="xsd:string">1.4</Literal>
   </Annotation>
+  <Annotation>
+    <AnnotationProperty IRI="oboInOwl:savedBy"/>
+    <Literal datatypeIRI="xsd:string">Martin Larralde</Literal>
+  </Annotation>
 </Ontology>

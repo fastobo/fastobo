@@ -37,7 +37,7 @@ macro_rules! converttest {
                 let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
                 p.push("tests");
                 p.push("data");
-                p.push("to_owl");
+                p.push("into_owl");
                 p
             };
 

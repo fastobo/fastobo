@@ -14,7 +14,7 @@ use crate::share::Redeem;
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! ident_subclass {
     (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident) => {
-        #[derive(Clone, Debug, PartialEq, Hash, Eq)]
+        #[derive(Clone, Debug, PartialEq, Hash, Eq, PartialOrd, Ord)]
         #[doc=$docstring]
         pub struct $name {
             id: Ident,

@@ -30,11 +30,11 @@ pub trait DateTime {
 ///
 /// For historical reasons, OBO headers do not contain ISO datetimes but
 /// *day-month-year* dates, which can be confusing for US-based users.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct NaiveDateTime {
-    day: u8,
-    month: u8,
     year: u16,
+    month: u8,
+    day: u8,
     hour: u8,
     minute: u8,
 }
@@ -137,17 +137,6 @@ impl<'i> FromPair<'i> for NaiveDateTime {
     }
 }
 impl_fromstr!(NaiveDateTime);
-
-impl PartialOrd for NaiveDateTime {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.year.partial_cmp(&other.year).unwrap()
-            .then(self.month.partial_cmp(&other.month).unwrap())
-            .then(self.day.partial_cmp(&other.month).unwrap())
-            .then(self.hour.partial_cmp(&other.month).unwrap())
-            .then(self.minute.partial_cmp(&other.month).unwrap())
-            .into()
-    }
-}
 
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

@@ -23,7 +23,7 @@ use crate::parser::Rule;
 /// optional, but every document should *at least* contain a `FormatVersion`
 /// clause, to help with interoperability and to make sure the semantics of
 /// the right OBO specification are in use.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub enum HeaderClause {
     FormatVersion(UnquotedString),
     DataVersion(UnquotedString),

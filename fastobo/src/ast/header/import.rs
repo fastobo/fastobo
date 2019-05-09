@@ -12,11 +12,14 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
+// FIXME(@althonos): Ordering is not based on lexicographic order but will put
+//                   Abbreviated before Url. This will probably look nicer
+//                   but goes against the specification.
 /// A reference to another document to be imported.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Import {
-    Url(Url),
     Abbreviated(Ident), // QUESTION(@althonos): IdentPrefix ?
+    Url(Url),
 }
 
 impl Import {

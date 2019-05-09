@@ -31,7 +31,7 @@ pest = "2.1.1"
 opaque_typedef = "0.0.5"
 opaque_typedef_macros = "0.0.5"
 url = "1.7.2"
-fastobo-syntax = { path = "../fastobo-syntax", version = "0.2.0" }
+fastobo-syntax = "0.2.0"
 memchr = { version = "2.2.0", optional = true }
 
 [features]

@@ -1,7 +1,6 @@
 [workspace]
 members = [
   "fastobo",
-  "fastobo-syntax",
   "fastobo-py",
   "fastobo-py/derive",
   "fastobo-owl",

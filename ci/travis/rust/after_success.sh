@@ -6,12 +6,6 @@
 # --- Publish crate to `crates.io` -------------------------------------------
 
 case "$TRAVIS_TAG" in
-	# Release fastobo-syntax
-	v*-syntax)
-		cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
-		log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
-		cargo publish --token $CRATES_IO_TOKEN
-		;;
 	# Do nothing for fastobo-py: it is released in Python runners
 	v*-py)
 		;;
@@ -34,12 +28,6 @@ gem install --user-install chandler
 
 log Updating GitHub release notes
 case "$TRAVIS_TAG" in
-	v*-syntax)
-		cd "$TRAVIS_BUILD_DIR/fastobo-syntax"
-		chandler push --github="$TRAVIS_REPO_SLUG" \
-			--changelog="CHANGELOG.md" \
-			--git="../.git"
-			;;
 	v*-py)
 		cd "$TRAVIS_BUILD_DIR/fastobo-py"
 		chandler push --github="$TRAVIS_REPO_SLUG" \

@@ -4,7 +4,7 @@
 
 # --- Test with coverage -----------------------------------------------------
 
-cargo tarpaulin -v -p "fastobo" -p "fastobo-syntax" -p "fastobo2owl" --out Xml --ciserver travis-ci
+cargo tarpaulin -v -p "fastobo" -p "fastobo2owl" --out Xml --ciserver travis-ci
 
 # --- Run examples -----------------------------------------------------------
 

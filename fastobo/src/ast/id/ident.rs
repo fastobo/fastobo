@@ -1,3 +1,5 @@
+use std::cmp::PartialOrd;
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -19,7 +21,7 @@ use super::UnprefixedIdent;
 use super::Url;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq, Ord)]
 pub enum Ident {
     Prefixed(PrefixedIdent),
     Unprefixed(UnprefixedIdent),
@@ -69,6 +71,18 @@ impl<'i> FromPair<'i> for Ident {
     }
 }
 impl_fromstr!(Ident);
+
+impl PartialOrd for Ident {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        use self::Ident::*;
+        match (self, other) {
+            (Prefixed(l), Prefixed(r)) => l.partial_cmp(r),
+            (Unprefixed(l), Unprefixed(r)) => l.partial_cmp(r),
+            (Url(l), Url(r)) => l.partial_cmp(r),
+            (l, r) => l.to_string().partial_cmp(&r.to_string())
+        }
+    }
+}
 
 impl<'a> Share<'a, Id<'a>> for Ident {
     fn share(&'a self) -> Id<'a> {
@@ -139,5 +153,48 @@ impl<'a> Redeem<'a> for Id<'a> {
             Id::Unprefixed(cow) => Ident::Unprefixed(cow.redeem()),
             Id::Url(cow) => Ident::Url(cow.redeem())
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+
+    use pretty_assertions::assert_eq;
+    use std::str::FromStr;
+    use std::string::ToString;
+    use super::*;
+
+    #[test]
+    fn from_str() {
+        let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl").unwrap();
+        let expected = Ident::Url(Url::parse("http://purl.obolibrary.org/obo/po.owl").unwrap());
+        assert_eq!(actual, expected);
+
+        let actual = Ident::from_str("GO:0046154").unwrap();
+        let expected = Ident::from(PrefixedIdent::new("GO", "0046154"));
+        assert_eq!(actual, expected);
+
+        let actual = Ident::from_str("goslim_plant").unwrap();
+        let expected = Ident::from(UnprefixedIdent::new("goslim_plant"));
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn partial_cmp() {
+        let lp = Ident::Prefixed(PrefixedIdent::new("GO", "001"));
+        let rp = Ident::Prefixed(PrefixedIdent::new("GO", "002"));
+        assert!(lp < rp);
+
+        let lu = Ident::Unprefixed(UnprefixedIdent::new("has_part"));
+        let ru = Ident::Unprefixed(UnprefixedIdent::new("part_of"));
+        assert!(lu < ru);
+
+        let lurl = Ident::Url(Url::parse("http://doi.org/").unwrap());
+        let rurl = Ident::Url(Url::parse("http://nih.org").unwrap());
+        assert!(lurl < rurl);
+
+        assert!(lp < ru);
+        assert!(lurl < ru);
     }
 }

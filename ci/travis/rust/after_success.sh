@@ -12,6 +12,9 @@ case "$TRAVIS_TAG" in
 		log Publishing fastobo-syntax ${TRAVIS_TAG%-syntax}
 		cargo publish --token $CRATES_IO_TOKEN
 		;;
+	# Do nothing for fastobo-py: it is released in Python runners
+	v*-py)
+		;;
 	# Release fastobo
 	v*)
 		cd "$TRAVIS_BUILD_DIR/fastobo"
@@ -37,12 +40,12 @@ case "$TRAVIS_TAG" in
 			--changelog="CHANGELOG.md" \
 			--git="../.git"
 			;;
-  v*-py)
-    cd "$TRAVIS_BUILD_DIR/fastobo-py"
-    chandler push --github="$TRAVIS_REPO_SLUG" \
-      --changelog="CHANGELOG.md" \
-      --git="../.git"
-      ;;
+	v*-py)
+		cd "$TRAVIS_BUILD_DIR/fastobo-py"
+		chandler push --github="$TRAVIS_REPO_SLUG" \
+			--changelog="CHANGELOG.md" \
+			--git="../.git"
+		;;
 	v*)
 		cd "$TRAVIS_BUILD_DIR/fastobo"
 		chandler push --github="$TRAVIS_REPO_SLUG" \

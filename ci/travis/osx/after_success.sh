@@ -23,6 +23,6 @@ $PYTHON setup.py sdist bdist_wheel
 case "$TRAVIS_TAG" in
 	v*-syntax) ;;
 	v*-py) twine upload --skip-existing dist/*.whl dist/*.tar.gz ;;
-  v*)  ;;
+	v*)  ;;
 	*) twine upload --skip-existing dist/*.whl dist/*.tar.gz ;;
 esac

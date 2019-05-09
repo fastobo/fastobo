@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+[Unreleased]: https://github.com/althonos/fastobo/compare/v0.1.0...HEAD
+
+## [0.1.0] - 2019-08-05
+
+[0.1.0]: https://github.com/althonos/fastobo/compare/40aa9b0...v0.1.0
+
 Initial release.
 
-[Unreleased]: https://github.com/althonos/fastobo/compare/40aa9b0...HEAD

@@ -9,6 +9,8 @@ documentation = "https://github.com/althonos/fastobo/tree/master/fastobo-syntax"
 homepage = "https://github.com/althonos/fastobo"
 description = "PEG Syntax and pest parser for the OBO flat file format 1.4"
 edition = "2018"
+keywords = ["obo", "ontology", "obofoundry", "syntax", "parser"]
+categories = ["science", "parser-implementations"]
 workspace = ".."
 
 [badges.travis-ci]

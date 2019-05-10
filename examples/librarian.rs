@@ -2,7 +2,7 @@
 //!
 //! ```cargo
 //! [dependencies]
-//! fastobo = { git = "http://github.com/althonos/fastobo", default-features = false }
+//! fastobo = "0.1.0"
 //! isbn = "0.2.0"
 //! ```
 

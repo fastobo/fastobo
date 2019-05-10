@@ -33,7 +33,7 @@ pub struct OboDoc {
 /// # use std::io::BufReader;
 /// # use std::fs::File;
 /// # use fastobo::ast::*;
-/// let doc1 = OboDoc::from_file("../tests/data/ms.obo").unwrap();
+/// let doc1 = OboDoc::from_file("tests/data/ms.obo").unwrap();
 ///
 /// // This is equivalent to (but with the file path set in eventual errors):
 /// let mut r = BufReader::new(File::open("../tests/data/ms.obo").unwrap());

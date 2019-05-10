@@ -1,15 +1,15 @@
-# `fastobo` [![Star me](https://img.shields.io/github/stars/althonos/fastobo.svg?style=social&label=Star&maxAge=3600)](https://github.com/althonos/fastobo/stargazers)
+# `fastobo` [![Star me](https://img.shields.io/github/stars/fastobo/fastobo.svg?style=social&label=Star&maxAge=3600)](https://github.com/fastobo/fastobo/stargazers)
 
 *Faultless AST for Open Biomedical Ontologies.*
 
-[![TravisCI](https://img.shields.io/travis/althonos/fastobo/master.svg?maxAge=600&style=flat-square)](https://travis-ci.org/althonos/fastobo/branches)
-[![Codecov](https://img.shields.io/codecov/c/gh/althonos/fastobo/master.svg?style=flat-square&maxAge=600)](https://codecov.io/gh/althonos/fastobo)
+[![TravisCI](https://img.shields.io/travis/fastobo/fastobo/master.svg?maxAge=600&style=flat-square)](https://travis-ci.org/fastobo/fastobo/branches)
+[![Codecov](https://img.shields.io/codecov/c/gh/fastobo/fastobo/master.svg?style=flat-square&maxAge=600)](https://codecov.io/gh/fastobo/fastobo)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/mit/)
-[![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo)
+[![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/fastobo/fastobo)
 [![Crate](https://img.shields.io/crates/v/fastobo.svg?maxAge=600&style=flat-square)](https://crates.io/crates/fastobo)
 [![Documentation](https://img.shields.io/badge/docs.rs-latest-4d76ae.svg?maxAge=2678400&style=flat-square)](https://docs.rs/fastobo)
-[![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fastobo/blob/master/fastobo/CHANGELOG.md)
-[![GitHub issues](https://img.shields.io/github/issues/althonos/fastobo.svg?style=flat-square)](https://github.com/althonos/fastobo/issues)
+[![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/fastobo/fastobo/blob/master/fastobo/CHANGELOG.md)
+[![GitHub issues](https://img.shields.io/github/issues/fastobo/fastobo.svg?style=flat-square)](https://github.com/fastobo/fastobo/issues)
 
 
 ## Overview
@@ -62,7 +62,7 @@ fn main() {
 ## Feedback
 
 Found a bug ? Have an enhancement request ? Head over to the
-[GitHub issue tracker](https://github.com/althonos/fastobo/issues) of the project if
+[GitHub issue tracker](https://github.com/fastobo/fastobo/issues) of the project if
 you need to report or ask something. If you are filling in on a bug, please include as much
 information as you can about the issue, and try to recreate the same bug in a simple, easily
 reproducible situation.

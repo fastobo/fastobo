@@ -5,7 +5,8 @@ authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 license = "MIT"
 description = "Faultless AST for Open Biomedical Ontologies."
-repository = "https://github.com/althonos/fastobo"
+repository = "https://github.com/fastobo/fastobo"
+homepage = "https://github.com/fastobo/fastobo"
 readme = "README.md"
 keywords = ["obo", "ontology", "syntax", "ast", "parser"]
 categories = ["science", "parser-implementations"]
@@ -15,12 +16,12 @@ name = "fastobo"
 path = "src/lib.rs"
 
 [badges.travis-ci]
-repository = "althonos/fastobo"
+repository = "fastobo/fastobo"
 [badges.codecov]
-repository = "althonos/fastobo"
+repository = "fastobo/fastobo"
 service    = "github"
 [badges.is-it-maintained-issue-resolution]
-repository = "althonos/fastobo"
+repository = "fastobo/fastobo"
 [badges.maintenance]
 status     = "actively-developed"
 

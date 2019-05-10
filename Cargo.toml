@@ -1,14 +1,46 @@
-[workspace]
-members = [
-  "fastobo",
-  "fastobo-py",
-  "fastobo-py/derive",
-  "fastobo-owl",
-]
+[package]
+name = "fastobo"
+version = "0.1.0"
+authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
+edition = "2018"
+license = "MIT"
+description = "Faultless AST for Open Biomedical Ontologies."
+repository = "https://github.com/althonos/fastobo"
+readme = "README.md"
+keywords = ["obo", "ontology", "syntax", "ast", "parser"]
+categories = ["science", "parser-implementations"]
+workspace = ".."
 
-[profile.test]
-opt-level = 1
+[lib]
+name = "fastobo"
+path = "src/lib.rs"
 
-[profile.release]
-opt-level = 3
-lto = true
+[badges.travis-ci]
+repository = "althonos/fastobo"
+[badges.codecov]
+repository = "althonos/fastobo"
+service    = "github"
+[badges.is-it-maintained-issue-resolution]
+repository = "althonos/fastobo"
+[badges.maintenance]
+status     = "actively-developed"
+
+[dependencies]
+failure = "0.1.5"
+pest = "2.1.1"
+opaque_typedef = "0.0.5"
+opaque_typedef_macros = "0.0.5"
+url = "1.7.2"
+fastobo-syntax = "0.2.0"
+memchr = { version = "2.2.0", optional = true }
+
+[features]
+default = ["memchr"]
+
+[dev-dependencies]
+lazy_static = "1.3.0"
+obofoundry = "0.1.2"
+pretty_assertions = "0.6.1"
+serde_yaml = "0.8.8"
+textwrap = "0.11.0"
+ureq = "0.9.1"

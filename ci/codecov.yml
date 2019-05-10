@@ -1,5 +1,3 @@
 ignore:
-  - "fastobo-py"
-  - "fastobo-py-derive"
-  - "fastobo/tests"
+  - "tests"
   - "examples"

@@ -1,6 +1,7 @@
 sudo: false
 dist: xenial
 language: Rust
+cache: cargo
 
 rust:
 - stable
@@ -14,11 +15,6 @@ env:
 
 git:
   depth: false
-
-cache:
-  directories:
-  - "$HOME/.cargo/bin"
-  - "$TRAVIS_BUILD_DIR/target"
 
 install:
 - ci/travis/install.sh

@@ -260,7 +260,7 @@ impl Orderable for OboDoc {
     fn sort(&mut self) {
         self.header.sort_unstable();
         // FIXME(@althonos): should probably not require cloning here.
-        self.entities.sort_unstable_by_key(|e| e.id().clone());
+        self.entities.sort_unstable_by_key(|e| e.as_id().clone());
         for entity in &mut self.entities {
             entity.sort()
         }
@@ -270,7 +270,7 @@ impl Orderable for OboDoc {
     fn is_sorted(&self) -> bool {
         // Check entities are sorted on their identifier.
         for i in 1..self.entities.len() {
-            if self.entities[i-1].id() > self.entities[i].id() {
+            if self.entities[i-1].as_id() > self.entities[i].as_id() {
                 return false
             }
         }

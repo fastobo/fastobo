@@ -66,6 +66,15 @@ impl<'i> FromPair<'i> for Qualifier {
 }
 impl_fromstr!(Qualifier);
 
+impl Identified for Qualifier {
+    fn as_id(&self) -> &Ident {
+        self.key.as_ref()
+    }
+    fn as_id_mut(&mut self) -> &mut Ident {
+        self.key.as_mut()
+    }
+}
+
 /// A list containing zero or more `Qualifier`s.
 #[derive(Clone, Default, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(allow_mut_ref)]

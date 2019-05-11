@@ -92,6 +92,18 @@ impl Display for InstanceFrame {
     }
 }
 
+impl Identified for InstanceFrame {
+    /// Get a reference to the identifier of the term.
+    fn as_id(&self) -> &Ident {
+        self.id.as_inner().as_ref()
+    }
+
+    /// Get a mutable reference to the identifier of the term.
+    fn as_id_mut(&mut self) -> &mut Ident {
+        self.id.as_mut().as_mut()
+    }
+}
+
 impl<'i> FromPair<'i> for InstanceFrame {
     const RULE: Rule = Rule::InstanceFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {

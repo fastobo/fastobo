@@ -77,8 +77,14 @@ pub trait Orderable {
     fn is_sorted(&self) -> bool;
 }
 
-/// A trait to access data and carry on operations common to all entities.
-pub trait Entity {
-    fn id(&self) -> &Ident;
-    fn id_mut(&mut self) -> &mut Ident;
+/// A trait for structs that have an identifier.
+pub trait Identified {
+    /// Get a reference to the identifier of the entity.
+    ///
+    /// This is made possible because all entities in OBO documents have an
+    /// identifier.
+    fn as_id(&self) -> &Ident;
+
+    /// Get a mutable reference to the identifier of the entity.
+    fn as_id_mut(&mut self) -> &mut Ident;
 }

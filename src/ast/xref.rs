@@ -105,6 +105,15 @@ impl<'i> FromPair<'i> for Xref {
 }
 impl_fromstr!(Xref);
 
+impl Identified for Xref {
+    fn as_id(&self) -> &Ident {
+        &self.id
+    }
+    fn as_id_mut(&mut self) -> &mut Ident {
+        &mut self.id
+    }
+}
+
 /// A list of containing zero or more `Xref`s.
 #[derive(Clone, Default, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialOrd, PartialEq)]
 #[opaque_typedef(allow_mut_ref)]

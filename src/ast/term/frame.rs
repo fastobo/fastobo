@@ -132,6 +132,18 @@ impl Display for TermFrame {
     }
 }
 
+impl Identified for TermFrame {
+    /// Get a reference to the identifier of the term.
+    fn as_id(&self) -> &Ident {
+        self.id.as_inner().as_ref()
+    }
+
+    /// Get a mutable reference to the identifier of the term.
+    fn as_id_mut(&mut self) -> &mut Ident {
+        self.id.as_mut().as_mut()
+    }
+}
+
 /// Create a new term frame with the frame ID given as a `Line`.
 impl From<Line<ClassIdent>> for TermFrame {
     fn from(line: Line<ClassIdent>) -> Self {

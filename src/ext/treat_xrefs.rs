@@ -135,7 +135,7 @@ pub fn as_has_subclass(
             subclass_map.entry(key).or_default().insert(value);
         }
 
-        entities_map.insert(entity.id().clone(), entity);
+        entities_map.insert(entity.as_id().clone(), entity);
     }
 
     // Patch all entity frames with the xref id `is_a` clause.
@@ -255,7 +255,7 @@ pub fn as_reverse_genus_differentia(
             subclass_map.entry(key).or_default().insert(value);
         }
 
-        entities_map.insert(entity.id().clone(), entity);
+        entities_map.insert(entity.as_id().clone(), entity);
     }
 
     // Patch all entity frames with the right `intersection_of` clauses.

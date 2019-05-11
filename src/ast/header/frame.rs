@@ -183,11 +183,6 @@ impl<'i> FromPair<'i> for HeaderFrame {
 }
 impl_fromstr!(HeaderFrame);
 
-// WIP(@althonos)
-// pub struct HeaderFrameRef<'a> {
-//     pub clauses: Cow<'a, &'a [HeaderClauseRef<'a>]>
-// }
-
 #[cfg(test)]
 mod tests {
 
@@ -284,5 +279,27 @@ mod tests {
             ]
         );
         assert!(!frame.is_sorted());
+    }
+
+    #[test]
+    fn sort() {
+        let mut frame = HeaderFrame::with_clauses(
+            vec![
+                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+            ]
+        );
+        frame.sort();
+        assert_eq!(
+            frame,
+            HeaderFrame::with_clauses(
+                vec![
+                    HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+                    HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+                    HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+                ]
+            )
+        );
     }
 }

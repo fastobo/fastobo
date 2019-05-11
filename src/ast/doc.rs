@@ -36,7 +36,7 @@ pub struct OboDoc {
 /// let doc1 = OboDoc::from_file("tests/data/ms.obo").unwrap();
 ///
 /// // This is equivalent to (but with the file path set in eventual errors):
-/// let mut r = BufReader::new(File::open("../tests/data/ms.obo").unwrap());
+/// let mut r = BufReader::new(File::open("tests/data/ms.obo").unwrap());
 /// let doc2 = OboDoc::from_stream(&mut r).unwrap();
 ///
 /// assert_eq!(doc1, doc2);

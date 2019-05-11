@@ -12,7 +12,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in a term frame.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum TermClause {
     IsAnonymous(bool),
     Name(UnquotedString),
@@ -31,11 +31,11 @@ pub enum TermClause {
     EquivalentTo(ClassIdent),
     DisjointFrom(ClassIdent),
     Relationship(RelationIdent, ClassIdent),
+    CreatedBy(UnquotedString),
+    CreationDate(IsoDateTime),
     IsObsolete(bool),
     ReplacedBy(ClassIdent),
     Consider(ClassIdent),
-    CreatedBy(UnquotedString),
-    CreationDate(IsoDateTime),
     // FIXME(@althonos): in the guide but not in the syntax.
     // ExpandAssertionTo(QuotedString, XrefList),
     // ExpandExpressionTO(QuotedString, XrefList),

@@ -182,6 +182,20 @@ impl IntoIterator for XrefList {
     }
 }
 
+impl Orderable for XrefList {
+    fn sort(&mut self) {
+        self.xrefs.sort_unstable();
+    }
+    fn is_sorted(&self) -> bool {
+        for i in 1..self.xrefs.len() {
+            if self.xrefs[i-1] > self.xrefs[i] {
+                return false;
+            }
+        }
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

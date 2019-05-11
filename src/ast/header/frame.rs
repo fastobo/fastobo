@@ -56,7 +56,6 @@ impl HeaderFrame {
     ///   contain any default namespace definition.
     /// - `CardinalityError::DuplicateClauses` if the header frame does
     ///   contain more than one default namespace definition.
-    ///
     pub fn default_namespace(&self) -> Result<&NamespaceIdent, CardinalityError> {
         let mut namespace: Option<&NamespaceIdent> = None;
         for clause in &self.clauses {
@@ -96,6 +95,25 @@ impl HeaderFrame {
             }
         }
         version.ok_or(CardinalityError::missing("data-version"))
+    }
+
+    /// Sort the header clauses in the right serialization order.
+    ///
+    /// # See Also
+    /// - The [Serializer conventions](https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5)
+    ///   section of the OBO Flat File format guide.
+    pub fn sort(&mut self) {
+        self.clauses.sort_unstable()
+    }
+
+    /// Check if the header clauses are sorted in the right serialization order.
+    pub fn is_sorted(&self) -> bool {
+        for i in 1..self.clauses.len() {
+            if self.clauses[i-1] > self.clauses[i] {
+                return false
+            }
+        }
+        true
     }
 }
 
@@ -242,5 +260,29 @@ mod tests {
     fn new() {
         let frame = HeaderFrame::new();
         self::assert_eq!(frame.clauses, Vec::new());
+    }
+
+    #[test]
+    fn is_sorted() {
+        let frame = HeaderFrame::new();
+        assert!(frame.is_sorted());
+
+        let frame = HeaderFrame::with_clauses(
+            vec![
+                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+            ]
+        );
+        assert!(frame.is_sorted());
+
+        let frame = HeaderFrame::with_clauses(
+            vec![
+                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+            ]
+        );
+        assert!(!frame.is_sorted());
     }
 }

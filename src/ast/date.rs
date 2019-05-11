@@ -1,4 +1,6 @@
+use std::cmp::Ord;
 use std::cmp::Ordering;
+use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -141,13 +143,84 @@ impl_fromstr!(NaiveDateTime);
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IsoDateTime {
-    day: u8,
-    month: u8,
     year: u16,
+    month: u8,
+    day: u8,
     hour: u8,
     minute: u8,
     second: u8,
     timezone: Option<IsoTimezone>,
+}
+
+impl IsoDateTime {
+    // FIXME(@althonos): check for date
+    /// Create a new `IsoDateTime` without a timezone.
+    pub fn new(day: u8, month: u8, year: u16, hour: u8, minute: u8, second: u8) -> Self {
+        IsoDateTime {
+            day,
+            month,
+            year,
+            hour,
+            minute,
+            second,
+            timezone: None,
+        }
+    }
+
+    /// Change the timezone component of the `IsoDateTime`.
+    pub fn with_timezone<I>(mut self, tz: I) -> Self
+    where
+        I: Into<Option<IsoTimezone>>,
+    {
+        self.timezone = tz.into();
+        self
+    }
+
+    /// Change the date component of the `IsoDateTime`.
+    pub fn with_date(mut self, day: u8, month: u8, year: u16) -> Self {
+        self.day = day;
+        self.month = month;
+        self.year = year;
+        self
+    }
+
+    /// Change the time component of the `IsoDateTime`.
+    pub fn with_time(mut self, hour: u8, minute: u8, second: u8) -> Self {
+        self.hour = hour;
+        self.minute = minute;
+        self.second = second;
+        self
+    }
+
+    /// Get the day of the `IsoDateTime`.
+    pub fn day(&self) -> u8 {
+        self.day
+    }
+
+    /// Get the month of the `IsoDateTime`.
+    pub fn month(&self) -> u8 {
+        self.month
+    }
+
+    /// Get the year of the `IsoDateTime`.
+    pub fn year(&self) -> u16 {
+        self.year
+    }
+
+    /// Get the hour of the `IsoDateTime`.
+    pub fn hour(&self) -> u8 {
+        self.hour
+    }
+
+    /// Get the minute of the `IsoDateTime`.
+    pub fn minute(&self) -> u8 {
+        self.minute
+    }
+
+    /// Get the second of the `IsoDateTime`.
+    pub fn second(&self) -> u8 {
+        self.second
+    }
 }
 
 impl Display for IsoDateTime {
@@ -197,12 +270,50 @@ impl<'i> FromPair<'i> for IsoDateTime {
 }
 impl_fromstr!(IsoDateTime);
 
+// FIXME(@althonos): implement proper datetime handling.
+impl Ord for IsoDateTime {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_string().partial_cmp(&other.to_string()).unwrap()
+    }
+}
+
+impl PartialOrd for IsoDateTime {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.to_string().partial_cmp(&other.to_string())
+    }
+}
+
+
 /// An ISO-8601 timezone.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum IsoTimezone {
     Utc,
     Plus(u8, u8),
     Minus(u8, u8),
+}
+
+impl DateTime for IsoDateTime {
+    /// Generate an XML Schema datetime serialization of the `IsoDateTime`.
+    fn to_xsd_datetime(&self) -> String {
+
+        let ref tz = match self.timezone {
+            None => String::new(),
+            Some(IsoTimezone::Utc) => String::from("Z"),
+            Some(IsoTimezone::Plus(h, m)) => format!("+{:02}:{:02}", h, m),
+            Some(IsoTimezone::Minus(h, m)) => format!("-{:02}:{:02}", h, m),
+        };
+
+        format!(
+            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}",
+            self.year,
+            self.month,
+            self.day,
+            self.hour,
+            self.minute,
+            self.second,
+            tz,
+        )
+    }
 }
 
 impl Display for IsoTimezone {
@@ -238,30 +349,6 @@ impl<'i> FromPair<'i> for IsoTimezone {
     }
 }
 impl_fromstr!(IsoTimezone);
-
-impl DateTime for IsoDateTime {
-    /// Generate an XML Schema datetime serialization of the `IsoDateTime`.
-    fn to_xsd_datetime(&self) -> String {
-
-        let ref tz = match self.timezone {
-            None => String::new(),
-            Some(IsoTimezone::Utc) => String::from("Z"),
-            Some(IsoTimezone::Plus(h, m)) => format!("+{:02}:{:02}", h, m),
-            Some(IsoTimezone::Minus(h, m)) => format!("-{:02}:{:02}", h, m),
-        };
-
-        format!(
-            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}",
-            self.year,
-            self.month,
-            self.day,
-            self.hour,
-            self.minute,
-            self.second,
-            tz,
-        )
-    }
-}
 
 #[cfg(test)]
 mod tests {

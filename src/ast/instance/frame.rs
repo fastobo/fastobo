@@ -124,3 +124,17 @@ impl<'a> IntoIterator for &'a InstanceFrame {
         self.clauses.as_slice().iter()
     }
 }
+
+impl Orderable for InstanceFrame {
+    fn sort(&mut self) {
+        self.clauses.sort_unstable();
+    }
+    fn is_sorted(&self) -> bool {
+        for i in 1..self.clauses.len() {
+            if self.clauses[i-1] > self.clauses[i] {
+                return false;
+            }
+        }
+        true
+    }
+}

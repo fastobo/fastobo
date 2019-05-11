@@ -11,7 +11,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in an instance frame.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum InstanceClause {
     IsAnonymous(bool),
     Name(UnquotedString),

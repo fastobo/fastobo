@@ -62,3 +62,23 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
+
+
+/// A trait for structs that can be sorted in an order specified in the OBO spec.
+pub trait Orderable {
+    /// Sort the elements of the collection in the right serialization order.
+    ///
+    /// # See Also
+    /// - The [Serializer conventions](https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5)
+    ///   section of the OBO Flat File format guide.
+    fn sort(&mut self);
+
+    /// Check if the collection is sorted in the right serialization order.
+    fn is_sorted(&self) -> bool;
+}
+
+/// A trait to access data and carry on operations common to all entities.
+pub trait Entity {
+    fn id(&self) -> &Ident;
+    fn id_mut(&mut self) -> &mut Ident;
+}

@@ -15,7 +15,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Line<T> {
     inner: T,
     qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
@@ -56,6 +56,22 @@ impl<T> Line<T> {
         }
     }
 
+    pub fn qualifiers(&self) -> Option<&QualifierList> {
+        self.qualifiers.as_ref()
+    }
+
+    pub fn qualifiers_mut(&mut self) -> Option<&mut QualifierList> {
+        self.qualifiers.as_mut()
+    }
+
+    pub fn comment(&self) -> Option<&Comment> {
+        self.comment.as_ref()
+    }
+
+    pub fn comment_mut(&mut self) -> Option<&mut Comment> {
+        self.comment.as_mut()
+    }
+
     /// Get a reference to the OBO clause wrapped in the line.
     pub fn as_inner(&self) -> &T {
         &self.inner
@@ -91,15 +107,6 @@ impl<T> BorrowMut<T> for Line<T> {
     }
 }
 
-impl<T> From<T> for Line<T> {
-    fn from(inner: T) -> Self {
-        Line {
-            inner,
-            qualifiers: None,
-            comment: None,
-        }
-    }
-}
 
 impl<T> Deref for Line<T> {
     type Target = T;
@@ -130,6 +137,16 @@ where
         }
 
         f.write_char('\n')
+    }
+}
+
+impl<T> From<T> for Line<T> {
+    fn from(inner: T) -> Self {
+        Line {
+            inner,
+            qualifiers: None,
+            comment: None,
+        }
     }
 }
 

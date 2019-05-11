@@ -13,7 +13,7 @@ use crate::parser::Rule;
 use crate::parser::QuickFind;
 
 /// A qualifier, possibly used as a trailing modifier.
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Qualifier {
     key: RelationIdent,
     value: QuotedString,
@@ -67,7 +67,7 @@ impl<'i> FromPair<'i> for Qualifier {
 impl_fromstr!(Qualifier);
 
 /// A list containing zero or more `Qualifier`s.
-#[derive(Clone, Default, Debug, Hash, Eq, PartialEq, OpaqueTypedef)]
+#[derive(Clone, Default, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),
@@ -85,6 +85,10 @@ pub struct QualifierList {
 impl QualifierList {
     pub fn new(qualifiers: Vec<Qualifier>) -> Self {
         Self { qualifiers }
+    }
+
+    pub fn sort(&mut self) {
+        self.qualifiers.sort_unstable();
     }
 }
 
@@ -131,6 +135,20 @@ impl IntoIterator for QualifierList {
     type IntoIter = <Vec<Qualifier> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
         self.qualifiers.into_iter()
+    }
+}
+
+impl Orderable for QualifierList {
+    fn sort(&mut self) {
+        self.qualifiers.sort_unstable();
+    }
+    fn is_sorted(&self) -> bool {
+        for i in 1..self.qualifiers.len() {
+            if self.qualifiers[i-1] > self.qualifiers[i] {
+                return false;
+            }
+        }
+        true
     }
 }
 

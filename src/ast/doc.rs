@@ -255,6 +255,38 @@ where
     }
 }
 
+impl Orderable for OboDoc {
+    /// Sort the document in the right serialization order.
+    fn sort(&mut self) {
+        self.header.sort_unstable();
+        // FIXME(@althonos): should probably not require cloning here.
+        self.entities.sort_unstable_by_key(|e| e.id().clone());
+        for entity in &mut self.entities {
+            entity.sort()
+        }
+    }
+
+    /// Check if the document is sorted in the right serialization order.
+    fn is_sorted(&self) -> bool {
+        // Check entities are sorted on their identifier.
+        for i in 1..self.entities.len() {
+            if self.entities[i-1].id() > self.entities[i].id() {
+                return false
+            }
+        }
+
+        // Check every entity is sorted.
+        for entity in &self.entities {
+            if !entity.is_sorted() {
+                return false
+            }
+        }
+
+        // Check the header is sorted.
+        self.header.is_sorted()
+    }
+}
+
 impl<'i> FromPair<'i> for OboDoc {
     const RULE: Rule = Rule::OboDoc;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {

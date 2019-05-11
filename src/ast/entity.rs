@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -94,3 +96,22 @@ impl<'i> FromPair<'i> for EntityFrame {
     }
 }
 impl_fromstr!(EntityFrame);
+
+impl Orderable for EntityFrame {
+    fn sort(&mut self) {
+        use self::EntityFrame::*;
+        match self {
+            Term(t) => t.sort(),
+            Typedef(t) => t.sort(),
+            Instance(i) => i.sort(),
+        }
+    }
+    fn is_sorted(&self) -> bool {
+        use self::EntityFrame::*;
+        match self {
+            Term(t) => t.is_sorted(),
+            Typedef(t) => t.is_sorted(),
+            Instance(i) => i.is_sorted(),
+        }
+    }
+}

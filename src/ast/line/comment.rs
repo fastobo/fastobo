@@ -15,7 +15,7 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// An inline comment without semantic value.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, OpaqueTypedef)]
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),

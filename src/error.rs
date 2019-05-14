@@ -1,6 +1,7 @@
 //! `Error` and `Result` types for this crate.
 
 use std::io::Error as IOError;
+use std::error::Error as StdError;
 
 use pest::Span;
 use pest::Position;
@@ -85,7 +86,10 @@ pub enum Error {
     /// # };
     /// ```
     #[fail(display = "parser error: {}", error)]
-    ParserError { error: PestError<Rule> },
+    ParserError {
+        #[cause]
+        error: PestError<Rule>
+    },
 
     /// An IO error occurred.
     ///
@@ -100,12 +104,18 @@ pub enum Error {
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     #[fail(display = "IO error: {}", error)]
-    IOError { error: IOError },
+    IOError {
+        #[cause]
+        error: IOError
+    },
 
     /// A cardinality-related error occurred.
-    #[fail(display = "cardinality error")]
-    #[cause(inner)]
-    CardinalityError { id: Option<Ident>, inner: CardinalityError }
+    #[fail(display = "cardinality error: {}", inner)]
+    CardinalityError {
+        id: Option<Ident>,
+        #[cause]
+        inner: CardinalityError
+    }
 }
 
 impl Error {

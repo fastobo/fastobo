@@ -80,9 +80,6 @@ pub trait Orderable {
 /// A trait for structs that have an identifier.
 pub trait Identified {
     /// Get a reference to the identifier of the entity.
-    ///
-    /// This is made possible because all entities in OBO documents have an
-    /// identifier.
     fn as_id(&self) -> &Ident;
 
     /// Get a mutable reference to the identifier of the entity.

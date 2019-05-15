@@ -90,7 +90,6 @@ foundrytest!(ddpheno);
 foundrytest!(wbphenotype);
 foundrytest!(fbdv);
 foundrytest!(omp);
-foundrytest!(ro);
 
 
 // --- Too large to run casually ---------------------------------------------
@@ -126,6 +125,7 @@ foundrytest!(#[ignore] envo);
 foundrytest!(#[ignore] mmo);
 foundrytest!(#[ignore] mi);
 foundrytest!(#[ignore] mco);
+foundrytest!(#[ignore] ro);
 // Invalid date
 foundrytest!(#[ignore] doid);
 // Invalid syntax (reported)

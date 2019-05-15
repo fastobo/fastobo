@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.2.0...HEAD
+
+
+## [0.2.0] - 2019-05-14
+
+[0.2.0]: https://github.com/fastobo/fastobo/compare/v0.1.1...v0.2.0
 
 ### Added
 - `Orderable` trait for syntax structs that must be serialized in a
@@ -25,7 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.1.1] - 2019-05-10
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.1.0...v0.1.1
+[0.1.1]: https://github.com/fastobo/fastobo/compare/v0.1.0...v0.1.1
 
 ### Added
 - [`PartialOrd`] implementation for header clauses, identifiers, `Synonym` 

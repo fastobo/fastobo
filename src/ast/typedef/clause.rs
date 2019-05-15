@@ -30,6 +30,7 @@ pub enum TypedefClause {
     IsCyclic(bool),
     IsReflexive(bool),
     IsSymmetric(bool),
+    IsAsymmetric(bool),
     IsTransitive(bool),
     IsFunctional(bool),
     IsInverseFunctional(bool),
@@ -84,6 +85,7 @@ impl Display for TypedefClause {
             IsCyclic(b) => f.write_str("is_cyclic: ").and(b.fmt(f)),
             IsReflexive(b) => f.write_str("is_reflexive: ").and(b.fmt(f)),
             IsSymmetric(b) => f.write_str("is_symmetric: ").and(b.fmt(f)),
+            IsAsymmetric(b) => f.write_str("is_asymmetric: ").and(b.fmt(f)),
             IsTransitive(b) => f.write_str("is_transitive: ").and(b.fmt(f)),
             IsFunctional(b) => f.write_str("is_functional: ").and(b.fmt(f)),
             IsInverseFunctional(b) => f.write_str("is_inverse_functional: ").and(b.fmt(f)),
@@ -215,6 +217,10 @@ impl<'i> FromPair<'i> for TypedefClause {
             Rule::IsSymmetricTag => {
                 let b = bool::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(TypedefClause::IsSymmetric(b))
+            }
+            Rule::IsAsymmetricTag => {
+                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::IsAsymmetric(b))
             }
             Rule::IsTransitiveTag => {
                 let b = bool::from_pair_unchecked(inner.next().unwrap())?;

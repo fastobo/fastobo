@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   particular order (e.g. `EntityFrame`, `XrefList`, `OboDoc`, ...).
 - `Identified` trait for syntax structs that have an identifier
   (e.g. `EntityFrame`, `Qualifier`, ...).
+- Support for `is_asymmetric` typedef clause.
 
 ### Fixed
 - `Error::IOError` and `Error::ParserError` will now return their inner 

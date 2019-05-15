@@ -90,6 +90,7 @@ foundrytest!(ddpheno);
 foundrytest!(wbphenotype);
 foundrytest!(fbdv);
 foundrytest!(omp);
+foundrytest!(ro);
 
 
 // --- Too large to run casually ---------------------------------------------
@@ -139,8 +140,6 @@ foundrytest!(#[ignore] zeco);
 foundrytest!(#[ignore] xlmod);
 // Unescaped quotes in QuotedString
 foundrytest!(#[ignore] rnao);
-// Undefined "is_asymmetric"
-foundrytest!(#[ignore] ro);
 // Download error
 foundrytest!(#[ignore] rs);
 // Deprecated and unreachable

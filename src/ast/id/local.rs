@@ -3,18 +3,20 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Rule;
 use crate::parser::QuickFind;
+use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
@@ -26,7 +28,7 @@ fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
         ':' => f.write_str("\\:"),
         '"' => f.write_str("\\\""),
         '\\' => f.write_str("\\\\"),
-        _ => f.write_char(char)
+        _ => f.write_char(char),
     })
 }
 
@@ -53,7 +55,6 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
     s.as_ref().chars().all(|c| c.is_ascii_digit())
 }
 
-
 /// A local identifier, preceded by a prefix in prefixed IDs.
 ///
 /// * A canonical local ID only contains digits (`[0-9]`).
@@ -69,7 +70,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.local().is_canonical());
 /// assert_eq!(id.local(), "0046154");
 /// ```
-#[derive(Clone, Debug, Ord, Hash, Eq)]
+#[derive(Clone, Debug, Ord, Eq)]
 pub struct IdentLocal {
     value: String,
     canonical: bool,
@@ -84,7 +85,7 @@ impl IdentLocal {
         let value = local.into();
         Self {
             canonical: is_canonical(&value),
-            value
+            value,
         }
     }
 
@@ -95,7 +96,10 @@ impl IdentLocal {
 
     /// Create a new `IdLocal` without checking if it is canonical.
     pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
-        Self { value: s, canonical }
+        Self {
+            value: s,
+            canonical,
+        }
     }
 
     /// Get the local identifier as a string slice.
@@ -161,6 +165,12 @@ impl<'i> FromPair<'i> for IdentLocal {
     }
 }
 impl_fromstr!(IdentLocal);
+
+impl Hash for IdentLocal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.value.hash(state)
+    }
+}
 
 impl PartialEq for IdentLocal {
     fn eq(&self, other: &Self) -> bool {
@@ -255,9 +265,7 @@ impl<'a> PartialOrd for IdLocal<'a> {
 impl<'a> Redeem<'a> for IdLocal<'a> {
     type Owned = IdentLocal;
     fn redeem(&self) -> Self::Owned {
-        unsafe {
-            IdentLocal::new_unchecked(self.value.to_owned(), self.canonical)
-        }
+        unsafe { IdentLocal::new_unchecked(self.value.to_owned(), self.canonical) }
     }
 }
 

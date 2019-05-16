@@ -86,7 +86,7 @@
 //! [Lawrence Berkeley National Laboratory](https://www.lbl.gov/), under the supervision of
 //! [Chris Mungall](http://biosciences.lbl.gov/profiles/chris-mungall/).
 
-
+#![warn(clippy::all)]
 #![allow(dead_code, unused_imports)]
 
 #[macro_use]
@@ -99,15 +99,15 @@ extern crate fastobo_syntax;
 extern crate memchr;
 extern crate opaque_typedef;
 extern crate pest;
-extern crate url;
 #[cfg(test)]
 extern crate textwrap;
+extern crate url;
 
 #[macro_use]
 pub mod parser;
 
 pub mod ast;
 pub mod error;
+pub mod ext;
 pub mod share;
 pub mod visit;
-pub mod ext;

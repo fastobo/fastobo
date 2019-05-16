@@ -283,7 +283,6 @@ impl PartialOrd for IsoDateTime {
     }
 }
 
-
 /// An ISO-8601 timezone.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum IsoTimezone {
@@ -295,8 +294,7 @@ pub enum IsoTimezone {
 impl DateTime for IsoDateTime {
     /// Generate an XML Schema datetime serialization of the `IsoDateTime`.
     fn to_xsd_datetime(&self) -> String {
-
-        let ref tz = match self.timezone {
+        let tz = match self.timezone {
             None => String::new(),
             Some(IsoTimezone::Utc) => String::from("Z"),
             Some(IsoTimezone::Plus(h, m)) => format!("+{:02}:{:02}", h, m),
@@ -305,13 +303,7 @@ impl DateTime for IsoDateTime {
 
         format!(
             "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}",
-            self.year,
-            self.month,
-            self.day,
-            self.hour,
-            self.minute,
-            self.second,
-            tz,
+            self.year, self.month, self.day, self.hour, self.minute, self.second, tz,
         )
     }
 }
@@ -353,9 +345,9 @@ impl_fromstr!(IsoTimezone);
 #[cfg(test)]
 mod tests {
 
+    use super::*;
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
-    use super::*;
 
     mod naive {
 

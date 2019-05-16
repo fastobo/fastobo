@@ -4,18 +4,18 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::iter::FromIterator;
 use std::iter::IntoIterator;
-use std::str::FromStr;
 use std::result::Result;
+use std::str::FromStr;
 
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
 use crate::error::CardinalityError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 /// The header frame, containing metadata about an OBO document.
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, OpaqueTypedef)]
@@ -66,7 +66,7 @@ impl HeaderFrame {
                 }
             }
         }
-        namespace.ok_or(CardinalityError::missing("default-namespace"))
+        namespace.ok_or_else(|| CardinalityError::missing("default-namespace"))
     }
 
     /// Get the format version of the ontology, if any is declared.
@@ -80,7 +80,7 @@ impl HeaderFrame {
                 }
             }
         }
-        version.ok_or(CardinalityError::missing("format-version"))
+        version.ok_or_else(|| CardinalityError::missing("format-version"))
     }
 
     /// Get the data version of the ontology, if any is declared.
@@ -94,7 +94,7 @@ impl HeaderFrame {
                 }
             }
         }
-        version.ok_or(CardinalityError::missing("data-version"))
+        version.ok_or_else(|| CardinalityError::missing("data-version"))
     }
 
     /// Sort the header clauses in the right serialization order.
@@ -109,8 +109,8 @@ impl HeaderFrame {
     /// Check if the header clauses are sorted in the right serialization order.
     pub fn is_sorted(&self) -> bool {
         for i in 1..self.clauses.len() {
-            if self.clauses[i-1] > self.clauses[i] {
-                return false
+            if self.clauses[i - 1] > self.clauses[i] {
+                return false;
             }
         }
         true
@@ -141,7 +141,7 @@ impl From<HeaderClause> for HeaderFrame {
 impl FromIterator<HeaderClause> for HeaderFrame {
     fn from_iter<T>(iter: T) -> Self
     where
-        T: IntoIterator<Item = HeaderClause>
+        T: IntoIterator<Item = HeaderClause>,
     {
         Self::with_clauses(iter.into_iter().collect())
     }
@@ -186,8 +186,8 @@ impl_fromstr!(HeaderFrame);
 #[cfg(test)]
 mod tests {
 
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn default_namespace() {
@@ -262,44 +262,36 @@ mod tests {
         let frame = HeaderFrame::new();
         assert!(frame.is_sorted());
 
-        let frame = HeaderFrame::with_clauses(
-            vec![
-                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-            ]
-        );
+        let frame = HeaderFrame::with_clauses(vec![
+            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+        ]);
         assert!(frame.is_sorted());
 
-        let frame = HeaderFrame::with_clauses(
-            vec![
-                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-            ]
-        );
+        let frame = HeaderFrame::with_clauses(vec![
+            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+        ]);
         assert!(!frame.is_sorted());
     }
 
     #[test]
     fn sort() {
-        let mut frame = HeaderFrame::with_clauses(
-            vec![
-                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-            ]
-        );
+        let mut frame = HeaderFrame::with_clauses(vec![
+            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+        ]);
         frame.sort();
         assert_eq!(
             frame,
-            HeaderFrame::with_clauses(
-                vec![
-                    HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-                    HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-                    HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-                ]
-            )
+            HeaderFrame::with_clauses(vec![
+                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+            ])
         );
     }
 }

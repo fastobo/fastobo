@@ -3,19 +3,20 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Rule;
 use crate::parser::QuickFind;
-
+use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
@@ -27,7 +28,7 @@ fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
         ':' => f.write_str("\\:"),
         '"' => f.write_str("\\\""),
         '\\' => f.write_str("\\\\"),
-        _ => f.write_char(char)
+        _ => f.write_char(char),
     })
 }
 
@@ -60,7 +61,6 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
     }
 }
 
-
 /// An identifier prefix, either canonical or non-canonical.
 ///
 /// * A canonical ID prefix only contains alphabetic characters (`[a-zA-Z]`)
@@ -76,7 +76,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.prefix().is_canonical());
 /// assert_eq!(id.prefix(), "GO");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord)]
+#[derive(Clone, Debug, Eq, Ord)]
 pub struct IdentPrefix {
     value: String,
     canonical: bool,
@@ -86,7 +86,7 @@ impl IdentPrefix {
     /// Create a new identifier prefix.
     pub fn new<S>(prefix: S) -> Self
     where
-        S: Into<String>
+        S: Into<String>,
     {
         let value = prefix.into();
         Self {
@@ -113,7 +113,10 @@ impl IdentPrefix {
     /// if the prefix needs escaping. If not set right, the syntax of the
     /// produced serialization could be invalid.
     pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
-        Self { canonical, value: s }
+        Self {
+            canonical,
+            value: s,
+        }
     }
 
     /// Get the prefix as a string slice.
@@ -179,6 +182,12 @@ impl<'i> FromPair<'i> for IdentPrefix {
 }
 impl_fromstr!(IdentPrefix);
 
+impl Hash for IdentPrefix {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.value.hash(state)
+    }
+}
+
 impl PartialEq for IdentPrefix {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
@@ -203,7 +212,6 @@ impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
     }
 }
 
-
 /// A borrowed `IdentPrefix`
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct IdPrefix<'a> {
@@ -226,7 +234,10 @@ impl<'a> IdPrefix<'a> {
 
     /// Create a new `IdPrf` without checking if it is canonical or not.
     pub unsafe fn new_unchecked(s: &'a str, canonical: bool) -> Self {
-        Self { value: s, canonical }
+        Self {
+            value: s,
+            canonical,
+        }
     }
 }
 
@@ -261,7 +272,10 @@ impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
         } else if inner.as_str().find('\\').is_some() {
             IdentPrefix::from_pair_unchecked(inner).map(Cow::Owned)
         } else {
-            Ok(Cow::Borrowed(IdPrefix::new_unchecked(inner.as_str(), false)))
+            Ok(Cow::Borrowed(IdPrefix::new_unchecked(
+                inner.as_str(),
+                false,
+            )))
         }
     }
 }
@@ -282,19 +296,16 @@ impl<'a> PartialOrd for IdPrefix<'a> {
 impl<'a> Redeem<'a> for IdPrefix<'a> {
     type Owned = IdentPrefix;
     fn redeem(&self) -> IdentPrefix {
-        unsafe {
-            IdentPrefix::new_unchecked(self.value.to_string(), self.canonical)
-        }
+        unsafe { IdentPrefix::new_unchecked(self.value.to_string(), self.canonical) }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     #[test]
     fn is_canonical() {

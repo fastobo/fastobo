@@ -3,12 +3,10 @@ extern crate pretty_assertions;
 extern crate fastobo;
 
 use std::path::PathBuf;
-use std::str::FromStr;
 
 use pretty_assertions::assert_eq;
 
 use fastobo::ast::OboDoc;
-
 
 macro_rules! canonicalizetest {
     ($name:ident) => {
@@ -33,8 +31,7 @@ macro_rules! canonicalizetest {
             let output = std::fs::read_to_string(&output_path).unwrap();
             assert_eq!(doc.to_string(), output);
         }
-    }
+    };
 }
-
 
 canonicalizetest!(header);

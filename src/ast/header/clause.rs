@@ -8,14 +8,13 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 /// A clause appearing in a header frame.
 ///
@@ -60,8 +59,7 @@ impl Display for HeaderClause {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::HeaderClause::*;
         match self {
-            FormatVersion(ref version) =>
-                f.write_str("format-version: ").and(version.fmt(f)),
+            FormatVersion(ref version) => f.write_str("format-version: ").and(version.fmt(f)),
             DataVersion(version) => f.write_str("data-version: ").and(version.fmt(f)),
             Date(date) => f.write_str("date: ").and(date.fmt(f)),
             SavedBy(person) => f.write_str("saved-by: ").and(person.fmt(f)),
@@ -116,9 +114,7 @@ impl Display for HeaderClause {
                 .and(prefix.fmt(f))
                 .and(f.write_char(' '))
                 .and(rel.fmt(f)),
-            TreatXrefsAsIsA(prefix) => f
-                .write_str("treat-xrefs-as-is_a: ")
-                .and(prefix.fmt(f)),
+            TreatXrefsAsIsA(prefix) => f.write_str("treat-xrefs-as-is_a: ").and(prefix.fmt(f)),
             TreatXrefsAsHasSubclass(prefix) => f
                 .write_str("treat-xrefs-as-has-subclass: ")
                 .and(prefix.fmt(f)),
@@ -253,8 +249,8 @@ impl_fromstr!(HeaderClause);
 #[cfg(test)]
 mod tests {
 
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn from_str() {
@@ -275,34 +271,29 @@ mod tests {
 
         let actual =
             HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
-        let expected = HeaderClause::NamespaceIdRule(
-            UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"),
-        );
+        let expected =
+            HeaderClause::NamespaceIdRule(UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"));
         assert_eq!(actual, expected);
 
         let actual = HeaderClause::from_str("treat-xrefs-as-relationship: TEST rel").unwrap();
         let expected = HeaderClause::TreatXrefsAsRelationship(
             IdentPrefix::new("TEST"),
-            RelationIdent::from(UnprefixedIdent::new("rel"))
+            RelationIdent::from(UnprefixedIdent::new("rel")),
         );
         assert_eq!(actual, expected);
 
-        let actual =
-            HeaderClause::from_str("tag: value").unwrap();
-        let expected = HeaderClause::Unreserved(
-            UnquotedString::new("tag"),
-            UnquotedString::new("value"),
-        );
+        let actual = HeaderClause::from_str("tag: value").unwrap();
+        let expected =
+            HeaderClause::Unreserved(UnquotedString::new("tag"), UnquotedString::new("value"));
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn partial_cmp() {
-
         macro_rules! assert_lt {
-            ($l:ident, $r:ident) => (
+            ($l:ident, $r:ident) => {
                 assert!($l < $r, "'{}' < '{}' is not true!", $l, $r)
-            )
+            };
         }
 
         let fv1 = HeaderClause::FormatVersion(UnquotedString::new("1.4"));

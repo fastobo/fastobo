@@ -54,7 +54,7 @@ impl Display for EntityFrame {
         use self::EntityFrame::*;
         match self {
             Term(t) => t.fmt(f),
-            Typedef(t) => t.fmt(f) ,
+            Typedef(t) => t.fmt(f),
             Instance(i) => i.fmt(f),
         }
     }
@@ -85,7 +85,7 @@ impl<'i> FromPair<'i> for EntityFrame {
         match inner.as_rule() {
             Rule::TermFrame => TermFrame::from_pair_unchecked(inner).map(From::from),
             Rule::TypedefFrame => TypedefFrame::from_pair_unchecked(inner).map(From::from),
-            Rule::InstanceFrame => unimplemented!(),
+            Rule::InstanceFrame => InstanceFrame::from_pair_unchecked(inner).map(From::from),
             _ => unreachable!(),
         }
     }

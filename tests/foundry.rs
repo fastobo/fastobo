@@ -92,6 +92,7 @@ foundrytest!(fbdv);
 foundrytest!(omp);
 foundrytest!(mco);
 foundrytest!(mp);
+foundrytest!(to);
 
 
 // --- Too large to run casually ---------------------------------------------
@@ -120,7 +121,6 @@ foundrytest!(#[ignore] ecocore);
 foundrytest!(#[ignore] chebi);
 foundrytest!(#[ignore] uberon);
 foundrytest!(#[ignore] xco);
-foundrytest!(#[ignore] to);
 foundrytest!(#[ignore] pw);
 // Invalid syntax (WIP)
 foundrytest!(#[ignore] envo);

@@ -9,8 +9,8 @@
 extern crate fastobo;
 extern crate isbn;
 
-use std::collections::HashSet;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::string::ToString;
 
@@ -39,7 +39,6 @@ impl<'a> Visit<'a> for IsbnChecker<'a> {
 
 fn main() {
     for path in std::env::args().skip(1) {
-
         // Parse the document
         let mut doc = match OboDoc::from_file(&path) {
             Ok(doc) => doc,
@@ -59,6 +58,5 @@ fn main() {
         for (id, err) in checker.invalid.iter() {
             println!("- {:<16}\t{:?}", id.to_string(), err)
         }
-
     }
 }

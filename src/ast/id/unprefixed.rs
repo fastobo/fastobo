@@ -9,15 +9,14 @@ use std::ops::Deref;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Rule;
 use crate::parser::QuickFind;
-
+use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
@@ -29,7 +28,7 @@ fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
         ':' => f.write_str("\\:"),
         '"' => f.write_str("\\\""),
         '\\' => f.write_str("\\\\"),
-        _ => f.write_char(char)
+        _ => f.write_char(char),
     })
 }
 
@@ -52,7 +51,6 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     Ok(())
 }
 
-
 /// An identifier without a prefix.
 #[derive(Clone, Debug, Ord, PartialEq, PartialOrd, Hash, Eq)]
 pub struct UnprefixedIdent {
@@ -63,7 +61,7 @@ impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
     pub fn new<S>(id: S) -> Self
     where
-        S: Into<String>
+        S: Into<String>,
     {
         Self { value: id.into() }
     }
@@ -199,10 +197,10 @@ impl ToOwned for UnprefixedId {
 #[cfg(test)]
 mod tests {
 
+    use super::*;
+    use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
-    use pretty_assertions::assert_eq;
-    use super::*;
 
     #[test]
     fn from_str() {

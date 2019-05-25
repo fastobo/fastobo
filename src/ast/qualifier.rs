@@ -9,8 +9,8 @@ use pest::iterators::Pair;
 use crate::ast::*;
 use crate::error::Result;
 use crate::parser::FromPair;
-use crate::parser::Rule;
 use crate::parser::QuickFind;
+use crate::parser::Rule;
 
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
@@ -117,11 +117,11 @@ impl Display for QualifierList {
 
 impl<Q> FromIterator<Q> for QualifierList
 where
-    Q: Into<Qualifier>
+    Q: Into<Qualifier>,
 {
     fn from_iter<T>(iter: T) -> Self
     where
-        T: IntoIterator<Item = Q>
+        T: IntoIterator<Item = Q>,
     {
         Self::new(iter.into_iter().map(Into::into).collect())
     }
@@ -153,7 +153,7 @@ impl Orderable for QualifierList {
     }
     fn is_sorted(&self) -> bool {
         for i in 1..self.qualifiers.len() {
-            if self.qualifiers[i-1] > self.qualifiers[i] {
+            if self.qualifiers[i - 1] > self.qualifiers[i] {
                 return false;
             }
         }
@@ -164,8 +164,8 @@ impl Orderable for QualifierList {
 #[cfg(test)]
 mod tests {
 
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn from_str() {

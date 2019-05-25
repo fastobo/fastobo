@@ -2,14 +2,13 @@ extern crate pretty_assertions;
 
 extern crate fastobo;
 
+use std::fs::read_to_string;
 use std::path::PathBuf;
 use std::str::FromStr;
-use std::fs::read_to_string;
 
 use pretty_assertions::assert_eq;
 
 use fastobo::ast::OboDoc;
-
 
 macro_rules! roundtriptest {
     ($name:ident) => {
@@ -28,9 +27,7 @@ macro_rules! roundtriptest {
             let doc = OboDoc::from_str(&txt).expect("could not parse file");
             assert_eq!(txt, doc.to_string());
         }
-    }
+    };
 }
-
-
 
 roundtriptest!(msterm);

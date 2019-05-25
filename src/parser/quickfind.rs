@@ -1,4 +1,4 @@
-pub trait QuickFind:  {
+pub trait QuickFind {
     fn quickfind(&self, needle: u8) -> Option<usize>;
     fn quickrfind(&self, needle: u8) -> Option<usize>;
     fn quickcount(&self, needle: u8) -> usize;

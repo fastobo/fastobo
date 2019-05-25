@@ -8,8 +8,8 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::FromSlice;
 use crate::parser::Rule;
-use crate::share::Share;
 use crate::share::Redeem;
+use crate::share::Share;
 
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! ident_subclass {
@@ -96,7 +96,6 @@ macro_rules! ident_subclasses {
     }
 }
 
-
 macro_rules! id_subclass {
     (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident : &$life:lifetime $owned:ident) => {
         #[doc=$docstring]
@@ -154,7 +153,6 @@ macro_rules! id_subclass {
     }
 }
 
-
 macro_rules! id_subclasses {
     ($(#[doc = $docstring:literal] $rule:expr => pub struct $name:ident : &$life:lifetime $owned:ident;)*) => {
         $(id_subclass!(#[doc = $docstring] $rule => pub struct $name : &$life $owned);)*
@@ -183,7 +181,6 @@ ident_subclasses! {
     /// A unique identifier for a synonym type.
     Rule::SynonymTypeId => pub struct SynonymTypeIdent;
 }
-
 
 id_subclasses! {
     /// A borrowed `ClassIdent`.

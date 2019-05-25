@@ -12,11 +12,10 @@
 //! [`OboDoc::from_stream`]: ./struct.OboDoc.html#method.from_stream
 //! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.
 
-
 mod date;
 mod doc;
-mod header;
 mod entity;
+mod header;
 mod id;
 mod instance;
 mod line;
@@ -28,11 +27,10 @@ mod term;
 mod typedef;
 mod xref;
 
-
 pub use self::date::*;
 pub use self::doc::*;
-pub use self::header::*;
 pub use self::entity::*;
+pub use self::header::*;
 pub use self::id::*;
 pub use self::instance::*;
 pub use self::line::*;
@@ -63,7 +61,6 @@ use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
-
 
 /// A trait for structs that can be sorted in an order specified in the OBO spec.
 pub trait Orderable {

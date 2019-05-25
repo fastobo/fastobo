@@ -54,7 +54,6 @@ use crate::ast::*;
 
 /// Syntax tree traversal to walk a shared borrow of an OBO syntax tree.
 pub trait Visit<'ast> {
-
     fn visit_class_ident(&mut self, id: &'ast ClassIdent) {
         self.visit_ident(id.as_ref())
     }
@@ -355,7 +354,7 @@ pub trait Visit<'ast> {
                 self.visit_xref_list(xrefs);
             }
 
-            IsMetadataTag(_) | IsClassLevel(_) => ()
+            IsMetadataTag(_) | IsClassLevel(_) => (),
         }
     }
 
@@ -387,13 +386,10 @@ pub trait Visit<'ast> {
             self.visit_xref(xref)
         }
     }
-
 }
-
 
 /// Syntax tree traversal to walk a mutable borrow of an OBO syntax tree.
 pub trait VisitMut {
-
     fn visit_class_ident(&mut self, id: &mut ClassIdent) {
         self.visit_ident(id.as_mut())
     }
@@ -696,7 +692,7 @@ pub trait VisitMut {
                 self.visit_xref_list(xrefs);
             }
 
-            IsMetadataTag(_) | IsClassLevel(_) => ()
+            IsMetadataTag(_) | IsClassLevel(_) => (),
         }
     }
 
@@ -730,5 +726,4 @@ pub trait VisitMut {
             self.visit_xref(xref)
         }
     }
-
 }

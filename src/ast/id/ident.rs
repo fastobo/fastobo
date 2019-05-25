@@ -1,5 +1,5 @@
-use std::cmp::PartialOrd;
 use std::cmp::Ordering;
+use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -7,12 +7,12 @@ use std::fmt::Write;
 
 use pest::iterators::Pair;
 
-use crate::share::Share;
-use crate::share::Redeem;
-use crate::share::Cow;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 use super::PrefixedId;
 use super::PrefixedIdent;
@@ -79,7 +79,7 @@ impl PartialOrd for Ident {
             (Prefixed(l), Prefixed(r)) => l.partial_cmp(r),
             (Unprefixed(l), Unprefixed(r)) => l.partial_cmp(r),
             (Url(l), Url(r)) => l.partial_cmp(r),
-            (l, r) => l.to_string().partial_cmp(&r.to_string())
+            (l, r) => l.to_string().partial_cmp(&r.to_string()),
         }
     }
 }
@@ -114,9 +114,9 @@ impl<'a> Display for Id<'a> {
 }
 
 impl<'a> From<PrefixedId<'a>> for Id<'a> {
-     fn from(id: PrefixedId<'a>) -> Self {
-         Id::Prefixed(Cow::Borrowed(id))
-     }
+    fn from(id: PrefixedId<'a>) -> Self {
+        Id::Prefixed(Cow::Borrowed(id))
+    }
 }
 
 impl<'a> From<&'a UnprefixedId> for Id<'a> {
@@ -137,9 +137,11 @@ impl<'i> FromPair<'i> for Id<'i> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::PrefixedId => Cow::<PrefixedId>::from_pair_unchecked(inner).map(Id::Prefixed),
-            Rule::UnprefixedId => Cow::<&UnprefixedId>::from_pair_unchecked(inner).map(Id::Unprefixed),
+            Rule::UnprefixedId => {
+                Cow::<&UnprefixedId>::from_pair_unchecked(inner).map(Id::Unprefixed)
+            }
             Rule::UrlId => Url::from_pair_unchecked(inner).map(Cow::Owned).map(Id::Url),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }
@@ -151,19 +153,18 @@ impl<'a> Redeem<'a> for Id<'a> {
         match self {
             Id::Prefixed(cow) => Ident::Prefixed(cow.redeem()),
             Id::Unprefixed(cow) => Ident::Unprefixed(cow.redeem()),
-            Id::Url(cow) => Ident::Url(cow.redeem())
+            Id::Url(cow) => Ident::Url(cow.redeem()),
         }
     }
 }
 
-
 #[cfg(test)]
 mod tests {
 
+    use super::*;
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
-    use super::*;
 
     #[test]
     fn from_str() {

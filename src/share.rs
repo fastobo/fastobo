@@ -43,9 +43,8 @@
 //! # assert_eq!(s1.0, s2.0);
 //! ```
 
-
-use std::fmt::Display;
 use std::fmt::Debug;
+use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
@@ -92,7 +91,7 @@ where
 
 impl<'a, T> Redeem<'a> for &'a T
 where
-    T: Clone
+    T: Clone,
 {
     type Owned = T;
     fn redeem(&self) -> Self::Owned {
@@ -174,7 +173,7 @@ where
 
 impl<'a, B> From<&'a B> for Cow<'a, &'a B>
 where
-    &'a B: Redeem<'a>
+    &'a B: Redeem<'a>,
 {
     fn from(b: &'a B) -> Self {
         Cow::Borrowed(b)
@@ -184,7 +183,7 @@ where
 impl<'a, B> Display for Cow<'a, B>
 where
     B: Display + Redeem<'a>,
-    <B as Redeem<'a>>::Owned: Display
+    <B as Redeem<'a>>::Owned: Display,
 {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
@@ -214,7 +213,7 @@ where
 {
     fn hash<H>(&self, state: &mut H)
     where
-        H: Hasher
+        H: Hasher,
     {
         match self {
             Cow::Borrowed(b) => b.hash(state),
@@ -274,7 +273,7 @@ impl<'a> PartialEq for Cow<'a, &'a str> {
 
 impl<'a, T> Redeem<'a> for &'a [T]
 where
-    T: 'a + Clone
+    T: 'a + Clone,
 {
     type Owned = Vec<T>;
     fn redeem(&'a self) -> Vec<T> {

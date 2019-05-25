@@ -208,8 +208,8 @@ impl_fromstr!(TermClause);
 #[cfg(test)]
 mod tests {
 
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     mod is_anonymous {
         use super::*;
@@ -259,8 +259,10 @@ mod tests {
             )
             .unwrap();
             let expected = TermClause::Def(
-                QuotedString::new(String::from("A reference string relevant to the sample under study.")),
-                XrefList::from(vec![Xref::new(PrefixedIdent::new("PSI", "MS"))])
+                QuotedString::new(String::from(
+                    "A reference string relevant to the sample under study.",
+                )),
+                XrefList::from(vec![Xref::new(PrefixedIdent::new("PSI", "MS"))]),
             );
             self::assert_eq!(actual, expected);
 
@@ -282,7 +284,8 @@ mod tests {
 
         #[test]
         fn from_str() {
-            let actual = TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
+            let actual =
+                TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
             let expected = TermClause::Synonym(Synonym::with_xrefs(
                 QuotedString::new("chemical entity"),
                 SynonymScope::Exact,
@@ -306,10 +309,12 @@ mod tests {
             self::assert_eq!(actual, expected);
 
             let actual =
-                TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
-            let expected = TermClause::Xref(Xref::new(
-                PrefixedIdent::new("Wikipedia", "https://en.wikipedia.org/wiki/Gas")
-            ));
+                TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas")
+                    .unwrap();
+            let expected = TermClause::Xref(Xref::new(PrefixedIdent::new(
+                "Wikipedia",
+                "https://en.wikipedia.org/wiki/Gas",
+            )));
             self::assert_eq!(actual, expected);
         }
     }
@@ -328,21 +333,20 @@ mod tests {
             let actual =
                 Line::<TermClause>::from_str("intersection_of: part_of PO:0020039 ! leaf lamina\n")
                     .unwrap();
-            let expected =
-            Line::from(
-                TermClause::IntersectionOf(
-                    Some(RelationIdent::from(UnprefixedIdent::new("part_of"))),
-                    ClassIdent::from(PrefixedIdent::new("PO", "0020039")),
-                ),
-            ).and_comment(Comment::new("leaf lamina"));
+            let expected = Line::from(TermClause::IntersectionOf(
+                Some(RelationIdent::from(UnprefixedIdent::new("part_of"))),
+                ClassIdent::from(PrefixedIdent::new("PO", "0020039")),
+            ))
+            .and_comment(Comment::new("leaf lamina"));
             self::assert_eq!(actual, expected);
 
             let actual =
-                Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n").unwrap();
+                Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n")
+                    .unwrap();
             let expected = Line::with_comment(Comment::new("leaf epidermis")).and_inner(
                 TermClause::IntersectionOf(
                     None,
-                    ClassIdent::from(PrefixedIdent::new("PO", "0006016"))
+                    ClassIdent::from(PrefixedIdent::new("PO", "0006016")),
                 ),
             );
             self::assert_eq!(actual, expected);

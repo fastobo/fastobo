@@ -6,21 +6,16 @@ use crate::ast::*;
 use self::EntityFrame::*;
 
 /// Apply a single `treat-xrefs-as-equivalent` macro to the whole document.
-pub fn as_equivalent(
-    entities: &mut Vec<EntityFrame>,
-    prefix: &IdentPrefix
-) {
+pub fn as_equivalent(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
     // Macro to reduce code duplication
     macro_rules! process {
-        ($frame:ident, $clause:ident) => ({
+        ($frame:ident, $clause:ident) => {{
             let mut new = Vec::with_capacity($frame.clauses().len());
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
-                            new.push(Line::from(
-                                $clause::EquivalentTo(xref.id().clone().into())
-                            ));
+                            new.push(Line::from($clause::EquivalentTo(xref.id().clone().into())));
                         }
                     }
                 }
@@ -31,7 +26,7 @@ pub fn as_equivalent(
                     clauses.push(new_clause);
                 }
             }
-        });
+        }};
     }
 
     for entity in entities.iter_mut() {
@@ -44,21 +39,16 @@ pub fn as_equivalent(
 }
 
 /// Apply a single `treat-xrefs-as-is_a` macro to the whole document.
-pub fn as_is_a(
-    entities: &mut Vec<EntityFrame>,
-    prefix: &IdentPrefix
-) {
+pub fn as_is_a(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
     // Macro to reduce code duplication
     macro_rules! process {
-        ($frame:ident, $clause:ident) => ({
+        ($frame:ident, $clause:ident) => {{
             let mut new = Vec::with_capacity($frame.clauses().len());
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
-                            new.push(Line::from(
-                                $clause::IsA(xref.id().clone().into())
-                            ));
+                            new.push(Line::from($clause::IsA(xref.id().clone().into())));
                         }
                     }
                 }
@@ -70,7 +60,7 @@ pub fn as_is_a(
                     clauses.push(new_clause);
                 }
             }
-        });
+        }};
     }
 
     for entity in entities.iter_mut() {
@@ -83,14 +73,13 @@ pub fn as_is_a(
 }
 
 /// Apply a single `treat-xrefs-as-is_a` macro to the whole document.
-pub fn as_has_subclass(
-    entities: &mut Vec<EntityFrame>,
-    prefix: &IdentPrefix
-) {
+pub fn as_has_subclass(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
     // Collect subclass info into a mapping where `key is_a value`
     macro_rules! collect {
-        () => (HashMap::new());
-        ($frame:ident, $clause:ident) => ({
+        () => {
+            HashMap::new()
+        };
+        ($frame:ident, $clause:ident) => {{
             let mut new: HashMap<Ident, Ident> = HashMap::new();
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
@@ -105,26 +94,22 @@ pub fn as_has_subclass(
                 }
             }
             new
-        });
+        }};
     }
 
     /// Add `is_a: $supercls` clause to the `$subcls` frame.
     macro_rules! process {
-        ($subcls:ident, $supercls:ident, $clause:ident) => ({
-            $subcls.clauses_mut().push(
-                Line::from(
-                    $clause::IsA($supercls.clone().into())
-                )
-            );
-        })
+        ($subcls:ident, $supercls:ident, $clause:ident) => {{
+            $subcls
+                .clauses_mut()
+                .push(Line::from($clause::IsA($supercls.clone().into())));
+        }};
     }
-
 
     // Collect a complete map of all `is_a` clauses that must be added.
     let mut subclass_map: HashMap<Ident, HashSet<Ident>> = HashMap::new();
     let mut entities_map: HashMap<Ident, &mut EntityFrame> = HashMap::new();
     for entity in entities.iter_mut() {
-
         let entity_mapping = match entity {
             Term(x) => collect!(x, TermClause),
             Typedef(x) => collect!(x, TypedefClause),
@@ -144,7 +129,7 @@ pub fn as_has_subclass(
             match entities_map.get_mut(&subclass) {
                 Some(Term(ref mut x)) => process!(x, superclass, TermClause),
                 Some(Typedef(ref mut x)) => process!(x, superclass, TypedefClause),
-                _ => ()
+                _ => (),
             }
         }
     }
@@ -168,11 +153,13 @@ pub fn as_genus_differentia(
                         if p.prefix() == prefix {
                             // add genus from Xref
                             new.push(Line::from(TermClause::IntersectionOf(
-                                None, xref.id().clone().into()
+                                None,
+                                xref.id().clone().into(),
                             )));
                             // add differentia from header
                             new.push(Line::from(TermClause::IntersectionOf(
-                                Some(relid.clone()), classid.clone()
+                                Some(relid.clone()),
+                                classid.clone(),
                             )));
                         }
                     }
@@ -194,18 +181,19 @@ pub fn as_genus_differentia(
     }
 }
 
-
 /// Apply a single `treat-xrefs-as-reverse-genus-differentia` macro to the whole document.
 pub fn as_reverse_genus_differentia(
     entities: &mut Vec<EntityFrame>,
     prefix: &IdentPrefix,
     relid: &RelationIdent,
-    classid: &ClassIdent
+    classid: &ClassIdent,
 ) {
     /// Collect genus info into a mapping where `value := intersection_of key`
     macro_rules! collect {
-        () => (HashMap::new());
-        ($frame:ident, $clause:ident) => ({
+        () => {
+            HashMap::new()
+        };
+        ($frame:ident, $clause:ident) => {{
             let mut new: HashMap<Ident, Ident> = HashMap::new();
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
@@ -220,31 +208,28 @@ pub fn as_reverse_genus_differentia(
                 }
             }
             new
-        })
+        }};
     }
 
     /// Add genus-differentia to the other frame.
     macro_rules! process {
-        ($frame:ident, $genus:ident, $clause:ident) => ({
+        ($frame:ident, $genus:ident, $clause:ident) => {{
             let clauses = $frame.clauses_mut();
-            clauses.push(
-                Line::from(
-                    $clause::IntersectionOf(None, $genus.clone().into())
-                )
-            );
-            clauses.push(
-                Line::from(
-                    $clause::IntersectionOf(Some(relid.clone()), classid.clone())
-                )
-            );
-        })
+            clauses.push(Line::from($clause::IntersectionOf(
+                None,
+                $genus.clone().into(),
+            )));
+            clauses.push(Line::from($clause::IntersectionOf(
+                Some(relid.clone()),
+                classid.clone(),
+            )));
+        }};
     }
 
     // Collect a complete map of all `is_a` clauses that must be added.
     let mut subclass_map: HashMap<Ident, HashSet<Ident>> = HashMap::new();
     let mut entities_map: HashMap<Ident, &mut EntityFrame> = HashMap::new();
     for entity in entities.iter_mut() {
-
         let entity_mapping = match entity {
             Term(x) => collect!(x, TermClause),
             Typedef(_) => collect!(),
@@ -272,22 +257,20 @@ pub fn as_reverse_genus_differentia(
 pub fn as_relationship(
     entities: &mut Vec<EntityFrame>,
     prefix: &IdentPrefix,
-    relid: &RelationIdent
+    relid: &RelationIdent,
 ) {
     // Macro to reduce code duplication
     macro_rules! process {
-        ($frame:ident, $clause:ident) => ({
+        ($frame:ident, $clause:ident) => {{
             let mut new = Vec::with_capacity($frame.clauses().len());
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
-                            new.push(Line::from(
-                                $clause::Relationship(
-                                    relid.clone(),
-                                    xref.id().clone().into()
-                                )
-                            ));
+                            new.push(Line::from($clause::Relationship(
+                                relid.clone(),
+                                xref.id().clone().into(),
+                            )));
                         }
                     }
                 }
@@ -299,7 +282,7 @@ pub fn as_relationship(
                     clauses.push(new_clause);
                 }
             }
-        });
+        }};
     }
 
     for entity in entities.iter_mut() {
@@ -325,7 +308,8 @@ mod tests {
 
     #[test]
     fn as_equivalent() {
-        let mut doc = OboDoc::from_str(&dedent("
+        let mut doc = OboDoc::from_str(&dedent(
+            "
             treat-xrefs-as-equivalent: TEST
 
             [Term]
@@ -334,11 +318,15 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
         doc.treat_xrefs();
 
-        self::assert_eq!(dedent("
+        self::assert_eq!(
+            dedent(
+                "
             treat-xrefs-as-equivalent: TEST
 
             [Term]
@@ -348,12 +336,17 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ").trim_start_matches('\n'), doc.to_string());
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
     }
 
     #[test]
     fn as_is_a() {
-        let mut doc = OboDoc::from_str(&dedent("
+        let mut doc = OboDoc::from_str(&dedent(
+            "
             treat-xrefs-as-is_a: TEST
 
             [Term]
@@ -362,11 +355,15 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
         doc.treat_xrefs();
 
-        self::assert_eq!(dedent("
+        self::assert_eq!(
+            dedent(
+                "
             treat-xrefs-as-is_a: TEST
 
             [Term]
@@ -376,12 +373,17 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ").trim_start_matches('\n'), doc.to_string());
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
     }
 
     #[test]
     fn as_has_subclass() {
-        let mut doc = OboDoc::from_str(&dedent("
+        let mut doc = OboDoc::from_str(&dedent(
+            "
             treat-xrefs-as-has-subclass: TEST
 
             [Term]
@@ -390,11 +392,15 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
         doc.treat_xrefs();
 
-        self::assert_eq!(dedent("
+        self::assert_eq!(
+            dedent(
+                "
             treat-xrefs-as-has-subclass: TEST
 
             [Term]
@@ -404,12 +410,17 @@ mod tests {
             [Term]
             id: TEST:002
             is_a: TEST:001
-        ").trim_start_matches('\n'), doc.to_string());
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
     }
 
     #[test]
     fn as_genus_differentia() {
-        let mut doc = OboDoc::from_str(&dedent("
+        let mut doc = OboDoc::from_str(&dedent(
+            "
             treat-xrefs-as-genus-differentia: TEST part_of something
 
             [Term]
@@ -418,11 +429,15 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
         doc.treat_xrefs();
 
-        self::assert_eq!(dedent("
+        self::assert_eq!(
+            dedent(
+                "
             treat-xrefs-as-genus-differentia: TEST part_of something
 
             [Term]
@@ -433,12 +448,17 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ").trim_start_matches('\n'), doc.to_string());
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
     }
 
     #[test]
     fn as_reverse_genus_differentia() {
-        let mut doc = OboDoc::from_str(&dedent("
+        let mut doc = OboDoc::from_str(&dedent(
+            "
             treat-xrefs-as-reverse-genus-differentia: TEST part_of something
 
             [Term]
@@ -447,11 +467,15 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
         doc.treat_xrefs();
 
-        self::assert_eq!(dedent("
+        self::assert_eq!(
+            dedent(
+                "
             treat-xrefs-as-reverse-genus-differentia: TEST part_of something
 
             [Term]
@@ -462,12 +486,17 @@ mod tests {
             id: TEST:002
             intersection_of: TEST:001
             intersection_of: part_of something
-        ").trim_start_matches('\n'), doc.to_string());
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
     }
 
     #[test]
     fn as_relationship() {
-        let mut doc = OboDoc::from_str(&dedent("
+        let mut doc = OboDoc::from_str(&dedent(
+            "
             treat-xrefs-as-relationship: TEST connected_to
 
             [Term]
@@ -476,11 +505,15 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
         doc.treat_xrefs();
 
-        self::assert_eq!(dedent("
+        self::assert_eq!(
+            dedent(
+                "
             treat-xrefs-as-relationship: TEST connected_to
 
             [Term]
@@ -490,6 +523,10 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ").trim_start_matches('\n'), doc.to_string());
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
     }
 }

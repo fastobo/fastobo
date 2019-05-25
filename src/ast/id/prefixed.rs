@@ -7,17 +7,17 @@ use std::fmt::Write;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
+use super::IdLocal;
+use super::IdPrefix;
+use super::IdentLocal;
+use super::IdentPrefix;
 use crate::error::Error;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-use super::IdPrefix;
-use super::IdentPrefix;
-use super::IdLocal;
-use super::IdentLocal;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 /// An identifier with a prefix.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
@@ -45,11 +45,11 @@ impl PrefixedIdent {
     pub fn new<P, L>(prefix: P, local: L) -> Self
     where
         P: Into<IdentPrefix>,
-        L: Into<IdentLocal>
+        L: Into<IdentLocal>,
     {
         Self {
             prefix: prefix.into(),
-            local: local.into()
+            local: local.into(),
         }
     }
 
@@ -129,10 +129,7 @@ impl PartialOrd for PrefixedIdent {
 
 impl<'a> Share<'a, PrefixedId<'a>> for PrefixedIdent {
     fn share(&'a self) -> PrefixedId<'a> {
-        PrefixedId::new(
-            self.prefix.share(),
-            self.local.share(),
-        )
+        PrefixedId::new(self.prefix.share(), self.local.share())
     }
 }
 
@@ -193,26 +190,36 @@ impl<'a> Redeem<'a> for PrefixedId<'a> {
 #[cfg(test)]
 mod tests {
 
+    use super::*;
+    use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
-    use pretty_assertions::assert_eq;
-    use super::*;
 
     #[test]
     fn from_str() {
         let actual = PrefixedIdent::from_str("GO:0046154").unwrap();
-        let expected = PrefixedIdent::new(IdentPrefix::new(String::from("GO")), IdentLocal::new(String::from("0046154")));
+        let expected = PrefixedIdent::new(
+            IdentPrefix::new(String::from("GO")),
+            IdentLocal::new(String::from("0046154")),
+        );
         self::assert_eq!(actual, expected);
 
         let actual = PrefixedIdent::from_str("PSI:MS").unwrap();
-        let expected = PrefixedIdent::new(IdentPrefix::new(String::from("PSI")), IdentLocal::new(String::from("MS")));
+        let expected = PrefixedIdent::new(
+            IdentPrefix::new(String::from("PSI")),
+            IdentLocal::new(String::from("MS")),
+        );
         self::assert_eq!(actual, expected);
 
         let actual = PrefixedIdent::from_str("CAS:22325-47-9").unwrap();
-        let expected = PrefixedIdent::new(IdentPrefix::new(String::from("CAS")), IdentLocal::new(String::from("22325-47-9")));
+        let expected = PrefixedIdent::new(
+            IdentPrefix::new(String::from("CAS")),
+            IdentLocal::new(String::from("22325-47-9")),
+        );
         self::assert_eq!(actual, expected);
 
-        let actual = PrefixedIdent::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
+        let actual =
+            PrefixedIdent::from_str("Wikipedia:https\\://en.wikipedia.org/wiki/Gas").unwrap();
         let expected = PrefixedIdent::new(
             IdentPrefix::new(String::from("Wikipedia")),
             IdentLocal::new(String::from("https://en.wikipedia.org/wiki/Gas")),
@@ -227,7 +234,10 @@ mod tests {
 
     #[test]
     fn to_string() {
-        let id = PrefixedIdent::new(IdentPrefix::new(String::from("GO")), IdentLocal::new(String::from("0046154")));
+        let id = PrefixedIdent::new(
+            IdentPrefix::new(String::from("GO")),
+            IdentLocal::new(String::from("0046154")),
+        );
         self::assert_eq!(id.to_string(), "GO:0046154")
     }
 }

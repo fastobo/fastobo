@@ -6,18 +6,18 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::ops::Deref;
 
-use pest::iterators::Pair;
 use opaque_typedef::OpaqueTypedefUnsized;
+use pest::iterators::Pair;
 
+use super::escape;
+use super::unescape;
 use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
-use crate::share::Share;
 use crate::share::Cow;
 use crate::share::Redeem;
-use super::escape;
-use super::unescape;
+use crate::share::Share;
 
 /// A string enclosed by quotes, used for definitions.
 ///
@@ -51,7 +51,7 @@ impl QuotedString {
     /// Create a new `QuotedString` from an unescaped string.
     pub fn new<S>(s: S) -> Self
     where
-        S: Into<String>
+        S: Into<String>,
     {
         QuotedString { value: s.into() }
     }
@@ -199,10 +199,10 @@ impl ToOwned for QuotedStr {
 #[cfg(test)]
 mod tests {
 
+    use super::*;
+    use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
-    use pretty_assertions::assert_eq;
-    use super::*;
 
     #[test]
     fn from_str() {

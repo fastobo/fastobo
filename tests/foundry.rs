@@ -94,53 +94,147 @@ foundrytest!(mco);
 foundrytest!(mp);
 foundrytest!(to);
 
-
 // --- Too large to run casually ---------------------------------------------
 
-foundrytest!(#[ignore] mondo);
-foundrytest!(#[ignore] ncbitaxon);
-foundrytest!(#[ignore] ncit);
-foundrytest!(#[ignore] go);
-foundrytest!(#[ignore] vto);
-foundrytest!(#[ignore] pr);
-foundrytest!(#[ignore] tto);
-
+foundrytest!(
+    #[ignore]
+    mondo
+);
+foundrytest!(
+    #[ignore]
+    ncbitaxon
+);
+foundrytest!(
+    #[ignore]
+    ncit
+);
+foundrytest!(
+    #[ignore]
+    go
+);
+foundrytest!(
+    #[ignore]
+    vto
+);
+foundrytest!(
+    #[ignore]
+    pr
+);
+foundrytest!(
+    #[ignore]
+    tto
+);
 
 // --- Expected failures -----------------------------------------------------
 
 // Outdated syntax (`exact_synonym`, `xref_analog`)
-foundrytest!(#[ignore] trans);
-foundrytest!(#[ignore] fix);
+foundrytest!(
+    #[ignore]
+    trans
+);
+foundrytest!(
+    #[ignore]
+    fix
+);
 // Invalid syntax caused by ChEBI
-foundrytest!(#[ignore] fypo);
-foundrytest!(#[ignore] sibo);
-foundrytest!(#[ignore] fbcv);
+foundrytest!(
+    #[ignore]
+    fypo
+);
+foundrytest!(
+    #[ignore]
+    sibo
+);
+foundrytest!(
+    #[ignore]
+    fbcv
+);
 // Invalid syntax caused by ENVO
-foundrytest!(#[ignore] ecocore);
+foundrytest!(
+    #[ignore]
+    ecocore
+);
 // Invalid Xref syntax
-foundrytest!(#[ignore] chebi);
-foundrytest!(#[ignore] uberon);
-foundrytest!(#[ignore] xco);
-foundrytest!(#[ignore] pw);
+foundrytest!(
+    #[ignore]
+    chebi
+);
+foundrytest!(
+    #[ignore]
+    uberon
+);
+foundrytest!(
+    #[ignore]
+    xco
+);
+foundrytest!(
+    #[ignore]
+    pw
+);
 // Invalid syntax (WIP)
-foundrytest!(#[ignore] envo);
-foundrytest!(#[ignore] mmo);
-foundrytest!(#[ignore] mi);
-foundrytest!(#[ignore] ro);
+foundrytest!(
+    #[ignore]
+    envo
+);
+foundrytest!(
+    #[ignore]
+    mmo
+);
+foundrytest!(
+    #[ignore]
+    mi
+);
+foundrytest!(
+    #[ignore]
+    ro
+);
 // Invalid date
-foundrytest!(#[ignore] doid);
+foundrytest!(
+    #[ignore]
+    doid
+);
 // Invalid syntax (reported)
-foundrytest!(#[ignore] cl);
+foundrytest!(
+    #[ignore]
+    cl
+);
 // Invalid syntax
-foundrytest!(#[ignore] gaz);
-foundrytest!(#[ignore] hao);
-foundrytest!(#[ignore] symp);
-foundrytest!(#[ignore] zp);
-foundrytest!(#[ignore] zeco);
-foundrytest!(#[ignore] xlmod);
+foundrytest!(
+    #[ignore]
+    gaz
+);
+foundrytest!(
+    #[ignore]
+    hao
+);
+foundrytest!(
+    #[ignore]
+    symp
+);
+foundrytest!(
+    #[ignore]
+    zp
+);
+foundrytest!(
+    #[ignore]
+    zeco
+);
+foundrytest!(
+    #[ignore]
+    xlmod
+);
 // Unescaped quotes in QuotedString
-foundrytest!(#[ignore] rnao);
+foundrytest!(
+    #[ignore]
+    rnao
+);
 // Download error
-foundrytest!(#[ignore] rs);
+foundrytest!(
+    #[ignore]
+    rs
+);
 // Deprecated and unreachable
-foundrytest!(#[ignore] eo);
+foundrytest!(
+    #[ignore]
+    eo
+);

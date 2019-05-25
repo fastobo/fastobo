@@ -35,7 +35,7 @@ impl<T> Line<T> {
     /// ```
     pub fn and_comment<C>(self, comment: C) -> Self
     where
-        C: Into<Option<Comment>>
+        C: Into<Option<Comment>>,
     {
         Self {
             inner: self.inner,
@@ -47,7 +47,7 @@ impl<T> Line<T> {
     /// Update the line qualifier list with the given one.
     pub fn and_qualifiers<Q>(self, qualifiers: Q) -> Self
     where
-        Q: Into<Option<QualifierList>>
+        Q: Into<Option<QualifierList>>,
     {
         Self {
             inner: self.inner,
@@ -106,7 +106,6 @@ impl<T> BorrowMut<T> for Line<T> {
         &mut self.inner
     }
 }
-
 
 impl<T> Deref for Line<T> {
     type Target = T;
@@ -185,9 +184,7 @@ impl<'i> FromPair<'i> for Eol {
                 Rule::QualifierList => {
                     QualifierList::from_pair_unchecked(pair1).map(Eol::with_qualifiers)
                 }
-                Rule::HiddenComment => {
-                    Comment::from_pair_unchecked(pair1).map(Eol::with_comment)
-                }
+                Rule::HiddenComment => Comment::from_pair_unchecked(pair1).map(Eol::with_comment),
                 _ => unreachable!(),
             },
             (None, _) => Ok(Eol::new()),
@@ -206,7 +203,6 @@ impl Default for Eol {
 }
 
 impl Eol {
-
     // Create a new empty `Eol`.
     pub fn new() -> Self {
         Default::default()

@@ -14,7 +14,7 @@ fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
         '\u{000c}' => f.write_str("\\f"),
         '"' => f.write_str("\\\""),
         '\\' => f.write_str("\\\\"),
-        _ => f.write_char(char)
+        _ => f.write_char(char),
     })
 }
 

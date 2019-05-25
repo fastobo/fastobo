@@ -1,5 +1,5 @@
-use pest::error::ErrorVariant;
 use pest::error::Error as PestError;
+use pest::error::ErrorVariant;
 use pest::iterators::Pair;
 use url::Url;
 
@@ -35,7 +35,6 @@ pub trait FromPair<'i>: Sized {
     }
 }
 
-
 impl<'i> FromPair<'i> for bool {
     const RULE: Rule = Rule::Boolean;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
@@ -43,23 +42,19 @@ impl<'i> FromPair<'i> for bool {
     }
 }
 
-
 impl<'i> FromPair<'i> for Url {
     const RULE: Rule = Rule::Iri;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
         Url::parse(pair.as_str()).map_err(|e| {
-            Error::from(
-                PestError::new_from_span(
-                    ErrorVariant::CustomError {
-                        message: format!("could not parse URL: {}", e)
-                    },
-                    pair.as_span(),
-                )
-            )
+            Error::from(PestError::new_from_span(
+                ErrorVariant::CustomError {
+                    message: format!("could not parse URL: {}", e),
+                },
+                pair.as_span(),
+            ))
         })
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -76,9 +71,7 @@ mod tests {
         fn from_pair() {
             let pairs = OboParser::parse(Rule::UnquotedString, "http://not an url");
             let pair = pairs.unwrap().next().unwrap();
-            unsafe {
-                assert!(Url::from_pair_unchecked(pair).is_err())
-            }
+            unsafe { assert!(Url::from_pair_unchecked(pair).is_err()) }
         }
     }
 
@@ -98,7 +91,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn unexpected_rule() {
         let pairs = OboParser::parse(Rule::Boolean, "true");
@@ -106,13 +98,15 @@ mod tests {
 
         let err = Ident::from_pair(pair).unwrap_err();
         match err {
-            Error::UnexpectedRule { ref actual, ref expected } => {
+            Error::UnexpectedRule {
+                ref actual,
+                ref expected,
+            } => {
                 assert_eq!(actual, &Rule::Boolean);
                 assert_eq!(expected, &Rule::Id);
             }
             e => panic!("unexpected error: {:?}", e),
         }
     }
-
 
 }

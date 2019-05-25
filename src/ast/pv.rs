@@ -1,5 +1,5 @@
-use std::cmp::PartialOrd;
 use std::cmp::Ordering;
+use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -10,13 +10,12 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::share::Cow;
-use crate::share::Share;
-use crate::share::Redeem;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
@@ -41,15 +40,14 @@ impl PropertyValue {
 impl<'a> Share<'a, PropVal<'a>> for PropertyValue {
     fn share(&'a self) -> PropVal<'a> {
         match self {
-            PropertyValue::Identified(p, v) => PropVal::Identified(
-                Cow::Borrowed(p.share()),
-                Cow::Borrowed(v.share()),
-            ),
+            PropertyValue::Identified(p, v) => {
+                PropVal::Identified(Cow::Borrowed(p.share()), Cow::Borrowed(v.share()))
+            }
             PropertyValue::Typed(p, v, t) => PropVal::Typed(
                 Cow::Borrowed(p.share()),
                 Cow::Borrowed(v.share()),
                 Cow::Borrowed(t.share()),
-            )
+            ),
         }
     }
 }
@@ -89,7 +87,8 @@ impl_fromstr!(PropertyValue);
 
 impl PartialOrd for PropertyValue {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.property().cmp(&other.property())
+        self.property()
+            .cmp(&other.property())
             .then_with(|| self.to_string().cmp(&other.to_string()))
             .into()
     }
@@ -98,17 +97,19 @@ impl PartialOrd for PropertyValue {
 /// A borrowed `PropertyValue`.
 pub enum PropVal<'a> {
     Identified(Cow<'a, RelationId<'a>>, Cow<'a, Id<'a>>),
-    Typed(Cow<'a, RelationId<'a>>, Cow<'a, &'a QuotedStr>, Cow<'a, Id<'a>>)
+    Typed(
+        Cow<'a, RelationId<'a>>,
+        Cow<'a, &'a QuotedStr>,
+        Cow<'a, Id<'a>>,
+    ),
 }
 
 impl<'a> Redeem<'a> for PropVal<'a> {
     type Owned = PropertyValue;
     fn redeem(&'a self) -> PropertyValue {
         match self {
-            PropVal::Identified(p, v) =>
-                PropertyValue::Identified(p.redeem(), v.redeem()),
-            PropVal::Typed(p, v, t) =>
-                PropertyValue::Typed(p.redeem(), v.redeem(), t.redeem()),
+            PropVal::Identified(p, v) => PropertyValue::Identified(p.redeem(), v.redeem()),
+            PropVal::Typed(p, v, t) => PropertyValue::Typed(p.redeem(), v.redeem(), t.redeem()),
         }
     }
 }
@@ -130,25 +131,28 @@ impl<'a> Display for PropVal<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
 
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn from_str() {
         let actual = PropertyValue::from_str("married_to heather").unwrap();
         let expected = PropertyValue::Identified(
-            RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from("married_to")))),
+            RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from(
+                "married_to",
+            )))),
             Ident::Unprefixed(UnprefixedIdent::new(String::from("heather"))),
         );
         assert_eq!(actual, expected);
 
         let actual = PropertyValue::from_str("shoe_size \"8\" xsd:positiveInteger").unwrap();
         let expected = PropertyValue::Typed(
-            RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from("shoe_size")))),
+            RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from(
+                "shoe_size",
+            )))),
             QuotedString::new(String::from("8")),
             Ident::from(PrefixedIdent::new(
                 IdentPrefix::new(String::from("xsd")),

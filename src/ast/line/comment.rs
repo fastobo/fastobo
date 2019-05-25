@@ -35,7 +35,9 @@ impl Comment {
     where
         S: Into<String>,
     {
-        Comment { value: value.into() }
+        Comment {
+            value: value.into(),
+        }
     }
 }
 
@@ -57,10 +59,10 @@ impl_fromstr!(Comment);
 #[cfg(test)]
 mod tests {
 
+    use super::*;
+    use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
-    use pretty_assertions::assert_eq;
-    use super::*;
 
     #[test]
     fn from_str() {

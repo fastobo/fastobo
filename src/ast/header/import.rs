@@ -30,9 +30,9 @@ impl Import {
     pub fn into_url(self) -> Url {
         match self {
             Import::Url(u) => u,
-            Import::Abbreviated(id) => Url::parse(
-                &format!("http://purl.obolibrary.org/obo/{}.owl", id)
-            ).unwrap(),
+            Import::Abbreviated(id) => {
+                Url::parse(&format!("http://purl.obolibrary.org/obo/{}.owl", id)).unwrap()
+            }
         }
     }
 }
@@ -87,9 +87,15 @@ mod tests {
     #[test]
     fn into_url() {
         let i = Import::Abbreviated(Ident::from(UnprefixedIdent::new("go")));
-        assert_eq!(i.into_url(), Url::parse("http://purl.obolibrary.org/obo/go.owl").unwrap());
+        assert_eq!(
+            i.into_url(),
+            Url::parse("http://purl.obolibrary.org/obo/go.owl").unwrap()
+        );
 
         let i = Import::Url(Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap());
-        assert_eq!(i.into_url(), Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap());
+        assert_eq!(
+            i.into_url(),
+            Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap()
+        );
     }
 }

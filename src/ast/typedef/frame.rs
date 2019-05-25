@@ -140,7 +140,7 @@ impl Orderable for TypedefFrame {
     }
     fn is_sorted(&self) -> bool {
         for i in 1..self.clauses.len() {
-            if self.clauses[i-1] > self.clauses[i] {
+            if self.clauses[i - 1] > self.clauses[i] {
                 return false;
             }
         }

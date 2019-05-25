@@ -1,9 +1,9 @@
-use std::ops::Deref;
-use std::ops::DerefMut;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 use pest::iterators::Pair;
 
@@ -23,7 +23,7 @@ impl InstanceFrame {
     /// Create a new instance frame with the given ID but without any clause.
     pub fn new<I>(id: I) -> Self
     where
-        I: Into<Line<InstanceIdent>>
+        I: Into<Line<InstanceIdent>>,
     {
         Self::with_clauses(id, Vec::new())
     }
@@ -31,11 +31,11 @@ impl InstanceFrame {
     /// Create a new instance frame with the provided ID and clauses.
     pub fn with_clauses<I>(id: I, clauses: Vec<Line<InstanceClause>>) -> Self
     where
-        I: Into<Line<InstanceIdent>>
+        I: Into<Line<InstanceIdent>>,
     {
         Self {
             id: id.into(),
-            clauses
+            clauses,
         }
     }
 
@@ -143,7 +143,7 @@ impl Orderable for InstanceFrame {
     }
     fn is_sorted(&self) -> bool {
         for i in 1..self.clauses.len() {
-            if self.clauses[i-1] > self.clauses[i] {
+            if self.clauses[i - 1] > self.clauses[i] {
                 return false;
             }
         }

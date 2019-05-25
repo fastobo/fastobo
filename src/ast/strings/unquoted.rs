@@ -9,15 +9,15 @@ use std::ops::Deref;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use crate::error::Error;
-use crate::parser::FromPair;
-use crate::parser::Rule;
-use crate::parser::QuickFind;
-use crate::share::Share;
-use crate::share::Cow;
-use crate::share::Redeem;
 use super::escape;
 use super::unescape;
+use crate::error::Error;
+use crate::parser::FromPair;
+use crate::parser::QuickFind;
+use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 /// A string without delimiters, used as values in different clauses.
 ///
@@ -50,7 +50,7 @@ impl UnquotedString {
     /// Create a new `UnquotedString` from an unescaped string.
     pub fn new<S>(s: S) -> Self
     where
-        S: Into<String>
+        S: Into<String>,
     {
         UnquotedString { value: s.into() }
     }
@@ -170,10 +170,10 @@ impl<'a> Redeem<'a> for &'a UnquotedStr {
 #[cfg(test)]
 mod tests {
 
+    use super::*;
+    use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
-    use pretty_assertions::assert_eq;
-    use super::*;
 
     #[test]
     fn from_str() {

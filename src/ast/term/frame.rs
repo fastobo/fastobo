@@ -97,7 +97,6 @@ impl TermFrame {
 
         genus_count == 1 && has_differentia
     }
-
 }
 
 impl AsRef<Vec<Line<TermClause>>> for TermFrame {
@@ -161,7 +160,6 @@ impl From<ClassIdent> for TermFrame {
 impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-
         use crate::parser::QuickFind;
         let n = pair.as_str().quickcount(b'\n');
 
@@ -169,7 +167,7 @@ impl<'i> FromPair<'i> for TermFrame {
         let clsid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
         let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(clsid);
 
-        let mut clauses = Vec::with_capacity(n-1);
+        let mut clauses = Vec::with_capacity(n - 1);
 
         for pair in inner {
             clauses.push(Line::<TermClause>::from_pair_unchecked(pair)?);
@@ -202,7 +200,7 @@ impl Orderable for TermFrame {
     }
     fn is_sorted(&self) -> bool {
         for i in 1..self.clauses.len() {
-            if self.clauses[i-1] > self.clauses[i] {
+            if self.clauses[i - 1] > self.clauses[i] {
                 return false;
             }
         }
@@ -213,20 +211,20 @@ impl Orderable for TermFrame {
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     #[test]
     fn is_genus_differentia() {
-
         // Genus w/ 1 differentia
         let term = TermFrame::from_str(
             "[Term]
             id: TEST:01
             intersection_of: TEST:02
-            intersection_of: part_of TEST:03\n"
-        ).unwrap();
+            intersection_of: part_of TEST:03\n",
+        )
+        .unwrap();
         assert!(term.is_genus_differentia());
 
         // Genus w/ 1+ differentia
@@ -235,24 +233,27 @@ mod tests {
             id: TEST:01
             intersection_of: TEST:02
             intersection_of: part_of TEST:03
-            intersection_of: has_part TEST:04\n"
-        ).unwrap();
+            intersection_of: has_part TEST:04\n",
+        )
+        .unwrap();
         assert!(term.is_genus_differentia());
 
         // Genus w/o differentia (cardinality error)
         let term = TermFrame::from_str(
             "[Term]
             id: TEST:01
-            intersection_of: TEST:02\n"
-        ).unwrap();
+            intersection_of: TEST:02\n",
+        )
+        .unwrap();
         assert!(!term.is_genus_differentia());
 
         // Differentia w/o genus (cardinality error)
         let term = TermFrame::from_str(
             "[Term]
             id: TEST:01
-            intersection_of: part_of TEST:03\n"
-        ).unwrap();
+            intersection_of: part_of TEST:03\n",
+        )
+        .unwrap();
         assert!(!term.is_genus_differentia());
 
         // No intersection_of clause
@@ -284,6 +285,7 @@ mod tests {
             is_a: PO:0009005 ! root
             created_by: austinmeier
             creation_date: 2015-08-11T15:05:12Z\n",
-        ).is_ok());
+        )
+        .is_ok());
     }
 }

@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.2.1...HEAD
+
+## [0.2.1] - 2019-05-24
+
+[0.2.1]: https://github.com/fastobo/fastobo/compare/v0.2.0...v0.2.1
+
+### Fixed
+- `InstanceFrame::from_pair_unchecked` being implemented but not used in
+  `EntityFrame::from_pair_unchecked`, causing a panic when parsing an OBO
+  document with instance frames.
 
 
 ## [0.2.0] - 2019-05-14
@@ -22,7 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for `is_asymmetric` typedef clause.
 
 ### Fixed
-- `Error::IOError` and `Error::ParserError` will now return their inner 
+- `Error::IOError` and `Error::ParserError` will now return their inner
   error when calling the [`Fail.cause`] method.
 
 [`Fail.cause`]: https://docs.rs/failure/0.1.5/failure/trait.Fail.html#method.cause
@@ -33,7 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.1.1]: https://github.com/fastobo/fastobo/compare/v0.1.0...v0.1.1
 
 ### Added
-- [`PartialOrd`] implementation for header clauses, identifiers, `Synonym` 
+- [`PartialOrd`] implementation for header clauses, identifiers, `Synonym`
   and `PropertyValue`.
 
 [`PartialOrd`]: https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html

@@ -2,14 +2,14 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-use std::iter::IntoIterator;
 use std::iter::FromIterator;
+use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::str::FromStr;
 
-use pest::iterators::Pair;
 use pest::error::Error as PestError;
 use pest::error::InputLocation;
+use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::Error;
@@ -33,7 +33,6 @@ pub struct Xref {
 }
 
 impl Xref {
-
     /// Create a new `Xref` from the given ID, without description.
     pub fn new<I>(id: I) -> Self
     where
@@ -66,18 +65,12 @@ impl Xref {
 
     /// Get a reference to the description of the xref, if any.
     pub fn description(&self) -> Option<&QuotedString> {
-        match self.desc {
-            Some(ref d) => Some(d),
-            None => None,
-        }
+        self.desc.as_ref()
     }
 
     /// Get a mutable reference to the description of the xref, if any.
     pub fn description_mut(&mut self) -> Option<&mut QuotedString> {
-        match self.desc {
-            Some(ref mut d) => Some(d),
-            None => None,
-        }
+        self.desc.as_mut()
     }
 }
 
@@ -163,7 +156,7 @@ impl Display for XrefList {
 impl FromIterator<Xref> for XrefList {
     fn from_iter<T>(iter: T) -> Self
     where
-        T: IntoIterator<Item = Xref>
+        T: IntoIterator<Item = Xref>,
     {
         Self::new(iter.into_iter().collect())
     }
@@ -174,8 +167,7 @@ impl<'i> FromPair<'i> for XrefList {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
-            let xref = Xref::from_str(inner.as_str())
-                .map_err(|e| e.with_span(inner.as_span()))?;
+            let xref = Xref::from_str(inner.as_str()).map_err(|e| e.with_span(inner.as_span()))?;
             xrefs.push(xref);
         }
         Ok(Self { xrefs })
@@ -197,7 +189,7 @@ impl Orderable for XrefList {
     }
     fn is_sorted(&self) -> bool {
         for i in 1..self.xrefs.len() {
-            if self.xrefs[i-1] > self.xrefs[i] {
+            if self.xrefs[i - 1] > self.xrefs[i] {
                 return false;
             }
         }
@@ -208,8 +200,8 @@ impl Orderable for XrefList {
 #[cfg(test)]
 mod tests {
 
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
 
     mod list {
 

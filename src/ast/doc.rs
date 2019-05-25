@@ -8,18 +8,18 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::share::Cow;
-use crate::share::Share;
-use crate::share::Redeem;
 use crate::error::Result;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::share::Cow;
+use crate::share::Redeem;
+use crate::share::Share;
 
 /// A complete OBO document in format version 1.4.
 #[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
 pub struct OboDoc {
-    header: HeaderFrame,
-    entities: Vec<EntityFrame>,
+    pub(crate) header: HeaderFrame,
+    pub(crate) entities: Vec<EntityFrame>,
 }
 
 /// Constructors and builder methods.
@@ -56,7 +56,6 @@ pub struct OboDoc {
 ///     .and_header(HeaderFrame::from(HeaderClause::FormatVersion("1.4".into())));
 /// ```
 impl OboDoc {
-
     /// Create a new empty OBO document.
     pub fn new() -> Self {
         Default::default()
@@ -125,7 +124,7 @@ impl OboDoc {
 
             // Bail out if we reached EOL or first frame.
             if l.starts_with('[') || line.is_empty() {
-                break
+                break;
             }
         }
 
@@ -137,7 +136,6 @@ impl OboDoc {
         let mut local_line_offset = 0;
         let mut local_offset = 0;
         while !line.is_empty() {
-
             // Read the next line.
             frame_lines.push_str(&line);
             line.clear();
@@ -145,7 +143,6 @@ impl OboDoc {
 
             // Read the line if we reached the next frame.
             if line.trim_start().starts_with('[') || line.is_empty() {
-
                 unsafe {
                     let mut pairs = OboParser::parse(Rule::EntitySingle, &frame_lines)
                         .map_err(|e| Error::from(e).with_offsets(line_offset, offset))?;
@@ -161,7 +158,6 @@ impl OboDoc {
                 // Reset local offsets
                 local_line_offset = 0;
                 local_offset = 0;
-
             }
 
             // Update local offsets
@@ -245,11 +241,11 @@ impl Display for OboDoc {
 
 impl<E> FromIterator<E> for OboDoc
 where
-    E: Into<EntityFrame>
+    E: Into<EntityFrame>,
 {
     fn from_iter<T>(iter: T) -> Self
     where
-        T: IntoIterator<Item = E>
+        T: IntoIterator<Item = E>,
     {
         Self::with_entities(iter.into_iter().map(Into::into).collect())
     }
@@ -270,15 +266,15 @@ impl Orderable for OboDoc {
     fn is_sorted(&self) -> bool {
         // Check entities are sorted on their identifier.
         for i in 1..self.entities.len() {
-            if self.entities[i-1].as_id() > self.entities[i].as_id() {
-                return false
+            if self.entities[i - 1].as_id() > self.entities[i].as_id() {
+                return false;
             }
         }
 
         // Check every entity is sorted.
         for entity in &self.entities {
             if !entity.is_sorted() {
-                return false
+                return false;
             }
         }
 
@@ -308,10 +304,10 @@ impl_fromstr!(OboDoc);
 #[cfg(test)]
 mod tests {
 
-    use std::iter::FromIterator;
-    use pretty_assertions::assert_eq;
-    use textwrap::dedent;
     use super::*;
+    use pretty_assertions::assert_eq;
+    use std::iter::FromIterator;
+    use textwrap::dedent;
 
     #[test]
     fn from_str() {
@@ -324,19 +320,20 @@ mod tests {
         self::assert_eq!(doc, Default::default());
 
         // A simple file should parse.
-        let doc = OboDoc::from_str(&dedent("
+        let doc = OboDoc::from_str(&dedent(
+            "
             format-version: 1.2
 
             [Term]
             id: TEST:001
-        ")).unwrap();
+        ",
+        ))
+        .unwrap();
 
-        let header = HeaderFrame::from_iter(
-            vec![HeaderClause::FormatVersion(UnquotedString::new("1.2"))]
-        );
-        let term = TermFrame::new(
-            ClassIdent::from(PrefixedIdent::new("TEST", "001"))
-        );
+        let header = HeaderFrame::from_iter(vec![HeaderClause::FormatVersion(
+            UnquotedString::new("1.2"),
+        )]);
+        let term = TermFrame::new(ClassIdent::from(PrefixedIdent::new("TEST", "001")));
         self::assert_eq!(doc, OboDoc::from_iter(Some(term)).and_header(header));
     }
 
@@ -347,16 +344,19 @@ mod tests {
         self::assert_eq!(doc.to_string(), "");
 
         // `OboDoc` with only header frame should not add newline separator.
-        let doc = OboDoc::with_header(
-            HeaderFrame::from(vec![
-                HeaderClause::FormatVersion(UnquotedString::new("1.2")),
-                HeaderClause::Remark(UnquotedString::new("this is a test")),
-            ])
-        );
-        self::assert_eq!(doc.to_string(), dedent("
+        let doc = OboDoc::with_header(HeaderFrame::from(vec![
+            HeaderClause::FormatVersion(UnquotedString::new("1.2")),
+            HeaderClause::Remark(UnquotedString::new("this is a test")),
+        ]));
+        self::assert_eq!(
+            doc.to_string(),
+            dedent(
+                "
             format-version: 1.2
             remark: this is a test
             "
-        ).trim_start_matches('\n'));
+            )
+            .trim_start_matches('\n')
+        );
     }
 }

@@ -1,13 +1,13 @@
 //! `Error` and `Result` types for this crate.
 
-use std::io::Error as IOError;
 use std::error::Error as StdError;
+use std::io::Error as IOError;
 
-use pest::Span;
-use pest::Position;
 use pest::error::Error as PestError;
 use pest::error::InputLocation;
 use pest::error::LineColLocation;
+use pest::Position;
+use pest::Span;
 
 use crate::ast::*;
 use crate::parser::Rule;
@@ -24,26 +24,20 @@ pub enum CardinalityError {
     #[fail(display = "duplicate {:?} clauses", name)]
     DuplicateClauses { name: String },
     #[fail(display = "invalid single {:?} clause", name)]
-    SingleClause { name: String }
+    SingleClause { name: String },
 }
 
 impl CardinalityError {
     pub(crate) fn missing<S: Into<String>>(name: S) -> Self {
-        CardinalityError::MissingClause {
-            name: name.into()
-        }
+        CardinalityError::MissingClause { name: name.into() }
     }
 
     pub(crate) fn duplicate<S: Into<String>>(name: S) -> Self {
-        CardinalityError::DuplicateClauses {
-            name: name.into()
-        }
+        CardinalityError::DuplicateClauses { name: name.into() }
     }
 
     pub(crate) fn single<S: Into<String>>(name: S) -> Self {
-        CardinalityError::DuplicateClauses {
-            name: name.into()
-        }
+        CardinalityError::DuplicateClauses { name: name.into() }
     }
 }
 
@@ -88,7 +82,7 @@ pub enum Error {
     #[fail(display = "parser error: {}", error)]
     ParserError {
         #[cause]
-        error: PestError<Rule>
+        error: PestError<Rule>,
     },
 
     /// An IO error occurred.
@@ -106,7 +100,7 @@ pub enum Error {
     #[fail(display = "IO error: {}", error)]
     IOError {
         #[cause]
-        error: IOError
+        error: IOError,
     },
 
     /// A cardinality-related error occurred.
@@ -114,8 +108,8 @@ pub enum Error {
     CardinalityError {
         id: Option<Ident>,
         #[cause]
-        inner: CardinalityError
-    }
+        inner: CardinalityError,
+    },
 }
 
 impl Error {
@@ -130,16 +124,14 @@ impl Error {
             e @ UnexpectedRule { .. } => e,
             ParserError { mut error } => {
                 error.location = match error.location {
-                    InputLocation::Pos(s) =>
-                        InputLocation::Pos(s + offset),
-                    InputLocation::Span((s, e)) =>
-                        InputLocation::Span((s + offset, e + offset))
+                    InputLocation::Pos(s) => InputLocation::Pos(s + offset),
+                    InputLocation::Span((s, e)) => InputLocation::Span((s + offset, e + offset)),
                 };
                 error.line_col = match error.line_col {
-                    LineColLocation::Pos((l, c)) =>
-                        LineColLocation::Pos((l + line_offset, c)),
-                    LineColLocation::Span((ls, cs), (le, ce)) =>
+                    LineColLocation::Pos((l, c)) => LineColLocation::Pos((l + line_offset, c)),
+                    LineColLocation::Span((ls, cs), (le, ce)) => {
                         LineColLocation::Span((ls + line_offset, cs), (le + line_offset, ce))
+                    }
                 };
                 ParserError { error }
             }
@@ -153,12 +145,14 @@ impl Error {
             e @ IOError { .. } => e,
             e @ UnexpectedRule { .. } => e,
             e @ CardinalityError { .. } => e,
-            ParserError { error } => ParserError { error: error.with_path(path) },
+            ParserError { error } => ParserError {
+                error: error.with_path(path),
+            },
         }
     }
 
     /// Update the span of the error, if needed.
-    pub(crate) fn with_span<'i>(self, span: Span<'i>) -> Self {
+    pub(crate) fn with_span(self, span: Span) -> Self {
         use self::Error::*;
         match self {
             e @ IOError { .. } => e,
@@ -170,7 +164,7 @@ impl Error {
                 //                   is no clean way to create an error at
                 //                   the right position with `pest::error`.
                 ParserError {
-                    error: PestError::new_from_span(error.variant, span)
+                    error: PestError::new_from_span(error.variant, span),
                 }
             }
         }

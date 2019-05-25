@@ -102,8 +102,7 @@ pub trait OboSemantics {
 /// Additional methods for `OboDoc` that can be used to edit the syntax tree.
 impl OboSemantics for OboDoc {
     /// Assign the ontology default namespace to all frames without one.
-    fn assign_namespaces(&mut self) -> Result<(), CardinalityError>{
-
+    fn assign_namespaces(&mut self) -> Result<(), CardinalityError> {
         macro_rules! expand {
             ($frame:ident, $clause:ident, $ns:ident, $outer:lifetime) => ({
                 for clause in $frame.iter() {
@@ -119,16 +118,8 @@ impl OboSemantics for OboDoc {
 
         // Force borrowck to split borrows: we shoudl be able to borrow
         // the header AND the entities at the same time.
-        let ns = self.header().default_namespace()?;
-        let entities = unsafe {
-            &mut *(
-                self.entities()
-                as *const Vec<EntityFrame>
-                as *mut Vec<EntityFrame>
-            )
-        };
-
-        'outer: for entity in entities {
+        let ns = self.header.default_namespace()?;
+        'outer: for entity in &mut self.entities {
             match entity {
                 Term(x) => expand!(x, TermClause, ns, 'outer),
                 Typedef(x) => expand!(x, TypedefClause, ns, 'outer),
@@ -145,56 +136,31 @@ impl OboSemantics for OboDoc {
 
         // Force borrowck to split borrows: we should be able to mutably
         // borrow the header AND the entities at the same time.
-        let entities = unsafe {
-            &mut *(
-                self.entities()
-                as *const Vec<EntityFrame>
-                as *mut Vec<EntityFrame>
-            )
-        };
+        let entities = &mut self.entities;
 
         // Apply implicit macros for `BFO` and `RO`
         self::treat_xrefs::as_equivalent(entities, &IdentPrefix::new("BFO"));
         self::treat_xrefs::as_equivalent(entities, &IdentPrefix::new("RO"));
 
         // Apply all `treat-xrefs` macros to the document.
-        for clause in self.header() {
+        for clause in &self.header {
             match clause {
-                TreatXrefsAsEquivalent(prefix) =>
-                    self::treat_xrefs::as_equivalent(
-                        entities,
-                        &prefix
-                    ),
-                TreatXrefsAsIsA(prefix) =>
-                    self::treat_xrefs::as_is_a(
-                        entities,
-                        &prefix
-                    ),
-                TreatXrefsAsHasSubclass(prefix) =>
-                    self::treat_xrefs::as_has_subclass(
-                        entities,
-                        &prefix
-                    ),
-                TreatXrefsAsGenusDifferentia(prefix, rel, cls) =>
-                    self::treat_xrefs::as_genus_differentia(
-                        entities,
-                        &prefix,
-                        &rel,
-                        &cls
-                    ),
-                TreatXrefsAsReverseGenusDifferentia(prefix, rel, cls) =>
-                    self::treat_xrefs::as_reverse_genus_differentia(
-                        entities,
-                        &prefix,
-                        &rel,
-                        &cls
-                    ),
-                TreatXrefsAsRelationship(prefix, rel) =>
-                    self::treat_xrefs::as_relationship(
-                        entities,
-                        &prefix,
-                        &rel,
-                    ),
+                TreatXrefsAsEquivalent(prefix) => {
+                    self::treat_xrefs::as_equivalent(entities, &prefix)
+                }
+                TreatXrefsAsIsA(prefix) => self::treat_xrefs::as_is_a(entities, &prefix),
+                TreatXrefsAsHasSubclass(prefix) => {
+                    self::treat_xrefs::as_has_subclass(entities, &prefix)
+                }
+                TreatXrefsAsGenusDifferentia(prefix, rel, cls) => {
+                    self::treat_xrefs::as_genus_differentia(entities, &prefix, &rel, &cls)
+                }
+                TreatXrefsAsReverseGenusDifferentia(prefix, rel, cls) => {
+                    self::treat_xrefs::as_reverse_genus_differentia(entities, &prefix, &rel, &cls)
+                }
+                TreatXrefsAsRelationship(prefix, rel) => {
+                    self::treat_xrefs::as_relationship(entities, &prefix, &rel)
+                }
                 _ => (),
             }
         }

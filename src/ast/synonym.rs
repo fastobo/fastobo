@@ -99,12 +99,7 @@ impl Synonym {
     }
 
     /// Create a `Synonym` with the given description, scope, type, and xrefs.
-    pub fn with_type_and_xrefs<D, T, L>(
-        desc: D,
-        scope: SynonymScope,
-        ty: T,
-        xrefs: L,
-    ) -> Self
+    pub fn with_type_and_xrefs<D, T, L>(desc: D, scope: SynonymScope, ty: T, xrefs: L) -> Self
     where
         D: Into<QuotedString>,
         T: Into<Option<SynonymTypeIdent>>,
@@ -142,18 +137,12 @@ impl Synonym {
 
     /// Get a reference to the type of the `Synonym`, if any.
     pub fn ty(&self) -> Option<&SynonymTypeIdent> {
-        match self.ty {
-            Some(ref id) => Some(id),
-            None => None,
-        }
+        self.ty.as_ref()
     }
 
     /// Get a mutable reference to the type of the `Synonym`, if any.
     pub fn ty_mut(&mut self) -> Option<&mut SynonymTypeIdent> {
-        match self.ty {
-            Some(ref mut id) => Some(id),
-            None => None,
-        }
+        self.ty.as_mut()
     }
 
     /// Get a reference to the xrefs of the `Synonym`.
@@ -222,14 +211,14 @@ impl_fromstr!(Synonym);
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
-    use pretty_assertions::assert_eq;
     use super::*;
+    use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     mod scope {
 
-        use super::*;
         use self::SynonymScope::*;
+        use super::*;
 
         #[test]
         fn from_str() {
@@ -255,7 +244,10 @@ mod tests {
 
         #[test]
         fn from_str() {
-            let actual = Synonym::from_str("\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]").unwrap();
+            let actual = Synonym::from_str(
+                "\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]",
+            )
+            .unwrap();
             let expected = Synonym::with_xrefs(
                 "ssDNA-specific endodeoxyribonuclease activity",
                 SynonymScope::Related,
@@ -267,16 +259,14 @@ mod tests {
         #[test]
         fn to_string() {
             let s = Synonym::with_xrefs(
-                QuotedString::new(String::from("ssDNA-specific endodeoxyribonuclease activity")),
+                QuotedString::new(String::from(
+                    "ssDNA-specific endodeoxyribonuclease activity",
+                )),
                 SynonymScope::Related,
-                vec![Xref::new(
-                    Ident::from(
-                        PrefixedIdent::new(
-                            IdentPrefix::new(String::from("GOC")),
-                            IdentLocal::new(String::from("mah"))
-                        )
-                    )
-                )]
+                vec![Xref::new(Ident::from(PrefixedIdent::new(
+                    IdentPrefix::new(String::from("GOC")),
+                    IdentLocal::new(String::from("mah")),
+                )))],
             );
 
             self::assert_eq!(
@@ -286,6 +276,5 @@ mod tests {
         }
 
     }
-
 
 }

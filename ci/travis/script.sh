@@ -4,7 +4,7 @@
 
 # --- Test with coverage -----------------------------------------------------
 
-cargo tarpaulin -v --out Xml --ciserver travis-ci
+cargo tarpaulin --release -v --out Xml --ciserver travis-ci
 
 # --- Run examples -----------------------------------------------------------
 

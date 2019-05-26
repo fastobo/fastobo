@@ -213,11 +213,11 @@ pub trait Visit<'ast> {
     fn visit_property_value(&mut self, pv: &'ast PropertyValue) {
         use self::PropertyValue::*;
         match &pv {
-            Identified(relation, value) => {
+            Resource(relation, value) => {
                 self.visit_relation_ident(relation);
                 self.visit_ident(value);
             }
-            Typed(relation, value, ty) => {
+            Literal(relation, value, ty) => {
                 self.visit_relation_ident(relation);
                 self.visit_quoted_string(value);
                 self.visit_ident(ty);
@@ -549,11 +549,11 @@ pub trait VisitMut {
     fn visit_property_value(&mut self, pv: &mut PropertyValue) {
         use self::PropertyValue::*;
         match pv {
-            Identified(ref mut relation, ref mut value) => {
+            Resource(ref mut relation, ref mut value) => {
                 self.visit_relation_ident(relation);
                 self.visit_ident(value);
             }
-            Typed(ref mut relation, ref mut value, ref mut ty) => {
+            Literal(ref mut relation, ref mut value, ref mut ty) => {
                 self.visit_relation_ident(relation);
                 self.visit_quoted_string(value);
                 self.visit_ident(ty);

@@ -21,9 +21,9 @@ use crate::share::Share;
 #[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
 pub enum PropertyValue {
     /// A property-value binding where the value is specified with an ID.
-    Identified(RelationIdent, Ident),
-    /// A property-value binding where the value is given by a typed string.
-    Typed(RelationIdent, QuotedString, Ident),
+    Resource(RelationIdent, Ident),
+    /// A property-value binding where the value is given by a typed literal.
+    Literal(RelationIdent, QuotedString, Ident),
 }
 
 impl PropertyValue {
@@ -31,8 +31,8 @@ impl PropertyValue {
     pub fn property(&self) -> &RelationIdent {
         use self::PropertyValue::*;
         match self {
-            Identified(ref prop, _) => prop,
-            Typed(ref prop, _, _) => prop,
+            Resource(ref prop, _) => prop,
+            Literal(ref prop, _, _) => prop,
         }
     }
 }
@@ -40,10 +40,10 @@ impl PropertyValue {
 impl<'a> Share<'a, PropVal<'a>> for PropertyValue {
     fn share(&'a self) -> PropVal<'a> {
         match self {
-            PropertyValue::Identified(p, v) => {
-                PropVal::Identified(Cow::Borrowed(p.share()), Cow::Borrowed(v.share()))
+            PropertyValue::Resource(p, v) => {
+                PropVal::Resource(Cow::Borrowed(p.share()), Cow::Borrowed(v.share()))
             }
-            PropertyValue::Typed(p, v, t) => PropVal::Typed(
+            PropertyValue::Literal(p, v, t) => PropVal::Literal(
                 Cow::Borrowed(p.share()),
                 Cow::Borrowed(v.share()),
                 Cow::Borrowed(t.share()),
@@ -67,17 +67,17 @@ impl<'i> FromPair<'i> for PropertyValue {
         match second.as_rule() {
             Rule::Id => {
                 let id = Ident::from_pair_unchecked(second)?;
-                Ok(PropertyValue::Identified(relid, id))
+                Ok(PropertyValue::Resource(relid, id))
             }
             Rule::PvValue => {
                 let desc = QuotedString::new(second.as_str().to_string());
                 let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
-                Ok(PropertyValue::Typed(relid, desc, datatype))
+                Ok(PropertyValue::Literal(relid, desc, datatype))
             }
             Rule::QuotedString => {
                 let desc = QuotedString::from_pair_unchecked(second)?;
                 let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
-                Ok(PropertyValue::Typed(relid, desc, datatype))
+                Ok(PropertyValue::Literal(relid, desc, datatype))
             }
             _ => unreachable!(),
         }
@@ -96,8 +96,8 @@ impl PartialOrd for PropertyValue {
 
 /// A borrowed `PropertyValue`.
 pub enum PropVal<'a> {
-    Identified(Cow<'a, RelationId<'a>>, Cow<'a, Id<'a>>),
-    Typed(
+    Resource(Cow<'a, RelationId<'a>>, Cow<'a, Id<'a>>),
+    Literal(
         Cow<'a, RelationId<'a>>,
         Cow<'a, &'a QuotedStr>,
         Cow<'a, Id<'a>>,
@@ -108,8 +108,8 @@ impl<'a> Redeem<'a> for PropVal<'a> {
     type Owned = PropertyValue;
     fn redeem(&'a self) -> PropertyValue {
         match self {
-            PropVal::Identified(p, v) => PropertyValue::Identified(p.redeem(), v.redeem()),
-            PropVal::Typed(p, v, t) => PropertyValue::Typed(p.redeem(), v.redeem(), t.redeem()),
+            PropVal::Resource(p, v) => PropertyValue::Resource(p.redeem(), v.redeem()),
+            PropVal::Literal(p, v, t) => PropertyValue::Literal(p.redeem(), v.redeem(), t.redeem()),
         }
     }
 }
@@ -118,10 +118,10 @@ impl<'a> Display for PropVal<'a> {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::PropVal::*;
         match self {
-            Identified(relation, instance) => {
+            Resource(relation, instance) => {
                 relation.fmt(f).and(f.write_char(' ')).and(instance.fmt(f))
             }
-            Typed(relation, desc, datatype) => relation
+            Literal(relation, desc, datatype) => relation
                 .fmt(f)
                 .and(f.write_char(' '))
                 .and(desc.fmt(f))
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn from_str() {
         let actual = PropertyValue::from_str("married_to heather").unwrap();
-        let expected = PropertyValue::Identified(
+        let expected = PropertyValue::Resource(
             RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from(
                 "married_to",
             )))),
@@ -149,7 +149,7 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = PropertyValue::from_str("shoe_size \"8\" xsd:positiveInteger").unwrap();
-        let expected = PropertyValue::Typed(
+        let expected = PropertyValue::Literal(
             RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from(
                 "shoe_size",
             )))),

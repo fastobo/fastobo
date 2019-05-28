@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.3.0...HEAD
+
+
+## [0.3.0] - 2019-05-27
+
+[0.3.0]: https://github.com/fastobo/fastobo/compare/v0.2.1...v0.3.0
+
+### Changed
+- Renamed variants of `PropertyValue` and `PropVal` enums.
+
 
 ## [0.2.1] - 2019-05-24
 

@@ -9,6 +9,7 @@ use url::Url;
 
 use crate::ast::*;
 use crate::error::Result;
+use crate::parser::FrameReader;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::share::Cow;
@@ -94,78 +95,15 @@ impl OboDoc {
     where
         B: BufRead,
     {
-        let mut line = String::new();
-        let mut l: &str;
+        let mut reader = FrameReader::new(stream)?;
+        let mut doc = Self::new();
+        std::mem::swap(reader.header_mut(), doc.header_mut());
 
-        let mut offset = 0;
-        let mut line_offset = 0;
-
-        // collect the header frame
-        let mut frame_clauses = Vec::new();
-        loop {
-            // Read the next line
-            line.clear();
-            stream.read_line(&mut line)?;
-            l = line.trim();
-
-            // Parse header as long as we didn't reach EOL or first frame.
-            if !l.starts_with('[') && !l.is_empty() {
-                unsafe {
-                    let mut pairs = OboParser::parse(Rule::HeaderClause, &line)
-                        .map_err(|e| Error::from(e).with_offsets(line_offset, offset))?;
-                    let clause = HeaderClause::from_pair_unchecked(pairs.next().unwrap())?;
-                    frame_clauses.push(clause);
-                }
-            }
-
-            // Update offsets
-            line_offset += 1;
-            offset += line.len();
-
-            // Bail out if we reached EOL or first frame.
-            if l.starts_with('[') || line.is_empty() {
-                break;
-            }
+        for result in reader {
+            doc.entities.push(result?);
         }
 
-        // create the OBO document
-        let mut obodoc = Self::with_header(HeaderFrame::with_clauses(frame_clauses));
-
-        // read all entity frames
-        let mut frame_lines = String::new();
-        let mut local_line_offset = 0;
-        let mut local_offset = 0;
-        while !line.is_empty() {
-            // Read the next line.
-            frame_lines.push_str(&line);
-            line.clear();
-            stream.read_line(&mut line)?;
-
-            // Read the line if we reached the next frame.
-            if line.trim_start().starts_with('[') || line.is_empty() {
-                unsafe {
-                    let mut pairs = OboParser::parse(Rule::EntitySingle, &frame_lines)
-                        .map_err(|e| Error::from(e).with_offsets(line_offset, offset))?;
-                    let entity = EntityFrame::from_pair_unchecked(pairs.next().unwrap())?;
-                    obodoc.entities.push(entity);
-                    frame_lines.clear()
-                }
-
-                // Update offsets
-                line_offset += local_line_offset;
-                offset += local_offset;
-
-                // Reset local offsets
-                local_line_offset = 0;
-                local_offset = 0;
-            }
-
-            // Update local offsets
-            local_line_offset += 1;
-            local_offset += line.len();
-        }
-
-        Ok(obodoc)
+        Ok(doc)
     }
 
     /// Read an OBO file located somwhere in the filesystem.
@@ -179,9 +117,7 @@ impl OboDoc {
             .and_then(|f| Self::from_stream(&mut BufReader::new(f)))
             .map_err(|e| e.with_path(&pathref.to_string_lossy()))
     }
-}
 
-impl OboDoc {
     /// Get a reference to the header of the OBO document.
     pub fn header(&self) -> &HeaderFrame {
         &self.header

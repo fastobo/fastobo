@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -96,14 +97,7 @@ impl OboDoc {
         B: BufRead,
     {
         let mut reader = FrameReader::new(stream)?;
-        let mut doc = Self::new();
-        std::mem::swap(reader.header_mut(), doc.header_mut());
-
-        for result in reader {
-            doc.entities.push(result?);
-        }
-
-        Ok(doc)
+        Self::try_from(reader)
     }
 
     /// Read an OBO file located somwhere in the filesystem.

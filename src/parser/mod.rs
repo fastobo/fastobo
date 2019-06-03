@@ -3,12 +3,14 @@
 use std::io::BufRead;
 use std::iter::Iterator;
 use std::str::FromStr;
+use std::convert::TryFrom;
 
 use pest::Parser;
 
 use crate::ast::EntityFrame;
 use crate::ast::HeaderClause;
 use crate::ast::HeaderFrame;
+use crate::ast::OboDoc;
 use crate::error::Error;
 
 #[macro_use]
@@ -28,17 +30,21 @@ pub use self::quickfind::QuickFind;
 
 // ---
 
+/// An iterator reading entity frames contained in an OBO stream.
 pub struct FrameReader<B: BufRead> {
     stream: B,
-
     line: String,
     offset: usize,
     line_offset: usize,
-
     header: HeaderFrame,
 }
 
 impl<B: BufRead> FrameReader<B> {
+    /// Create a new `FrameReader` from the given stream.
+    ///
+    /// The constructor will parse the header frame right away, and return an
+    /// error if it fails. The header can then be accessed using the `header`
+    /// method.
     pub fn new(mut stream: B) -> Result<Self, Error> {
         let mut line = String::new();
         let mut l: &str;
@@ -81,10 +87,12 @@ impl<B: BufRead> FrameReader<B> {
         })
     }
 
+    /// Get a reference to the parsed header frame.
     pub fn header(&self) -> &HeaderFrame {
         &self.header
     }
 
+    /// Get a mutable reference to the parsed header frame.
     pub fn header_mut(&mut self) -> &mut HeaderFrame {
         &mut self.header
     }
@@ -140,6 +148,21 @@ impl<B: BufRead> Iterator for FrameReader<B> {
         }
 
         None
+    }
+}
+
+impl<B: BufRead> TryFrom<FrameReader<B>> for OboDoc {
+    type Error = Error;
+    fn try_from(mut reader: FrameReader<B>) -> Result<OboDoc, Error> {
+        let mut doc = OboDoc::new();
+        std::mem::swap(reader.header_mut(), doc.header_mut());
+
+        let mut entities = doc.entities_mut();
+        for result in reader {
+            entities.push(result?);
+        }
+
+        Ok(doc)
     }
 }
 

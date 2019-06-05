@@ -165,6 +165,7 @@ impl FromIterator<Xref> for XrefList {
 impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+        println!("{:?}", pair);
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
             let xref = Xref::from_str(inner.as_str()).map_err(|e| e.with_span(inner.as_span()))?;
@@ -226,6 +227,17 @@ mod tests {
                 Xref::with_desc(
                     PrefixedIdent::new("reactome", "R-HSA-8983680"),
                     QuotedString::new("OAS1 produces oligoadenylates"),
+                ),
+            ]);
+            self::assert_eq!(actual, expected);
+
+            let actual = XrefList::from_str(
+                r#"[DOI:10.1086/522843 "Gordon, Deborah. American Naturalist: Natural History Note. Dec. 2007"]"#
+            ).unwrap();
+            let expected = XrefList::from(vec![
+                Xref::with_desc(
+                    PrefixedIdent::new("DOI", "10.1086/522843"),
+                    QuotedString::new("Gordon, Deborah. American Naturalist: Natural History Note. Dec. 2007"),
                 ),
             ]);
             self::assert_eq!(actual, expected);

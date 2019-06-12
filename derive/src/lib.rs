@@ -30,7 +30,7 @@ fn is_option(ty: &Type) -> bool {
 
 #[derive(Debug, FromVariant)]
 #[darling(attributes(clause), supports(newtype, tuple))]
-struct ClauseVariant {
+struct OboClauseVariant {
     ident: Ident,
     fields: ast::Fields<Type>,
     attrs: Vec<syn::Attribute>,
@@ -40,7 +40,7 @@ struct ClauseVariant {
     cardinality: Option<syn::Path>,
 }
 
-impl ClauseVariant {
+impl OboClauseVariant {
     fn tag(&self) -> Cow<syn::LitStr> {
         // match
         if let Some(tag) = &self.tag {
@@ -59,8 +59,8 @@ impl ClauseVariant {
         }
     }
 
-    /// Make the `Display` impl for this particular variant.
-    fn display_impl(&self) -> Vec<syn::Arm> {
+    /// Make the arms for a particular variant to be used in `Display` impl.
+    fn fmt_arms(&self) -> Vec<syn::Arm> {
         // Extract ident and tag to use in `quote!` calls.
         let id = &self.ident;
         let tag = self.tag();
@@ -150,29 +150,45 @@ impl ClauseVariant {
             }]
         }
     }
+
+    //
+    fn tag_arm(&self) -> syn::Arm {
+        let id = &self.ident;
+        let tag = self.tag();
+        let pat: Vec<syn::Pat> = vec![parse_quote!(_); self.fields.len()];
+        parse_quote!(#id(#(#pat,)*) => #tag)
+    }
+
+    //
+    fn cardinality_arm(&self) -> syn::Arm {
+        let id = &self.ident;
+        let tag = self.cardinality();
+        let pat: Vec<syn::Pat> = vec![parse_quote!(_); self.fields.len()];
+        parse_quote!(#id(#(#pat,)*) => crate::ext::Cardinality::#tag)
+    }
 }
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(clause), supports(enum_newtype, enum_tuple))]
-struct ClauseDerive {
+struct OboClauseDerive {
     ident: Ident,
-    data: ast::Data<ClauseVariant, util::Ignored>,
+    data: ast::Data<OboClauseVariant, util::Ignored>,
 }
 
-impl ClauseDerive {
+impl OboClauseDerive {
+
+    fn variants(&self) -> &[OboClauseVariant] {
+        match &self.data {
+            darling::ast::Data::Enum(variants) => variants,
+            _ => unreachable!("OboClauseDerive only supports enums"),
+        }
+    }
+
     fn display_impl(&self) -> syn::ItemImpl {
         let id = &self.ident;
-
-        let arms: Vec<syn::Arm> = match &self.data {
-            darling::ast::Data::Enum(variants) => variants
-                .iter()
-                .map(|v| v.display_impl())
-                .flatten()
-                .collect(),
-            _ => unreachable!(),
-        };
-
+        let arms = self.variants().iter().flat_map(|v| v.fmt_arms());
         parse_quote! {
+            #[automatically_derived]
             impl std::fmt::Display for #id {
                 fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                     use self::#id::*;
@@ -183,17 +199,47 @@ impl ClauseDerive {
             }
         }
     }
+
+    fn oboclause_impl(&self) -> syn::ItemImpl {
+        let id = &self.ident;
+        let arms_tag = self.variants().iter().map(|v| v.tag_arm());
+        let arms_card = self.variants().iter().map(|v| v.cardinality_arm());
+
+        parse_quote! {
+            #[automatically_derived]
+            impl crate::ast::OboClause for #id {
+                fn tag(&self) -> &'static str {
+                    use self::#id::*;
+                    match self {
+                        #(#arms_tag,)*
+                    }
+                }
+                #[cfg(feature = "ext")]
+                fn cardinality(&self) -> crate::ext::Cardinality {
+                    use self::#id::*;
+                    match self {
+                        #(#arms_card,)*
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[proc_macro_derive(OboClause, attributes(clause))]
 pub fn oboclause_derive(input: TokenStream) -> TokenStream {
     let parsed = syn::parse(input).unwrap();
-    let receiver = ClauseDerive::from_derive_input(&parsed).unwrap();
+    let receiver = OboClauseDerive::from_derive_input(&parsed).unwrap();
 
+    let oboclause_impl = receiver.oboclause_impl();
     let display_impl = receiver.display_impl();
+    // let cardinalitybound_impl = receiver.cardinalitybound_impl();
 
     TokenStream::from(quote!(
-        #[cfg(feature = "ext")]
+
+        #oboclause_impl
+
+        // #[cfg(feature = "display")]
         #display_impl
     ))
 }

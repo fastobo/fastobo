@@ -22,6 +22,29 @@ pub enum Cardinality {
     Any,
 }
 
+impl Cardinality {
+    pub fn is_match(&self, n: usize) -> bool {
+        match self {
+            Cardinality::ZeroOrOne => n < 2,
+            Cardinality::One => n == 1,
+            Cardinality::NotOne => n != 1,
+            Cardinality::Any => true,
+        }
+    }
+
+    pub fn to_error<S: Into<String>>(&self, n: usize, tag: S) -> Option<CardinalityError> {
+        use self::CardinalityError::*;
+        let name = tag.into();
+        match self {
+            Cardinality::ZeroOrOne if n > 2 => Some(DuplicateClauses { name }),
+            Cardinality::One if n == 0 => Some(MissingClause { name }),
+            Cardinality::One if n > 1 => Some(DuplicateClauses { name }),
+            Cardinality::NotOne if n == 1 => Some(SingleClause { name }),
+            _ => None,
+        }
+    }
+}
+
 /// A trait for structs that can be sorted in an order specified in the OBO spec.
 pub trait Orderable {
     /// Sort the elements of the collection in the right serialization order.

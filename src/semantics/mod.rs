@@ -14,6 +14,7 @@ mod treat_xrefs;
 pub(crate) use self::treat_xrefs::*;
 
 /// The cardinality constraint for a given clause type.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Cardinality {
     ZeroOrOne,
     One,

@@ -13,99 +13,72 @@ use crate::parser::Rule;
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "_derive", derive(OboClause))]
 pub enum TypedefClause {
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsAnonymous(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Name(UnquotedString),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "One"))]
     Namespace(NamespaceIdent),
     AltId(Ident),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Def(QuotedString, XrefList),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Comment(UnquotedString),
     Subset(SubsetIdent),
     Synonym(Synonym),
     Xref(Xref),
     PropertyValue(PropertyValue),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Domain(ClassIdent), // QUESTION(@althonos): Should be ID ?
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Range(ClassIdent),  // QUESTION(@althonos): same.
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Builtin(bool),
     HoldsOverChain(RelationIdent, RelationIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsAntiSymmetric(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsCyclic(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsReflexive(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsSymmetric(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsAsymmetric(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsTransitive(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsFunctional(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsInverseFunctional(bool),
     IsA(RelationIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
     IntersectionOf(RelationIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
     UnionOf(RelationIdent),
     EquivalentTo(RelationIdent),
     DisjointFrom(RelationIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     InverseOf(RelationIdent),
     TransitiveOver(RelationIdent),
     EquivalentToChain(RelationIdent, RelationIdent),
     DisjointOver(RelationIdent),
     Relationship(RelationIdent, RelationIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsObsolete(bool),
     ReplacedBy(RelationIdent),
     Consider(Ident),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     CreatedBy(UnquotedString),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     CreationDate(IsoDateTime),
     ExpandAssertionTo(QuotedString, XrefList),
     ExpandExpressionTo(QuotedString, XrefList),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsMetadataTag(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsClassLevel(bool),
 }
-
-// #[cfg(feature = "ext")]
-// impl crate::ext::CardinalityBound for TypedefClause {
-//     fn cardinality(&self) -> crate::ext::Cardinality {
-//         use self::TypedefClause::*;
-//         use crate::ext::Cardinality::*;
-//         match self {
-//             IsAnonymous(_) => ZeroOrOne,
-//             Name(_) => ZeroOrOne,
-//             Namespace(_) => One,
-//             AltId(_) => Any,
-//             Def(_, _) => ZeroOrOne,
-//             Comment(_) => ZeroOrOne,
-//             Subset(_) => ZeroOrOne,
-//             Synonym(_) => Any,
-//             Xref(_) => Any,
-//             PropertyValue(_) => ZeroOrOne,
-//             Domain(_) => ZeroOrOne, // QUESTION(@althonos): Should be ID ?
-//             Range(_) => ZeroOrOne,  // QUESTION(@althonos): same.
-//             Builtin(_) => ZeroOrOne,
-//             HoldsOverChain(_, _) => Any,
-//             IsAntiSymmetric(_) => ZeroOrOne,
-//             IsCyclic(_) => ZeroOrOne,
-//             IsReflexive(_) => ZeroOrOne,
-//             IsSymmetric(_) => ZeroOrOne,
-//             IsAsymmetric(_) => ZeroOrOne,
-//             IsTransitive(_) => ZeroOrOne,
-//             IsFunctional(_) => ZeroOrOne,
-//             IsInverseFunctional(_) => ZeroOrOne,
-//             IsA(_) => Any,
-//             IntersectionOf(_) => NotOne,
-//             UnionOf(_) => NotOne,
-//             EquivalentTo(_) => Any,
-//             DisjointFrom(_) => Any,
-//             InverseOf(_) => ZeroOrOne,
-//             TransitiveOver(_) => Any,
-//             EquivalentToChain(_, _) => Any,
-//             DisjointOver(_) => Any,
-//             Relationship(_, _) => Any,
-//             IsObsolete(_) => ZeroOrOne,
-//             ReplacedBy(_) => Any,
-//             Consider(_) => Any,
-//             CreatedBy(_) => ZeroOrOne,
-//             CreationDate(_) => ZeroOrOne,
-//             ExpandAssertionTo(_, _) => Any,
-//             ExpandExpressionTo(_, _) => Any,
-//             IsMetadataTag(_) => ZeroOrOne,
-//             IsClassLevel(_) => ZeroOrOne,
-//         }
-//     }
-// }
 
 impl<'i> FromPair<'i> for Line<TypedefClause> {
     const RULE: Rule = Rule::TypedefClauseLine;

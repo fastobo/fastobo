@@ -22,25 +22,37 @@ use crate::parser::Rule;
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "_derive", derive(OboClause))]
 pub enum TermClause {
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsAnonymous(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Name(UnquotedString),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "One"))]
     Namespace(NamespaceIdent),
     AltId(Ident),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Def(QuotedString, XrefList),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Comment(UnquotedString),
     Subset(SubsetIdent),
     Synonym(Synonym),
     Xref(Xref),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Builtin(bool),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     PropertyValue(PropertyValue),
     IsA(ClassIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
     IntersectionOf(Option<RelationIdent>, ClassIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
     UnionOf(ClassIdent),
     EquivalentTo(ClassIdent),
     DisjointFrom(ClassIdent),
     Relationship(RelationIdent, ClassIdent),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     CreatedBy(UnquotedString),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     CreationDate(IsoDateTime),
+    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     IsObsolete(bool),
     ReplacedBy(ClassIdent),
     Consider(ClassIdent),
@@ -50,38 +62,6 @@ pub enum TermClause {
     // IsMetadataTag(bool),
     // IsClassLevel(bool),
 }
-
-// #[cfg(feature = "ext")]
-// impl crate::ext::CardinalityBound for TermClause {
-//     fn cardinality(&self) -> crate::ext::Cardinality {
-//         use self::TermClause::*;
-//         use crate::ext::Cardinality::*;
-//         match self {
-//             IsAnonymous(_) => ZeroOrOne,
-//             Name(_) => ZeroOrOne,
-//             Namespace(_) => One,
-//             AltId(_) => Any,
-//             Def(_, _) => ZeroOrOne,
-//             Comment(_) => ZeroOrOne,
-//             Subset(_) => Any,
-//             Synonym(_) => Any,
-//             Xref(_) => Any,
-//             Builtin(_) => ZeroOrOne,
-//             PropertyValue(_) => ZeroOrOne,
-//             IsA(_) => Any,
-//             IntersectionOf(_, _) => NotOne,
-//             UnionOf(_) => NotOne,
-//             EquivalentTo(_) => Any,
-//             DisjointFrom(_) => Any,
-//             Relationship(_, _) => Any,
-//             CreatedBy(_) => ZeroOrOne,
-//             CreationDate(_) => ZeroOrOne,
-//             IsObsolete(_) => ZeroOrOne,
-//             ReplacedBy(_) => Any,
-//             Consider(_) => Any,
-//         }
-//     }
-// }
 
 impl<'i> FromPair<'i> for Line<TermClause> {
     const RULE: Rule = Rule::TermClauseLine;

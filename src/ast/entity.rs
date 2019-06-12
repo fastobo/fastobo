@@ -93,7 +93,8 @@ impl<'i> FromPair<'i> for EntityFrame {
 }
 impl_fromstr!(EntityFrame);
 
-impl Orderable for EntityFrame {
+#[cfg(feature = "semantics")]
+impl crate::semantics::Orderable for EntityFrame {
     fn sort(&mut self) {
         use self::EntityFrame::*;
         match self {

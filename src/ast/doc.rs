@@ -329,7 +329,9 @@ where
     }
 }
 
-impl Orderable for OboDoc {
+#[cfg(feature = "semantics")]
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
+impl crate::semantics::Orderable for OboDoc {
     /// Sort the document in the right serialization order.
     fn sort(&mut self) {
         self.header.sort_unstable();

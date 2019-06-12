@@ -136,7 +136,8 @@ impl<'a> IntoIterator for &'a TypedefFrame {
     }
 }
 
-impl Orderable for TypedefFrame {
+#[cfg(feature = "semantics")]
+impl crate::semantics::Orderable for TypedefFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

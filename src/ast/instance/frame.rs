@@ -139,7 +139,8 @@ impl<'a> IntoIterator for &'a InstanceFrame {
     }
 }
 
-impl Orderable for InstanceFrame {
+#[cfg(feature = "semantics")]
+impl crate::semantics::Orderable for InstanceFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

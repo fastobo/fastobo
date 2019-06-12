@@ -149,6 +149,18 @@ impl FromIterator<HeaderClause> for HeaderFrame {
     }
 }
 
+impl<'i> FromPair<'i> for HeaderFrame {
+    const RULE: Rule = Rule::HeaderFrame;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+        let mut clauses = Vec::new();
+        for inner in pair.into_inner() {
+            clauses.push(HeaderClause::from_pair_unchecked(inner)?)
+        }
+        Ok(HeaderFrame::with_clauses(clauses))
+    }
+}
+impl_fromstr!(HeaderFrame);
+
 impl IntoIterator for HeaderFrame {
     type Item = HeaderClause;
     type IntoIter = <Vec<HeaderClause> as IntoIterator>::IntoIter;
@@ -173,17 +185,20 @@ impl<'a> IntoIterator for &'a mut HeaderFrame {
     }
 }
 
-impl<'i> FromPair<'i> for HeaderFrame {
-    const RULE: Rule = Rule::HeaderFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        let mut clauses = Vec::new();
-        for inner in pair.into_inner() {
-            clauses.push(HeaderClause::from_pair_unchecked(inner)?)
+#[cfg(feature = "semantics")]
+impl crate::semantics::Orderable for HeaderFrame {
+    fn sort(&mut self) {
+        self.clauses.sort_unstable();
+    }
+    fn is_sorted(&self) -> bool {
+        for i in 1..self.clauses.len() {
+            if self.clauses[i - 1] > self.clauses[i] {
+                return false;
+            }
         }
-        Ok(HeaderFrame::with_clauses(clauses))
+        true
     }
 }
-impl_fromstr!(HeaderFrame);
 
 #[cfg(test)]
 mod tests {

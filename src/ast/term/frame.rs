@@ -195,7 +195,8 @@ impl<'a> IntoIterator for &'a TermFrame {
     }
 }
 
-impl Orderable for TermFrame {
+#[cfg(feature = "semantics")]
+impl crate::semantics::Orderable for TermFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

@@ -34,6 +34,17 @@
 //! *Warning: this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html),
 //!  but the API is likely to change a lot before the release of a stable 1.0.*
 //!
+//! ## Features
+//!
+//! All the following features are enabled by default, but can be disabled and
+//! cherry-picked using the `default-features = false` option in the `Cargo.toml`
+//! manifest of your project:
+//!
+//! * **`memchr`** - Use the `memchr` library to improve parser speed when
+//!   searching for a particular character in a buffer.
+//! * **`ext`** - Compile the `fastobo::ext` module containing additional
+//!   traits to check the validity of an OBO document on the semantic level,
+//!   and implementation of macros to transform OBO documents in place.
 //!
 //! ## Usage
 //!
@@ -67,7 +78,9 @@
 //!
 //! ## See also
 //!
+//! * [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser for the OBO format version 1.4.
 //! * [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to this crate.
+//! * [`fastobo-validator`](https://pypi.org/project/fastobo/): Standalone CLI to validate OBO files against the specification.
 //!
 //!
 //! ## Feedback
@@ -108,6 +121,7 @@ pub mod parser;
 
 pub mod ast;
 pub mod error;
+#[cfg(feature = "ext")]
 pub mod ext;
 pub mod share;
 pub mod visit;

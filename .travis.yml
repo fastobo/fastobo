@@ -1,7 +1,10 @@
 sudo: false
 dist: xenial
 language: Rust
-cache: cargo
+cache:
+  directories:
+    - $HOME/.cargo/bin
+    - $TRAVIS_BUILD_DIR/target
 
 rust:
 - stable

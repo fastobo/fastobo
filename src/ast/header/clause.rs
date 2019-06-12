@@ -61,10 +61,6 @@ pub enum HeaderClause {
         clause(tag = "default-namespace", cardinality = "ZeroOrOne")
     )]
     DefaultNamespace(NamespaceIdent),
-    #[cfg_attr(
-        feature = "_derive",
-        clause(tag = "namespace-id-rule", cardinality = "ZeroOrOne")
-    )]
     NamespaceIdRule(UnquotedString),
     Idspace(IdentPrefix, Url, Option<QuotedString>),
     #[cfg_attr(feature = "_derive", clause(tag = "treat-xrefs-as-equivalent"))]

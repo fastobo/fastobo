@@ -55,7 +55,7 @@ pub enum SyntaxError {
     /// # let err =
     /// QuotedString::from_pair(pairs.unwrap().next().unwrap()).unwrap_err();
     /// # match err {
-    /// #   fastobo::error::Error::UnexpectedRule { expected, actual } => {
+    /// #   fastobo::error::SyntaxError::UnexpectedRule { expected, actual } => {
     /// #       assert_eq!(expected, Rule::QuotedString);
     /// #       assert_eq!(actual, Rule::UnquotedString);
     /// #   }
@@ -75,7 +75,7 @@ pub enum SyntaxError {
     /// # let err =
     /// QuotedString::from_str("definitely not a quoted string").unwrap_err();
     /// # match err {
-    /// #   fastobo::error::Error::ParserError { .. } => (),
+    /// #   fastobo::error::SyntaxError::ParserError { .. } => (),
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     /// ```

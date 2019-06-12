@@ -200,6 +200,14 @@ impl crate::semantics::Orderable for HeaderFrame {
     }
 }
 
+impl OboFrame for HeaderFrame {
+    type Clause = HeaderClause;
+
+    fn clauses_ref(&self) -> Vec<&Self::Clause> {
+        self.clauses.iter().collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

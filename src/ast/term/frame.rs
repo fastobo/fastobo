@@ -210,6 +210,14 @@ impl crate::semantics::Orderable for TermFrame {
     }
 }
 
+impl OboFrame for TermFrame {
+    type Clause = TermClause;
+
+    fn clauses_ref(&self) -> Vec<&Self::Clause> {
+        self.clauses.iter().map(Line::as_inner).collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

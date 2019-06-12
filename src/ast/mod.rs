@@ -56,27 +56,90 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 use pest::Parser;
 
+#[cfg(feature = "semantics")]
+use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
 
 /// Common attributes and operations for all frames.
-pub trait OboFrame {}
+pub trait OboFrame {
+    type Clause: OboClause;
+
+    /// Get a vector of references to the clauses of a frame.
+    ///
+    /// # Note
+    /// While currently returning a `Box<Iterator>`, this method will be changed
+    /// to return an associated type when [RFC1598] is implemented and available
+    /// in *stable* Rust.
+    ///
+    /// [RFC1598]: https://github.com/rust-lang/rfcs/blob/master/text/1598-generic_associated_types.md
+    fn clauses_ref(&self) -> Vec<&Self::Clause>;
+
+    /// Check the frame only contains clauses with the right cardinality.
+    ///
+    /// # Note
+    /// The current implementation does not check for missing clauses: good
+    /// ergonomics are to be found to provide a collection of required clauses
+    /// in a generic manner.
+    #[cfg(feature = "semantics")]
+    #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
+    fn cardinality_check(&self) -> Result<(), CardinalityError> {
+        use std::collections::HashMap;
+        use std::mem::discriminant;
+
+        // Group clauses by variant kind
+        let mut clause_index: HashMap<_, Vec<&Self::Clause>> = HashMap::new();
+        for clause in self.clauses_ref() {
+            clause_index
+                .entry(discriminant(clause))
+                .or_default()
+                .push(clause);
+        }
+
+        // Check each variant kind
+        for clauses in clause_index.values() {
+            let cardinality = clauses[0].cardinality();
+            if let Some(err) = cardinality.to_error(clauses.len(), clauses[0].tag()) {
+                return Err(err);
+            }
+        }
+
+        Ok(())
+    }
+}
 
 /// Common attributes and operations for all clauses.
 pub trait OboClause {
     /// Get the raw string corresponding to the tag of a clause.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let clause = HeaderClause::SavedBy("Martin Larralde".into());
+    /// assert_eq!(clause.tag(), "saved-by");
+    /// ```
     fn tag(&self) -> &str;
 
-    #[cfg(feature = "semantics")]
-    #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
     /// Get the cardinality expected for a clause variant.
     ///
     /// While most clauses can appear any number of time in a frame, some
     /// have a constraint on how many time they can appear: for instance,
     /// a `namespace` clause must appear exactly once in every entity frame,
     /// and an `intersection_of` clause cannot appear only once.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// use fastobo::semantics::Cardinality;
+    /// let clause = HeaderClause::SavedBy("Martin Larralde".into());
+    /// assert_eq!(clause.cardinality(), Cardinality::ZeroOrOne);
+    /// ```
+    #[cfg(feature = "semantics")]
+    #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
     fn cardinality(&self) -> crate::semantics::Cardinality;
 }
 

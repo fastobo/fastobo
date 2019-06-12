@@ -150,3 +150,11 @@ impl crate::semantics::Orderable for TypedefFrame {
         true
     }
 }
+
+impl OboFrame for TypedefFrame {
+    type Clause = TypedefClause;
+
+    fn clauses_ref(&self) -> Vec<&Self::Clause> {
+        self.clauses.iter().map(Line::as_inner).collect()
+    }
+}

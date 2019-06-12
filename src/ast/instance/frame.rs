@@ -153,3 +153,11 @@ impl crate::semantics::Orderable for InstanceFrame {
         true
     }
 }
+
+impl OboFrame for InstanceFrame {
+    type Clause = InstanceClause;
+
+    fn clauses_ref(&self) -> Vec<&Self::Clause> {
+        self.clauses.iter().map(Line::as_inner).collect()
+    }
+}

@@ -31,7 +31,7 @@ pub enum TypedefClause {
     #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Domain(ClassIdent), // QUESTION(@althonos): Should be ID ?
     #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
-    Range(ClassIdent),  // QUESTION(@althonos): same.
+    Range(ClassIdent), // QUESTION(@althonos): same.
     #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
     Builtin(bool),
     HoldsOverChain(RelationIdent, RelationIdent),

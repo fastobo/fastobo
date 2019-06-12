@@ -14,7 +14,41 @@
 
 ## Overview
 
-This library provides an abstract syntax tree for the [OBO flat file format 1.4](http://owlcollab.github.io/oboformat/doc/obo-syntax.html).
+This library provides a mostly-complete implementation of the
+[OBO flat file format 1.4](http://owlcollab.github.io/oboformat/doc/obo-syntax.html).
+
+* **Data structures** - `fastobo` provides a complete owned AST for the
+  OBO language, with constructors and covenience traits where applicable.
+  There is a plan to provide borrowed data structures as well, to be able
+  to build a view of an OBO document from borrowed data.
+* **Parsing** - The parser is implemented using [pest](http://pest.rs/),
+  and is reexported from the [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax)
+  crate. Most structures implement the [`FromPair`](./parser/trait.FromPair.html)
+  trait which allows to build a data structure from a stream of pest tokens.
+* **Errors** - All functions in that crate that return a `Result` will
+  always use the `Error` struct defined in the `error` module. Errors
+  reported by pest are very meaningful, and can give the exact location
+  of a syntax error encountered by the parser.
+* **Semantics** - This library exports specific methods that can be used
+  to edit an OBO syntax tree with the semantics expected in the format
+  guide: mapping identifiers to URLs, adding default namespaces, or
+  expanding entity frames using `treat-xrefs` macros.
+
+*Warning: this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html),
+but the API is likely to change a lot before the release of a stable 1.0.*
+
+
+## Features
+
+All the following features are enabled by default, but can be disabled and
+cherry-picked using the `default-features = false` option in the `Cargo.toml`
+manifest of your project:
+
+* **`memchr`** - Use the `memchr` library to improve parser speed when
+  searching for a particular character in a buffer.
+* **`semantics`** - Compile additional methods to check the validity of an OBO
+  document on the semantic level, and implementation of macros to transform OBO
+  documents in place.
 
 
 ## Usage
@@ -22,7 +56,7 @@ This library provides an abstract syntax tree for the [OBO flat file format 1.4]
 Add `fastobo` to the `[dependencies]` sections of your `Cargo.toml` manifest:
 ```toml
 [dependencies]
-fastobo = "0.1.0"
+fastobo = "0.3.0"
 ```
 
 The `OboDoc` struct acts as the root of the AST. Use `OboDoc::from_stream` to load an OBO document
@@ -31,25 +65,18 @@ from a [`BufRead`](https://doc.rust-lang.org/std/io/trait.BufRead.html) implemen
 
 ```rust
 extern crate fastobo;
-extern crate reqwest;
+extern crate ureq;
 
 fn main() {
-    let response = reqwest::get("http://purl.obolibrary.org/obo/go.obo").unwrap();
-    let mut reader = std::io::BufReader::new(response);
+    let response = ureq::get("http://purl.obolibrary.org/obo/ms.obo").call();
+    let mut reader = std::io::BufReader::new(response.into_reader());
 
     match fastobo::ast::OboDoc::from_stream(&mut reader) {
-        Ok(doc) => println!("Number of GO entities: {}", doc.entities.len()),
-        Err(e) => panic!("Could not parse the Gene Ontology: {}", e),
+        Ok(doc) => println!("Number of MS entities: {}", doc.entities().len()),
+        Err(e) => panic!("Could not parse the Mass-Spec Ontology: {}", e),
     }
 }
 ```
-
-
-## Missing features
-
-* [ ] Support for comment blocks between frames
-* [ ] Support for comments in `property_value` clauses in headers.
-* [ ] More `std` traits implementation.
 
 
 ## See also
@@ -57,6 +84,7 @@ fn main() {
 * [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser for the OBO
   format version 1.4.
 * [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to this crate.
+* [`fastobo-validator`](https://pypi.org/project/fastobo/): Standalone CLI to validate OBO files against the specification.
 
 
 ## Feedback

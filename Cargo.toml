@@ -25,6 +25,9 @@ repository = "fastobo/fastobo"
 [badges.maintenance]
 status     = "actively-developed"
 
+[package.metadata.docs.rs]
+features = [ "_doc" ]
+
 [dependencies]
 failure = "0.1.5"
 pest = "2.1.1"

@@ -47,7 +47,6 @@ impl Qualifier {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for Qualifier {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.key
@@ -103,7 +102,6 @@ impl QualifierList {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for QualifierList {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut qualifiers = self.qualifiers.iter().peekable();
@@ -150,8 +148,6 @@ impl IntoIterator for QualifierList {
     }
 }
 
-#[cfg(feature = "semantics")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
 impl crate::semantics::Orderable for QualifierList {
     fn sort(&mut self) {
         self.qualifiers.sort_unstable();

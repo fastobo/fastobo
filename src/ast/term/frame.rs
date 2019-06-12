@@ -124,7 +124,6 @@ impl DerefMut for TermFrame {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for TermFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_str("[Term]\nid: ").and(self.id.fmt(f))?;
@@ -195,7 +194,6 @@ impl<'a> IntoIterator for &'a TermFrame {
     }
 }
 
-#[cfg(feature = "semantics")]
 impl crate::semantics::Orderable for TermFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();

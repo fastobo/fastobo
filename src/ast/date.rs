@@ -109,7 +109,6 @@ impl DateTime for NaiveDateTime {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for NaiveDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
@@ -224,7 +223,6 @@ impl IsoDateTime {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for IsoDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
@@ -310,7 +308,6 @@ impl DateTime for IsoDateTime {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for IsoTimezone {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::IsoTimezone::*;

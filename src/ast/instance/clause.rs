@@ -12,17 +12,16 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in an instance frame.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "_derive", derive(OboClause))]
+#[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]
 pub enum InstanceClause {
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Name(UnquotedString),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "One"))]
+    #[clause(cardinality = "One")]
     Namespace(NamespaceIdent),
     AltId(Ident),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Def(QuotedString, XrefList),
     Comment(UnquotedString),
     Subset(SubsetIdent),
@@ -31,11 +30,11 @@ pub enum InstanceClause {
     PropertyValue(PropertyValue),
     InstanceOf(ClassIdent),
     Relationship(RelationIdent, Ident), // QUESTION(@althonos): InstanceId ?
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     CreatedBy(UnquotedString),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     CreationDate(IsoDateTime),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
     ReplacedBy(InstanceIdent),
     Consider(Ident),

@@ -278,6 +278,11 @@ impl OboDoc {
             }
         }
     }
+
+    /// Check if the OBO document is fully labeled.
+    pub fn is_fully_labeled(&self) {
+        for frame in &self.entities {}
+    }
 }
 
 impl AsRef<[EntityFrame]> for OboDoc {

@@ -49,7 +49,6 @@ impl Identified for EntityFrame {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for EntityFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::EntityFrame::*;
@@ -93,7 +92,6 @@ impl<'i> FromPair<'i> for EntityFrame {
 }
 impl_fromstr!(EntityFrame);
 
-#[cfg(feature = "semantics")]
 impl crate::semantics::Orderable for EntityFrame {
     fn sort(&mut self) {
         use self::EntityFrame::*;

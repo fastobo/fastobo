@@ -19,40 +19,39 @@ use crate::parser::Rule;
 /// specification: clauses will compare based on their serialization order
 /// rather than on their alphabetic order; clauses of the same kind will be
 /// ranked in the alphabetic order.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "_derive", derive(OboClause))]
+#[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]
 pub enum TermClause {
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Name(UnquotedString),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "One"))]
+    #[clause(cardinality = "One")]
     Namespace(NamespaceIdent),
     AltId(Ident),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Def(QuotedString, XrefList),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Comment(UnquotedString),
     Subset(SubsetIdent),
     Synonym(Synonym),
     Xref(Xref),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Builtin(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     PropertyValue(PropertyValue),
     IsA(ClassIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
+    #[clause(cardinality = "NotOne")]
     IntersectionOf(Option<RelationIdent>, ClassIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
+    #[clause(cardinality = "NotOne")]
     UnionOf(ClassIdent),
     EquivalentTo(ClassIdent),
     DisjointFrom(ClassIdent),
     Relationship(RelationIdent, ClassIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     CreatedBy(UnquotedString),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     CreationDate(IsoDateTime),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
     ReplacedBy(ClassIdent),
     Consider(ClassIdent),

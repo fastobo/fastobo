@@ -21,7 +21,6 @@ pub enum SynonymScope {
     Related,
 }
 
-#[cfg(feature = "display")]
 impl Display for SynonymScope {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::SynonymScope::*;
@@ -157,7 +156,6 @@ impl Synonym {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for Synonym {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.desc

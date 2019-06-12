@@ -1,5 +1,4 @@
 //! A selection of useful traits that exceed the scope of OBO syntax.
-#![cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
 
 use std::cmp::Ordering;
 use std::collections::HashMap;

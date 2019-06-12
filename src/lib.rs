@@ -8,8 +8,7 @@ extern crate failure;
 #[macro_use]
 extern crate opaque_typedef_macros;
 
-#[cfg(feature = "_derive")]
-#[cfg_attr(feature = "_derive", macro_use)]
+#[macro_use]
 extern crate fastobo_derive;
 extern crate fastobo_syntax;
 
@@ -26,7 +25,6 @@ pub mod parser;
 
 pub mod ast;
 pub mod error;
-#[cfg(feature = "semantics")]
 pub mod semantics;
 pub mod share;
 pub mod visit;

@@ -10,73 +10,72 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in a typedef frame.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "_derive", derive(OboClause))]
+#[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]
 pub enum TypedefClause {
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Name(UnquotedString),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "One"))]
+    #[clause(cardinality = "One")]
     Namespace(NamespaceIdent),
     AltId(Ident),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Def(QuotedString, XrefList),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Comment(UnquotedString),
     Subset(SubsetIdent),
     Synonym(Synonym),
     Xref(Xref),
     PropertyValue(PropertyValue),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Domain(ClassIdent), // QUESTION(@althonos): Should be ID ?
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Range(ClassIdent), // QUESTION(@althonos): same.
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     Builtin(bool),
     HoldsOverChain(RelationIdent, RelationIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsAntiSymmetric(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsCyclic(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsReflexive(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsSymmetric(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsAsymmetric(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsTransitive(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsFunctional(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsInverseFunctional(bool),
     IsA(RelationIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
+    #[clause(cardinality = "NotOne")]
     IntersectionOf(RelationIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "NotOne"))]
+    #[clause(cardinality = "NotOne")]
     UnionOf(RelationIdent),
     EquivalentTo(RelationIdent),
     DisjointFrom(RelationIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     InverseOf(RelationIdent),
     TransitiveOver(RelationIdent),
     EquivalentToChain(RelationIdent, RelationIdent),
     DisjointOver(RelationIdent),
     Relationship(RelationIdent, RelationIdent),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
     ReplacedBy(RelationIdent),
     Consider(Ident),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     CreatedBy(UnquotedString),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     CreationDate(IsoDateTime),
     ExpandAssertionTo(QuotedString, XrefList),
     ExpandExpressionTo(QuotedString, XrefList),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsMetadataTag(bool),
-    #[cfg_attr(feature = "_derive", clause(cardinality = "ZeroOrOne"))]
+    #[clause(cardinality = "ZeroOrOne")]
     IsClassLevel(bool),
 }
 

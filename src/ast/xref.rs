@@ -74,7 +74,6 @@ impl Xref {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for Xref {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.id.fmt(f)?;
@@ -136,7 +135,6 @@ impl AsRef<[Xref]> for XrefList {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for XrefList {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_char('[')?;
@@ -185,7 +183,6 @@ impl IntoIterator for XrefList {
     }
 }
 
-#[cfg(feature = "semantics")]
 impl crate::semantics::Orderable for XrefList {
     fn sort(&mut self) {
         self.xrefs.sort_unstable();

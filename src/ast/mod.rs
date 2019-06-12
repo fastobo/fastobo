@@ -56,7 +56,6 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 use pest::Parser;
 
-#[cfg(feature = "semantics")]
 use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::parser::FromPair;
@@ -83,8 +82,6 @@ pub trait OboFrame {
     /// The current implementation does not check for missing clauses: good
     /// ergonomics are to be found to provide a collection of required clauses
     /// in a generic manner.
-    #[cfg(feature = "semantics")]
-    #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
     fn cardinality_check(&self) -> Result<(), CardinalityError> {
         use std::collections::HashMap;
         use std::mem::discriminant;
@@ -138,8 +135,6 @@ pub trait OboClause {
     /// let clause = HeaderClause::SavedBy("Martin Larralde".into());
     /// assert_eq!(clause.cardinality(), Cardinality::ZeroOrOne);
     /// ```
-    #[cfg(feature = "semantics")]
-    #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
     fn cardinality(&self) -> crate::semantics::Cardinality;
 }
 

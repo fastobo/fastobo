@@ -71,13 +71,13 @@ impl HeaderFrame {
     }
 
     /// Get the format version of the ontology, if any is declared.
-    pub fn format_version(&self) -> Result<&str, CardinalityError> {
-        let mut version: Option<&str> = None;
+    pub fn format_version(&self) -> Result<&UnquotedString, CardinalityError> {
+        let mut version: Option<&UnquotedString> = None;
         for clause in &self.clauses {
             if let HeaderClause::FormatVersion(v) = clause {
                 match version {
                     Some(_) => return Err(CardinalityError::duplicate("format-version")),
-                    None => version = Some(v.as_str()),
+                    None => version = Some(&v),
                 }
             }
         }
@@ -124,7 +124,6 @@ impl AsRef<[HeaderClause]> for HeaderFrame {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for HeaderFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         for clause in self.clauses.iter() {
@@ -185,7 +184,6 @@ impl<'a> IntoIterator for &'a mut HeaderFrame {
     }
 }
 
-#[cfg(feature = "semantics")]
 impl crate::semantics::Orderable for HeaderFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();

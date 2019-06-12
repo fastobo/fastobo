@@ -23,7 +23,6 @@ pub fn oboclause_derive(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote!(
         #oboclause_impl
-        #[cfg(feature = "display")]
         #display_impl
     ))
 }

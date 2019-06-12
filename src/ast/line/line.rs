@@ -121,7 +121,6 @@ impl<T> DerefMut for Line<T> {
     }
 }
 
-#[cfg(feature = "display")]
 impl<T> Display for Line<T>
 where
     T: Display,

@@ -13,7 +13,7 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::share::Share;
@@ -86,7 +86,7 @@ impl Display for Xref {
 
 impl<'i> FromPair<'i> for Xref {
     const RULE: Rule = Rule::Xref;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let id = FromPair::from_pair_unchecked(inner.next().unwrap())?;
         let desc = match inner.next() {
@@ -164,8 +164,7 @@ impl FromIterator<Xref> for XrefList {
 
 impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-        println!("{:?}", pair);
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
             let xref = Xref::from_str(inner.as_str()).map_err(|e| e.with_span(inner.as_span()))?;
@@ -234,12 +233,12 @@ mod tests {
             let actual = XrefList::from_str(
                 r#"[DOI:10.1086/522843 "Gordon, Deborah. American Naturalist: Natural History Note. Dec. 2007"]"#
             ).unwrap();
-            let expected = XrefList::from(vec![
-                Xref::with_desc(
-                    PrefixedIdent::new("DOI", "10.1086/522843"),
-                    QuotedString::new("Gordon, Deborah. American Naturalist: Natural History Note. Dec. 2007"),
+            let expected = XrefList::from(vec![Xref::with_desc(
+                PrefixedIdent::new("DOI", "10.1086/522843"),
+                QuotedString::new(
+                    "Gordon, Deborah. American Naturalist: Natural History Note. Dec. 2007",
                 ),
-            ]);
+            )]);
             self::assert_eq!(actual, expected);
         }
     }

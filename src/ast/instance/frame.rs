@@ -8,7 +8,8 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -106,7 +107,7 @@ impl Identified for InstanceFrame {
 
 impl<'i> FromPair<'i> for InstanceFrame {
     const RULE: Rule = Rule::InstanceFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let iid = InstanceIdent::from_pair_unchecked(inner.next().unwrap())?;
         let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(iid);

@@ -12,7 +12,7 @@ use super::IdPrefix;
 use super::IdentLocal;
 use super::IdentPrefix;
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::share::Cow;
@@ -108,7 +108,7 @@ impl Display for PrefixedIdent {
 
 impl<'i> FromPair<'i> for PrefixedIdent {
     const RULE: Rule = Rule::PrefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inners = pair.into_inner();
         let prefix = IdentPrefix::from_pair_unchecked(inners.next().unwrap())?;
         let local = IdentLocal::from_pair_unchecked(inners.next().unwrap())?;
@@ -171,7 +171,7 @@ impl<'a> Display for PrefixedId<'a> {
 
 impl<'i> FromPair<'i> for Cow<'i, PrefixedId<'i>> {
     const RULE: Rule = Rule::PrefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inners = pair.into_inner();
         let prefix = Cow::<IdPrefix>::from_pair_unchecked(inners.next().unwrap())?;
         let local = Cow::<IdLocal>::from_pair_unchecked(inners.next().unwrap())?;

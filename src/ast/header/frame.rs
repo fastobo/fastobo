@@ -11,6 +11,7 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::CardinalityError;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::share::Cow;
@@ -173,7 +174,7 @@ impl<'a> IntoIterator for &'a mut HeaderFrame {
 
 impl<'i> FromPair<'i> for HeaderFrame {
     const RULE: Rule = Rule::HeaderFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut clauses = Vec::new();
         for inner in pair.into_inner() {
             clauses.push(HeaderClause::from_pair_unchecked(inner)?)

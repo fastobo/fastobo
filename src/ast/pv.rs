@@ -10,7 +10,8 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::share::Cow;
@@ -60,7 +61,7 @@ impl Display for PropertyValue {
 
 impl<'i> FromPair<'i> for PropertyValue {
     const RULE: Rule = Rule::PropertyValue;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
         let second = inner.next().unwrap();

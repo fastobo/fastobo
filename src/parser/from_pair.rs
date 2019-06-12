@@ -6,6 +6,7 @@ use url::Url;
 use std::str::FromStr;
 
 use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::Rule;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
@@ -19,13 +20,13 @@ pub trait FromPair<'i>: Sized {
     /// # Panic
     /// Panics if the pair was not produced by the right rule, i.e.
     /// `pair.as_rule() != <Self as FromPair>::RULE`.
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error>;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError>;
 
     /// Create a new instance from a `Pair`.
     #[inline]
-    fn from_pair(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+    fn from_pair(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         if pair.as_rule() != Self::RULE {
-            return Err(Error::UnexpectedRule {
+            return Err(SyntaxError::UnexpectedRule {
                 actual: pair.as_rule(),
                 expected: Self::RULE,
             });
@@ -37,16 +38,16 @@ pub trait FromPair<'i>: Sized {
 
 impl<'i> FromPair<'i> for bool {
     const RULE: Rule = Rule::Boolean;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
     }
 }
 
 impl<'i> FromPair<'i> for Url {
     const RULE: Rule = Rule::Iri;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         Url::parse(pair.as_str()).map_err(|e| {
-            Error::from(PestError::new_from_span(
+            SyntaxError::from(PestError::new_from_span(
                 ErrorVariant::CustomError {
                     message: format!("could not parse URL: {}", e),
                 },
@@ -98,7 +99,7 @@ mod tests {
 
         let err = Ident::from_pair(pair).unwrap_err();
         match err {
-            Error::UnexpectedRule {
+            SyntaxError::UnexpectedRule {
                 ref actual,
                 ref expected,
             } => {

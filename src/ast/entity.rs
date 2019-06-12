@@ -16,7 +16,7 @@ use pest::Parser;
 
 use crate::ast::*;
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
@@ -80,7 +80,7 @@ impl From<InstanceFrame> for EntityFrame {
 
 impl<'i> FromPair<'i> for EntityFrame {
     const RULE: Rule = Rule::EntityFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::TermFrame => TermFrame::from_pair_unchecked(inner).map(From::from),

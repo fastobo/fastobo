@@ -10,7 +10,8 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -170,7 +171,7 @@ pub type Eol = Line<()>;
 
 impl<'i> FromPair<'i> for Eol {
     const RULE: Rule = Rule::EOL;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let opt1 = inner.next();
         let opt2 = inner.next();

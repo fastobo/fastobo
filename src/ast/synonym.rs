@@ -8,7 +8,7 @@ use url::Url;
 
 use crate::ast::*;
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -35,7 +35,7 @@ impl Display for SynonymScope {
 
 impl<'i> FromPair<'i> for SynonymScope {
     const RULE: Rule = Rule::SynonymScope;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         match pair.as_str() {
             "EXACT" => Ok(SynonymScope::Exact),
             "BROAD" => Ok(SynonymScope::Broad),
@@ -174,7 +174,7 @@ impl Display for Synonym {
 
 impl<'i> FromPair<'i> for Synonym {
     const RULE: Rule = Rule::Synonym;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
 
         let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;

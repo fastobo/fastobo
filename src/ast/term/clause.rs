@@ -7,7 +7,8 @@ use std::str::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -88,7 +89,7 @@ impl Display for TermClause {
 
 impl<'i> FromPair<'i> for Line<TermClause> {
     const RULE: Rule = Rule::TermClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let clause = TermClause::from_pair_unchecked(inner.next().unwrap())?;
         let eol = inner.next().unwrap();
@@ -99,7 +100,7 @@ impl_fromstr!(Line<TermClause>);
 
 impl<'i> FromPair<'i> for TermClause {
     const RULE: Rule = Rule::TermClause;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         match inner.next().unwrap().as_rule() {
             Rule::IsAnonymousTag => {

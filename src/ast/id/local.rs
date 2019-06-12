@@ -10,7 +10,7 @@ use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
@@ -145,7 +145,7 @@ impl Display for IdentLocal {
 
 impl<'i> FromPair<'i> for IdentLocal {
     const RULE: Rule = Rule::IdLocal;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {
@@ -237,7 +237,7 @@ impl<'a> Display for IdLocal<'a> {
 
 impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
     const RULE: Rule = Rule::IdLocal;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {
             Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), true)))

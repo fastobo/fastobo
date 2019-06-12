@@ -9,7 +9,7 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -159,7 +159,7 @@ impl From<ClassIdent> for TermFrame {
 
 impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         use crate::parser::QuickFind;
         let n = pair.as_str().quickcount(b'\n');
 

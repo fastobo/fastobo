@@ -1,9 +1,9 @@
 //! Parser and parsing-related traits for the OBO format.
 
+use std::convert::TryFrom;
 use std::io::BufRead;
 use std::iter::Iterator;
 use std::str::FromStr;
-use std::convert::TryFrom;
 
 use pest::Parser;
 
@@ -12,6 +12,7 @@ use crate::ast::HeaderClause;
 use crate::ast::HeaderFrame;
 use crate::ast::OboDoc;
 use crate::error::Error;
+use crate::error::SyntaxError;
 
 #[macro_use]
 mod macros;
@@ -61,8 +62,9 @@ impl<B: BufRead> FrameReader<B> {
             // Parse header as long as we didn't reach EOL or first frame.
             if !l.starts_with('[') && !l.is_empty() {
                 unsafe {
-                    let mut pairs = OboParser::parse(Rule::HeaderClause, &line)
-                        .map_err(|e| Error::from(e).with_offsets(line_offset, offset))?;
+                    let mut pairs = OboParser::parse(Rule::HeaderClause, &line).map_err(|e| {
+                        Error::from(SyntaxError::from(e).with_offsets(line_offset, offset))
+                    })?;
                     let clause = HeaderClause::from_pair_unchecked(pairs.next().unwrap())?;
                     frame_clauses.push(clause);
                 }
@@ -123,12 +125,15 @@ impl<B: BufRead> Iterator for FrameReader<B> {
                 unsafe {
                     match OboParser::parse(Rule::EntitySingle, &frame_lines) {
                         Ok(mut pairs) => {
-                            return Some(EntityFrame::from_pair_unchecked(pairs.next().unwrap()));
+                            return Some(
+                                EntityFrame::from_pair_unchecked(pairs.next().unwrap())
+                                    .map_err(Error::from),
+                            );
                         }
                         Err(e) => {
-                            return Some(Err(
-                                Error::from(e).with_offsets(self.line_offset, self.offset)
-                            ));
+                            return Some(Err(Error::from(
+                                SyntaxError::from(e).with_offsets(self.line_offset, self.offset),
+                            )));
                         }
                     }
                 }

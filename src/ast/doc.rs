@@ -9,7 +9,8 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FrameReader;
 use crate::parser::FromPair;
 use crate::parser::Rule;
@@ -92,7 +93,7 @@ impl OboDoc {
     }
 
     /// Consume a buffered stream containing an OBO document into an AST.
-    pub fn from_stream<B>(stream: &mut B) -> Result<Self>
+    pub fn from_stream<B>(stream: &mut B) -> Result<Self, Error>
     where
         B: BufRead,
     {
@@ -101,7 +102,7 @@ impl OboDoc {
     }
 
     /// Read an OBO file located somwhere in the filesystem.
-    pub fn from_file<P>(path: P) -> Result<Self>
+    pub fn from_file<P>(path: P) -> Result<Self, Error>
     where
         P: AsRef<Path>,
     {
@@ -109,7 +110,13 @@ impl OboDoc {
         File::open(pathref)
             .map_err(Error::from)
             .and_then(|f| Self::from_stream(&mut BufReader::new(f)))
-            .map_err(|e| e.with_path(&pathref.to_string_lossy()))
+            .map_err(|e| {
+                if let Error::SyntaxError { error } = e {
+                    error.with_path(&pathref.to_string_lossy()).into()
+                } else {
+                    e
+                }
+            })
     }
 
     /// Get a reference to the header of the OBO document.
@@ -215,7 +222,7 @@ impl Orderable for OboDoc {
 
 impl<'i> FromPair<'i> for OboDoc {
     const RULE: Rule = Rule::OboDoc;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
 
         let mut entities = Vec::new();

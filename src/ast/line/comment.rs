@@ -10,7 +10,8 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -49,8 +50,7 @@ impl Display for Comment {
 
 impl<'i> FromPair<'i> for Comment {
     const RULE: Rule = Rule::HiddenComment;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
-        // FIXME(@althonos): Check for trailing spaces ?
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         Ok(Comment::new(pair.as_str()[1..].trim().to_string()))
     }
 }

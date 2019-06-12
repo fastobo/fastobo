@@ -14,8 +14,8 @@
 macro_rules! impl_fromstr {
     ($type:ty) => {
         impl std::str::FromStr for $type {
-            type Err = $crate::error::Error;
-            fn from_str(s: &str) -> $crate::error::Result<Self> {
+            type Err = $crate::error::SyntaxError;
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
                 use $crate::error::Error;
                 use $crate::parser::OboParser;
                 use $crate::pest::error::ErrorVariant;
@@ -48,8 +48,8 @@ macro_rules! impl_fromstr {
 macro_rules! impl_fromslice {
     ($life:lifetime, $type:ty) => {
         impl<$life> $crate::parser::FromSlice<$life> for $type {
-            type Err = $crate::error::Error;
-            fn from_slice(s: &$life str) -> $crate::error::Result<Self> {
+            type Err = $crate::error::SyntaxError;
+            fn from_slice(s: &$life str) -> Result<Self, Self::Err> {
                 use $crate::error::Error;
                 use $crate::parser::OboParser;
                 use $crate::pest::error::ErrorVariant;

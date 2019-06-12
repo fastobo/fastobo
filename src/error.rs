@@ -41,9 +41,9 @@ impl CardinalityError {
     }
 }
 
-/// The error type for this crate.
-#[derive(Debug, Fail)]
-pub enum Error {
+/// A syntax error.
+#[derive(Debug, Eq, Fail, PartialEq)]
+pub enum SyntaxError {
     /// An unexpected rule was used in `FromPair::from_pair`.
     ///
     /// # Example
@@ -84,6 +84,76 @@ pub enum Error {
         #[cause]
         error: PestError<Rule>,
     },
+}
+
+impl From<PestError<Rule>> for SyntaxError {
+    fn from(error: PestError<Rule>) -> Self {
+        SyntaxError::ParserError { error }
+    }
+}
+
+impl SyntaxError {
+    /// Update the line of the error, if needed.
+    pub(crate) fn with_offsets(self, line_offset: usize, offset: usize) -> Self {
+        use self::SyntaxError::*;
+        use pest::error::InputLocation;
+        use pest::error::LineColLocation;
+        match self {
+            e @ UnexpectedRule { .. } => e,
+            ParserError { mut error } => {
+                error.location = match error.location {
+                    InputLocation::Pos(s) => InputLocation::Pos(s + offset),
+                    InputLocation::Span((s, e)) => InputLocation::Span((s + offset, e + offset)),
+                };
+                error.line_col = match error.line_col {
+                    LineColLocation::Pos((l, c)) => LineColLocation::Pos((l + line_offset, c)),
+                    LineColLocation::Span((ls, cs), (le, ce)) => {
+                        LineColLocation::Span((ls + line_offset, cs), (le + line_offset, ce))
+                    }
+                };
+                ParserError { error }
+            }
+        }
+    }
+
+    /// Update the path of the error, if needed.
+    pub(crate) fn with_path(self, path: &str) -> Self {
+        use self::SyntaxError::*;
+        match self {
+            e @ UnexpectedRule { .. } => e,
+            ParserError { error } => ParserError {
+                error: error.with_path(path),
+            },
+        }
+    }
+
+    /// Update the span of the error, if needed.
+    pub(crate) fn with_span(self, span: Span) -> Self {
+        use self::SyntaxError::*;
+        match self {
+            e @ UnexpectedRule { .. } => e,
+            ParserError { error } => {
+                // FIXME(@althonos): the new error should be spanned only if
+                //                   the original error is spanned, but there
+                //                   is no clean way to create an error at
+                //                   the right position with `pest::error`.
+                ParserError {
+                    error: PestError::new_from_span(error.variant, span),
+                }
+            }
+        }
+    }
+}
+
+/// The error type for this crate.
+#[derive(Debug, Fail)]
+pub enum Error {
+    /// A syntax error occurred.
+    #[fail(display = "Syntax error: {}", error)]
+    SyntaxError {
+        #[cause]
+        error: SyntaxError,
+    },
 
     /// An IO error occurred.
     ///
@@ -112,74 +182,21 @@ pub enum Error {
     },
 }
 
-impl Error {
-    /// Update the line of the error, if needed.
-    pub(crate) fn with_offsets(self, line_offset: usize, offset: usize) -> Self {
-        use self::Error::*;
-        use pest::error::InputLocation;
-        use pest::error::LineColLocation;
-        match self {
-            e @ IOError { .. } => e,
-            e @ CardinalityError { .. } => e,
-            e @ UnexpectedRule { .. } => e,
-            ParserError { mut error } => {
-                error.location = match error.location {
-                    InputLocation::Pos(s) => InputLocation::Pos(s + offset),
-                    InputLocation::Span((s, e)) => InputLocation::Span((s + offset, e + offset)),
-                };
-                error.line_col = match error.line_col {
-                    LineColLocation::Pos((l, c)) => LineColLocation::Pos((l + line_offset, c)),
-                    LineColLocation::Span((ls, cs), (le, ce)) => {
-                        LineColLocation::Span((ls + line_offset, cs), (le + line_offset, ce))
-                    }
-                };
-                ParserError { error }
-            }
-        }
-    }
-
-    /// Update the path of the error, if needed.
-    pub(crate) fn with_path(self, path: &str) -> Self {
-        use self::Error::*;
-        match self {
-            e @ IOError { .. } => e,
-            e @ UnexpectedRule { .. } => e,
-            e @ CardinalityError { .. } => e,
-            ParserError { error } => ParserError {
-                error: error.with_path(path),
-            },
-        }
-    }
-
-    /// Update the span of the error, if needed.
-    pub(crate) fn with_span(self, span: Span) -> Self {
-        use self::Error::*;
-        match self {
-            e @ IOError { .. } => e,
-            e @ UnexpectedRule { .. } => e,
-            e @ CardinalityError { .. } => e,
-            ParserError { error } => {
-                // FIXME(@althonos): the new error should be spanned only if
-                //                   the original error is spanned, but there
-                //                   is no clean way to create an error at
-                //                   the right position with `pest::error`.
-                ParserError {
-                    error: PestError::new_from_span(error.variant, span),
-                }
-            }
-        }
-    }
-}
-
 impl From<PestError<Rule>> for Error {
     fn from(error: PestError<Rule>) -> Self {
-        Error::ParserError { error }
+        Error::from(SyntaxError::from(error))
     }
 }
 
 impl From<IOError> for Error {
     fn from(error: IOError) -> Self {
         Error::IOError { error }
+    }
+}
+
+impl From<SyntaxError> for Error {
+    fn from(error: SyntaxError) -> Self {
+        Error::SyntaxError { error }
     }
 }
 

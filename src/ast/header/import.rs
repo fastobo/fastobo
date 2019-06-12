@@ -8,7 +8,8 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -67,7 +68,7 @@ impl Display for Import {
 
 impl<'i> FromPair<'i> for Import {
     const RULE: Rule = Rule::Import;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iri => Ok(Url::parse(inner.as_str()).unwrap().into()), // FIXME

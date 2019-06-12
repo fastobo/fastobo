@@ -10,7 +10,7 @@ use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
@@ -162,7 +162,7 @@ impl From<&str> for IdentPrefix {
 
 impl<'i> FromPair<'i> for IdentPrefix {
     const RULE: Rule = Rule::IdPrefix;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
@@ -265,7 +265,7 @@ impl<'a> Into<&'a str> for IdPrefix<'a> {
 
 impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
     const RULE: Rule = Rule::IdPrefix;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
             Ok(Cow::Borrowed(IdPrefix::new_unchecked(inner.as_str(), true)))

@@ -4,7 +4,8 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::FromSlice;
 use crate::parser::Rule;
@@ -76,14 +77,14 @@ macro_rules! ident_subclass {
 
         impl<'i> crate::parser::FromPair<'i> for $name {
             const RULE: Rule = $rule;
-            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
                 Ident::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
             }
         }
 
         impl ::std::str::FromStr for $name {
-            type Err = $crate::error::Error;
-            fn from_str(s: &str) -> Result<Self> {
+            type Err = $crate::error::SyntaxError;
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
                 Ident::from_str(s).map(Self::from)
             }
         }
@@ -125,15 +126,15 @@ macro_rules! id_subclass {
 
         impl<'i> FromPair<'i> for $name<'i> {
             const RULE: Rule = $rule;
-            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
                 Id::from_pair_unchecked(pair.into_inner().next().unwrap())
                     .map(From::from)
             }
         }
 
         impl<'i> FromSlice<'i> for $name<'i> {
-            type Err = $crate::error::Error;
-            fn from_slice(s: &'i str) -> $crate::error::Result<Self> {
+            type Err = $crate::error::SyntaxError;
+            fn from_slice(s: &'i str) -> Result<Self, Self::Err> {
                 Id::from_slice(s).map(From::from)
             }
         }

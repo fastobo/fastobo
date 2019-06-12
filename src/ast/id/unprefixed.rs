@@ -10,7 +10,7 @@ use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::error::Error;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
@@ -123,7 +123,7 @@ impl From<&str> for UnprefixedIdent {
 
 impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\');
         let mut local = String::with_capacity(s.len() + escaped);
@@ -170,7 +170,7 @@ impl Display for UnprefixedId {
 
 impl<'i> FromPair<'i> for Cow<'i, &'i UnprefixedId> {
     const RULE: Rule = Rule::UnprefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         if pair.as_str().quickfind(b'\\').is_some() {
             UnprefixedIdent::from_pair_unchecked(pair).map(Cow::Owned)
         } else {

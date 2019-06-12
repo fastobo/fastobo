@@ -12,6 +12,7 @@ use pest::iterators::Pair;
 use super::escape;
 use super::unescape;
 use crate::error::Error;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
@@ -106,7 +107,7 @@ impl From<&str> for UnquotedString {
 
 impl<'i> FromPair<'i> for UnquotedString {
     const RULE: Rule = Rule::UnquotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\'); // number of escaped characters
         let mut local = String::with_capacity(s.len() + escaped);
@@ -143,7 +144,7 @@ impl<'a> Display for UnquotedStr {
 
 impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
     const RULE: Rule = Rule::UnquotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, Error> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         if pair.as_str().quickfind(b'\\').is_some() {
             UnquotedString::from_pair_unchecked(pair).map(Cow::Owned)
         } else {

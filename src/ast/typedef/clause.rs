@@ -5,7 +5,7 @@ use std::fmt::Write;
 use std::str::FromStr;
 
 use crate::ast::*;
-use crate::error::Result;
+use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
 
@@ -130,7 +130,7 @@ impl Display for TypedefClause {
 
 impl<'i> FromPair<'i> for Line<TypedefClause> {
     const RULE: Rule = Rule::TypedefClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let clause = TypedefClause::from_pair_unchecked(inner.next().unwrap())?;
         let eol = inner.next().unwrap();
@@ -141,7 +141,7 @@ impl_fromstr!(Line<TypedefClause>);
 
 impl<'i> FromPair<'i> for TypedefClause {
     const RULE: Rule = Rule::TypedefClause;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         match inner.next().unwrap().as_rule() {
             Rule::IsAnonymousTag => {

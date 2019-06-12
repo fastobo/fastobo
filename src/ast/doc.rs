@@ -9,9 +9,9 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
+use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::error::SyntaxError;
-use crate::error::CardinalityError;
 use crate::parser::FrameReader;
 use crate::parser::FromPair;
 use crate::parser::Rule;

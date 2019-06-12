@@ -1,6 +1,5 @@
 #![cfg_attr(feature = "_doc", feature(doc_cfg, external_doc))]
 #![cfg_attr(feature = "_doc", doc(include = "../README.md"))]
-
 #![warn(clippy::all)]
 #![allow(dead_code, unused_imports)]
 

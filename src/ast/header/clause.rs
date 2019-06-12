@@ -52,7 +52,10 @@ pub enum HeaderClause {
     TreatXrefsAsEquivalent(IdentPrefix),
     #[cfg_attr(feature = "_derive", clause(tag = "treat-xrefs-as-genus-differentia"))]
     TreatXrefsAsGenusDifferentia(IdentPrefix, RelationIdent, ClassIdent),
-    #[cfg_attr(feature = "_derive", clause(tag = "treat-xrefs-as-reverse-genus-differentia"))]
+    #[cfg_attr(
+        feature = "_derive",
+        clause(tag = "treat-xrefs-as-reverse-genus-differentia")
+    )]
     TreatXrefsAsReverseGenusDifferentia(IdentPrefix, RelationIdent, ClassIdent),
     #[cfg_attr(feature = "_derive", clause(tag = "treat-xrefs-as-relationship"))]
     TreatXrefsAsRelationship(IdentPrefix, RelationIdent),
@@ -233,7 +236,10 @@ mod tests {
         let clause = HeaderClause::FormatVersion(UnquotedString::from("1.2"));
         assert_eq!(clause.tag(), "format-version");
 
-        let clause = HeaderClause::Unreserved(UnquotedString::from("something"), UnquotedString::new(String::new()));
+        let clause = HeaderClause::Unreserved(
+            UnquotedString::from("something"),
+            UnquotedString::new(String::new()),
+        );
         assert_eq!(clause.tag(), "something");
     }
 

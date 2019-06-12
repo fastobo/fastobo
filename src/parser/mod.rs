@@ -124,15 +124,11 @@ impl<B: BufRead> Iterator for FrameReader<B> {
             if l.starts_with('[') || self.line.is_empty() {
                 let res = unsafe {
                     match OboParser::parse(Rule::EntitySingle, &frame_lines) {
-                        Ok(mut pairs) => {
-                            EntityFrame::from_pair_unchecked(pairs.next().unwrap())
-                                .map_err(Error::from)
-                        }
-                        Err(e) => {
-                            Err(Error::from(
-                                SyntaxError::from(e).with_offsets(self.line_offset, self.offset),
-                            ))
-                        }
+                        Ok(mut pairs) => EntityFrame::from_pair_unchecked(pairs.next().unwrap())
+                            .map_err(Error::from),
+                        Err(e) => Err(Error::from(
+                            SyntaxError::from(e).with_offsets(self.line_offset, self.offset),
+                        )),
                     }
                 };
 

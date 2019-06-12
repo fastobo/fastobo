@@ -13,6 +13,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::export::Span;
 use syn::parse_quote;
+use syn::spanned::Spanned;
 use syn::{Ident, Path, Type};
 
 /// Return `true` if a type is an `Option` type.
@@ -55,7 +56,10 @@ impl OboClauseVariant {
         // match
         if let Some(tag) = &self.tag {
             if let syn::Lit::Int(i) = tag {
-                let id = &format!("__{}_{}", &self.ident, i.value());
+                let id = syn::Ident::new(
+                    &format!("__{}_{}", &self.ident, i.value()),
+                    tag.span(),
+                );
                 parse_quote!(#id)
             } else {
                 parse_quote!(#tag)
@@ -143,7 +147,6 @@ struct OboClauseDerive {
 }
 
 impl OboClauseDerive {
-
     fn variants(&self) -> &[OboClauseVariant] {
         match &self.data {
             darling::ast::Data::Enum(variants) => variants,
@@ -175,7 +178,7 @@ impl OboClauseDerive {
         parse_quote! {
             #[automatically_derived]
             impl crate::ast::OboClause for #id {
-                fn tag(&self) -> &'static str {
+                fn tag(&self) -> &str {
                     use self::#id::*;
                     match self {
                         #(#arms_tag,)*

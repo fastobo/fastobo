@@ -232,6 +232,9 @@ mod tests {
     fn tag() {
         let clause = HeaderClause::FormatVersion(UnquotedString::from("1.2"));
         assert_eq!(clause.tag(), "format-version");
+
+        let clause = HeaderClause::Unreserved(UnquotedString::from("something"), UnquotedString::new(String::new()));
+        assert_eq!(clause.tag(), "something");
     }
 
     #[test]

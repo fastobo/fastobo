@@ -107,7 +107,11 @@ extern crate failure;
 #[macro_use]
 extern crate opaque_typedef_macros;
 
+#[cfg(feature = "_derive")]
+#[cfg_attr(feature = "_derive", macro_use)]
+extern crate fastobo_derive;
 extern crate fastobo_syntax;
+
 #[cfg(feature = "memchr")]
 extern crate memchr;
 extern crate opaque_typedef;

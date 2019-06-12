@@ -16,9 +16,6 @@ cargo check --release --no-default-features --features display
 log Checking code with feature \`semantics\`, \`display\`
 cargo check --release --no-default-features --features display,semantics
 
-log Checking code with all features
-cargo check --release --all-features
-
 log Measuring code coverage with Tarpaulin
 cargo tarpaulin --release -v --out Xml --ciserver travis-ci
 

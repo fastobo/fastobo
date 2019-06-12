@@ -122,29 +122,25 @@ impl<B: BufRead> Iterator for FrameReader<B> {
 
             // Read the line if we reached the next frame.
             if l.starts_with('[') || self.line.is_empty() {
-                unsafe {
+                let res = unsafe {
                     match OboParser::parse(Rule::EntitySingle, &frame_lines) {
                         Ok(mut pairs) => {
-                            return Some(
-                                EntityFrame::from_pair_unchecked(pairs.next().unwrap())
-                                    .map_err(Error::from),
-                            );
+                            EntityFrame::from_pair_unchecked(pairs.next().unwrap())
+                                .map_err(Error::from)
                         }
                         Err(e) => {
-                            return Some(Err(Error::from(
+                            Err(Error::from(
                                 SyntaxError::from(e).with_offsets(self.line_offset, self.offset),
-                            )));
+                            ))
                         }
                     }
-                }
+                };
 
                 // Update offsets
                 self.line_offset += local_line_offset;
                 self.offset += local_offset;
 
-                // Reset local offsets
-                local_line_offset = 0;
-                local_offset = 0;
+                return Some(res);
             }
 
             // Update local offsets
@@ -162,9 +158,8 @@ impl<B: BufRead> TryFrom<FrameReader<B>> for OboDoc {
         let mut doc = OboDoc::new();
         std::mem::swap(reader.header_mut(), doc.header_mut());
 
-        let mut entities = doc.entities_mut();
         for result in reader {
-            entities.push(result?);
+            doc.entities_mut().push(result?);
         }
 
         Ok(doc)

@@ -98,7 +98,7 @@ impl OboDoc {
     where
         B: BufRead,
     {
-        let mut reader = FrameReader::new(stream)?;
+        let reader = FrameReader::new(stream)?;
         Self::try_from(reader)
     }
 

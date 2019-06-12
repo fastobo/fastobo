@@ -304,7 +304,6 @@ mod tests {
     use textwrap::dedent;
 
     use super::*;
-    use crate::ext::OboSemantics;
 
     #[test]
     fn as_equivalent() {

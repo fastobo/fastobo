@@ -42,6 +42,7 @@ impl Comment {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for Comment {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_str("! ").and(self.value.fmt(f)) // FIXME(@althonos): escape newlines

@@ -86,6 +86,7 @@ impl DerefMut for InstanceFrame {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for InstanceFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_str("[Instance]\nid: ").and(self.id.fmt(f))?;

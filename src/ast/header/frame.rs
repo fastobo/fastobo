@@ -124,6 +124,7 @@ impl AsRef<[HeaderClause]> for HeaderFrame {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for HeaderFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         for clause in self.clauses.iter() {

@@ -158,6 +158,7 @@ impl AsMut<Vec<EntityFrame>> for OboDoc {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for OboDoc {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.header.fmt(f)?;

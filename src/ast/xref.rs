@@ -74,6 +74,7 @@ impl Xref {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for Xref {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.id.fmt(f)?;
@@ -135,6 +136,7 @@ impl AsRef<[Xref]> for XrefList {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for XrefList {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_char('[')?;

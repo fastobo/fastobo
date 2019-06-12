@@ -9,21 +9,11 @@ use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::visit::VisitMut;
 
+mod cardinality;
 mod treat_xrefs;
 
-// TODO: implement for
-// - EntityFrame
-// - TermFrame
-// - TypedefFrame
-// - InstanceFrame
-// - HeaderClause
-// - TermClause
-// - TypedefClause
-// - EntityClause
-/// A trait for structs that can be serialized in a particular order.
-pub trait SerializationOrd {
-    fn serialization_cmp(&self, other: &Self) -> Ordering;
-}
+pub use cardinality::Cardinality;
+pub use cardinality::CardinalityBound;
 
 /// Additional methods for `OboDoc` that can be used to edit the syntax tree.
 ///

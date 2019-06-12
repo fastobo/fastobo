@@ -47,6 +47,7 @@ impl Qualifier {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for Qualifier {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.key
@@ -102,6 +103,7 @@ impl QualifierList {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for QualifierList {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut qualifiers = self.qualifiers.iter().peekable();

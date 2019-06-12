@@ -74,6 +74,14 @@ pub trait Orderable {
     fn is_sorted(&self) -> bool;
 }
 
+pub trait OboFrame {}
+
+pub trait OboClause {
+    fn tag(&self) -> &'static str;
+    #[cfg(feature = "ext")]
+    fn cardinality(&self) -> crate::ext::Cardinality;
+}
+
 /// A trait for structs that have an identifier.
 pub trait Identified {
     /// Get a reference to the identifier of the entity.

@@ -49,6 +49,7 @@ impl Identified for EntityFrame {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for EntityFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::EntityFrame::*;

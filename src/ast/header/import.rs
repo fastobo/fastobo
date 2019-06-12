@@ -56,6 +56,7 @@ impl From<Import> for Url {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for Import {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::Import::*;

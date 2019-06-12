@@ -188,6 +188,7 @@ impl OboClauseDerive {
         let id = &self.ident;
         let arms = self.variants().iter().flat_map(|v| v.fmt_arms());
         parse_quote! {
+            #[cfg_attr(feature = "_doc", doc(cfg = "display"))]
             #[automatically_derived]
             impl std::fmt::Display for #id {
                 fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {

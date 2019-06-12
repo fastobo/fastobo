@@ -11,6 +11,7 @@ use crate::parser::Rule;
 
 /// A clause appearing in a typedef frame.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "_derive", derive(OboClause))]
 pub enum TypedefClause {
     IsAnonymous(bool),
     Name(UnquotedString),
@@ -55,75 +56,53 @@ pub enum TypedefClause {
     IsClassLevel(bool),
 }
 
-impl Display for TypedefClause {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+#[cfg(feature = "ext")]
+impl crate::ext::CardinalityBound for TypedefClause {
+    fn cardinality(&self) -> crate::ext::Cardinality {
         use self::TypedefClause::*;
+        use crate::ext::Cardinality::*;
         match self {
-            IsAnonymous(b) => f.write_str("is_anonymous: ").and(b.fmt(f)),
-            Name(name) => f.write_str("name: ").and(name.fmt(f)),
-            Namespace(ns) => f.write_str("namespace: ").and(ns.fmt(f)),
-            AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xrefs) => f
-                .write_str("def: ")
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(xrefs.fmt(f)),
-            Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
-            Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
-            Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),
-            Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
-            PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
-            Domain(id) => f.write_str("domain: ").and(id.fmt(f)),
-            Range(id) => f.write_str("range: ").and(id.fmt(f)),
-            Builtin(b) => f.write_str("builtin: ").and(b.fmt(f)),
-            HoldsOverChain(r1, r2) => f
-                .write_str("holds_over_chain: ")
-                .and(r1.fmt(f))
-                .and(f.write_char(' '))
-                .and(r2.fmt(f)),
-            IsAntiSymmetric(b) => f.write_str("is_anti_symmetric: ").and(b.fmt(f)),
-            IsCyclic(b) => f.write_str("is_cyclic: ").and(b.fmt(f)),
-            IsReflexive(b) => f.write_str("is_reflexive: ").and(b.fmt(f)),
-            IsSymmetric(b) => f.write_str("is_symmetric: ").and(b.fmt(f)),
-            IsAsymmetric(b) => f.write_str("is_asymmetric: ").and(b.fmt(f)),
-            IsTransitive(b) => f.write_str("is_transitive: ").and(b.fmt(f)),
-            IsFunctional(b) => f.write_str("is_functional: ").and(b.fmt(f)),
-            IsInverseFunctional(b) => f.write_str("is_inverse_functional: ").and(b.fmt(f)),
-            IsA(r) => f.write_str("is_a: ").and(r.fmt(f)),
-            IntersectionOf(r) => f.write_str("intersection_of: ").and(r.fmt(f)),
-            UnionOf(r) => f.write_str("union_of: ").and(r.fmt(f)),
-            EquivalentTo(r) => f.write_str("equivalent_to: ").and(r.fmt(f)),
-            DisjointFrom(r) => f.write_str("disjoint_from: ").and(r.fmt(f)),
-            InverseOf(r) => f.write_str("inverse_of: ").and(r.fmt(f)),
-            TransitiveOver(r) => f.write_str("transitive_over: ").and(r.fmt(f)),
-            EquivalentToChain(r1, r2) => f
-                .write_str("equivalent_to_chain: ")
-                .and(r1.fmt(f))
-                .and(f.write_char(' '))
-                .and(r2.fmt(f)),
-            DisjointOver(r) => f.write_str("disjoint_over: ").and(r.fmt(f)),
-            Relationship(r1, r2) => f
-                .write_str("relationship: ")
-                .and(r1.fmt(f))
-                .and(f.write_char(' '))
-                .and(r2.fmt(f)),
-            IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
-            ReplacedBy(r) => f.write_str("replaced_by: ").and(r.fmt(f)),
-            Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
-            CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
-            CreationDate(date) => f.write_str("creation_date: ").and(date.fmt(f)),
-            ExpandAssertionTo(desc, xrefs) => f
-                .write_str("expand_assertion_to: ")
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(xrefs.fmt(f)),
-            ExpandExpressionTo(desc, xrefs) => f
-                .write_str("expand_expression_to: ")
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(xrefs.fmt(f)),
-            IsMetadataTag(b) => f.write_str("is_metadata_tag: ").and(b.fmt(f)),
-            IsClassLevel(b) => f.write_str("is_class_level: ").and(b.fmt(f)),
+            IsAnonymous(_) => ZeroOrOne,
+            Name(_) => ZeroOrOne,
+            Namespace(_) => One,
+            AltId(_) => Any,
+            Def(_, _) => ZeroOrOne,
+            Comment(_) => ZeroOrOne,
+            Subset(_) => ZeroOrOne,
+            Synonym(_) => Any,
+            Xref(_) => Any,
+            PropertyValue(_) => ZeroOrOne,
+            Domain(_) => ZeroOrOne, // QUESTION(@althonos): Should be ID ?
+            Range(_) => ZeroOrOne,  // QUESTION(@althonos): same.
+            Builtin(_) => ZeroOrOne,
+            HoldsOverChain(_, _) => Any,
+            IsAntiSymmetric(_) => ZeroOrOne,
+            IsCyclic(_) => ZeroOrOne,
+            IsReflexive(_) => ZeroOrOne,
+            IsSymmetric(_) => ZeroOrOne,
+            IsAsymmetric(_) => ZeroOrOne,
+            IsTransitive(_) => ZeroOrOne,
+            IsFunctional(_) => ZeroOrOne,
+            IsInverseFunctional(_) => ZeroOrOne,
+            IsA(_) => Any,
+            IntersectionOf(_) => NotOne,
+            UnionOf(_) => NotOne,
+            EquivalentTo(_) => Any,
+            DisjointFrom(_) => Any,
+            InverseOf(_) => ZeroOrOne,
+            TransitiveOver(_) => Any,
+            EquivalentToChain(_, _) => Any,
+            DisjointOver(_) => Any,
+            Relationship(_, _) => Any,
+            IsObsolete(_) => ZeroOrOne,
+            ReplacedBy(_) => Any,
+            Consider(_) => Any,
+            CreatedBy(_) => ZeroOrOne,
+            CreationDate(_) => ZeroOrOne,
+            ExpandAssertionTo(_, _) => Any,
+            ExpandExpressionTo(_, _) => Any,
+            IsMetadataTag(_) => ZeroOrOne,
+            IsClassLevel(_) => ZeroOrOne,
         }
     }
 }

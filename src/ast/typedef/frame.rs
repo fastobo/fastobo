@@ -83,6 +83,7 @@ impl DerefMut for TypedefFrame {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for TypedefFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_str("[Typedef]\nid: ").and(self.id.fmt(f))?;

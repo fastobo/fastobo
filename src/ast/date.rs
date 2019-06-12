@@ -109,6 +109,7 @@ impl DateTime for NaiveDateTime {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for NaiveDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
@@ -141,7 +142,7 @@ impl<'i> FromPair<'i> for NaiveDateTime {
 impl_fromstr!(NaiveDateTime);
 
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct IsoDateTime {
     year: u16,
     month: u8,
@@ -223,6 +224,7 @@ impl IsoDateTime {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for IsoDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
@@ -270,25 +272,25 @@ impl<'i> FromPair<'i> for IsoDateTime {
 }
 impl_fromstr!(IsoDateTime);
 
-// FIXME(@althonos): implement proper datetime handling.
-impl Ord for IsoDateTime {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.to_string().partial_cmp(&other.to_string()).unwrap()
-    }
-}
-
-impl PartialOrd for IsoDateTime {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.to_string().partial_cmp(&other.to_string())
-    }
-}
+// // FIXME(@althonos): implement proper datetime handling.
+// impl Ord for IsoDateTime {
+//     fn cmp(&self, other: &Self) -> Ordering {
+//         self.to_string().partial_cmp(&other.to_string()).unwrap()
+//     }
+// }
+//
+// impl PartialOrd for IsoDateTime {
+//     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+//         self.to_string().partial_cmp(&other.to_string())
+//     }
+// }
 
 /// An ISO-8601 timezone.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum IsoTimezone {
+    Minus(u8, u8),
     Utc,
     Plus(u8, u8),
-    Minus(u8, u8),
 }
 
 impl DateTime for IsoDateTime {
@@ -308,6 +310,7 @@ impl DateTime for IsoDateTime {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for IsoTimezone {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::IsoTimezone::*;

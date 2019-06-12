@@ -98,6 +98,7 @@
 //! as part of a Master's Degree internship in the [BBOP team](http://berkeleybop.org/) of the
 //! [Lawrence Berkeley National Laboratory](https://www.lbl.gov/), under the supervision of
 //! [Chris Mungall](http://biosciences.lbl.gov/profiles/chris-mungall/).
+#![cfg_attr(feature = "_doc", feature(doc_cfg))]
 
 #![warn(clippy::all)]
 #![allow(dead_code, unused_imports)]

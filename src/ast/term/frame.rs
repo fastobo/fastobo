@@ -124,6 +124,7 @@ impl DerefMut for TermFrame {
     }
 }
 
+#[cfg(feature = "display")]
 impl Display for TermFrame {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         f.write_str("[Term]\nid: ").and(self.id.fmt(f))?;

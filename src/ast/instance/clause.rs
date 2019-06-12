@@ -13,6 +13,7 @@ use crate::parser::Rule;
 
 /// A clause appearing in an instance frame.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "_derive", derive(OboClause))]
 pub enum InstanceClause {
     IsAnonymous(bool),
     Name(UnquotedString),
@@ -31,39 +32,6 @@ pub enum InstanceClause {
     IsObsolete(bool),
     ReplacedBy(InstanceIdent),
     Consider(Ident),
-}
-
-impl Display for InstanceClause {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        use self::InstanceClause::*;
-        match self {
-            IsAnonymous(b) => f.write_str("is_anonymous: ").and(b.fmt(f)),
-            Name(n) => f.write_str("name: ").and(n.fmt(f)),
-            Namespace(ns) => f.write_str("namespace: ").and(ns.fmt(f)),
-            AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xrefs) => f
-                .write_str("def: ")
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(xrefs.fmt(f)),
-            Comment(s) => f.write_str("comment: ").and(s.fmt(f)),
-            Subset(id) => f.write_str("subset: ").and(id.fmt(f)),
-            Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),
-            Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
-            PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
-            InstanceOf(id) => f.write_str("instance_of: ").and(id.fmt(f)),
-            Relationship(r, id) => f
-                .write_str("relationship: ")
-                .and(r.fmt(f))
-                .and(f.write_char(' '))
-                .and(id.fmt(f)),
-            CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
-            CreationDate(dt) => f.write_str("creation_date: ").and(dt.fmt(f)),
-            IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
-            ReplacedBy(id) => f.write_str("replaced_by: ").and(id.fmt(f)),
-            Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
-        }
-    }
 }
 
 impl<'i> FromPair<'i> for InstanceClause {

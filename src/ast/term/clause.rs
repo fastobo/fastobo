@@ -13,7 +13,14 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 
 /// A clause appearing in a term frame.
+///
+/// # Comparison
+/// `TermClause` implements `PartialOrd` following the semantics of the OBO
+/// specification: clauses will compare based on their serialization order
+/// rather than on their alphabetic order; clauses of the same kind will be
+/// ranked in the alphabetic order.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "_derive", derive(OboClause))]
 pub enum TermClause {
     IsAnonymous(bool),
     Name(UnquotedString),
@@ -44,45 +51,34 @@ pub enum TermClause {
     // IsClassLevel(bool),
 }
 
-impl Display for TermClause {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+#[cfg(feature = "ext")]
+impl crate::ext::CardinalityBound for TermClause {
+    fn cardinality(&self) -> crate::ext::Cardinality {
         use self::TermClause::*;
+        use crate::ext::Cardinality::*;
         match self {
-            IsAnonymous(b) => f.write_str("is_anonymous: ").and(b.fmt(f)),
-            Name(name) => f.write_str("name: ").and(name.fmt(f)),
-            Namespace(id) => f.write_str("namespace: ").and(id.fmt(f)),
-            AltId(id) => f.write_str("alt_id: ").and(id.fmt(f)),
-            Def(desc, xreflist) => f
-                .write_str("def: ")
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(xreflist.fmt(f)),
-            Comment(comment) => f.write_str("comment: ").and(comment.fmt(f)),
-            Subset(subset) => f.write_str("subset: ").and(subset.fmt(f)),
-            Synonym(syn) => f.write_str("synonym: ").and(syn.fmt(f)),
-            Xref(xref) => f.write_str("xref: ").and(xref.fmt(f)),
-            Builtin(b) => f.write_str("builtin: ").and(b.fmt(f)),
-            PropertyValue(pv) => f.write_str("property_value: ").and(pv.fmt(f)),
-            IsA(id) => f.write_str("is_a: ").and(id.fmt(f)),
-            IntersectionOf(Some(rel), id) => f
-                .write_str("intersection_of: ")
-                .and(rel.fmt(f))
-                .and(f.write_char(' '))
-                .and(id.fmt(f)),
-            IntersectionOf(None, id) => f.write_str("intersection_of: ").and(id.fmt(f)),
-            UnionOf(id) => f.write_str("union_of: ").and(id.fmt(f)),
-            EquivalentTo(id) => f.write_str("equivalent_to: ").and(id.fmt(f)),
-            DisjointFrom(id) => f.write_str("disjoint_from: ").and(id.fmt(f)),
-            Relationship(rel, id) => f
-                .write_str("relationship: ")
-                .and(rel.fmt(f))
-                .and(f.write_char(' '))
-                .and(id.fmt(f)),
-            IsObsolete(b) => f.write_str("is_obsolete: ").and(b.fmt(f)),
-            ReplacedBy(id) => f.write_str("replaced_by: ").and(id.fmt(f)),
-            Consider(id) => f.write_str("consider: ").and(id.fmt(f)),
-            CreatedBy(s) => f.write_str("created_by: ").and(s.fmt(f)),
-            CreationDate(date) => f.write_str("creation_date: ").and(date.fmt(f)),
+            IsAnonymous(_) => ZeroOrOne,
+            Name(_) => ZeroOrOne,
+            Namespace(_) => One,
+            AltId(_) => Any,
+            Def(_, _) => ZeroOrOne,
+            Comment(_) => ZeroOrOne,
+            Subset(_) => Any,
+            Synonym(_) => Any,
+            Xref(_) => Any,
+            Builtin(_) => ZeroOrOne,
+            PropertyValue(_) => ZeroOrOne,
+            IsA(_) => Any,
+            IntersectionOf(_, _) => NotOne,
+            UnionOf(_) => NotOne,
+            EquivalentTo(_) => Any,
+            DisjointFrom(_) => Any,
+            Relationship(_, _) => Any,
+            CreatedBy(_) => ZeroOrOne,
+            CreationDate(_) => ZeroOrOne,
+            IsObsolete(_) => ZeroOrOne,
+            ReplacedBy(_) => Any,
+            Consider(_) => Any,
         }
     }
 }

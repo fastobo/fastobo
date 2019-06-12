@@ -35,20 +35,35 @@ struct OboClauseVariant {
     fields: ast::Fields<Type>,
     attrs: Vec<syn::Attribute>,
     #[darling(default)]
-    tag: Option<syn::LitStr>,
+    tag: Option<syn::Lit>,
     #[darling(default)]
     cardinality: Option<syn::Path>,
 }
 
 impl OboClauseVariant {
-    fn tag(&self) -> Cow<syn::LitStr> {
+
+    fn field_patterns(&self) -> Vec<syn::Pat> {
+        self.fields
+            .iter()
+            .enumerate()
+            .map(|(n, _)| syn::Ident::new(&format!("__{}_{}", &self.ident, n), Span::call_site()))
+            .map(|id| parse_quote!(#id))
+            .collect()
+    }
+
+    fn tag(&self) -> syn::Expr {
         // match
         if let Some(tag) = &self.tag {
-            Cow::Borrowed(tag)
+            if let syn::Lit::Int(i) = tag {
+                let id = &format!("__{}_{}", &self.ident, i.value());
+                parse_quote!(#id)
+            } else {
+                parse_quote!(#tag)
+            }
         } else {
             let tag_str = self.ident.to_string().to_snake_case();
             let tag = syn::LitStr::new(&tag_str, self.ident.span());
-            Cow::Owned(tag)
+            parse_quote!(#tag)
         }
     }
 
@@ -64,65 +79,23 @@ impl OboClauseVariant {
         // Extract ident and tag to use in `quote!` calls.
         let id = &self.ident;
         let tag = self.tag();
-        let mk_ident = |n| syn::Ident::new(&format!("__{}_{}", id, n), Span::call_site());
 
         // If the variant contain an option, we need two arms: one where the
         // value is `Some` and the other when the value is `None`.
         // NB: limited to a single `Option` per variant.
         if let Some(idx) = self.fields.iter().position(|ty| is_option(ty)) {
             // The arm pattern and expression when the field is `None`
-            let c1_none: Vec<syn::Expr> = {
-                self.fields
-                    .iter()
-                    .enumerate()
-                    .map(|(n, _)| {
-                        if n == idx {
-                            parse_quote!(None)
-                        } else {
-                            let ident =
-                                syn::Ident::new(&format!("__{}_{}", id, n), Span::call_site());
-                            parse_quote!(#ident)
-                        }
-                    })
-                    .collect()
-            };
-            let c2_none: Vec<syn::Ident> = {
-                self.fields
-                    .iter()
-                    .enumerate()
-                    .flat_map(|(n, _)| {
-                        if n == idx {
-                            None
-                        } else {
-                            let ident =
-                                syn::Ident::new(&format!("__{}_{}", id, n), Span::call_site());
-                            Some(parse_quote!(#ident))
-                        }
-                    })
-                    .collect()
-            };
+            let mut c1_none: Vec<syn::Pat> = self.field_patterns();
+            c1_none[idx] = parse_quote!(None);
+            let mut c2_none: Vec<syn::Pat> = self.field_patterns();
+            c2_none.remove(idx);
+
             // The arm pattern and expression when the field is `Some`
-            let c1_some: Vec<syn::Expr> = {
-                self.fields
-                    .iter()
-                    .enumerate()
-                    .map(|(n, _)| {
-                        let ident = mk_ident(n);
-                        if n == idx {
-                            parse_quote!( Some(#ident) )
-                        } else {
-                            parse_quote!(#ident)
-                        }
-                    })
-                    .collect()
-            };
-            let c2_some: Vec<syn::Ident> = {
-                self.fields
-                    .iter()
-                    .enumerate()
-                    .map(|(n, _)| mk_ident(n))
-                    .collect()
-            };
+            let mut c1_some: Vec<syn::Pat> = self.field_patterns();
+            let ident = syn::Ident::new(&format!("__{}_{}", &self.ident, idx), Span::call_site());
+            c1_some[idx] = parse_quote!(Some(#ident));
+            let c2_some: Vec<syn::Pat> = self.field_patterns();
+
             //
             vec![
                 parse_quote! {
@@ -135,13 +108,7 @@ impl OboClauseVariant {
                 },
             ]
         } else {
-            let catches: Vec<syn::Ident> = {
-                self.fields
-                    .iter()
-                    .enumerate()
-                    .map(|(n, _)| mk_ident(n))
-                    .collect()
-            };
+            let catches: Vec<syn::Pat> = self.field_patterns();
             let c1 = &catches;
             let c2 = &catches;
             vec![parse_quote! {
@@ -155,7 +122,7 @@ impl OboClauseVariant {
     fn tag_arm(&self) -> syn::Arm {
         let id = &self.ident;
         let tag = self.tag();
-        let pat: Vec<syn::Pat> = vec![parse_quote!(_); self.fields.len()];
+        let pat = self.field_patterns();
         parse_quote!(#id(#(#pat,)*) => #tag)
     }
 
@@ -163,8 +130,8 @@ impl OboClauseVariant {
     fn cardinality_arm(&self) -> syn::Arm {
         let id = &self.ident;
         let tag = self.cardinality();
-        let pat: Vec<syn::Pat> = vec![parse_quote!(_); self.fields.len()];
-        parse_quote!(#id(#(#pat,)*) => crate::ext::Cardinality::#tag)
+        let pat = self.field_patterns();
+        parse_quote!(#id(#(#pat,)*) => crate::semantics::Cardinality::#tag)
     }
 }
 
@@ -205,7 +172,6 @@ impl OboClauseDerive {
         let id = &self.ident;
         let arms_tag = self.variants().iter().map(|v| v.tag_arm());
         let arms_card = self.variants().iter().map(|v| v.cardinality_arm());
-
         parse_quote! {
             #[automatically_derived]
             impl crate::ast::OboClause for #id {
@@ -215,8 +181,9 @@ impl OboClauseDerive {
                         #(#arms_tag,)*
                     }
                 }
-                #[cfg(feature = "ext")]
-                fn cardinality(&self) -> crate::ext::Cardinality {
+                #[cfg(feature = "semantics")]
+                #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
+                fn cardinality(&self) -> crate::semantics::Cardinality {
                     use self::#id::*;
                     match self {
                         #(#arms_card,)*
@@ -234,13 +201,10 @@ pub fn oboclause_derive(input: TokenStream) -> TokenStream {
 
     let oboclause_impl = receiver.oboclause_impl();
     let display_impl = receiver.display_impl();
-    // let cardinalitybound_impl = receiver.cardinalitybound_impl();
 
     TokenStream::from(quote!(
-
         #oboclause_impl
-
-        // #[cfg(feature = "display")]
+        #[cfg(feature = "display")]
         #display_impl
     ))
 }

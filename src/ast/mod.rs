@@ -74,12 +74,23 @@ pub trait Orderable {
     fn is_sorted(&self) -> bool;
 }
 
+/// Common attributes and operations for all frames.
 pub trait OboFrame {}
 
+/// Common attributes and operations for all clauses.
 pub trait OboClause {
-    fn tag(&self) -> &'static str;
-    #[cfg(feature = "ext")]
-    fn cardinality(&self) -> crate::ext::Cardinality;
+    /// Get the raw string corresponding to the tag of a clause.
+    fn tag(&self) -> &str;
+
+    #[cfg(feature = "semantics")]
+    #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
+    /// Get the cardinality expected for a clause variant.
+    ///
+    /// While most clauses can appear any number of time in a frame, some
+    /// have a constraint on how many time they can appear: for instance,
+    /// a `namespace` clause must appear exactly once in every entity frame,
+    /// and an `intersection_of` clause cannot appear only once.
+    fn cardinality(&self) -> crate::semantics::Cardinality;
 }
 
 /// A trait for structs that have an identifier.

@@ -39,11 +39,11 @@ memchr = { version = "2.2.0", optional = true }
 fastobo-derive = { version = "0.3.0", optional = true, path = "derive" }
 
 [features]
-default = ["memchr", "ext", "display"]
+default = ["memchr", "semantics", "display"]
 display = ["_derive"]
-ext = ["_derive"]
+semantics = ["_derive"]
 _derive = ["fastobo-derive"]
-_doc = ["_derive", "ext", "display"]
+_doc = ["semantics", "display"]
 
 [dev-dependencies]
 lazy_static = "1.3.0"

@@ -118,7 +118,10 @@ impl OboDoc {
                 }
             })
     }
+}
 
+/// Shared and mutable getters.
+impl OboDoc {
     /// Get a reference to the header of the OBO document.
     pub fn header(&self) -> &HeaderFrame {
         &self.header

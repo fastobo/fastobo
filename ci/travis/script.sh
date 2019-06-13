@@ -4,19 +4,10 @@
 
 # --- Test with coverage -----------------------------------------------------
 
-log Checking code without features
-cargo check --release --no-default-features
+log Measuring code coverage through Tarpaulin without default features
+cargo tarpaulin --release -v --out Xml --ciserver travis-ci --no-default-features
 
-log Checking code with feature \`semantics\`
-cargo check --release --no-default-features --features semantics
-
-log Checking code with feature \`semantics\`
-cargo check --release --no-default-features --features display
-
-log Checking code with feature \`semantics\`, \`display\`
-cargo check --release --no-default-features --features display,semantics
-
-log Measuring code coverage with Tarpaulin
+log Measuring code coverage through Tarpaulin with default features
 cargo tarpaulin --release -v --out Xml --ciserver travis-ci
 
 # --- Run examples -----------------------------------------------------------

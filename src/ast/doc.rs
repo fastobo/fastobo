@@ -148,8 +148,6 @@ impl OboDoc {
 ///
 /// The OBO 1.4 semantics are used to process header macros or to add the
 /// default OBO namespace to all the frames of the document.
-#[cfg(feature = "semantics")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
 impl OboDoc {
     /// Assign the ontology default namespace to all frames without one.
     ///
@@ -303,7 +301,6 @@ impl AsMut<Vec<EntityFrame>> for OboDoc {
     }
 }
 
-#[cfg(feature = "display")]
 impl Display for OboDoc {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         self.header.fmt(f)?;
@@ -334,8 +331,6 @@ where
     }
 }
 
-#[cfg(feature = "semantics")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
 impl crate::semantics::Orderable for OboDoc {
     /// Sort the document in the right serialization order.
     fn sort(&mut self) {

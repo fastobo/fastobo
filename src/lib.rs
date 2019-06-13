@@ -9,7 +9,7 @@ extern crate failure;
 extern crate opaque_typedef_macros;
 
 #[macro_use]
-extern crate fastobo_derive;
+extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
 
 #[cfg(feature = "memchr")]

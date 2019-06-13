@@ -38,7 +38,7 @@ opaque_typedef = "0.0.5"
 opaque_typedef_macros = "0.0.5"
 url = "1.7.2"
 fastobo-syntax = "0.3.1"
-fastobo-derive = { version = "0.3.0", path = "derive" }
+fastobo-derive-internal = { version = "0.4.0", path = "derive" }
 memchr = { version = "2.2.0", optional = true }
 
 [features]

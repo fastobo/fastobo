@@ -1,10 +1,10 @@
 [package]
-name = "fastobo-derive"
+name = "fastobo-derive-internal"
 version = "0.3.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 license = "MIT"
-description = "Derive macros for the `fastobo` crate."
+description = "Internal derive macros for the `fastobo` crate."
 repository = "https://github.com/fastobo/fastobo"
 homepage = "https://github.com/fastobo/fastobo"
 workspace = ".."

@@ -4,7 +4,10 @@
 
 # --- Set the version of both crates using the Travis tag --------------------
 
-sed -i 's/version = ".*"/version = "$TRAVIS_TAG"/g' Cargo.toml derive/Cargo.toml
+sed -i "s/^version = \".*\"/version = \"$TRAVIS_TAG\"/g" Cargo.toml derive/Cargo.toml
+sed -i "s/^fastobo-derive = { version = \".*\", path = \"derive\" }/fastobo-derive = { version = \"$TRAVIS_TAG\", path = \"derive\" }/" Cargo.toml
+
+exit 0
 
 # --- Deploy `fastobo-derive` crate ------------------------------------------
 

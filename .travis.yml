@@ -29,13 +29,7 @@ after_script:
 - curl -SsL "https://codecov.io/bash" | bash
 
 deploy:
-- provider: cargo
-  token:
-    secure: oftrW3UUEV7B/GeXs5okwrcXwJxibj6Qiz5A7VuxUl1TGKDGRpriW+U6YXoNrjWD8R/rmg3fTz+iqHMlrsWSNDNKc9V+zQheQVDgU2c1UXLybCtPRI4usn5iX6xdYIsFteCgPWRGWoFYJj8fVtAZkY4iNeBdi4KEcB+VTtQ8qc1Z5MJn3ZIwnLorPMdxdz2osr5nKL0Np+JYWCXyIp/BFGDJjwaScMO46wcQS7u/vpHzhUU/dTrjwbV4xfdLOGcdKwHeH0nHLDra9L2p5SNF4wkwkpiObE9yliezJ2OK7Z6HdbxPNx/ntZKTWcfIZNntAHzkVfroKjwYUUSgnpsryVBtIHZzwnLlMHus3pP7oZpR3hoiPB4yM6rAu7gAnk2a9Xleu2GEuY/bP4hEKtUWQeL+Lo4oUTTEsCVSViJ2+47VnhEQI+8E/GOVeslhwye3DHcF+aZQVnMxND1yhTFGcvh7ZN9l8mkhU1Bu+C2yeVJcuBdFYZSgsBFtxpmFwnJwzYBXOS8RQUotjmmATBm/SaSLSxfswh4O9tafr7mmkM6vA64spekNjSr+C6YV/9BdZiDlVyuMLpNenhRt4Zw1Zv9Xrzy2M94M/CGXDYbkVwIgGEbB+B702srviR4/0sQZ7sRJLCtiQRHPJz8E5FHo1Mfolne4kcuureJQk424C8g=
-  on:
-    rust: stable
-    tags: true
-- provider: script
+  provider: script
   script: ci/travis/deploy.sh
   on:
     rust: stable

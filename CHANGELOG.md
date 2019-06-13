@@ -7,7 +7,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.0...HEAD
+
+
+## [0.4.0] - 2019-06-12
+
+[0.4.0]: https://github.com/fastobo/fastobo/compare/v0.3.0...v0.4.0
+
+### Added
+- Parsing iterator implementation in `fastobo::parser::FrameReader`
+- `fastobo-derive-internal` proc-macros to reduce code boilerplate.
+- `OboClause` and `OboFrame` traits with common operations for all
+  clauses/frames in an OBO document.
+- `Cardinality` enum which can be retrieved from any `OboClause` variant
+  with the `cardinality` method.
+- `OboDoc.is_fully_labeled` semantic check.
+
+### Changed
+- Decomposed errors into smaller errors: the main `Error` now wraps `CardinalityError`,
+  `IOError` and `SyntaxError` which can be accessed independently.
+
+### Removed
+- Removed `OboSemantics` trait and added functions to `OboDoc` directly.
+
+### Fixed
+- Bug causing `XrefList` to be parsed incorrectly when having a comma in their 
+  quote-enclosed description.
 
 
 ## [0.3.0] - 2019-05-27

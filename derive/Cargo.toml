@@ -3,15 +3,26 @@ name = "fastobo-derive"
 version = "0.3.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
+license = "MIT"
+description = "Derive macros for the `fastobo` crate."
+repository = "https://github.com/fastobo/fastobo"
+homepage = "https://github.com/fastobo/fastobo"
 workspace = ".."
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+keywords = ["obo", "ontology", "proc-macro", "derive"]
+categories = ["science", "parser-implementations"]
 
 [lib]
 proc-macro = true
 
+[badges.travis-ci]
+repository = "fastobo/fastobo"
+[badges.is-it-maintained-issue-resolution]
+repository = "fastobo/fastobo"
+[badges.maintenance]
+status     = "actively-developed"
+
 [dependencies]
-darling = "0.9"
+darling = "0.9.0"
 syn = "0.15.35"
 heck = "0.3.1"
 quote = "0.6.12"

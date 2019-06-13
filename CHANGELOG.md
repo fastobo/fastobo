@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.2...HEAD
+
+
+## [0.4.2] - 2019-06-13
+
+[0.4.2]: https://github.com/fastobo/fastobo/compare/v0.4.1...v0.4.2
 
 ### Fixed
 - `Cardinality::to_error` not returning an error for `ZeroOrOne` clauses

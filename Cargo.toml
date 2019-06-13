@@ -15,6 +15,9 @@ categories = ["science", "parser-implementations"]
 name = "fastobo"
 path = "src/lib.rs"
 
+[workspace]
+members = ["derive"]
+
 [badges.travis-ci]
 repository = "fastobo/fastobo"
 [badges.codecov]

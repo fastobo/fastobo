@@ -56,6 +56,20 @@ impl TypedefFrame {
     pub fn clauses_mut(&mut self) -> &mut Vec<Line<TypedefClause>> {
         &mut self.clauses
     }
+
+    /// Get the name of the typedef, if one is declared.
+    pub fn name(&self) -> Result<&UnquotedString, CardinalityError> {
+        let mut name: Option<&UnquotedString> = None;
+        for clause in &self.clauses {
+            if let TypedefClause::Name(n) = clause.as_inner() {
+                match name {
+                    Some(_) => return Err(CardinalityError::duplicate("name")),
+                    None => name = Some(&n),
+                }
+            }
+        }
+        name.ok_or_else(|| CardinalityError::missing("name"))
+    }
 }
 
 impl AsRef<Vec<Line<TypedefClause>>> for TypedefFrame {

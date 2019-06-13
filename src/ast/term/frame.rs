@@ -9,6 +9,7 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
+use crate::error::CardinalityError;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
@@ -96,6 +97,20 @@ impl TermFrame {
         }
 
         genus_count == 1 && has_differentia
+    }
+
+    /// Get the name (label) of the term, if one is declared.
+    pub fn name(&self) -> Result<&UnquotedString, CardinalityError> {
+        let mut name: Option<&UnquotedString> = None;
+        for clause in &self.clauses {
+            if let TermClause::Name(n) = clause.as_inner() {
+                match name {
+                    Some(_) => return Err(CardinalityError::duplicate("name")),
+                    None => name = Some(&n),
+                }
+            }
+        }
+        name.ok_or_else(|| CardinalityError::missing("name"))
     }
 }
 

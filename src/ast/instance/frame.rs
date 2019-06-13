@@ -59,6 +59,20 @@ impl InstanceFrame {
     pub fn clauses_mut(&mut self) -> &mut Vec<Line<InstanceClause>> {
         &mut self.clauses
     }
+
+    /// Get the name of the instance, if one is declared.
+    pub fn name(&self) -> Result<&UnquotedString, CardinalityError> {
+        let mut name: Option<&UnquotedString> = None;
+        for clause in &self.clauses {
+            if let InstanceClause::Name(n) = clause.as_inner() {
+                match name {
+                    Some(_) => return Err(CardinalityError::duplicate("name")),
+                    None => name = Some(&n),
+                }
+            }
+        }
+        name.ok_or_else(|| CardinalityError::missing("name"))
+    }
 }
 
 impl AsRef<Vec<Line<InstanceClause>>> for InstanceFrame {

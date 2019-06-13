@@ -4,9 +4,6 @@
 
 # --- Test with coverage -----------------------------------------------------
 
-log Measuring code coverage through Tarpaulin without default features
-cargo tarpaulin --release -v --out Xml --ciserver travis-ci --no-default-features
-
 log Measuring code coverage through Tarpaulin with default features
 cargo tarpaulin --release -v --out Xml --ciserver travis-ci
 

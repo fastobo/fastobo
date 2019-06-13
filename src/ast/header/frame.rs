@@ -101,8 +101,9 @@ impl HeaderFrame {
     /// Sort the header clauses in the right serialization order.
     ///
     /// # See Also
-    /// - The [Serializer conventions](https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5)
-    ///   section of the OBO Flat File format guide.
+    /// - The [Serializer conventions] section of the OBO Flat File format guide.
+    ///
+    /// [Serializer conventions]: https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5
     pub fn sort(&mut self) {
         self.clauses.sort_unstable()
     }

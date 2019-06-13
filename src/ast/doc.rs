@@ -22,8 +22,8 @@ use crate::share::Share;
 /// A complete OBO document in format version 1.4.
 #[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
 pub struct OboDoc {
-    pub(crate) header: HeaderFrame,
-    pub(crate) entities: Vec<EntityFrame>,
+    header: HeaderFrame,
+    entities: Vec<EntityFrame>,
 }
 
 /// Constructors and builder methods.
@@ -278,8 +278,20 @@ impl OboDoc {
     }
 
     /// Check if the OBO document is fully labeled.
-    pub fn is_fully_labeled(&self) {
-        for frame in &self.entities {}
+    ///
+    /// An OBO ontology is fully labeled if every frame has exactly one `name`
+    /// clause. This is equivalent to the definition in the [OBO specification]
+    /// if we suppose an invalid OBO document is never *fully labeled*.
+    ///
+    /// [OBO specification]: http://owlcollab.github.io/oboformat/doc/obo-syntax.html#6.1.5
+    pub fn is_fully_labeled(&self) -> bool {
+        self.entities
+            .iter()
+            .all(|frame| match frame {
+                EntityFrame::Term(f) => f.name().is_ok(),
+                EntityFrame::Typedef(f) => f.name().is_ok(),
+                EntityFrame::Instance(f) => f.name().is_ok(),
+            })
     }
 }
 
@@ -438,5 +450,54 @@ mod tests {
             )
             .trim_start_matches('\n')
         );
+    }
+
+    #[test]
+    fn is_fully_labeled() {
+        let doc = OboDoc::from_str("[Term]\nid: TEST:001\n").unwrap();
+        assert!(!doc.is_fully_labeled());
+
+        let doc = OboDoc::from_str("[Term]\nid: TEST:001\nname: test item\n").unwrap();
+        assert!(doc.is_fully_labeled());
+
+        let doc = OboDoc::from_str(&dedent(
+            "
+            [Term]
+            id: TEST:001
+            name: test item
+
+            [Term]
+            id: TEST:002
+            name: test item two
+        ",
+        ))
+        .unwrap();
+        assert!(doc.is_fully_labeled());
+
+        let doc = OboDoc::from_str(&dedent(
+            "
+            [Term]
+            id: TEST:001
+            name: test item
+
+            [Term]
+            id: TEST:002
+        ",
+        ))
+        .unwrap();
+        assert!(!doc.is_fully_labeled());
+
+        let doc = OboDoc::from_str(&dedent(
+            "
+            [Term]
+            id: TEST:001
+
+            [Term]
+            id: TEST:002
+            name: test item two
+        ",
+        ))
+        .unwrap();
+        assert!(!doc.is_fully_labeled());
     }
 }

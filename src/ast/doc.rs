@@ -9,13 +9,14 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::semantics::Orderable;
 use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FrameReader;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::Identified;
+use crate::semantics::Orderable;
 use crate::share::Cow;
 use crate::share::Redeem;
 use crate::share::Share;
@@ -286,13 +287,11 @@ impl OboDoc {
     ///
     /// [OBO specification]: http://owlcollab.github.io/oboformat/doc/obo-syntax.html#6.1.5
     pub fn is_fully_labeled(&self) -> bool {
-        self.entities
-            .iter()
-            .all(|frame| match frame {
-                EntityFrame::Term(f) => f.name().is_ok(),
-                EntityFrame::Typedef(f) => f.name().is_ok(),
-                EntityFrame::Instance(f) => f.name().is_ok(),
-            })
+        self.entities.iter().all(|frame| match frame {
+            EntityFrame::Term(f) => f.name().is_ok(),
+            EntityFrame::Typedef(f) => f.name().is_ok(),
+            EntityFrame::Instance(f) => f.name().is_ok(),
+        })
     }
 }
 

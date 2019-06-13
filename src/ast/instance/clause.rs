@@ -10,6 +10,7 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::OboClause;
 
 /// A clause appearing in an instance frame.
 #[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]

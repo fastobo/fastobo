@@ -156,7 +156,7 @@ impl OboClauseDerive {
         let arms_card = self.variants().iter().map(|v| v.cardinality_arm());
         parse_quote! {
             #[automatically_derived]
-            impl crate::ast::OboClause for #id {
+            impl OboClause for #id {
                 fn tag(&self) -> &str {
                     use self::#id::*;
                     match self {

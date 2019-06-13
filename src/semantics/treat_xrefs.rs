@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 
+use crate::ast::EntityFrame::*;
 use crate::ast::*;
 
-use self::EntityFrame::*;
+use super::Identified;
 
 /// Apply a single `treat-xrefs-as-equivalent` macro to the whole document.
 pub fn as_equivalent(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {

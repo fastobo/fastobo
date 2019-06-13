@@ -169,7 +169,7 @@ mod tests {
     use textwrap::dedent;
 
     use super::*;
-    use crate::ast::Identified;
+    use crate::semantics::Identified;
 
     #[test]
     fn frame_reader_empty() {

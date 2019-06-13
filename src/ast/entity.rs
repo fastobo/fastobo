@@ -20,6 +20,7 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
+use crate::semantics::Identified;
 
 /// An entity frame, either for a term, an instance, or a typedef.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]

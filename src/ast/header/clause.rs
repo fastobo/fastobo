@@ -12,6 +12,7 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::OboClause;
 use crate::share::Cow;
 use crate::share::Redeem;
 use crate::share::Share;

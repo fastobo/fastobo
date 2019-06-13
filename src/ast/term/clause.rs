@@ -38,7 +38,6 @@ pub enum TermClause {
     Xref(Xref),
     #[clause(cardinality = "ZeroOrOne")]
     Builtin(bool),
-    #[clause(cardinality = "ZeroOrOne")]
     PropertyValue(PropertyValue),
     IsA(ClassIdent),
     #[clause(cardinality = "NotOne")]

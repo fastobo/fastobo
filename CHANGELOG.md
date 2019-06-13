@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.0...HEAD
 
+### Fixed
+- `TermClause::PropertyValue` having invalid `ZeroOrOne` cardinality
+
 
 ## [0.4.0] - 2019-06-12
 

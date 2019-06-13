@@ -15,6 +15,7 @@ use crate::ast::*;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
+use crate::semantics::Orderable;
 use crate::parser::Rule;
 use crate::share::Share;
 
@@ -183,7 +184,7 @@ impl IntoIterator for XrefList {
     }
 }
 
-impl crate::semantics::Orderable for XrefList {
+impl Orderable for XrefList {
     fn sort(&mut self) {
         self.xrefs.sort_unstable();
     }

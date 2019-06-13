@@ -9,6 +9,7 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
+use crate::semantics::Orderable;
 use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::error::SyntaxError;
@@ -343,7 +344,7 @@ where
     }
 }
 
-impl crate::semantics::Orderable for OboDoc {
+impl Orderable for OboDoc {
     /// Sort the document in the right serialization order.
     fn sort(&mut self) {
         self.header.sort_unstable();

@@ -14,6 +14,7 @@ use crate::error::CardinalityError;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::Orderable;
 use crate::share::Cow;
 use crate::share::Redeem;
 use crate::share::Share;
@@ -97,26 +98,6 @@ impl HeaderFrame {
         }
         version.ok_or_else(|| CardinalityError::missing("data-version"))
     }
-
-    /// Sort the header clauses in the right serialization order.
-    ///
-    /// # See Also
-    /// - The [Serializer conventions] section of the OBO Flat File format guide.
-    ///
-    /// [Serializer conventions]: https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5
-    pub fn sort(&mut self) {
-        self.clauses.sort_unstable()
-    }
-
-    /// Check if the header clauses are sorted in the right serialization order.
-    pub fn is_sorted(&self) -> bool {
-        for i in 1..self.clauses.len() {
-            if self.clauses[i - 1] > self.clauses[i] {
-                return false;
-            }
-        }
-        true
-    }
 }
 
 impl AsRef<[HeaderClause]> for HeaderFrame {
@@ -185,7 +166,7 @@ impl<'a> IntoIterator for &'a mut HeaderFrame {
     }
 }
 
-impl crate::semantics::Orderable for HeaderFrame {
+impl Orderable for HeaderFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

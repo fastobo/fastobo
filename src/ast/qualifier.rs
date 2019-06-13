@@ -12,6 +12,7 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
+use crate::semantics::Orderable;
 
 /// A qualifier, possibly used as a trailing modifier.
 #[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
@@ -148,7 +149,7 @@ impl IntoIterator for QualifierList {
     }
 }
 
-impl crate::semantics::Orderable for QualifierList {
+impl Orderable for QualifierList {
     fn sort(&mut self) {
         self.qualifiers.sort_unstable();
     }

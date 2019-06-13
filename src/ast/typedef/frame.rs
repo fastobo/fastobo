@@ -11,6 +11,7 @@ use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::Orderable;
 
 /// A typedef clause, describing a relationship.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -149,7 +150,7 @@ impl<'a> IntoIterator for &'a TypedefFrame {
     }
 }
 
-impl crate::semantics::Orderable for TypedefFrame {
+impl Orderable for TypedefFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

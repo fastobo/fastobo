@@ -13,6 +13,7 @@ use crate::error::CardinalityError;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::Orderable;
 
 /// A term frame, describing a class.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -209,7 +210,7 @@ impl<'a> IntoIterator for &'a TermFrame {
     }
 }
 
-impl crate::semantics::Orderable for TermFrame {
+impl Orderable for TermFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

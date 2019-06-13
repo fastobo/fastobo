@@ -12,6 +12,7 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
+use crate::semantics::Orderable;
 
 /// An instance frame, describing a particular individual.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -152,7 +153,7 @@ impl<'a> IntoIterator for &'a InstanceFrame {
     }
 }
 
-impl crate::semantics::Orderable for InstanceFrame {
+impl Orderable for InstanceFrame {
     fn sort(&mut self) {
         self.clauses.sort_unstable();
     }

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.1...HEAD
 
+### Fixed
+- `Cardinality::to_error` not returning an error for `ZeroOrOne` clauses
+  present twice in a frame.
+
 
 ## [0.4.1] - 2019-06-13
 

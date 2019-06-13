@@ -300,4 +300,20 @@ mod tests {
             ])
         );
     }
+
+    #[test]
+    fn cardinality_checK() {
+        let frame = HeaderFrame::with_clauses(vec![
+            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+        ]);
+        assert!(frame.cardinality_check().is_ok());
+
+        let frame2 = HeaderFrame::with_clauses(vec![
+            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+            HeaderClause::FormatVersion(UnquotedString::new("1.5")),
+        ]);
+        assert!(frame2.cardinality_check().is_err());
+    }
 }

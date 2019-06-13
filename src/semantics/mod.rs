@@ -35,7 +35,7 @@ impl Cardinality {
         use self::CardinalityError::*;
         let name = tag.into();
         match self {
-            Cardinality::ZeroOrOne if n > 2 => Some(DuplicateClauses { name }),
+            Cardinality::ZeroOrOne if n > 1 => Some(DuplicateClauses { name }),
             Cardinality::One if n == 0 => Some(MissingClause { name }),
             Cardinality::One if n > 1 => Some(DuplicateClauses { name }),
             Cardinality::NotOne if n == 1 => Some(SingleClause { name }),
@@ -85,15 +85,15 @@ pub trait OboFrame {
         let mut clause_index: HashMap<_, Vec<&Self::Clause>> = HashMap::new();
         for clause in self.clauses_ref() {
             clause_index
-                .entry(discriminant(clause))
+                .entry(clause.tag())
                 .or_default()
                 .push(clause);
         }
 
         // Check each variant kind
-        for clauses in clause_index.values() {
+        for (tag, clauses) in clause_index {
             let cardinality = clauses[0].cardinality();
-            if let Some(err) = cardinality.to_error(clauses.len(), clauses[0].tag()) {
+            if let Some(err) = cardinality.to_error(clauses.len(), tag) {
                 return Err(err);
             }
         }

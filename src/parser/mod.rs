@@ -1,7 +1,9 @@
 //! Parser and parsing-related traits for the OBO format.
 
 use std::convert::TryFrom;
+use std::fs::File;
 use std::io::BufRead;
+use std::io::BufReader;
 use std::iter::Iterator;
 use std::str::FromStr;
 
@@ -100,6 +102,13 @@ impl<B: BufRead> FrameReader<B> {
     }
 }
 
+impl TryFrom<File> for FrameReader<BufReader<File>> {
+    type Error = Error;
+    fn try_from(f: File) -> Result<Self, Self::Error> {
+        Self::new(BufReader::new(f))
+    }
+}
+
 impl<B: BufRead> Iterator for FrameReader<B> {
     type Item = Result<EntityFrame, Error>;
 
@@ -150,7 +159,7 @@ impl<B: BufRead> Iterator for FrameReader<B> {
 
 impl<B: BufRead> TryFrom<FrameReader<B>> for OboDoc {
     type Error = Error;
-    fn try_from(mut reader: FrameReader<B>) -> Result<OboDoc, Error> {
+    fn try_from(mut reader: FrameReader<B>) -> Result<Self, Self::Error> {
         let mut doc = OboDoc::new();
         std::mem::swap(reader.header_mut(), doc.header_mut());
 

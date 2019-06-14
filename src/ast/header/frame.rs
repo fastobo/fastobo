@@ -302,7 +302,7 @@ mod tests {
     }
 
     #[test]
-    fn cardinality_checK() {
+    fn cardinality_check() {
         let frame = HeaderFrame::with_clauses(vec![
             HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
             HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),

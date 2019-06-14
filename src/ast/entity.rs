@@ -21,6 +21,7 @@ use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
 use crate::semantics::Identified;
+use crate::semantics::Orderable;
 
 /// An entity frame, either for a term, an instance, or a typedef.
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
@@ -28,6 +29,48 @@ pub enum EntityFrame {
     Term(TermFrame),
     Typedef(TypedefFrame),
     Instance(InstanceFrame),
+}
+
+impl EntityFrame {
+    /// Return the `TermFrame` if the entity frame is one, or `None`.
+    ///
+    /// Use this function in conjunction with `Iterator::flat_map` to extract
+    /// all term frames from an iterator of `EntityFrame` references:
+    ///
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let doc = OboDoc::from_file("tests/data/ms.obo").unwrap();
+    /// let terms: Vec<&TermFrame> = doc
+    ///     .entities()
+    ///     .iter()
+    ///     .flat_map(EntityFrame::as_term_frame)
+    ///     .collect();
+    /// ```
+    pub fn as_term_frame(&self) -> Option<&TermFrame> {
+        if let EntityFrame::Term(frame) = &self {
+            Some(frame)
+        } else {
+            None
+        }
+    }
+    /// Return the `TypedefFrame` if the entity frame is one, or `None`.
+    pub fn as_typedef_frame(&self) -> Option<&TypedefFrame> {
+        if let EntityFrame::Typedef(frame) = &self {
+            Some(frame)
+        } else {
+            None
+        }
+    }
+
+    /// Return the `InstanceFrame` if the entity frame is one, or `None`.
+    pub fn as_instance_frame(&self) -> Option<&InstanceFrame> {
+        if let EntityFrame::Instance(frame) = &self {
+            Some(frame)
+        } else {
+            None
+        }
+    }
 }
 
 impl Identified for EntityFrame {
@@ -93,7 +136,7 @@ impl<'i> FromPair<'i> for EntityFrame {
 }
 impl_fromstr!(EntityFrame);
 
-impl crate::semantics::Orderable for EntityFrame {
+impl Orderable for EntityFrame {
     fn sort(&mut self) {
         use self::EntityFrame::*;
         match self {

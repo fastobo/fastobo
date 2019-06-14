@@ -110,6 +110,7 @@ pub trait OboClause {
     /// ```rust
     /// # extern crate fastobo;
     /// # use fastobo::ast::*;
+    /// # use fastobo::semantics::OboClause;
     /// let clause = HeaderClause::SavedBy("Martin Larralde".into());
     /// assert_eq!(clause.tag(), "saved-by");
     /// ```
@@ -126,7 +127,8 @@ pub trait OboClause {
     /// ```rust
     /// # extern crate fastobo;
     /// # use fastobo::ast::*;
-    /// use fastobo::semantics::Cardinality;
+    /// # use fastobo::semantics::OboClause;
+    /// # use fastobo::semantics::Cardinality;
     /// let clause = HeaderClause::SavedBy("Martin Larralde".into());
     /// assert_eq!(clause.cardinality(), Cardinality::ZeroOrOne);
     /// ```

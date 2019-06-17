@@ -1,6 +1,6 @@
 [package]
 name = "fastobo-derive-internal"
-version = "0.4.2"
+version = "0.4.3"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 license = "MIT"

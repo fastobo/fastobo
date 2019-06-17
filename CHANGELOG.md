@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.3...HEAD
+
+## [0.4.3] - 2019-06-17
+
+[0.4.3]: https://github.com/fastobo/fastobo/compare/v0.4.2...v0.4.3
+
+### Fixed
+- `HeaderFrame.sort` to avoid shuffling `OwlAxiom` header clauses.
+
+### Added
+- `HeaderFrame.merge_owl_axioms` method to merge OWL axioms in a 
+  header frame.
 
 
 ## [0.4.2] - 2019-06-13

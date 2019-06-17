@@ -100,6 +100,7 @@ impl HeaderFrame {
         version.ok_or_else(|| CardinalityError::missing("data-version"))
     }
 
+    /// Merge several OWL axioms into a single clause.
     pub fn merge_owl_axioms(&mut self) {
         //
         let mut merged = Vec::new();

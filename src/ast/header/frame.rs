@@ -169,7 +169,8 @@ impl<'a> IntoIterator for &'a mut HeaderFrame {
 
 impl Orderable for HeaderFrame {
     fn sort(&mut self) {
-        self.clauses.sort_unstable();
+        // NB: not `sort_unstable` to avoid shuffling owl-axioms
+        self.clauses.sort();
     }
     fn is_sorted(&self) -> bool {
         for i in 1..self.clauses.len() {

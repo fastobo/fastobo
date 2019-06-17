@@ -99,6 +99,23 @@ impl HeaderFrame {
         }
         version.ok_or_else(|| CardinalityError::missing("data-version"))
     }
+
+    pub fn merge_owl_axioms(&mut self) {
+        //
+        let mut merged = Vec::new();
+        for clause in std::mem::replace(&mut self.clauses, Vec::new()) {
+            if let HeaderClause::OwlAxioms(axioms) = clause {
+                merged.push(axioms.into_string());
+            } else {
+                self.clauses.push(clause);
+            }
+        }
+
+        if !merged.is_empty() {
+            let s = UnquotedString::new(merged.join("\n"));
+            self.clauses.push(HeaderClause::OwlAxioms(s));
+        }
+    }
 }
 
 impl AsRef<[HeaderClause]> for HeaderFrame {

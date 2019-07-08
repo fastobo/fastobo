@@ -50,6 +50,7 @@
 
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::str::FromStr;
 
 use url::Url;
 
@@ -737,7 +738,7 @@ pub trait VisitMut {
 ///
 /// # Usage
 /// The compactor will follow the rules from the OBO specification:
-/// * if the document declares an IDSpace prefix $p$ that maps to an Url `u`,
+/// * if the document declares an IDSpace prefix `p` that maps to an Url `u`,
 ///   URL identifiers that can be factorized as `{u}{v}` will be replaced
 ///   by Prefixed identifiers `{p}:{v}`
 /// * if the document does not declare an IDSpace `p'`, URL identifiers that
@@ -761,6 +762,9 @@ pub trait VisitMut {
 /// "[Term]
 /// id: BFO:0000055
 /// ");
+///
+/// # See also
+/// * [IdDecompactor](./struct.IdDecompactor.html) that does the opposite.
 #[derive(Clone, Debug, Default)]
 pub struct IdCompactor {
     idspaces: HashMap<IdentPrefix, Url>,
@@ -823,11 +827,133 @@ impl VisitMut for IdCompactor {
     }
 }
 
+/// A visitor that will decompact identifiers in an OBO document.
+///
+/// # Usage
+/// The decompactor will follow the rules from the OBO specification:
+/// * if the document declares an IDSpace prefix `p` that maps to an Url `u`,
+///   Prefixed identifiers `{p}:{id}` will be replaced by URLs identifiers
+///   `{u}{id}`.
+/// * if the document does not declare an IDSpace `p'`, Prefixed identifiers
+///   `{p}:{id}` with be replaced by URLs identifiers
+///   `http://purl.obolibrary.org/obo/{p'}_{id}`.
+///
+/// # See also
+/// * [IdCompactor](./struct.IdCompactor.html) that does the opposite.
+#[derive(Clone, Debug, Default)]
+pub struct IdDecompactor {
+    idspaces: HashMap<IdentPrefix, Url>,
+}
+
+impl IdDecompactor {
+    pub fn new() -> Self {
+        Self {
+            idspaces: HashMap::new(),
+        }
+    }
+}
+
+impl VisitMut for IdDecompactor {
+    fn visit_header_frame(&mut self, header: &mut HeaderFrame) {
+        // collect all IDSpaces before processing the header
+        for clause in header.iter() {
+            if let HeaderClause::Idspace(prefix, url, _) = clause {
+                self.idspaces.insert(prefix.clone(), url.clone());
+            }
+        }
+
+        // process the header as normal
+        for clause in header.iter_mut() {
+            self.visit_header_clause(clause)
+        }
+    }
+
+    fn visit_ident(&mut self, id: &mut Ident) {
+        // the compacted id.
+        let mut new: Option<Url> = None;
+        if let Ident::Prefixed(p) = id {
+            if let Some(baseurl) = self.idspaces.get(p.prefix()) {
+                let newurl = format!("{}{}", baseurl, p.local().as_str());
+                new = Some(Url::from_str(&newurl).expect("invalid URL"));
+            } else {
+                let newurl = format!(
+                    "http://purl.obolibrary.org/obo/{}_{}",
+                    p.prefix().as_str(),
+                    p.local().as_str()
+                );
+                new = Some(Url::from_str(&newurl).expect("invalid URL"));
+            }
+        }
+
+        if let Some(new_url) = new {
+            *id = Ident::Url(new_url);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
+
+    mod id_decompactor {
+        use std::str::FromStr;
+
+        use crate::ast::EntityFrame;
+        use crate::ast::Ident;
+        use crate::ast::OboDoc;
+        use crate::ast::PrefixedIdent;
+        use crate::ast::TermClause;
+        use crate::ast::Url;
+        use crate::ast::Xref;
+
+        use super::IdDecompactor;
+        use super::VisitMut;
+
+        #[test]
+        fn decompact_idspace() {
+            let mut doc = OboDoc::from_str(
+                "idspace: Wikipedia http://en.wikipedia.org/wiki/
+
+                [Term]
+                id: TST:001
+                name: Pupil
+                xref: Wikipedia:Pupil
+                ",
+            )
+            .unwrap();
+            IdDecompactor::new().visit_doc(&mut doc);
+
+            if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
+                let url = Url::from_str("http://en.wikipedia.org/wiki/Pupil").unwrap();
+                pretty_assertions::assert_eq!(
+                    term.clauses()[1].as_inner(),
+                    &TermClause::Xref(Xref::new(url)),
+                );
+            } else {
+                unreachable!()
+            }
+        }
+
+        #[test]
+        fn decompact_obolibrary() {
+            let mut doc = OboDoc::from_str(
+                "[Term]
+                id: MS:1000031
+                ",
+            )
+            .unwrap();
+            IdDecompactor::new().visit_doc(&mut doc);
+
+            if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
+                let url = Url::from_str("http://purl.obolibrary.org/obo/MS_1000031").unwrap();
+                pretty_assertions::assert_eq!(term.id().as_inner().as_ref(), &Ident::Url(url),);
+            } else {
+                unreachable!()
+            }
+        }
+    }
 
     mod id_compactor {
 

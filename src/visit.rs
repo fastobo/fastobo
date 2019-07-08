@@ -48,6 +48,9 @@
 //!   in [rust-unofficial/patterns](https://github.com/rust-unofficial/patterns).
 //!
 
+use std::collections::HashMap;
+use std::collections::HashSet;
+
 use url::Url;
 
 use crate::ast::*;
@@ -724,6 +727,189 @@ pub trait VisitMut {
     fn visit_xref_list(&mut self, xrefs: &mut XrefList) {
         for xref in xrefs.iter_mut() {
             self.visit_xref(xref)
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/// A visitor that will compact identifiers in an OBO document.
+///
+/// # Usage
+/// The compactor will follow the rules from the OBO specification:
+/// * if the document declares an IDSpace prefix $p$ that maps to an Url `u`,
+///   URL identifiers that can be factorized as `{u}{v}` will be replaced
+///   by Prefixed identifiers `{p}:{v}`
+/// * if the document does not declare an IDSpace `p'`, URL identifiers that
+///   can be factorized as `http://purl.obolibrary.org/obo/{p'}_{id}`
+///   will be replaced by Prefixed identifiers `{p'}:{id}`.
+///
+/// # Example
+/// ```rust
+/// # extern crate fastobo;
+/// # use std::str::FromStr;
+/// # use std::string::ToString;
+/// # use fastobo::ast::*;
+/// # use fastobo::visit::*;
+/// let mut doc = OboDoc::from_str(
+/// "[Term]
+/// id: http://purl.obolibrary.org/obo/BFO_0000055
+/// ")).unwrap();
+///
+/// IdCompactor::new().visit_doc(&mut doc);
+/// assert_eq!(doc.to_string(),
+/// "[Term]
+/// id: BFO:0000055
+/// ");
+#[derive(Clone, Debug, Default)]
+pub struct IdCompactor {
+    idspaces: HashMap<IdentPrefix, Url>,
+}
+
+impl IdCompactor {
+    pub fn new() -> Self {
+        Self {
+            idspaces: HashMap::new(),
+        }
+    }
+}
+
+impl VisitMut for IdCompactor {
+    fn visit_header_frame(&mut self, header: &mut HeaderFrame) {
+        // collect all IDSpaces before processing the header
+        for clause in header.iter() {
+            if let HeaderClause::Idspace(prefix, url, _) = clause {
+                self.idspaces.insert(prefix.clone(), url.clone());
+            }
+        }
+
+        // process the header as normal
+        for clause in header.iter_mut() {
+            self.visit_header_clause(clause)
+        }
+    }
+
+    fn visit_ident(&mut self, id: &mut Ident) {
+        // the compacted id.
+        let mut new: Option<PrefixedIdent> = None;
+
+        if let Ident::Url(ref u) = id {
+            // find a prefix from the idspaces declared in the document
+            for (prefix, url) in self.idspaces.iter() {
+                if u.as_str().starts_with(url.as_str()) {
+                    let local = IdentLocal::from(&u.as_str()[url.as_str().len()..]);
+                    new = Some(PrefixedIdent::new(prefix.clone(), local));
+                }
+            }
+            // if none find, use the OBO factorisation
+            if new.is_none() {
+                if u.as_str().starts_with("http://purl.obolibrary.org/obo/") {
+                    let raw_id = &u.as_str()[31..];
+                    if let Some(i) = raw_id.find('_') {
+                        // check we are not using a declared prefix (otherwise
+                        // the compaction/expansion would not roundtrip!)
+                        let prefix = IdentPrefix::new(&raw_id[..i]);
+                        if self.idspaces.get(&prefix).is_none() {
+                            new = Some(PrefixedIdent::new(prefix, &raw_id[i + 1..]));
+                        }
+                    }
+                }
+            }
+        }
+
+        if let Some(new_id) = new {
+            *id = Ident::Prefixed(new_id);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    mod id_compactor {
+
+        use std::str::FromStr;
+
+        use crate::ast::EntityFrame;
+        use crate::ast::Ident;
+        use crate::ast::OboDoc;
+        use crate::ast::PrefixedIdent;
+        use crate::ast::TermClause;
+        use crate::ast::Url;
+        use crate::ast::Xref;
+
+        use super::IdCompactor;
+        use super::VisitMut;
+
+        #[test]
+        fn compact_idspace() {
+            let mut doc = OboDoc::from_str(
+                "idspace: Wikipedia http://en.wikipedia.org/wiki/
+
+                [Term]
+                id: TST:001
+                name: Pupil
+                xref: http://en.wikipedia.org/wiki/Pupil
+                ",
+            )
+            .unwrap();
+            IdCompactor::new().visit_doc(&mut doc);
+
+            if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
+                pretty_assertions::assert_eq!(
+                    term.clauses()[1].as_inner(),
+                    &TermClause::Xref(Xref::new(PrefixedIdent::new("Wikipedia", "Pupil"))),
+                );
+            } else {
+                unreachable!()
+            }
+        }
+
+        #[test]
+        fn compact_obolibrary() {
+            let mut doc = OboDoc::from_str(
+                "[Term]
+                id: http://purl.obolibrary.org/obo/MS_1000031
+                ",
+            )
+            .unwrap();
+            IdCompactor::new().visit_doc(&mut doc);
+
+            if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
+                pretty_assertions::assert_eq!(
+                    term.id().as_inner().as_ref(),
+                    &Ident::Prefixed(PrefixedIdent::new("MS", "1000031")),
+                );
+            } else {
+                unreachable!()
+            }
+        }
+
+        #[test]
+        fn compact_no_idspace_override() {
+            let mut doc = OboDoc::from_str(
+                "idspace: PMC https://www.ncbi.nlm.nih.gov/pmc/articles/PMC
+
+                [Term]
+                id: TST:001
+                xref: http://purl.obolibrary.org/obo/PMC_2823822
+                ",
+            )
+            .unwrap();
+            IdCompactor::new().visit_doc(&mut doc);
+
+            if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
+                let url = Url::from_str("http://purl.obolibrary.org/obo/PMC_2823822").unwrap();
+                pretty_assertions::assert_eq!(
+                    term.clauses()[0].as_inner(),
+                    &TermClause::Xref(Xref::new(url)),
+                );
+            } else {
+                unreachable!()
+            }
         }
     }
 }

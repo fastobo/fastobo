@@ -59,7 +59,10 @@ foundrytest!(zfa);
 foundrytest!(bfo);
 foundrytest!(pato);
 foundrytest!(fao);
-foundrytest!(#[ignore] eco);
+foundrytest!(
+    #[ignore]
+    eco
+);
 foundrytest!(ceph);
 foundrytest!(wbbt);
 foundrytest!(ddanat);

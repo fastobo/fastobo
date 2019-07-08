@@ -84,10 +84,7 @@ pub trait OboFrame {
         // Group clauses by variant kind
         let mut clause_index: HashMap<_, Vec<&Self::Clause>> = HashMap::new();
         for clause in self.clauses_ref() {
-            clause_index
-                .entry(clause.tag())
-                .or_default()
-                .push(clause);
+            clause_index.entry(clause.tag()).or_default().push(clause);
         }
 
         // Check each variant kind

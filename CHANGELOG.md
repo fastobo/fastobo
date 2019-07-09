@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.4...HEAD
+
+## [0.4.4] - 2019-07-08
+
+[0.4.4]: https://github.com/fastobo/fastobo/compare/v0.4.3...v0.4.4
+
+## Added
+- `fastobo::visit::IdCompactor` and `fastobo::visit::IdDecompactor` to handle
+  url to prefixed ident conversion in OBO documents.
+
 
 ## [0.4.3] - 2019-06-17
 
@@ -17,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `HeaderFrame.sort` to avoid shuffling `OwlAxiom` header clauses.
 
 ### Added
-- `HeaderFrame.merge_owl_axioms` method to merge OWL axioms in a 
+- `HeaderFrame.merge_owl_axioms` method to merge OWL axioms in a
   header frame.
 
 
@@ -59,7 +68,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed `OboSemantics` trait and added functions to `OboDoc` directly.
 
 ### Fixed
-- Bug causing `XrefList` to be parsed incorrectly when having a comma in their 
+- Bug causing `XrefList` to be parsed incorrectly when having a comma in their
   quote-enclosed description.
 
 

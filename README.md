@@ -56,7 +56,7 @@ manifest of your project:
 Add `fastobo` to the `[dependencies]` sections of your `Cargo.toml` manifest:
 ```toml
 [dependencies]
-fastobo = "0.3.0"
+fastobo = "0.4.4"
 ```
 
 The `OboDoc` struct acts as the root of the AST. Use `OboDoc::from_stream` to load an OBO document

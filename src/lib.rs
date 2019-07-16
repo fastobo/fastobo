@@ -4,7 +4,7 @@
 #![allow(dead_code, unused_imports)]
 
 #[macro_use]
-extern crate failure;
+extern crate err_derive;
 #[macro_use]
 extern crate opaque_typedef_macros;
 

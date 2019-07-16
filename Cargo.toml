@@ -32,7 +32,7 @@ status     = "actively-developed"
 features = [ "_doc" ]
 
 [dependencies]
-failure = "0.1.5"
+err-derive = "0.1.5"
 pest = "2.1.1"
 opaque_typedef = "0.0.5"
 opaque_typedef_macros = "0.0.5"

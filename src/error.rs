@@ -17,13 +17,13 @@ use crate::parser::Rule;
 /// This error is highly dependent on the function that returns it: the `name`
 /// field can provide more information about the specific clause that errored
 /// to the end-user.
-#[derive(Debug, Eq, Fail, PartialEq)]
+#[derive(Debug, Eq, Error, PartialEq)]
 pub enum CardinalityError {
-    #[fail(display = "missing {:?} clause", name)]
+    #[error(display = "missing {:?} clause", name)]
     MissingClause { name: String },
-    #[fail(display = "duplicate {:?} clauses", name)]
+    #[error(display = "duplicate {:?} clauses", name)]
     DuplicateClauses { name: String },
-    #[fail(display = "invalid single {:?} clause", name)]
+    #[error(display = "invalid single {:?} clause", name)]
     SingleClause { name: String },
 }
 
@@ -42,7 +42,7 @@ impl CardinalityError {
 }
 
 /// A syntax error.
-#[derive(Debug, Eq, Fail, PartialEq)]
+#[derive(Debug, Eq, Error, PartialEq)]
 pub enum SyntaxError {
     /// An unexpected rule was used in `FromPair::from_pair`.
     ///
@@ -62,7 +62,7 @@ pub enum SyntaxError {
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     /// ```
-    #[fail(display = "unexpected rule: {:?} (expected {:?})", actual, expected)]
+    #[error(display = "unexpected rule: {:?} (expected {:?})", actual, expected)]
     UnexpectedRule { expected: Rule, actual: Rule },
 
     /// The underlying parser encountered an error.
@@ -79,9 +79,9 @@ pub enum SyntaxError {
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     /// ```
-    #[fail(display = "parser error: {}", error)]
+    #[error(display = "parser error: {}", error)]
     ParserError {
-        #[cause]
+        #[error(cause)]
         error: PestError<Rule>,
     },
 }
@@ -146,12 +146,12 @@ impl SyntaxError {
 }
 
 /// The error type for this crate.
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// A syntax error occurred.
-    #[fail(display = "Syntax error: {}", error)]
+    #[error(display = "Syntax error: {}", error)]
     SyntaxError {
-        #[cause]
+        #[error(cause)]
         error: SyntaxError,
     },
 
@@ -167,17 +167,17 @@ pub enum Error {
     /// #   fastobo::error::Error::IOError { .. } => (),
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
-    #[fail(display = "IO error: {}", error)]
+    #[error(display = "IO error: {}", error)]
     IOError {
-        #[cause]
+        #[error(cause)]
         error: IOError,
     },
 
     /// A cardinality-related error occurred.
-    #[fail(display = "cardinality error: {}", inner)]
+    #[error(display = "cardinality error: {}", inner)]
     CardinalityError {
         id: Option<Ident>,
-        #[cause]
+        #[error(cause)]
         inner: CardinalityError,
     },
 }

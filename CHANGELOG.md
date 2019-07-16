@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.4...HEAD
 
+## Changed
+- Transitioned to [`err-derive`](https://docs.rs/err-derive) for error 
+  management instead of `failure`.
+
+
 ## [0.4.4] - 2019-07-08
 
 [0.4.4]: https://github.com/fastobo/fastobo/compare/v0.4.3...v0.4.4

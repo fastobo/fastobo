@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.4.4...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.5.0...HEAD
 
-## Changed
+
+## [0.5.0] - 2019-07-15
+
+[0.5.0]: https://github.com/fastobo/fastobo/compare/v0.4.4...v0.5.0
+
+### Changed
 - Transitioned to [`err-derive`](https://docs.rs/err-derive) for error 
   management instead of `failure`.
 
@@ -18,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [0.4.4]: https://github.com/fastobo/fastobo/compare/v0.4.3...v0.4.4
 
-## Added
+### Added
 - `fastobo::visit::IdCompactor` and `fastobo::visit::IdDecompactor` to handle
   url to prefixed ident conversion in OBO documents.
 

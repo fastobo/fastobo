@@ -7,6 +7,7 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
+use ordered_float::OrderedFloat;
 use pest::iterators::Pair;
 
 use crate::error::Error;
@@ -32,7 +33,7 @@ pub trait DateTime {
 ///
 /// For historical reasons, OBO headers do not contain ISO datetimes but
 /// *day-month-year* dates, which can be confusing for US-based users.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
 pub struct NaiveDateTime {
     year: u16,
     month: u8,
@@ -141,7 +142,7 @@ impl<'i> FromPair<'i> for NaiveDateTime {
 impl_fromstr!(NaiveDateTime);
 
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub struct IsoDateTime {
     year: u16,
     month: u8,
@@ -149,6 +150,7 @@ pub struct IsoDateTime {
     hour: u8,
     minute: u8,
     second: u8,
+    fraction: Option<OrderedFloat<f32>>,
     timezone: Option<IsoTimezone>,
 }
 
@@ -163,6 +165,7 @@ impl IsoDateTime {
             hour,
             minute,
             second,
+            fraction: None,
             timezone: None,
         }
     }
@@ -221,6 +224,11 @@ impl IsoDateTime {
     pub fn second(&self) -> u8 {
         self.second
     }
+
+    /// Get the fraction of the `IsoDateTime`.
+    pub fn fraction(&self) -> Option<f32> {
+        self.fraction.as_ref().map(|f| f.0)
+    }
 }
 
 impl Display for IsoDateTime {
@@ -251,6 +259,7 @@ impl<'i> FromPair<'i> for IsoDateTime {
         let hour = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
         let minute = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
         let second = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
+        let fraction = time.next().map(|p| f32::from_str(p.as_str()).unwrap().into());
 
         let timezone = match inner.next() {
             Some(pair) => Some(IsoTimezone::from_pair_unchecked(pair)?),
@@ -264,6 +273,7 @@ impl<'i> FromPair<'i> for IsoDateTime {
             hour,
             minute,
             second,
+            fraction,
             timezone,
         })
     }
@@ -286,9 +296,9 @@ impl_fromstr!(IsoDateTime);
 /// An ISO-8601 timezone.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum IsoTimezone {
-    Minus(u8, u8),
+    Minus(u8, Option<u8>),
     Utc,
-    Plus(u8, u8),
+    Plus(u8, Option<u8>),
 }
 
 impl DateTime for IsoDateTime {
@@ -296,11 +306,8 @@ impl DateTime for IsoDateTime {
     fn to_xsd_datetime(&self) -> String {
         let tz = match self.timezone {
             None => String::new(),
-            Some(IsoTimezone::Utc) => String::from("Z"),
-            Some(IsoTimezone::Plus(h, m)) => format!("+{:02}:{:02}", h, m),
-            Some(IsoTimezone::Minus(h, m)) => format!("-{:02}:{:02}", h, m),
+            Some(ref dt) => dt.to_string(),
         };
-
         format!(
             "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}",
             self.year, self.month, self.day, self.hour, self.minute, self.second, tz,
@@ -313,8 +320,10 @@ impl Display for IsoTimezone {
         use self::IsoTimezone::*;
         match self {
             Utc => f.write_char('Z'),
-            Plus(hh, mm) => write!(f, "+{:02}:{:02}", hh, mm),
-            Minus(hh, mm) => write!(f, "-{:02}:{:02}", hh, mm),
+            Plus(hh, Some(mm)) => write!(f, "+{:02}:{:02}", hh, mm),
+            Minus(hh, Some(mm)) => write!(f, "-{:02}:{:02}", hh, mm),
+            Plus(hh, None) => write!(f, "-{:02}", hh),
+            Minus(hh, None) => write!(f, "-{:02}", hh),
         }
     }
 }
@@ -331,7 +340,7 @@ impl<'i> FromPair<'i> for IsoTimezone {
 
         let mut inner = pair.into_inner();
         let hh = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-        let mm = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
+        let mm = inner.next().map(|p| u8::from_str_radix(p.as_str(), 10).unwrap());
 
         match tag {
             '+' => Ok(Plus(hh, mm)),
@@ -383,6 +392,11 @@ mod tests {
             }
 
             match IsoDateTime::from_str("2017-1-24T14:41:36Z") {
+                Ok(_) => (),
+                Err(e) => panic!("{}", e),
+            }
+
+            match IsoDateTime::from_str("2017-1-24T14:41:36.05Z") {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }

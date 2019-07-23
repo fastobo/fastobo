@@ -15,6 +15,7 @@ extern crate fastobo_syntax;
 #[cfg(feature = "memchr")]
 extern crate memchr;
 extern crate opaque_typedef;
+extern crate ordered_float;
 extern crate pest;
 #[cfg(test)]
 extern crate textwrap;

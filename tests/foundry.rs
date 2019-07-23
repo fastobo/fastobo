@@ -96,6 +96,7 @@ foundrytest!(omp);
 foundrytest!(mco);
 foundrytest!(mp);
 foundrytest!(to);
+foundrytest!(poro);
 
 // --- Too large to run casually ---------------------------------------------
 

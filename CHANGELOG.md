@@ -7,30 +7,41 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.6.0...HEAD
 
 
-## [0.5.0] - 2019-07-15
+## [v0.6.0] - 2019-07-23
 
-[0.5.0]: https://github.com/fastobo/fastobo/compare/v0.4.4...v0.5.0
+[v0.6.0]: https://github.com/fastobo/fastobo/compare/v0.5.0...v0.6.0
+
+### Added
+- `fraction` method to `Iso8601DateTime`.
+
+### Fixed
+- `Iso8601DateTime` now support parsing ISO datetimes with fractional seconds.
+
+
+## [v0.5.0] - 2019-07-15
+
+[v0.5.0]: https://github.com/fastobo/fastobo/compare/v0.4.4...v0.5.0
 
 ### Changed
 - Transitioned to [`err-derive`](https://docs.rs/err-derive) for error 
   management instead of `failure`.
 
 
-## [0.4.4] - 2019-07-08
+## [v0.4.4] - 2019-07-08
 
-[0.4.4]: https://github.com/fastobo/fastobo/compare/v0.4.3...v0.4.4
+[v0.4.4]: https://github.com/fastobo/fastobo/compare/v0.4.3...v0.4.4
 
 ### Added
 - `fastobo::visit::IdCompactor` and `fastobo::visit::IdDecompactor` to handle
   url to prefixed ident conversion in OBO documents.
 
 
-## [0.4.3] - 2019-06-17
+## [v0.4.3] - 2019-06-17
 
-[0.4.3]: https://github.com/fastobo/fastobo/compare/v0.4.2...v0.4.3
+[v0.4.3]: https://github.com/fastobo/fastobo/compare/v0.4.2...v0.4.3
 
 ### Fixed
 - `HeaderFrame.sort` to avoid shuffling `OwlAxiom` header clauses.
@@ -40,26 +51,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   header frame.
 
 
-## [0.4.2] - 2019-06-13
+## [v0.4.2] - 2019-06-13
 
-[0.4.2]: https://github.com/fastobo/fastobo/compare/v0.4.1...v0.4.2
+[v0.4.2]: https://github.com/fastobo/fastobo/compare/v0.4.1...v0.4.2
 
 ### Fixed
 - `Cardinality::to_error` not returning an error for `ZeroOrOne` clauses
   present twice in a frame.
 
 
-## [0.4.1] - 2019-06-13
+## [v0.4.1] - 2019-06-13
 
-[0.4.1]: https://github.com/fastobo/fastobo/compare/v0.4.0...v0.4.1
+[v0.4.1]: https://github.com/fastobo/fastobo/compare/v0.4.0...v0.4.1
 
 ### Fixed
 - `TermClause::PropertyValue` having invalid `ZeroOrOne` cardinality
 
 
-## [0.4.0] - 2019-06-12
+## [v0.4.0] - 2019-06-12
 
-[0.4.0]: https://github.com/fastobo/fastobo/compare/v0.3.0...v0.4.0
+[v0.4.0]: https://github.com/fastobo/fastobo/compare/v0.3.0...v0.4.0
 
 ### Added
 - Parsing iterator implementation in `fastobo::parser::FrameReader`
@@ -82,17 +93,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   quote-enclosed description.
 
 
-## [0.3.0] - 2019-05-27
+## [v0.3.0] - 2019-05-27
 
-[0.3.0]: https://github.com/fastobo/fastobo/compare/v0.2.1...v0.3.0
+[v0.3.0]: https://github.com/fastobo/fastobo/compare/v0.2.1...v0.3.0
 
 ### Changed
 - Renamed variants of `PropertyValue` and `PropVal` enums.
 
 
-## [0.2.1] - 2019-05-24
+## [v0.2.1] - 2019-05-24
 
-[0.2.1]: https://github.com/fastobo/fastobo/compare/v0.2.0...v0.2.1
+[v0.2.1]: https://github.com/fastobo/fastobo/compare/v0.2.0...v0.2.1
 
 ### Fixed
 - `InstanceFrame::from_pair_unchecked` being implemented but not used in
@@ -100,9 +111,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   document with instance frames.
 
 
-## [0.2.0] - 2019-05-14
+## [v0.2.0] - 2019-05-14
 
-[0.2.0]: https://github.com/fastobo/fastobo/compare/v0.1.1...v0.2.0
+[v0.2.0]: https://github.com/fastobo/fastobo/compare/v0.1.1...v0.2.0
 
 ### Added
 - `Orderable` trait for syntax structs that must be serialized in a
@@ -118,9 +129,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [`Fail.cause`]: https://docs.rs/failure/0.1.5/failure/trait.Fail.html#method.cause
 
 
-## [0.1.1] - 2019-05-10
+## [v0.1.1] - 2019-05-10
 
-[0.1.1]: https://github.com/fastobo/fastobo/compare/v0.1.0...v0.1.1
+[v0.1.1]: https://github.com/fastobo/fastobo/compare/v0.1.0...v0.1.1
 
 ### Added
 - [`PartialOrd`] implementation for header clauses, identifiers, `Synonym`
@@ -134,8 +145,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [`fastobo/fastobo`](https://github.com/fastobo/fastobo).
 
 
-## [0.1.0] - 2019-05-08
+## [v0.1.0] - 2019-05-08
 
-[0.1.0]: https://github.com/fastobo/fastobo/compare/40aa9b0...v0.1.0
+[v0.1.0]: https://github.com/fastobo/fastobo/compare/40aa9b0...v0.1.0
 
 Initial release.

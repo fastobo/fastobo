@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.6.1...HEAD
+
+
+## [v0.6.1] - 2019-07-24
+
+[v0.6.1]: https://github.com/fastobo/fastobo/compare/v0.6.0...v0.6.1
+
+### Changed
+- Bumped internal `url` dependency to `v2.0.0`.
 
 
 ## [v0.6.0] - 2019-07-23

@@ -10,4 +10,4 @@ cargo tarpaulin --release -v --out Xml --ciserver travis-ci
 # --- Run examples -----------------------------------------------------------
 
 log Running librarian.rs on ms.obo
-cargo run --release --example librarian -- tests/data/plana.obo
+cargo run --example librarian -- tests/data/plana.obo

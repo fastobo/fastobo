@@ -23,6 +23,7 @@ pub struct TypedefFrame {
 }
 
 impl TypedefFrame {
+    /// Create a new typedef frame with the given identifier.
     pub fn new<I>(id: I) -> Self
     where
         I: Into<Line<RelationIdent>>,
@@ -30,6 +31,7 @@ impl TypedefFrame {
         Self::with_clauses(id, Vec::new())
     }
 
+    /// Create a new typedef frame from an identifier and a vector of clauses.
     pub fn with_clauses<I>(id: I, clauses: Vec<Line<TypedefClause>>) -> Self
     where
         I: Into<Line<RelationIdent>>,

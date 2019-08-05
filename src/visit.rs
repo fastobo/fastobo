@@ -762,6 +762,7 @@ pub trait VisitMut {
 /// "[Term]
 /// id: BFO:0000055
 /// ");
+/// ```
 ///
 /// # See also
 /// * [IdDecompactor](./struct.IdDecompactor.html) that does the opposite.

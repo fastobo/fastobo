@@ -78,6 +78,11 @@ impl<T> Line<T> {
         &self.inner
     }
 
+    /// Get a mutable reference to the OBO clause wrapped in the line.
+    pub fn as_inner_mut(&mut self) -> &mut T {
+        &mut self.inner
+    }
+
     /// Get the actual OBO clause wrapped in the line.
     pub fn into_inner(self) -> T {
         self.inner

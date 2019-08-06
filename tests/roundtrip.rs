@@ -4,11 +4,8 @@ extern crate fastobo;
 
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use std::str::FromStr;
 
 use pretty_assertions::assert_eq;
-
-use fastobo::ast::OboDoc;
 
 macro_rules! roundtriptest {
     ($name:ident) => {
@@ -31,3 +28,4 @@ macro_rules! roundtriptest {
 }
 
 roundtriptest!(msterm);
+roundtriptest!(mslite);

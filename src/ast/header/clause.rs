@@ -46,6 +46,7 @@ pub enum HeaderClause {
     SynonymTypedef(SynonymTypeIdent, QuotedString, Option<SynonymScope>),
     #[clause(tag = "default-namespace", cardinality = "ZeroOrOne")]
     DefaultNamespace(NamespaceIdent),
+    #[clause(tag = "namespace-id-rule")]
     NamespaceIdRule(UnquotedString),
     Idspace(IdentPrefix, Url, Option<QuotedString>),
     #[clause(tag = "treat-xrefs-as-equivalent")]

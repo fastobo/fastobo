@@ -29,6 +29,12 @@ pub enum Ident {
     Url(Url),
 }
 
+impl AsRef<Ident> for Ident {
+  fn as_ref(&self) -> &Self {
+    &self
+  }
+}
+
 impl Display for Ident {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::Ident::*;

@@ -33,14 +33,14 @@ features = [ "_doc" ]
 
 [dependencies]
 err-derive = "0.1.5"
-pest = "2.1.1"
+pest = "=2.1.1"
 opaque_typedef = "0.0.5"
 opaque_typedef_macros = "0.0.5"
 ordered-float = "1.0.2"
-url = "2.0.0"
+url = "2.1.0"
 fastobo-syntax = "0.3.3"
 fastobo-derive-internal = { version = "0.6.1", path = "derive" }
-memchr = { version = "2.2.0", optional = true }
+memchr = { version = "2.2.1", optional = true }
 
 [features]
 default = ["memchr"]

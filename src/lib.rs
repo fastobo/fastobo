@@ -78,11 +78,9 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> Result<OboDoc> {
 
 // ---------------------------------------------------------------------------
 
+/// Write an OBO document to a `Write` implementor.
 #[inline]
-pub fn to_writer<W>(mut writer: W, doc: &OboDoc) -> Result<()>
-where
-    W: Write,
-{
+pub fn to_writer<W: Write>(mut writer: W, doc: &OboDoc) -> Result<()> {
     write!(writer, "{}", doc.header())?;
     if !doc.header().is_empty() && !doc.entities().is_empty() {
         write!(writer, "\n")?;
@@ -93,6 +91,7 @@ where
     Ok(())
 }
 
+/// Write an OBO document to a file on the local filesystem.
 #[inline]
 pub fn to_file<P: AsRef<Path>>(path: P, doc: &OboDoc) -> Result<()> {
     File::create(path)

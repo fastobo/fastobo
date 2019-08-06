@@ -162,7 +162,7 @@ pub enum Error {
     /// # extern crate fastobo;
     /// # use fastobo::ast::*;
     /// # let err =
-    /// OboDoc::from_file("some/non-existing/path").unwrap_err();
+    /// fastobo::from_file("some/non-existing/path").unwrap_err();
     /// # match err {
     /// #   fastobo::error::Error::IOError { .. } => (),
     /// #   e => panic!("unexpected error: {:?}", e),

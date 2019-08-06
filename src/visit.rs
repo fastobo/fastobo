@@ -39,7 +39,7 @@
 //!     checker.used.difference(&checker.declared).cloned().collect()
 //! }
 //!
-//! let doc = OboDoc::from_file("tests/data/ms.obo").unwrap();
+//! let doc = fastobo::from_file("tests/data/ms.obo").unwrap();
 //! assert!(undeclared_synonym_types(&doc).is_empty());
 //! ```
 //!
@@ -750,12 +750,11 @@ pub trait VisitMut {
 /// # extern crate fastobo;
 /// # use std::str::FromStr;
 /// # use std::string::ToString;
-/// # use fastobo::ast::*;
 /// # use fastobo::visit::*;
-/// let mut doc = OboDoc::from_str(
+/// let mut doc = fastobo::from_str(
 /// "[Term]
 /// id: http://purl.obolibrary.org/obo/BFO_0000055
-/// ")).unwrap();
+/// ").unwrap();
 ///
 /// IdCompactor::new().visit_doc(&mut doc);
 /// assert_eq!(doc.to_string(),

@@ -1,12 +1,8 @@
 extern crate pretty_assertions;
-
 extern crate fastobo;
 
 use std::path::PathBuf;
-
 use pretty_assertions::assert_eq;
-
-use fastobo::ast::OboDoc;
 
 macro_rules! canonicalizetest {
     ($name:ident) => {
@@ -23,7 +19,7 @@ macro_rules! canonicalizetest {
             let input_path = dir.join(format!("{}.input.obo", stringify!($name)));
             let output_path = dir.join(format!("{}.output.obo", stringify!($name)));
 
-            let mut doc = OboDoc::from_file(&input_path).unwrap();
+            let mut doc = fastobo::from_file(&input_path).unwrap();
             doc.header_mut().sort_unstable();
 
             println!("{}", doc.header());

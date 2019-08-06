@@ -40,7 +40,7 @@ impl<'a> Visit<'a> for IsbnChecker<'a> {
 fn main() {
     for path in std::env::args().skip(1) {
         // Parse the document
-        let mut doc = match OboDoc::from_file(&path) {
+        let mut doc = match fastobo::from_file(&path) {
             Ok(doc) => doc,
             Err(e) => panic!("{} could not be parsed:\n{}", path, e),
         };

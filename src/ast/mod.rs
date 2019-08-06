@@ -2,14 +2,14 @@
 //!
 //! [`OboDoc`] is the struct acting as the root of the syntax tree. It can be
 //! created from a borrowed string slice with either [`FromStr::from_str`] or
-//! [`FromSlice::from_slice`], from a file with [`OboDoc::from_file`], or from
-//! a buffered reader with [`OboDoc::from_stream`].
+//! [`FromSlice::from_slice`], from a file with [`fastobo::from_file`], or from
+//! a buffered reader with [`fastobo::from_stream`].
 //!
 //! [`FromStr::from_str`]: https://doc.rust-lang.org/std/str/trait.FromStr.html#tymethod.from_str
 //! [`FromSlice::from_slice`]: ../parser/trait.FromSlice.html#method.from_slice
 //! [`OboDoc`]: ./struct.OboDoc.html
-//! [`OboDoc::from_file`]: ./struct.OboDoc.html#method.from_file
-//! [`OboDoc::from_stream`]: ./struct.OboDoc.html#method.from_stream
+//! [`fastobo::from_file`]: ../fn.from_file.html
+//! [`fastobo::from_stream`]: ../fn.from_file.html
 //! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.
 
 mod date;

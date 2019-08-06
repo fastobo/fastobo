@@ -40,7 +40,7 @@ impl EntityFrame {
     /// ```rust
     /// # extern crate fastobo;
     /// # use fastobo::ast::*;
-    /// let doc = OboDoc::from_file("tests/data/ms.obo").unwrap();
+    /// let doc = fastobo::from_file("tests/data/ms.obo").unwrap();
     /// let terms: Vec<&TermFrame> = doc
     ///     .entities()
     ///     .iter()

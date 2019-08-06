@@ -39,11 +39,11 @@ pub struct OboDoc {
 /// # use std::io::BufReader;
 /// # use std::fs::File;
 /// # use fastobo::ast::*;
-/// let doc1 = OboDoc::from_file("tests/data/ms.obo").unwrap();
+/// let doc1 = fastobo::from_file("tests/data/ms.obo").unwrap();
 ///
 /// // This is equivalent to (but with the file path set in eventual errors):
 /// let mut r = BufReader::new(File::open("tests/data/ms.obo").unwrap());
-/// let doc2 = OboDoc::from_stream(&mut r).unwrap();
+/// let doc2 = fastobo::from_reader(&mut r).unwrap();
 ///
 /// assert_eq!(doc1, doc2);
 /// ```
@@ -93,33 +93,6 @@ impl OboDoc {
     pub fn and_entities(mut self, entities: Vec<EntityFrame>) -> Self {
         self.entities = entities;
         self
-    }
-
-    /// Consume a buffered stream containing an OBO document into an AST.
-    pub fn from_stream<B>(stream: &mut B) -> Result<Self, Error>
-    where
-        B: BufRead,
-    {
-        let reader = FrameReader::new(stream)?;
-        Self::try_from(reader)
-    }
-
-    /// Read an OBO file located somwhere in the filesystem.
-    pub fn from_file<P>(path: P) -> Result<Self, Error>
-    where
-        P: AsRef<Path>,
-    {
-        let pathref: &Path = path.as_ref();
-        File::open(pathref)
-            .map_err(Error::from)
-            .and_then(|f| Self::from_stream(&mut BufReader::new(f)))
-            .map_err(|e| {
-                if let Error::SyntaxError { error } = e {
-                    error.with_path(&pathref.to_string_lossy()).into()
-                } else {
-                    e
-                }
-            })
     }
 }
 

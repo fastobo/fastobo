@@ -144,6 +144,14 @@ impl OboDoc {
     pub fn entities_mut(&mut self) -> &mut Vec<EntityFrame> {
         &mut self.entities
     }
+
+    /// Check whether or not the document is empty.
+    ///
+    /// An empty document has no header clauses and no entity frames.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.header().is_empty() && self.entities().is_empty()
+    }
 }
 
 /// Additional methods for `OboDoc` that can be used to edit the syntax tree.

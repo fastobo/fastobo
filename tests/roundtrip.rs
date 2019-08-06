@@ -21,8 +21,11 @@ macro_rules! roundtriptest {
 
             let input = dir.join(format!("{}.obo", stringify!($name)));
             let txt = read_to_string(&input).expect("could not read file");
-            let doc = OboDoc::from_str(&txt).expect("could not parse file");
-            assert_eq!(txt, doc.to_string());
+            let doc = fastobo::from_str(&txt).expect("could not parse file");
+
+            for (i, (l, r)) in doc.to_string().split('\n').zip(txt.split('\n')).enumerate() {
+                assert_eq!(l, r, "line {} differs", i);
+            }
         }
     };
 }

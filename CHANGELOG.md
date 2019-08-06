@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.0...HEAD
+
+
+## [v0.7.0] - 2019-08-06
+
+[v0.7.0]: https://github.com/fastobo/fastobo/compare/v0.6.1...v0.7.0
+
+### Added
+- `Line.as_inner_mut` method (alias for `Line.as_mut`).
+- `OboDoc.is_empty` method to check if an ontology is empty.
+- `fastobo::from_file`, `fastobo::from_reader`, `fastobo::from_str`,
+  `fastobo::to_writer` and `fastobo::to_file`.
+- `AsRef<Ident>` implementation for `Ident`.
+
+### Changed
+- Require exact `pest` version `2.1.1` because of unsafe hack to access
+  `PestError` fields.
+
+### Removed
+- `OboDoc::from_file` and `OboDoc::from_stream` methods (replaced with
+  `fastobo::from_file` and `fastobo::from_reader`).
+
+### Fixed
+- Serialization of `UnquotedString` not escaping `!` characters.
 
 
 ## [v0.6.1] - 2019-07-24

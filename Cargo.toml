@@ -1,6 +1,6 @@
 [package]
 name = "fastobo"
-version = "0.6.1"
+version = "0.7.0"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 license = "MIT"
@@ -39,7 +39,7 @@ opaque_typedef_macros = "0.0.5"
 ordered-float = "1.0.2"
 url = "2.1.0"
 fastobo-syntax = "0.3.3"
-fastobo-derive-internal = { version = "0.6.1", path = "derive" }
+fastobo-derive-internal = { version = "0.7.0", path = "derive" }
 memchr = { version = "2.2.1", optional = true }
 
 [features]

@@ -102,9 +102,9 @@ impl HeaderFrame {
 
     /// Merge several OWL axioms into a single clause.
     pub fn merge_owl_axioms(&mut self) {
-        //
         let mut merged = Vec::new();
-        for clause in std::mem::replace(&mut self.clauses, Vec::new()) {
+        let clauses_new = Vec::with_capacity(self.clauses.len());
+        for clause in std::mem::replace(&mut self.clauses, clauses_new) {
             if let HeaderClause::OwlAxioms(axioms) = clause {
                 merged.push(axioms.into_string());
             } else {

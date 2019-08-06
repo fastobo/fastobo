@@ -46,9 +46,6 @@ manifest of your project:
 
 * **`memchr`** - Use the `memchr` library to improve parser speed when
   searching for a particular character in a buffer.
-* **`semantics`** - Compile additional methods to check the validity of an OBO
-  document on the semantic level, and implementation of macros to transform OBO
-  documents in place.
 
 
 ## Usage
@@ -81,10 +78,14 @@ fn main() {
 
 ## See also
 
-* [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser for the OBO
-  format version 1.4.
-* [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to this crate.
-* [`fastobo-validator`](https://pypi.org/project/fastobo/): Standalone CLI to validate OBO files against the specification.
+* [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser 
+  for the OBO format version 1.4.
+* [`fastobo-graphs`](https://crates.io/crates/fastobo-graphs): Data model and `serde`
+  implementation of the OBO graphs specification, with conversion traits from and to OBO.
+* [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to 
+  this crate.
+* [`fastobo-validator`](https://pypi.org/project/fastobo/): Standalone CLI to validate 
+  OBO files against the specification.
 
 
 ## Feedback

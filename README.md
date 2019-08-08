@@ -53,12 +53,14 @@ manifest of your project:
 Add `fastobo` to the `[dependencies]` sections of your `Cargo.toml` manifest:
 ```toml
 [dependencies]
-fastobo = "0.6.1"
+fastobo = "0.7.0"
 ```
 
-The `OboDoc` struct acts as the root of the AST. Use `OboDoc::from_stream` to load an OBO document
-from a [`BufRead`](https://doc.rust-lang.org/std/io/trait.BufRead.html) implementor
-(use [`std::io::BufReader`](https://doc.rust-lang.org/std/io/struct.BufReader.html) if needed):
+The top-level `fastobo` module provides several functions to parse an `OboDoc`.
+Use `fastobo::from_reader` to load an OBO document from a
+[`BufRead`](https://doc.rust-lang.org/std/io/trait.BufRead.html) implementor
+(use [`std::io::BufReader`](https://doc.rust-lang.org/std/io/struct.BufReader.html)
+if needed):
 
 ```rust
 extern crate fastobo;
@@ -68,7 +70,7 @@ fn main() {
     let response = ureq::get("http://purl.obolibrary.org/obo/ms.obo").call();
     let mut reader = std::io::BufReader::new(response.into_reader());
 
-    match fastobo::ast::OboDoc::from_stream(&mut reader) {
+    match fastobo::from_reader(&mut reader) {
         Ok(doc) => println!("Number of MS entities: {}", doc.entities().len()),
         Err(e) => panic!("Could not parse the Mass-Spec Ontology: {}", e),
     }
@@ -78,14 +80,14 @@ fn main() {
 
 ## See also
 
-* [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser 
+* [`fastobo-syntax`](https://crates.io/crates/fastobo-syntax): Standalone `pest` parser
   for the OBO format version 1.4.
 * [`fastobo-graphs`](https://crates.io/crates/fastobo-graphs): Data model and `serde`
   implementation of the OBO graphs specification, with conversion traits from and to OBO.
-* [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to 
+* [`fastobo-py`](https://pypi.org/project/fastobo/): Idiomatic Python bindings to
   this crate.
-* [`fastobo-validator`](https://pypi.org/project/fastobo/): Standalone CLI to validate 
-  OBO files against the specification.
+* [`fastobo-validator`](https://crates.io/crates/fastobo-validator): Standalone CLI
+  to validate OBO files against the specification.
 
 
 ## Feedback

@@ -176,7 +176,6 @@ impl OboDoc {
     /// namespace: quality
     /// ");
     ///
-    // #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
     pub fn assign_namespaces(&mut self) -> Result<(), CardinalityError> {
         macro_rules! expand {
             ($frame:ident, $clause:ident, $ns:ident, $outer:lifetime) => ({
@@ -224,7 +223,6 @@ impl OboDoc {
     /// # See also
     /// - [Header Macro Translation](http://owlcollab.github.io/oboformat/doc/obo-syntax.html#4.4.2)
     ///   section of the syntax and semantics guide.
-    // #[cfg_attr(feature = "_doc", doc(cfg(feature = "semantics")))]
     pub fn treat_xrefs(&mut self) {
         use self::HeaderClause::*;
 

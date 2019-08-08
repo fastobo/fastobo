@@ -358,9 +358,7 @@ mod tests {
         ",
         ))
         .unwrap();
-
         doc.treat_xrefs();
-
         self::assert_eq!(
             dedent(
                 "
@@ -372,6 +370,38 @@ mod tests {
             is_a: TEST:002
 
             [Term]
+            id: TEST:002
+        "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
+
+        let mut doc = OboDoc::from_str(&dedent(
+            "
+            treat-xrefs-as-is_a: TEST
+
+            [Typedef]
+            id: TEST:001
+            xref: TEST:002
+
+            [Typedef]
+            id: TEST:002
+        ",
+        ))
+        .unwrap();
+        doc.treat_xrefs();
+        self::assert_eq!(
+            dedent(
+                "
+            treat-xrefs-as-is_a: TEST
+
+            [Typedef]
+            id: TEST:001
+            xref: TEST:002
+            is_a: TEST:002
+
+            [Typedef]
             id: TEST:002
         "
             )
@@ -395,9 +425,7 @@ mod tests {
         ",
         ))
         .unwrap();
-
         doc.treat_xrefs();
-
         self::assert_eq!(
             dedent(
                 "
@@ -411,6 +439,38 @@ mod tests {
             id: TEST:002
             is_a: TEST:001
         "
+            )
+            .trim_start_matches('\n'),
+            doc.to_string()
+        );
+
+        let mut doc = OboDoc::from_str(&dedent(
+            "
+            treat-xrefs-as-has-subclass: TEST
+
+            [Typedef]
+            id: TEST:001
+            xref: TEST:002
+
+            [Typedef]
+            id: TEST:002
+        ",
+        ))
+        .unwrap();
+        doc.treat_xrefs();
+        self::assert_eq!(
+            dedent(
+            "
+            treat-xrefs-as-has-subclass: TEST
+
+            [Typedef]
+            id: TEST:001
+            xref: TEST:002
+
+            [Typedef]
+            id: TEST:002
+            is_a: TEST:001
+            "
             )
             .trim_start_matches('\n'),
             doc.to_string()

@@ -140,3 +140,65 @@ pub trait Identified {
     /// Get a mutable reference to the identifier of the entity.
     fn as_id_mut(&mut self) -> &mut Ident;
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod cardinality {
+        use super::*;
+
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn is_match() {
+            // ZeroOrOne
+            assert!(Cardinality::ZeroOrOne.is_match(0));
+            assert!(Cardinality::ZeroOrOne.is_match(1));
+            assert!(!Cardinality::ZeroOrOne.is_match(2));
+
+            // One
+            assert!(!Cardinality::One.is_match(0));
+            assert!(Cardinality::One.is_match(1));
+            assert!(!Cardinality::One.is_match(2));
+
+            // NotOne
+            assert!(Cardinality::NotOne.is_match(0));
+            assert!(!Cardinality::NotOne.is_match(1));
+            assert!(Cardinality::NotOne.is_match(2));
+
+            // Any
+            assert!(Cardinality::Any.is_match(0));
+            assert!(Cardinality::Any.is_match(1));
+            assert!(Cardinality::Any.is_match(2));
+        }
+
+        #[test]
+        fn to_error() {
+            assert_eq!(Cardinality::ZeroOrOne.to_error(0, "ok"), None);
+            assert_eq!(
+                Cardinality::ZeroOrOne.to_error(2, "ok"),
+                Some(CardinalityError::DuplicateClauses { name: String::from("ok")})
+            );
+
+            assert_eq!(Cardinality::One.to_error(1, "ok"), None);
+            assert_eq!(
+                Cardinality::One.to_error(2, "ok"),
+                Some(CardinalityError::DuplicateClauses { name: String::from("ok")})
+            );
+            assert_eq!(
+                Cardinality::One.to_error(0, "ok"),
+                Some(CardinalityError::MissingClause { name: String::from("ok")})
+            );
+
+            assert_eq!(Cardinality::NotOne.to_error(0, "ok"), None);
+            assert_eq!(
+                Cardinality::NotOne.to_error(1, "ok"),
+                Some(CardinalityError::SingleClause { name: String::from("ok")})
+            );
+
+            assert_eq!(Cardinality::Any.to_error(0, "ok"), None);
+        }
+    }
+}

@@ -39,7 +39,7 @@ impl OboClauseVariant {
         // match
         if let Some(tag) = &self.tag {
             if let syn::Lit::Int(i) = tag {
-                let id = Ident::new(&format!("__{}_{}", &self.ident, i.value()), tag.span());
+                let id = Ident::new(&format!("__{}_{}", &self.ident, i), tag.span());
                 parse_quote!(#id)
             } else {
                 parse_quote!(#tag)

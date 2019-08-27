@@ -7,7 +7,7 @@
 log Deploying \`fastobo-derive-internal\` v$TRAVIS_TAG
 cargo publish --manifest-path derive/Cargo.toml --token $CRATES_IO_TOKEN
 
-sleep 5
+sleep 10
 cargo update
 
 # --- Deploy `fastobo` crate -------------------------------------------------

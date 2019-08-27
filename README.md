@@ -10,7 +10,7 @@
 [![Documentation](https://img.shields.io/badge/docs.rs-latest-4d76ae.svg?maxAge=2678400&style=flat-square)](https://docs.rs/fastobo)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/fastobo/fastobo/blob/master/CHANGELOG.md)
 [![GitHub issues](https://img.shields.io/github/issues/fastobo/fastobo.svg?style=flat-square)](https://github.com/fastobo/fastobo/issues)
-
+[![DOI](https://img.shields.io/badge/doi-10.7490%2Ff1000research.1117405.1-brightgreen?style=flat-square&maxAge=31536000)](https://f1000research.com/posters/8-1500)
 
 ## Overview
 
@@ -101,7 +101,12 @@ reproducible situation.
 
 ## About
 
-This project is currently being developed by [Martin Larralde](https://github.com/althonos)
+This project was developed by [Martin Larralde](https://github.com/althonos)
 as part of a Master's Degree internship in the [BBOP team](http://berkeleybop.org/) of the
 [Lawrence Berkeley National Laboratory](https://www.lbl.gov/), under the supervision of
-[Chris Mungall](http://biosciences.lbl.gov/profiles/chris-mungall/).
+[Chris Mungall](http://biosciences.lbl.gov/profiles/chris-mungall/). Cite this project as:
+
+*Larralde M.* **Developing Python and Rust libraries to improve the ontology ecosystem** 
+*\[version 1; not peer reviewed\].* F1000Research 2019, 8(ISCB Comm J):1500 (poster)
+([https://doi.org/10.7490/f1000research.1117405.1](https://doi.org/10.7490/f1000research.1117405.1)) 
+

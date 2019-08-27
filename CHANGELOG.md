@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.2...HEAD
+
+
+## [v0.7.2] - 2019-08-27
+
+[v0.7.2]: https://github.com/fastobo/fastobo/compare/v0.7.1...v0.7.2
+
+### Changed
+- Bumped `syn` and `quote` to version `1.0` in derive macros.
+
+### Added
+- Added BOSC 2019 poster reference to `README.md`.
 
 
 ## [v0.7.1] - 2019-08-08

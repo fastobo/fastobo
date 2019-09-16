@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.3...HEAD
+
+
+## [v0.7.3] - 2019-09-17
+
+[v0.7.3]: https://github.com/fastobo/fastobo/compare/v0.7.2...v0.7.3
+
+### Added
+- `FrameReader.as_ref` and `FrameReader.as_mut` to get a reference to
+  the underlying `BufRead`.
 
 
 ## [v0.7.2] - 2019-08-27

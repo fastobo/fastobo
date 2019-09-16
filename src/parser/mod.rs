@@ -102,6 +102,18 @@ impl<B: BufRead> FrameReader<B> {
     }
 }
 
+impl<B: BufRead> AsRef<B> for FrameReader<B> {
+    fn as_ref(&self) -> &B {
+        &self.stream
+    }
+}
+
+impl<B: BufRead> AsMut<B> for FrameReader<B> {
+    fn as_mut(&mut self) -> &mut B {
+        &mut self.stream
+    }
+}
+
 impl TryFrom<File> for FrameReader<BufReader<File>> {
     type Error = Error;
     fn try_from(f: File) -> Result<Self, Self::Error> {

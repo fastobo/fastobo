@@ -1,6 +1,6 @@
 [package]
 name = "fastobo"
-version = "0.7.3"
+version = "0.7.4"
 authors = ["Martin Larralde <martin.larralde@ens-paris-saclay.fr>"]
 edition = "2018"
 license = "MIT"

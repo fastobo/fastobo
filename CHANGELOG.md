@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.4...HEAD
+
+
+## [v0.7.4] - 2019-10-05
+
+[v0.7.4]: https://github.com/fastobo/fastobo/compare/v0.7.3...v0.7.4
+
+### Changed
+- Bumped `fastobo-syntax` to `0.3.6` to fix an edge-case bug 
+  when parsing a `Synonym`.
+
+### Added
+- `IsoDateTime.timezone` accessor to get the underlying `IsoTimeZone`.
 
 
 ## [v0.7.3] - 2019-09-17

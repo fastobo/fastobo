@@ -229,6 +229,11 @@ impl IsoDateTime {
     pub fn fraction(&self) -> Option<f32> {
         self.fraction.as_ref().map(|f| f.0)
     }
+
+    /// Get the timezone of the `IsoDateTime`, if any.
+    pub fn timezone(&self) -> Option<&IsoTimezone> {
+        self.timezone.as_ref()
+    }
 }
 
 impl Display for IsoDateTime {

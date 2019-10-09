@@ -86,12 +86,6 @@ pub enum SyntaxError {
     },
 }
 
-impl From<PestError<Rule>> for SyntaxError {
-    fn from(error: PestError<Rule>) -> Self {
-        SyntaxError::ParserError { error }
-    }
-}
-
 impl SyntaxError {
     /// Update the line of the error, if needed.
     pub(crate) fn with_offsets(self, line_offset: usize, offset: usize) -> Self {
@@ -180,24 +174,6 @@ pub enum Error {
         #[error(cause)]
         inner: CardinalityError,
     },
-}
-
-impl From<PestError<Rule>> for Error {
-    fn from(error: PestError<Rule>) -> Self {
-        Error::from(SyntaxError::from(error))
-    }
-}
-
-impl From<IOError> for Error {
-    fn from(error: IOError) -> Self {
-        Error::IOError { error }
-    }
-}
-
-impl From<SyntaxError> for Error {
-    fn from(error: SyntaxError) -> Self {
-        Error::SyntaxError { error }
-    }
 }
 
 /// The result type for this crate.

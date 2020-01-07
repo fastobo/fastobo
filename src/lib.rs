@@ -18,7 +18,7 @@ extern crate opaque_typedef;
 extern crate ordered_float;
 extern crate pest;
 #[cfg(test)]
-extern crate textwrap;
+extern crate textwrap_macros;
 extern crate url;
 
 #[macro_use]

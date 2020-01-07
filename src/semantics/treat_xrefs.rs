@@ -302,14 +302,14 @@ mod tests {
     use std::string::ToString;
 
     use pretty_assertions::assert_eq;
-    use textwrap::dedent;
+    use textwrap_macros::dedent;
 
     use super::*;
 
     #[test]
     fn as_equivalent() {
-        let mut doc = OboDoc::from_str(&dedent(
-            "
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
             treat-xrefs-as-equivalent: TEST
 
             [Term]
@@ -318,25 +318,25 @@ mod tests {
 
             [Term]
             id: TEST:002
-        ",
+            "#
         ))
         .unwrap();
 
         doc.treat_xrefs();
 
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-equivalent: TEST
+            dedent!(
+                r#"
+                treat-xrefs-as-equivalent: TEST
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
-            equivalent_to: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
+                equivalent_to: TEST:002
 
-            [Term]
-            id: TEST:002
-        "
+                [Term]
+                id: TEST:002
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
@@ -345,65 +345,69 @@ mod tests {
 
     #[test]
     fn as_is_a() {
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-is_a: TEST
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-is_a: TEST
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-        ",
-        ))
+                [Term]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-is_a: TEST
+            dedent!(
+                r#"
+                treat-xrefs-as-is_a: TEST
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
-            is_a: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
+                is_a: TEST:002
 
-            [Term]
-            id: TEST:002
-        "
+                [Term]
+                id: TEST:002
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
         );
 
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-is_a: TEST
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-is_a: TEST
 
-            [Typedef]
-            id: TEST:001
-            xref: TEST:002
+                [Typedef]
+                id: TEST:001
+                xref: TEST:002
 
-            [Typedef]
-            id: TEST:002
-        ",
-        ))
+                [Typedef]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-is_a: TEST
+            dedent!(
+                r#"
+                treat-xrefs-as-is_a: TEST
 
-            [Typedef]
-            id: TEST:001
-            xref: TEST:002
-            is_a: TEST:002
+                [Typedef]
+                id: TEST:001
+                xref: TEST:002
+                is_a: TEST:002
 
-            [Typedef]
-            id: TEST:002
-        "
+                [Typedef]
+                id: TEST:002
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
@@ -412,65 +416,69 @@ mod tests {
 
     #[test]
     fn as_has_subclass() {
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-has-subclass: TEST
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-has-subclass: TEST
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-        ",
-        ))
+                [Term]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-has-subclass: TEST
+            dedent!(
+                r#"
+                treat-xrefs-as-has-subclass: TEST
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-            is_a: TEST:001
-        "
+                [Term]
+                id: TEST:002
+                is_a: TEST:001
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
         );
 
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-has-subclass: TEST
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-has-subclass: TEST
 
-            [Typedef]
-            id: TEST:001
-            xref: TEST:002
+                [Typedef]
+                id: TEST:001
+                xref: TEST:002
 
-            [Typedef]
-            id: TEST:002
-        ",
-        ))
+                [Typedef]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
-            dedent(
-            "
-            treat-xrefs-as-has-subclass: TEST
+            dedent!(
+                r#"
+                treat-xrefs-as-has-subclass: TEST
 
-            [Typedef]
-            id: TEST:001
-            xref: TEST:002
+                [Typedef]
+                id: TEST:001
+                xref: TEST:002
 
-            [Typedef]
-            id: TEST:002
-            is_a: TEST:001
-            "
+                [Typedef]
+                id: TEST:002
+                is_a: TEST:001
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
@@ -479,36 +487,38 @@ mod tests {
 
     #[test]
     fn as_genus_differentia() {
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-genus-differentia: TEST part_of something
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-genus-differentia: TEST part_of something
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-        ",
-        ))
+                [Term]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
 
         doc.treat_xrefs();
 
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-genus-differentia: TEST part_of something
+            dedent!(
+                r#"
+                treat-xrefs-as-genus-differentia: TEST part_of something
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
-            intersection_of: TEST:002
-            intersection_of: part_of something
+                [Term]
+                id: TEST:001
+                xref: TEST:002
+                intersection_of: TEST:002
+                intersection_of: part_of something
 
-            [Term]
-            id: TEST:002
-        "
+                [Term]
+                id: TEST:002
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
@@ -517,36 +527,38 @@ mod tests {
 
     #[test]
     fn as_reverse_genus_differentia() {
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-reverse-genus-differentia: TEST part_of something
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-reverse-genus-differentia: TEST part_of something
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-        ",
-        ))
+                [Term]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
 
         doc.treat_xrefs();
 
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-reverse-genus-differentia: TEST part_of something
+            dedent!(
+                r#"
+                treat-xrefs-as-reverse-genus-differentia: TEST part_of something
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-            intersection_of: TEST:001
-            intersection_of: part_of something
-        "
+                [Term]
+                id: TEST:002
+                intersection_of: TEST:001
+                intersection_of: part_of something
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()
@@ -555,35 +567,37 @@ mod tests {
 
     #[test]
     fn as_relationship() {
-        let mut doc = OboDoc::from_str(&dedent(
-            "
-            treat-xrefs-as-relationship: TEST connected_to
+        let mut doc = OboDoc::from_str(
+            dedent!(
+                r#"
+                treat-xrefs-as-relationship: TEST connected_to
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
 
-            [Term]
-            id: TEST:002
-        ",
-        ))
+                [Term]
+                id: TEST:002
+                "#
+            )
+        )
         .unwrap();
 
         doc.treat_xrefs();
 
         self::assert_eq!(
-            dedent(
-                "
-            treat-xrefs-as-relationship: TEST connected_to
+            dedent!(
+                r#"
+                treat-xrefs-as-relationship: TEST connected_to
 
-            [Term]
-            id: TEST:001
-            xref: TEST:002
-            relationship: connected_to TEST:002
+                [Term]
+                id: TEST:001
+                xref: TEST:002
+                relationship: connected_to TEST:002
 
-            [Term]
-            id: TEST:002
-        "
+                [Term]
+                id: TEST:002
+                "#
             )
             .trim_start_matches('\n'),
             doc.to_string()

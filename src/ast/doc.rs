@@ -378,7 +378,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use std::iter::FromIterator;
-    use textwrap::dedent;
+    use textwrap_macros::dedent;
 
     #[test]
     fn from_str() {
@@ -391,13 +391,13 @@ mod tests {
         self::assert_eq!(doc, Default::default());
 
         // A simple file should parse.
-        let doc = OboDoc::from_str(&dedent(
-            "
+        let doc = OboDoc::from_str(dedent!(
+            r#"
             format-version: 1.2
 
             [Term]
             id: TEST:001
-        ",
+            "#
         ))
         .unwrap();
 
@@ -421,11 +421,11 @@ mod tests {
         ]));
         self::assert_eq!(
             doc.to_string(),
-            dedent(
-                "
-            format-version: 1.2
-            remark: this is a test
-            "
+            dedent!(
+                r#"
+                format-version: 1.2
+                remark: this is a test
+                "#
             )
             .trim_start_matches('\n')
         );
@@ -439,8 +439,8 @@ mod tests {
         let doc = OboDoc::from_str("[Term]\nid: TEST:001\nname: test item\n").unwrap();
         assert!(doc.is_fully_labeled());
 
-        let doc = OboDoc::from_str(&dedent(
-            "
+        let doc = OboDoc::from_str(dedent!(
+            r#"
             [Term]
             id: TEST:001
             name: test item
@@ -448,35 +448,36 @@ mod tests {
             [Term]
             id: TEST:002
             name: test item two
-        ",
+            "#
         ))
         .unwrap();
         assert!(doc.is_fully_labeled());
 
-        let doc = OboDoc::from_str(&dedent(
-            "
+        let doc = OboDoc::from_str(dedent!(
+            r#"
             [Term]
             id: TEST:001
             name: test item
 
             [Term]
             id: TEST:002
-        ",
+            "#
         ))
         .unwrap();
         assert!(!doc.is_fully_labeled());
 
-        let doc = OboDoc::from_str(&dedent(
-            "
+        let doc = OboDoc::from_str(dedent!(
+            r#"
             [Term]
             id: TEST:001
 
             [Term]
             id: TEST:002
             name: test item two
-        ",
+            "#
         ))
         .unwrap();
         assert!(!doc.is_fully_labeled());
     }
 }
+

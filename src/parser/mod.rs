@@ -187,7 +187,7 @@ impl<B: BufRead> TryFrom<FrameReader<B>> for OboDoc {
 mod tests {
 
     use std::io::Cursor;
-    use textwrap::dedent;
+    use textwrap_macros::dedent;
 
     use super::*;
     use crate::semantics::Identified;
@@ -201,16 +201,18 @@ mod tests {
 
     #[test]
     fn frame_reader_iter() {
-        let mut reader = FrameReader::new(Cursor::new(dedent(
-            r#"
-            format-version: 1.2
+        let mut reader = FrameReader::new(Cursor::new(String::from(
+            dedent!(
+                r#"
+                format-version: 1.2
 
-            [Term]
-            id: TST:001
+                [Term]
+                id: TST:001
 
-            [Term]
-            id: TST:002
-        "#,
+                [Term]
+                id: TST:002
+                "#
+           )
         )))
         .expect("could not parse frame header");
 

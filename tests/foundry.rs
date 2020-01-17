@@ -59,10 +59,6 @@ foundrytest!(zfa);
 foundrytest!(bfo);
 foundrytest!(pato);
 foundrytest!(fao);
-foundrytest!(
-    #[ignore]
-    eco
-);
 foundrytest!(ceph);
 foundrytest!(wbbt);
 foundrytest!(ddanat);
@@ -78,7 +74,6 @@ foundrytest!(planp);
 foundrytest!(fbbt);
 foundrytest!(pdumdv);
 foundrytest!(oba);
-foundrytest!(cmo);
 foundrytest!(hp);
 foundrytest!(phipo);
 foundrytest!(so);
@@ -97,6 +92,11 @@ foundrytest!(mco);
 foundrytest!(mp);
 foundrytest!(to);
 foundrytest!(poro);
+foundrytest!(fbcv);
+foundrytest!(doid);
+foundrytest!(zeco);
+foundrytest!(ro);
+foundrytest!(cl);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -149,10 +149,6 @@ foundrytest!(
     #[ignore]
     sibo
 );
-foundrytest!(
-    #[ignore]
-    fbcv
-);
 // Invalid syntax caused by ENVO
 foundrytest!(
     #[ignore]
@@ -188,20 +184,6 @@ foundrytest!(
     #[ignore]
     mi
 );
-foundrytest!(
-    #[ignore]
-    ro
-);
-// Invalid date
-foundrytest!(
-    #[ignore]
-    doid
-);
-// Invalid syntax (reported)
-foundrytest!(
-    #[ignore]
-    cl
-);
 // Invalid syntax
 foundrytest!(
     #[ignore]
@@ -219,10 +201,7 @@ foundrytest!(
     #[ignore]
     zp
 );
-foundrytest!(
-    #[ignore]
-    zeco
-);
+
 foundrytest!(
     #[ignore]
     xlmod
@@ -241,4 +220,14 @@ foundrytest!(
 foundrytest!(
     #[ignore]
     eo
+);
+// Invalid Qualifier List
+foundrytest!(
+    #[ignore]
+    cmo
+);
+// Invalid ISBN
+foundrytest!(
+    #[ignore]
+    eco
 );

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v0.7.5] - 2020-01-18
 
-[v0.7.4]: https://github.com/fastobo/fastobo/compare/v0.7.4...v0.7.5
+[v0.7.5]: https://github.com/fastobo/fastobo/compare/v0.7.4...v0.7.5
 
 ### Changed
 - Bumped `fastobo-syntax` to `0.3.7` to support Windows-style line breaks.

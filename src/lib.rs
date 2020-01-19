@@ -20,6 +20,13 @@ extern crate pest;
 #[cfg(test)]
 extern crate textwrap_macros;
 extern crate url;
+#[cfg(feature = "threading")]
+extern crate crossbeam_channel;
+#[macro_use]
+#[cfg(feature = "threading")]
+extern crate lazy_static;
+#[cfg(feature = "threading")]
+extern crate num_cpus;
 
 #[macro_use]
 pub mod parser;
@@ -54,9 +61,7 @@ pub fn from_str<S: AsRef<str>>(src: S) -> Result<OboDoc> {
 /// Parse an OBO document from a `BufRead` implementor.
 #[inline]
 pub fn from_reader<B: BufRead>(r: B) -> Result<OboDoc> {
-    FrameReader::new(r)
-        .map_err(Error::from)
-        .and_then(|r| OboDoc::try_from(r))
+    OboDoc::try_from(FrameReader::new(r))
 }
 
 /// Parse an OBO document from a file on the local filesystem.

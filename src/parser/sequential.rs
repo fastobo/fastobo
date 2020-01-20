@@ -8,6 +8,7 @@ use std::str::FromStr;
 use pest::Parser;
 
 use crate::ast::EntityFrame;
+use crate::ast::Frame;
 use crate::ast::HeaderClause;
 use crate::ast::HeaderFrame;
 use crate::ast::OboDoc;
@@ -24,7 +25,7 @@ pub struct SequentialReader<B: BufRead> {
     line: String,
     offset: usize,
     line_offset: usize,
-    header: Result<HeaderFrame, Error>
+    header: Option<Result<Frame, Error>>,
 }
 
 impl<B: BufRead> SequentialReader<B> {
@@ -39,14 +40,12 @@ impl<B: BufRead> SequentialReader<B> {
         let mut offset = 0;
         let mut line_offset = 0;
         let mut frame_clauses = Vec::new();
-        let mut header_err = None;
 
-        loop {
+        let header = loop {
             // Read the next line
             line.clear();
             if let Err(e) = stream.read_line(&mut line) {
-                header_err = Some(Error::from(e));
-                break;
+                break Some(Err(Error::from(e)));
             };
             l = line.trim();
 
@@ -58,8 +57,7 @@ impl<B: BufRead> SequentialReader<B> {
                         Ok(mut pairs) => pairs.next().unwrap(),
                         Err(e) => {
                             let err = SyntaxError::from(e).with_offsets(line_offset, offset);
-                            header_err = Some(Error::from(err));
-                            break;
+                            break Some(Err(Error::from(err)));
                         }
                     };
                     // produce a header clause from the token stream
@@ -67,8 +65,7 @@ impl<B: BufRead> SequentialReader<B> {
                         Ok(clause) => frame_clauses.push(clause),
                         Err(e) => {
                             let err = SyntaxError::from(e).with_offsets(line_offset, offset);
-                            header_err = Some(Error::from(err));
-                            break;
+                            break Some(Err(Error::from(err)));
                         }
                     }
                 }
@@ -80,30 +77,18 @@ impl<B: BufRead> SequentialReader<B> {
 
             // Bail out if we reached EOL or first frame.
             if l.starts_with('[') || line.is_empty() {
-                break;
+                let frame = Frame::Header(HeaderFrame::from(frame_clauses));
+                break Some(Ok(frame));
             }
-        }
+        };
 
         Self {
             stream,
             line,
             offset,
             line_offset,
-            header: match header_err {
-                Some(e) => Err(e),
-                None => Ok(HeaderFrame::from(frame_clauses)),
-            },
+            header
         }
-    }
-
-    /// Get a reference to the parsed header frame.
-    pub fn header(&self) -> Option<&HeaderFrame> {
-        self.header.as_ref().ok()
-    }
-
-    /// Get a mutable reference to the parsed header frame.
-    pub fn header_mut(&mut self) -> Option<&mut HeaderFrame> {
-        self.header.as_mut().ok()
     }
 }
 
@@ -127,7 +112,7 @@ impl<B: BufRead> SequentialReader<B> {
 // }
 
 impl<B: BufRead> Iterator for SequentialReader<B> {
-    type Item = Result<EntityFrame, Error>;
+    type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut l: &str = &self.line;
@@ -135,9 +120,8 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
         let mut local_line_offset = 0;
         let mut local_offset = 0;
 
-        if self.header.is_err() {
-            let e = std::mem::replace(&mut self.header, Ok(HeaderFrame::new()));
-            return Some(Err(e.unwrap_err()));
+        if let Some(res) = self.header.take() {
+            return Some(res);
         }
 
         while !self.line.is_empty() {
@@ -167,7 +151,7 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
                 self.line_offset += local_line_offset;
                 self.offset += local_offset;
 
-                return Some(res);
+                return Some(res.map(Frame::from));
             }
 
             // Update local offsets
@@ -183,12 +167,16 @@ impl<B: BufRead> TryFrom<SequentialReader<B>> for OboDoc {
     type Error = Error;
     fn try_from(mut reader: SequentialReader<B>) -> Result<Self, Self::Error> {
         let mut doc = OboDoc::new();
+
+        // extract the header
+        let header: &mut HeaderFrame = doc.header_mut();
+        *header = reader.next().unwrap()?.into_header_frame().unwrap();
+
+        // extract the entity frames
         for result in &mut reader {
-            doc.entities_mut().push(result?);
+            doc.entities_mut().push(result?.into_entity_frame().unwrap());
         }
 
-        // header is always Ok
-        std::mem::swap(reader.header_mut().unwrap(), doc.header_mut());
         Ok(doc)
     }
 }

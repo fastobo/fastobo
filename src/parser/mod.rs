@@ -12,6 +12,9 @@ use pest::Parser;
 use crate::ast::EntityFrame;
 use crate::ast::HeaderClause;
 use crate::ast::HeaderFrame;
+use crate::ast::TermFrame;
+use crate::ast::TypedefFrame;
+use crate::ast::InstanceFrame;
 use crate::ast::OboDoc;
 use crate::error::Error;
 use crate::error::SyntaxError;
@@ -63,8 +66,9 @@ mod tests {
         #[test]
         fn empty() {
             let mut reader = SequentialReader::new(Cursor::new(""));
+            let header = reader.next().unwrap().unwrap().into_header_frame().unwrap();
+            assert!(header.is_empty());
             assert!(reader.next().is_none());
-            assert!(reader.header().unwrap().is_empty());
         }
 
         #[test]
@@ -81,12 +85,13 @@ mod tests {
                 "#
             );
             let mut reader = SequentialReader::new(Cursor::new(&txt));
+            reader.next().unwrap();
             assert_eq!(
-                reader.next().unwrap().unwrap().as_id().to_string(),
+                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
                 "TST:001"
             );
             assert_eq!(
-                reader.next().unwrap().unwrap().as_id().to_string(),
+                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
                 "TST:002"
             );
             assert!(reader.next().is_none());
@@ -101,8 +106,9 @@ mod tests {
         fn empty() {
             let n = std::num::NonZeroUsize::new(1).unwrap();
             let mut reader = ThreadedReader::with_threads(Cursor::new(""), n);
+            let header = reader.next().unwrap().unwrap().into_header_frame().unwrap();
+            assert!(header.is_empty());
             assert!(reader.next().is_none());
-            assert!(reader.header().unwrap().is_empty());
         }
 
         #[test]
@@ -120,12 +126,13 @@ mod tests {
             );
             let n = std::num::NonZeroUsize::new(1).unwrap();
             let mut reader = ThreadedReader::with_threads(Cursor::new(&txt), n);
+            reader.next().unwrap();
             assert_eq!(
-                reader.next().unwrap().unwrap().as_id().to_string(),
+                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
                 "TST:001"
             );
             assert_eq!(
-                reader.next().unwrap().unwrap().as_id().to_string(),
+                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
                 "TST:002"
             );
             assert!(reader.next().is_none());

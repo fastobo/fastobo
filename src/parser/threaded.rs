@@ -14,6 +14,7 @@ use crossbeam_channel::TryRecvError;
 use crossbeam_channel::RecvTimeoutError;
 
 use crate::ast::EntityFrame;
+use crate::ast::Frame;
 use crate::ast::HeaderFrame;
 use crate::ast::HeaderClause;
 use crate::ast::OboDoc;
@@ -48,11 +49,10 @@ pub struct ThreadedReader<B: BufRead> {
     consumers: Vec<Consumer>,
 
     // communication channels
-    r_item: Receiver< Result<EntityFrame, Error> >,
+    r_item: Receiver< Result<Frame, Error> >,
     s_text: Sender< Option<String> >,
 
     line: String,
-    header: Option<HeaderFrame>,
     threads: NonZeroUsize,
 }
 
@@ -65,7 +65,6 @@ impl<B: BufRead> ThreadedReader<B> {
 
     pub fn with_threads(mut stream: B, threads: NonZeroUsize) -> Self {
         //
-        let mut header = None;
         let mut frame_clauses = Vec::new();
         let mut line = String::new();
         let mut l: &str;
@@ -75,12 +74,11 @@ impl<B: BufRead> ThreadedReader<B> {
         let (s_item, r_item) = crossbeam_channel::unbounded();
 
         // read until we reach the first entity frame
-        loop {
+        let header = loop {
             // Read the next line
             line.clear();
             if let Err(e) = stream.read_line(&mut line) {
-                s_item.send(Err(Error::from(e))).ok();
-                break;
+                break Err(Error::from(e));
             };
             l = line.trim();
 
@@ -95,19 +93,15 @@ impl<B: BufRead> ThreadedReader<B> {
                 // check if the clause was parsed properly or not
                 match clause {
                     Ok(c) => frame_clauses.push(c),
-                    Err(e) => {
-                        s_item.send(Err(e)).ok();
-                        break;
-                    }
+                    Err(e) => break Err(e),
                 };
             }
 
             // if the line is the beginning of an entity frame, stop
             if l.starts_with('[') || line.is_empty() {
-                header = Some(HeaderFrame::from(frame_clauses));
-                break;
+                break Ok(Frame::Header(HeaderFrame::from(frame_clauses)));
             }
-        }
+        };
 
         // create the consumers
         let mut consumers = Vec::with_capacity(threads.get());
@@ -115,6 +109,9 @@ impl<B: BufRead> ThreadedReader<B> {
             let c = Consumer::new(r_text.clone(), s_item.clone());
             consumers.push(c);
         }
+
+        // send the header to the channel (to get it back immediately after)
+        s_item.send(header).ok();
 
         // return the parser
         Self {
@@ -125,16 +122,7 @@ impl<B: BufRead> ThreadedReader<B> {
             consumers,
             line,
             state: State::Idle,
-            header,
         }
-    }
-
-    pub fn header(&self) -> Option<&HeaderFrame> {
-        self.header.as_ref()
-    }
-
-    pub fn header_mut(&mut self) -> Option<&mut HeaderFrame> {
-        self.header.as_mut()
     }
 
     pub fn into_underlying_reader(self) -> B {
@@ -143,7 +131,7 @@ impl<B: BufRead> ThreadedReader<B> {
 }
 
 impl<B: BufRead> Iterator for ThreadedReader<B> {
-    type Item = Result<EntityFrame, Error>;
+    type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -232,14 +220,16 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
 impl<B: BufRead> TryFrom<ThreadedReader<B>> for OboDoc {
     type Error = Error;
     fn try_from(mut reader: ThreadedReader<B>) -> Result<Self, Self::Error> {
-        let mut doc = OboDoc::new();
-        for result in &mut reader {
-            doc.entities_mut().push(result?);
-        }
+        // extract the header and create the doc
+        let header = reader.next().unwrap()?.into_header_frame().unwrap();
 
-        // header is always ok here since any error causes an early return
-        std::mem::swap(reader.header_mut().unwrap(), doc.header_mut());
-        Ok(doc)
+        // extract the remaining entities
+        let entities = reader
+            .map(|r| r.map(|f| f.into_entity_frame().unwrap()))
+            .collect::<Result<Vec<EntityFrame>, Error>>()?;
+
+        // return the doc
+        Ok(OboDoc::with_header(header).and_entities(entities))
     }
 }
 

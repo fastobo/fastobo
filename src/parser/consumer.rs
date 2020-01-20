@@ -9,6 +9,7 @@ use crossbeam_channel::TryRecvError;
 use crossbeam_channel::RecvTimeoutError;
 
 use crate::ast::EntityFrame;
+use crate::ast::Frame;
 use crate::ast::HeaderFrame;
 use crate::ast::HeaderClause;
 use crate::error::Error;
@@ -22,14 +23,14 @@ use super::FromPair;
 
 pub struct Consumer {
     r_text: Receiver< Option< String > >,
-    s_item: Sender< Result<EntityFrame, Error> >,
+    s_item: Sender< Result<Frame, Error> >,
     handle: Option< JoinHandle<()> >
 }
 
 impl Consumer {
     pub fn new(
         r_text: Receiver< Option<String> >,
-        s_item: Sender< Result<EntityFrame, Error> >,
+        s_item: Sender< Result<Frame, Error> >,
     ) -> Self {
         Self {
             r_text,
@@ -59,7 +60,7 @@ impl Consumer {
                     Ok(mut pairs) => unsafe {
                         let pair = pairs.next().unwrap();
                         let res = EntityFrame::from_pair_unchecked(pair);
-                        s_item.send(res.map_err(Error::from)).ok();
+                        s_item.send(res.map(Frame::from).map_err(Error::from)).ok();
                     }
                     Err(e) => {
                         let se = SyntaxError::from(e).with_offsets(0, 0);

@@ -15,6 +15,7 @@
 mod date;
 mod doc;
 mod entity;
+mod frame;
 mod header;
 mod id;
 mod instance;
@@ -41,6 +42,7 @@ pub use self::synonym::*;
 pub use self::term::*;
 pub use self::typedef::*;
 pub use self::xref::*;
+pub use self::frame::*;
 
 use std::fmt::Display;
 use std::fmt::Formatter;

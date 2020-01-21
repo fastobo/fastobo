@@ -60,82 +60,139 @@ mod tests {
     use super::*;
     use crate::semantics::Identified;
 
+
+    macro_rules! tests {
+        ($constructor:expr) => {
+            #[test]
+            fn empty() {
+                let mut reader = $constructor(Cursor::new(""));
+                let header = reader.next().unwrap().unwrap().into_header_frame().unwrap();
+                assert!(header.is_empty());
+                assert!(reader.next().is_none());
+            }
+
+            #[test]
+            fn two_frames() {
+                let txt = dedent!(
+                    r#"
+                    format-version: 1.2
+
+                    [Term]
+                    id: TST:001
+
+                    [Term]
+                    id: TST:002
+                    "#
+                );
+                let mut reader = $constructor(Cursor::new(&txt));
+                reader.next().unwrap();
+                assert_eq!(
+                    reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
+                    "TST:001"
+                );
+                assert_eq!(
+                    reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
+                    "TST:002"
+                );
+                assert!(reader.next().is_none());
+            }
+
+            mod errloc {
+                pub use super::*;
+
+                #[test]
+                fn invalid_def_1() {
+                    use pest::error::LineColLocation;
+                    use pest::error::InputLocation;
+
+                    let txt = "[Term]\nid: OK\ndef: no quote\n";
+
+                    let mut reader = $constructor(Cursor::new(&txt));
+                    reader.next().expect("header should be read")
+                        .expect("header should read fine");
+
+                    let err = reader.next().expect("somethhing should be produced")
+                        .expect_err("error should be produced");
+
+                    if let Error::SyntaxError { error: se } = err {
+                        if let SyntaxError::ParserError { error: pe } = se {
+                            match pe.line_col {
+                                LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                                LineColLocation::Pos((l, c)) => {
+                                    assert_eq!(l, 3);
+                                    assert_eq!(c, 6);
+                                }
+                            }
+                            match pe.location {
+                                InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                                InputLocation::Pos(s) => {
+                                    assert_eq!(s, 19);
+                                }
+                            }
+                        } else {
+                            panic!("error should be a parser error");
+                        }
+                    } else {
+                        panic!("error should be a syntax error")
+                    }
+                }
+
+                #[test]
+                #[ignore]
+                fn invalid_def_2() {
+                    use pest::error::LineColLocation;
+                    use pest::error::InputLocation;
+
+                    let txt = "[Term]\nid: OK\n\n[Term]\nid: NO\ndef: no quote\n";
+
+                    let mut reader = $constructor(Cursor::new(&txt));
+                    reader.next().expect("header should be read")
+                        .expect("header should read fine");
+                    reader.next().expect("first frame should be read")
+                        .expect("first frame should read fine");
+
+                    let err = reader.next().expect("somethhing should be produced")
+                        .expect_err("error should be produced");
+
+                    if let Error::SyntaxError { error: se } = err {
+                        if let SyntaxError::ParserError { error: pe } = se {
+                            match pe.line_col {
+                                LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                                LineColLocation::Pos((l, c)) => {
+                                    assert_eq!(l, 6, "line position differs");
+                                    assert_eq!(c, 6, "column position differs");
+                                }
+                            }
+                            match pe.location {
+                                InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                                InputLocation::Pos(s) => {
+                                    assert_eq!(s, 34);
+                                }
+                            }
+                        } else {
+                            panic!("error should be a parser error");
+                        }
+                    } else {
+                        panic!("error should be a syntax error")
+                    }
+                }
+            }
+        }
+    }
+
     mod sequential {
         use super::*;
-
-        #[test]
-        fn empty() {
-            let mut reader = SequentialReader::new(Cursor::new(""));
-            let header = reader.next().unwrap().unwrap().into_header_frame().unwrap();
-            assert!(header.is_empty());
-            assert!(reader.next().is_none());
-        }
-
-        #[test]
-        fn two_frames() {
-            let txt = dedent!(
-                r#"
-                format-version: 1.2
-
-                [Term]
-                id: TST:001
-
-                [Term]
-                id: TST:002
-                "#
-            );
-            let mut reader = SequentialReader::new(Cursor::new(&txt));
-            reader.next().unwrap();
-            assert_eq!(
-                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
-                "TST:001"
-            );
-            assert_eq!(
-                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
-                "TST:002"
-            );
-            assert!(reader.next().is_none());
-        }
+        tests!(|x| SequentialReader::new(x));
     }
 
     #[cfg(feature = "threading")]
     mod threaded {
         use super::*;
-
-        #[test]
-        fn empty() {
-            let n = std::num::NonZeroUsize::new(1).unwrap();
-            let mut reader = ThreadedReader::with_threads(Cursor::new(""), n);
-            let header = reader.next().unwrap().unwrap().into_header_frame().unwrap();
-            assert!(header.is_empty());
-            assert!(reader.next().is_none());
-        }
-
-        #[test]
-        fn two_frames() {
-            let txt = dedent!(
-                r#"
-                format-version: 1.2
-
-                [Term]
-                id: TST:001
-
-                [Term]
-                id: TST:002
-                "#
-            );
-            let n = std::num::NonZeroUsize::new(1).unwrap();
-            let mut reader = ThreadedReader::with_threads(Cursor::new(&txt), n);
-            reader.next().unwrap();
-            assert_eq!(
-                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
-                "TST:001"
-            );
-            assert_eq!(
-                reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
-                "TST:002"
-            );
-            assert!(reader.next().is_none());
-        }
+        tests!(|stream|
+            ThreadedReader::with_threads(
+                stream,
+                std::num::NonZeroUsize::new(1).unwrap()
+            )
+        );
     }
 }

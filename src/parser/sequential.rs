@@ -71,14 +71,14 @@ impl<B: BufRead> SequentialReader<B> {
                 }
             }
 
-            // Update offsets
-            line_offset += 1;
-            offset += line.len();
-
-            // Bail out if we reached EOL or first frame.
             if l.starts_with('[') || line.is_empty() {
+                // Bail out if we reached EOL or first frame.
                 let frame = Frame::Header(HeaderFrame::from(frame_clauses));
                 break Some(Ok(frame));
+            } else {
+                // Update offsets
+                line_offset += 1;
+                offset += line.len();
             }
         };
 
@@ -125,17 +125,17 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
         }
 
         while !self.line.is_empty() {
-            // Read the next line.
+            // Store the line in the frame lines and clear the buffer.
             frame_lines.push_str(l);
             self.line.clear();
 
+            // Read the next line.
             if let Err(e) = self.stream.read_line(&mut self.line) {
                 return Some(Err(Error::from(e)));
             }
 
+            // Process the frame if we reached the next frame.
             l = self.line.trim_start();
-
-            // Read the line if we reached the next frame.
             if l.starts_with('[') || self.line.is_empty() {
                 let res = unsafe {
                     match OboParser::parse(Rule::EntitySingle, &frame_lines) {
@@ -148,9 +148,8 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
                 };
 
                 // Update offsets
-                self.line_offset += local_line_offset;
-                self.offset += local_offset;
-
+                self.line_offset += local_line_offset + 1;
+                self.offset += local_offset + self.line.len();
                 return Some(res.map(Frame::from));
             }
 

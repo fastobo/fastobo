@@ -65,10 +65,10 @@ mod tests {
         ($constructor:expr) => {
             #[test]
             fn empty() {
-                let mut reader = $constructor(Cursor::new(""));
-                let header = reader.next().unwrap().unwrap().into_header_frame().unwrap();
-                assert!(header.is_empty());
-                assert!(reader.next().is_none());
+                let res = $constructor(Cursor::new(""));
+                let doc = res.expect("document should parse properly");
+                assert!(doc.header().is_empty());
+                assert!(doc.entities().is_empty());
             }
 
             #[test]
@@ -84,17 +84,12 @@ mod tests {
                     id: TST:002
                     "#
                 );
-                let mut reader = $constructor(Cursor::new(&txt));
-                reader.next().unwrap();
-                assert_eq!(
-                    reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
-                    "TST:001"
-                );
-                assert_eq!(
-                    reader.next().unwrap().unwrap().into_entity_frame().unwrap().as_id().to_string(),
-                    "TST:002"
-                );
-                assert!(reader.next().is_none());
+                let res = $constructor(Cursor::new(&txt));
+                let doc = res.expect("document should parse fine");
+
+                assert_eq!(doc.entities().len(), 2);
+                assert_eq!(doc.entities()[0].as_id().to_string(), "TST:001");
+                assert_eq!(doc.entities()[1].as_id().to_string(), "TST:002");
             }
 
             mod errloc {
@@ -106,34 +101,31 @@ mod tests {
                     use pest::error::InputLocation;
 
                     let txt = "[Term]\nid: OK\ndef: no quote\n";
+                    let res = $constructor(Cursor::new(&txt));
+                    let err = res.expect_err("document should fail to parse");
 
-                    let mut reader = $constructor(Cursor::new(&txt));
-                    reader.next().expect("header should be read")
-                        .expect("header should read fine");
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
 
-                    let err = reader.next().expect("somethhing should be produced")
-                        .expect_err("error should be produced");
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError")
+                    };
 
-                    if let Error::SyntaxError { error: se } = err {
-                        if let SyntaxError::ParserError { error: pe } = se {
-                            match pe.line_col {
-                                LineColLocation::Span(_, _) => panic!("position should be `pos`"),
-                                LineColLocation::Pos((l, c)) => {
-                                    assert_eq!(l, 3);
-                                    assert_eq!(c, 6);
-                                }
-                            }
-                            match pe.location {
-                                InputLocation::Span((_, _)) => panic!("location should be `pos`"),
-                                InputLocation::Pos(s) => {
-                                    assert_eq!(s, 19);
-                                }
-                            }
-                        } else {
-                            panic!("error should be a parser error");
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 3);
+                            assert_eq!(c, 6);
                         }
-                    } else {
-                        panic!("error should be a syntax error")
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 19);
+                        }
                     }
                 }
 
@@ -144,36 +136,31 @@ mod tests {
                     use pest::error::InputLocation;
 
                     let txt = "[Term]\nid: OK\n\n[Term]\nid: NO\ndef: no quote\n";
+                    let res = $constructor(Cursor::new(&txt));
+                    let err = res.expect_err("document should fail to parse");
 
-                    let mut reader = $constructor(Cursor::new(&txt));
-                    reader.next().expect("header should be read")
-                        .expect("header should read fine");
-                    reader.next().expect("first frame should be read")
-                        .expect("first frame should read fine");
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
 
-                    let err = reader.next().expect("somethhing should be produced")
-                        .expect_err("error should be produced");
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError")
+                    };
 
-                    if let Error::SyntaxError { error: se } = err {
-                        if let SyntaxError::ParserError { error: pe } = se {
-                            match pe.line_col {
-                                LineColLocation::Span(_, _) => panic!("position should be `pos`"),
-                                LineColLocation::Pos((l, c)) => {
-                                    assert_eq!(l, 6, "line position differs");
-                                    assert_eq!(c, 6, "column position differs");
-                                }
-                            }
-                            match pe.location {
-                                InputLocation::Span((_, _)) => panic!("location should be `pos`"),
-                                InputLocation::Pos(s) => {
-                                    assert_eq!(s, 34);
-                                }
-                            }
-                        } else {
-                            panic!("error should be a parser error");
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 6);
+                            assert_eq!(c, 6);
                         }
-                    } else {
-                        panic!("error should be a syntax error")
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 34);
+                        }
                     }
                 }
             }
@@ -182,17 +169,17 @@ mod tests {
 
     mod sequential {
         use super::*;
-        tests!(|x| SequentialReader::new(x));
+        tests!(|x| OboDoc::try_from(SequentialReader::new(x)));
     }
 
     #[cfg(feature = "threading")]
     mod threaded {
         use super::*;
         tests!(|stream|
-            ThreadedReader::with_threads(
+            OboDoc::try_from(ThreadedReader::with_threads(
                 stream,
                 std::num::NonZeroUsize::new(1).unwrap()
-            )
+            ))
         );
     }
 }

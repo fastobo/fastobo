@@ -20,6 +20,7 @@ use crate::ast::HeaderClause;
 use crate::ast::OboDoc;
 use crate::error::Error;
 use crate::error::SyntaxError;
+use crate::error::ThreadingError;
 
 use super::OboParser;
 use super::Rule;
@@ -153,6 +154,17 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
     type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
+
+        macro_rules! send_or_error {
+            ($channel:expr, $msg:expr) => {
+                if $channel.send($msg).is_err() {
+                    self.state = State::Finished;
+                    let err = ThreadingError::DisconnectedChannel;
+                    return Some(Err(Error::from(err)));
+                }
+            }
+        }
+
         loop {
             // poll for parsed frames to return
             match self.r_item.try_recv() {
@@ -174,7 +186,7 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
                 Err(TryRecvError::Disconnected) => {
                     if self.state != State::Finished {
                         self.state = State::Finished;
-                        panic!("ERR: DISCONNECTED CHANNEL");
+                        return Some(Err(Error::from(ThreadingError::DisconnectedChannel)));
                     }
                 }
             }
@@ -218,19 +230,24 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
                         // check if we reached the end of the frame
                         l = self.line.trim_start();
                         if l.starts_with('[') {
+                            // send the entire frame with the location offsets
                             let msg = ConsumerInput::new(lines, self.line_offset, self.offset);
-                            self.s_text.send(Some(msg));
+                            send_or_error!(self.s_text, Some(msg));
+                            // update the local offsets and bail out
                             self.line_offset += local_line_offset + 1;
                             self.offset += local_offset + self.line.len();
                             break;
                         } else if self.line.is_empty() {
+                            // change the state to wait for workers to finish
                             self.state = State::AtEof;
+                            // if some lines remain, send them as text
                             if !lines.chars().all(|c| c.is_whitespace()) {
                                 let msg = ConsumerInput::new(lines, self.line_offset, self.offset);
-                                self.s_text.send(Some(msg));
+                                send_or_error!(self.s_text, Some(msg));
                             }
+                            // poison-pill the remaining workers and bail out
                             for _ in 0..self.threads.get() {
-                                self.s_text.send(None);
+                                send_or_error!(self.s_text, None);
                             }
                             break;
                         }

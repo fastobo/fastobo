@@ -174,6 +174,22 @@ pub enum Error {
         #[error(cause)]
         inner: CardinalityError,
     },
+
+    /// A threading-related error occurred.
+    #[error(display = "threading error: {}", error)]
+    ThreadingError {
+        #[error(cause)]
+        error: ThreadingError,
+    }
+}
+
+/// A threading error.
+#[cfg(feature = "threading")]
+#[derive(Debug, Eq, Error, PartialEq)]
+pub enum ThreadingError {
+    /// A communication channel unexpectedly disconnected.
+    #[error(display = "disconnected channel")]
+    DisconnectedChannel,
 }
 
 /// The result type for this crate.

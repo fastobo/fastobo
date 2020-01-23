@@ -12,6 +12,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/fastobo/fastobo.svg?style=flat-square)](https://github.com/fastobo/fastobo/issues)
 [![DOI](https://img.shields.io/badge/doi-10.7490%2Ff1000research.1117405.1-brightgreen?style=flat-square&maxAge=31536000)](https://f1000research.com/posters/8-1500)
 
+
 ## Overview
 
 This library provides a mostly-complete implementation of the
@@ -44,8 +45,11 @@ All the following features are enabled by default, but can be disabled and
 cherry-picked using the `default-features = false` option in the `Cargo.toml`
 manifest of your project:
 
-* **`memchr`** - Use the `memchr` library to improve parser speed when
-  searching for a particular character in a buffer.
+* **`memchr`** - Use the [`memchr`](https://docs.rs/memchr/) library to improve
+  parser speed when searching for a particular character in a buffer.
+* **`threading`** - Use a multi-threaded parser (additionally depending on
+  [`crossbeam-channel`](https://docs.rs/crossbeam-channel)), which can greatly
+  improve the parser speed if parsing is CPU-bound.
 
 
 ## Usage
@@ -106,7 +110,6 @@ as part of a Master's Degree internship in the [BBOP team](http://berkeleybop.or
 [Lawrence Berkeley National Laboratory](https://www.lbl.gov/), under the supervision of
 [Chris Mungall](http://biosciences.lbl.gov/profiles/chris-mungall/). Cite this project as:
 
-*Larralde M.* **Developing Python and Rust libraries to improve the ontology ecosystem** 
+*Larralde M.* **Developing Python and Rust libraries to improve the ontology ecosystem**
 *\[version 1; not peer reviewed\].* F1000Research 2019, 8(ISCB Comm J):1500 (poster)
-([https://doi.org/10.7490/f1000research.1117405.1](https://doi.org/10.7490/f1000research.1117405.1)) 
-
+([https://doi.org/10.7490/f1000research.1117405.1](https://doi.org/10.7490/f1000research.1117405.1))

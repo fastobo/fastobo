@@ -47,7 +47,7 @@ impl<B: BufRead> SequentialReader<B> {
             if let Err(e) = stream.read_line(&mut line) {
                 break Some(Err(Error::from(e)));
             };
-            l = line.trim();
+            l = line.trim_start();
 
             // Parse header as long as we didn't reach EOL or first frame.
             if !l.starts_with('[') && !l.is_empty() {
@@ -115,7 +115,7 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
     type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut l: &str = &self.line;
+        let mut l: &str;
         let mut frame_lines = String::new();
         let mut local_line_offset = 0;
         let mut local_offset = 0;
@@ -126,7 +126,7 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
 
         while !self.line.is_empty() {
             // Store the line in the frame lines and clear the buffer.
-            frame_lines.push_str(l);
+            frame_lines.push_str(&self.line);
             self.line.clear();
 
             // Read the next line.

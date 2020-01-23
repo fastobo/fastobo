@@ -93,13 +93,75 @@ mod tests {
             }
 
             mod errloc {
-                pub use super::*;
+                use super::*;
+
+                use pest::error::LineColLocation;
+                use pest::error::InputLocation;
 
                 #[test]
-                fn invalid_def_1() {
-                    use pest::error::LineColLocation;
-                    use pest::error::InputLocation;
+                fn invalid_header_date() {
+                    let txt = "format-version: 1.4\ndate: nope";
+                    let res = $constructor(Cursor::new(&txt));
+                    let err = res.expect_err("document should fail to parse");
 
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
+
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError")
+                    };
+
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 2);
+                            assert_eq!(c, 7);
+                        }
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 26);
+                        }
+                    }
+                }
+
+                #[test]
+                fn invalid_header_date_indented() {
+                    let txt = "format-version: 1.4\n  date: nope";
+                    let res = $constructor(Cursor::new(&txt));
+                    let err = res.expect_err("document should fail to parse");
+
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
+
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError")
+                    };
+
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 2);
+                            assert_eq!(c, 9);
+                        }
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 28);
+                        }
+                    }
+                }
+
+                #[test]
+                fn invalid_frame_def() {
                     let txt = "[Term]\nid: OK\ndef: no quote\n";
                     let res = $constructor(Cursor::new(&txt));
                     let err = res.expect_err("document should fail to parse");
@@ -130,10 +192,7 @@ mod tests {
                 }
 
                 #[test]
-                fn invalid_def_2() {
-                    use pest::error::LineColLocation;
-                    use pest::error::InputLocation;
-
+                fn invalid_frame_def_2() {
                     let txt = "[Term]\nid: OK\n\n[Term]\nid: NO\ndef: no quote\n";
                     let res = $constructor(Cursor::new(&txt));
                     let err = res.expect_err("document should fail to parse");
@@ -159,6 +218,68 @@ mod tests {
                         InputLocation::Span((_, _)) => panic!("location should be `pos`"),
                         InputLocation::Pos(s) => {
                             assert_eq!(s, 34);
+                        }
+                    }
+                }
+
+                #[test]
+                fn invalid_frame_def_indented() {
+                    let txt = "[Term]\nid: OK\n   def: no quote\n";
+                    let res = $constructor(Cursor::new(&txt));
+                    let err = res.expect_err("document should fail to parse");
+
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
+
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError")
+                    };
+
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 3);
+                            assert_eq!(c, 9);
+                        }
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 22);
+                        }
+                    }
+                }
+
+                #[test]
+                fn invalid_frame_def_indented_2() {
+                    let txt = "[Term]\nid: OK\n\n[Term]\nid: NO\n   def: no quote\n";
+                    let res = $constructor(Cursor::new(&txt));
+                    let err = res.expect_err("document should fail to parse");
+
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
+
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError")
+                    };
+
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 6);
+                            assert_eq!(c, 9);
+                        }
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 37);
                         }
                     }
                 }

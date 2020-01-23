@@ -97,7 +97,7 @@ impl<B: BufRead> ThreadedReader<B> {
             // if the line is not empty, parse it
             if !l.starts_with('[') && !l.is_empty() {
                 // parse the header clause
-                let clause = OboParser::parse(Rule::HeaderClause, &l)
+                let clause = OboParser::parse(Rule::HeaderClause, &line)
                     .map_err(SyntaxError::from)
                     .map(|mut p| p.next().unwrap())
                     .and_then(HeaderClause::from_pair)
@@ -212,13 +212,13 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
                 State::Started => {
                     //
                     let mut lines = String::new();
-                    let mut l: &str = self.line.trim_start();
+                    let mut l: &str;
                     let mut local_line_offset = 0;
                     let mut local_offset = 0;
 
                     loop {
                         // store the previous line and process the next line
-                        lines.push_str(l);
+                        lines.push_str(&self.line);
                         self.line.clear();
 
                         // read the next line

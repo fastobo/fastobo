@@ -17,8 +17,8 @@ pub trait FromPair<'i>: Sized {
 
     /// Create a new instance from a `Pair` without checking the rule.
     ///
-    /// # Panic
-    /// Panics if the pair was not produced by the right rule, i.e.
+    /// # Safety
+    /// May panic if the pair was not produced by the right rule, i.e.
     /// `pair.as_rule() != <Self as FromPair>::RULE`.
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError>;
 

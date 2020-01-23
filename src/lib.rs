@@ -71,7 +71,7 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> Result<OboDoc> {
     File::open(pathref)
         .map(BufReader::new)
         .map_err(From::from)
-        .and_then(|r| from_reader(r))
+        .and_then(from_reader)
         .map_err(|e| {
             if let Error::SyntaxError { error } = e {
                 error.with_path(&pathref.to_string_lossy()).into()
@@ -88,7 +88,7 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> Result<OboDoc> {
 pub fn to_writer<W: Write>(mut writer: W, doc: &OboDoc) -> Result<()> {
     write!(writer, "{}", doc.header())?;
     if !doc.header().is_empty() && !doc.entities().is_empty() {
-        write!(writer, "\n")?;
+        writeln!(writer)?;
     }
     for entity in doc.entities() {
         write!(writer, "{}", entity)?;

@@ -806,16 +806,14 @@ impl VisitMut for IdCompactor {
                 }
             }
             // if none find, use the OBO factorisation
-            if new.is_none() {
-                if u.as_str().starts_with("http://purl.obolibrary.org/obo/") {
-                    let raw_id = &u.as_str()[31..];
-                    if let Some(i) = raw_id.find('_') {
-                        // check we are not using a declared prefix (otherwise
-                        // the compaction/expansion would not roundtrip!)
-                        let prefix = IdentPrefix::new(&raw_id[..i]);
-                        if self.idspaces.get(&prefix).is_none() {
-                            new = Some(PrefixedIdent::new(prefix, &raw_id[i + 1..]));
-                        }
+            if new.is_none() && u.as_str().starts_with("http://purl.obolibrary.org/obo/") {
+                let raw_id = &u.as_str()[31..];
+                if let Some(i) = raw_id.find('_') {
+                    // check we are not using a declared prefix (otherwise
+                    // the compaction/expansion would not roundtrip!)
+                    let prefix = IdentPrefix::new(&raw_id[..i]);
+                    if self.idspaces.get(&prefix).is_none() {
+                        new = Some(PrefixedIdent::new(prefix, &raw_id[i + 1..]));
                     }
                 }
             }

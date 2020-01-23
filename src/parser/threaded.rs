@@ -31,8 +31,8 @@ use super::consumer::ConsumerInput;
 
 // ---
 
-#[derive(PartialEq, Eq)]
 /// The state of a `ThreadedReader` instance.
+#[derive(PartialEq, Eq)]
 enum State {
     Idle,
     Started,
@@ -43,8 +43,8 @@ enum State {
 
 // ---
 
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
 /// An iterator reading entity frames contained in an OBO stream in parallel.
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
 pub struct ThreadedReader<B: BufRead> {
     // the reader
     stream: B,

@@ -102,7 +102,7 @@ where
 impl<'a> Redeem<'a> for &'a str {
     type Owned = String;
     fn redeem(&'a self) -> String {
-        self.to_string()
+        (*self).to_string()
     }
 }
 

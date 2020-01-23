@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.7.5...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.0...HEAD
+
+
+## [v0.8.0] - 2020-01-23
+
+[v0.8.0]: https://github.com/fastobo/fastobo/compare/v0.7.5...v0.8.0
+
+### Added
+- Parallel `FrameReader` implementation compiled under the `threading`
+  feature gate.
+
+### Fixed
+- Location of syntax errors not being reported properly in most cases.
+
+### Changed
+- Interface of `fastobo::parser::FrameReader` to be more intuitive to use.
+- Bumped `fastobo-syntax` to `0.3.8` to support indentation within files.
 
 
 ## [v0.7.5] - 2020-01-18

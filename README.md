@@ -57,7 +57,7 @@ manifest of your project:
 Add `fastobo` to the `[dependencies]` sections of your `Cargo.toml` manifest:
 ```toml
 [dependencies]
-fastobo = "0.7.0"
+fastobo = "0.8.0"
 ```
 
 The top-level `fastobo` module provides several functions to parse an `OboDoc`.

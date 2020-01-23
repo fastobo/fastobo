@@ -44,9 +44,11 @@ pub use self::threaded::ThreadedReader;
 // ---
 
 #[cfg(feature = "threading")]
+/// The default frame reader used by `fastobo`.
 pub type FrameReader<B> = ThreadedReader<B>;
 
 #[cfg(not(feature = "threading"))]
+/// The default frame reader used by `fastobo`.
 pub type FrameReader<B> = SequentialReader<B>;
 
 // ---

@@ -176,6 +176,8 @@ pub enum Error {
     },
 
     /// A threading-related error occurred.
+    #[cfg(feature = "threading")]
+    #[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
     #[error(display = "threading error: {}", error)]
     ThreadingError {
         #[error(cause)]
@@ -185,6 +187,7 @@ pub enum Error {
 
 /// A threading error.
 #[cfg(feature = "threading")]
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
 #[derive(Debug, Eq, Error, PartialEq)]
 pub enum ThreadingError {
     /// A communication channel unexpectedly disconnected.

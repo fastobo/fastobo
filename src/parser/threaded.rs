@@ -32,6 +32,7 @@ use super::consumer::ConsumerInput;
 // ---
 
 #[derive(PartialEq, Eq)]
+/// The state of a `ThreadedReader` instance.
 enum State {
     Idle,
     Started,
@@ -40,10 +41,10 @@ enum State {
     Finished,
 }
 
-
-
 // ---
 
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
+/// An iterator reading entity frames contained in an OBO stream in parallel.
 pub struct ThreadedReader<B: BufRead> {
     // the reader
     stream: B,
@@ -147,6 +148,24 @@ impl<B: BufRead> ThreadedReader<B> {
 
     pub fn into_underlying_reader(self) -> B {
         self.stream
+    }
+}
+
+impl<B: BufRead> AsRef<B> for ThreadedReader<B> {
+    fn as_ref(&self) -> &B {
+        &self.stream
+    }
+}
+
+impl<B: BufRead> AsMut<B> for ThreadedReader<B> {
+    fn as_mut(&mut self) -> &mut B {
+        &mut self.stream
+    }
+}
+
+impl From<File> for ThreadedReader<BufReader<File>> {
+    fn from(f: File) -> Self {
+        Self::new(BufReader::new(f))
     }
 }
 
@@ -277,17 +296,3 @@ impl<B: BufRead> TryFrom<ThreadedReader<B>> for OboDoc {
         Ok(OboDoc::with_header(header).and_entities(entities))
     }
 }
-
-impl<B: BufRead> AsRef<B> for ThreadedReader<B> {
-    fn as_ref(&self) -> &B {
-        &self.stream
-    }
-}
-
-impl<B: BufRead> AsMut<B> for ThreadedReader<B> {
-    fn as_mut(&mut self) -> &mut B {
-        &mut self.stream
-    }
-}
-
-// ---

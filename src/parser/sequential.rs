@@ -19,7 +19,7 @@ use super::OboParser;
 use super::Rule;
 use super::FromPair;
 
-/// An iterator reading entity frames contained in an OBO stream.
+/// An iterator reading entity frames contained in an OBO stream sequentially.
 pub struct SequentialReader<B: BufRead> {
     stream: B,
     line: String,
@@ -92,24 +92,23 @@ impl<B: BufRead> SequentialReader<B> {
     }
 }
 
-// impl<B: BufRead> AsRef<B> for SequentialReader<B> {
-//     fn as_ref(&self) -> &B {
-//         &self.stream
-//     }
-// }
-//
-// impl<B: BufRead> AsMut<B> for SequentialReader<B> {
-//     fn as_mut(&mut self) -> &mut B {
-//         &mut self.stream
-//     }
-// }
+impl<B: BufRead> AsRef<B> for SequentialReader<B> {
+    fn as_ref(&self) -> &B {
+        &self.stream
+    }
+}
 
-// impl TryFrom<File> for SequentialReader<BufReader<File>> {
-//     type Error = Error;
-//     fn try_from(f: File) -> Result<Self, Self::Error> {
-//         Self::new(BufReader::new(f))
-//     }
-// }
+impl<B: BufRead> AsMut<B> for SequentialReader<B> {
+    fn as_mut(&mut self) -> &mut B {
+        &mut self.stream
+    }
+}
+
+impl From<File> for SequentialReader<BufReader<File>> {
+    fn from(f: File) -> Self {
+        Self::new(BufReader::new(f))
+    }
+}
 
 impl<B: BufRead> Iterator for SequentialReader<B> {
     type Item = Result<Frame, Error>;
@@ -165,17 +164,15 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
 impl<B: BufRead> TryFrom<SequentialReader<B>> for OboDoc {
     type Error = Error;
     fn try_from(mut reader: SequentialReader<B>) -> Result<Self, Self::Error> {
-        let mut doc = OboDoc::new();
+        // extract the header and create the doc
+        let header = reader.next().unwrap()?.into_header_frame().unwrap();
 
-        // extract the header
-        let header: &mut HeaderFrame = doc.header_mut();
-        *header = reader.next().unwrap()?.into_header_frame().unwrap();
+        // extract the remaining entities
+        let entities = reader
+            .map(|r| r.map(|f| f.into_entity_frame().unwrap()))
+            .collect::<Result<Vec<EntityFrame>, Error>>()?;
 
-        // extract the entity frames
-        for result in &mut reader {
-            doc.entities_mut().push(result?.into_entity_frame().unwrap());
-        }
-
-        Ok(doc)
+        // return the doc
+        Ok(OboDoc::with_header(header).and_entities(entities))
     }
 }

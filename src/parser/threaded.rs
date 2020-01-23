@@ -26,6 +26,7 @@ use super::Rule;
 use super::FromPair;
 
 use super::consumer::Consumer;
+use super::consumer::ConsumerInput;
 
 // ---
 
@@ -38,6 +39,8 @@ enum State {
     Finished,
 }
 
+
+
 // ---
 
 pub struct ThreadedReader<B: BufRead> {
@@ -49,11 +52,17 @@ pub struct ThreadedReader<B: BufRead> {
     consumers: Vec<Consumer>,
 
     // communication channels
-    r_item: Receiver< Result<Frame, Error> >,
-    s_text: Sender< Option<String> >,
+    r_item: Receiver<Result<Frame, Error>>,
+    s_text: Sender<Option<ConsumerInput>>,
 
+    /// Buffer for the last line that was read.
     line: String,
+    /// Number of threads requested by the user
     threads: NonZeroUsize,
+
+    /// Offsets to report proper error position
+    line_offset: usize,
+    offset: usize,
 }
 
 impl<B: BufRead> ThreadedReader<B> {
@@ -68,6 +77,8 @@ impl<B: BufRead> ThreadedReader<B> {
         let mut frame_clauses = Vec::new();
         let mut line = String::new();
         let mut l: &str;
+        let mut offset = 0;
+        let mut line_offset = 0;
 
         // create the communication channels
         let (s_text, r_text) = crossbeam_channel::unbounded();
@@ -80,7 +91,7 @@ impl<B: BufRead> ThreadedReader<B> {
             if let Err(e) = stream.read_line(&mut line) {
                 break Err(Error::from(e));
             };
-            l = line.trim();
+            l = line.trim_start();
 
             // if the line is not empty, parse it
             if !l.starts_with('[') && !l.is_empty() {
@@ -89,17 +100,23 @@ impl<B: BufRead> ThreadedReader<B> {
                     .map_err(SyntaxError::from)
                     .map(|mut p| p.next().unwrap())
                     .and_then(HeaderClause::from_pair)
-                    .map_err(Error::from);
+                    .map_err(SyntaxError::from);
                 // check if the clause was parsed properly or not
                 match clause {
                     Ok(c) => frame_clauses.push(c),
-                    Err(e) => break Err(e),
+                    Err(e) => {
+                        let err = e.with_offsets(line_offset, offset);
+                        break Err(Error::from(err));
+                    },
                 };
             }
 
             // if the line is the beginning of an entity frame, stop
             if l.starts_with('[') || line.is_empty() {
                 break Ok(Frame::Header(HeaderFrame::from(frame_clauses)));
+            } else {
+                line_offset += 1;
+                offset += line.len();
             }
         };
 
@@ -121,6 +138,8 @@ impl<B: BufRead> ThreadedReader<B> {
             threads,
             consumers,
             line,
+            line_offset,
+            offset,
             state: State::Idle,
         }
     }
@@ -162,6 +181,7 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
 
             // depending on the state, do something before polling
             match self.state {
+                State::Waiting => (),
                 State::AtEof => {
                     self.state = State::Waiting;
                     for consumer in self.consumers.iter_mut() {
@@ -177,13 +197,12 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
                 State::Finished => {
                     return None;
                 }
-                State::Waiting => {
-                    std::thread::sleep(Duration::from_micros(1));
-                }
                 State::Started => {
                     //
                     let mut lines = String::new();
                     let mut l: &str = self.line.trim_start();
+                    let mut local_line_offset = 0;
+                    let mut local_offset = 0;
 
                     loop {
                         // store the previous line and process the next line
@@ -192,24 +211,33 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
 
                         // read the next line
                         if let Err(e) = self.stream.read_line(&mut self.line) {
-                            panic!("ERR: {:?}", e);
+                            self.state = State::Finished;
+                            return Some(Err(Error::from(e)));
                         }
 
                         // check if we reached the end of the frame
                         l = self.line.trim_start();
                         if l.starts_with('[') {
-                            self.s_text.send(Some(lines));
+                            let msg = ConsumerInput::new(lines, self.line_offset, self.offset);
+                            self.s_text.send(Some(msg));
+                            self.line_offset += local_line_offset + 1;
+                            self.offset += local_offset + self.line.len();
                             break;
                         } else if self.line.is_empty() {
                             self.state = State::AtEof;
                             if !lines.chars().all(|c| c.is_whitespace()) {
-                                self.s_text.send(Some(lines));
+                                let msg = ConsumerInput::new(lines, self.line_offset, self.offset);
+                                self.s_text.send(Some(msg));
                             }
                             for _ in 0..self.threads.get() {
                                 self.s_text.send(None);
                             }
                             break;
                         }
+
+                        // Update local offsets
+                        local_line_offset += 1;
+                        local_offset += self.line.len();
                     }
                 }
             }

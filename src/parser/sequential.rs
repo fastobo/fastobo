@@ -64,7 +64,7 @@ impl<B: BufRead> SequentialReader<B> {
                     match HeaderClause::from_pair_unchecked(p) {
                         Ok(clause) => frame_clauses.push(clause),
                         Err(e) => {
-                            let err = SyntaxError::from(e).with_offsets(line_offset, offset);
+                            let err = e.with_offsets(line_offset, offset);
                             break Some(Err(Error::from(err)));
                         }
                     }

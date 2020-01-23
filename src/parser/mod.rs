@@ -130,7 +130,6 @@ mod tests {
                 }
 
                 #[test]
-                #[ignore]
                 fn invalid_def_2() {
                     use pest::error::LineColLocation;
                     use pest::error::InputLocation;

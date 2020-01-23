@@ -21,15 +21,31 @@ use super::FromPair;
 
 // ---
 
+pub struct ConsumerInput {
+    text: String,
+    line_offset: usize,
+    offset: usize,
+}
+
+impl ConsumerInput {
+    pub fn new(text: String, line_offset: usize, offset: usize) -> Self {
+        Self {
+            text,
+            line_offset,
+            offset
+        }
+    }
+}
+
 pub struct Consumer {
-    r_text: Receiver< Option< String > >,
+    r_text: Receiver< Option< ConsumerInput > >,
     s_item: Sender< Result<Frame, Error> >,
     handle: Option< JoinHandle<()> >
 }
 
 impl Consumer {
     pub fn new(
-        r_text: Receiver< Option<String> >,
+        r_text: Receiver< Option<ConsumerInput> >,
         s_item: Sender< Result<Frame, Error> >,
     ) -> Self {
         Self {
@@ -46,7 +62,7 @@ impl Consumer {
         self.handle = Some(std::thread::spawn(move || {
             loop {
                 // get the string containing the entire frame
-                let lines = loop {
+                let msg = loop {
                     match r_text.recv_timeout(Duration::from_micros(1)) {
                         Ok(Some(text)) => break text,
                         Ok(None) => return,
@@ -56,14 +72,15 @@ impl Consumer {
                 };
 
                 // parse the string
-                match OboParser::parse(Rule::EntitySingle, &lines) {
+                match OboParser::parse(Rule::EntitySingle, &msg.text) {
                     Ok(mut pairs) => unsafe {
                         let pair = pairs.next().unwrap();
                         let res = EntityFrame::from_pair_unchecked(pair);
                         s_item.send(res.map(Frame::from).map_err(Error::from)).ok();
                     }
                     Err(e) => {
-                        let se = SyntaxError::from(e).with_offsets(0, 0);
+                        let se = SyntaxError::from(e)
+                            .with_offsets(msg.line_offset, msg.offset);
                         s_item.send(Err(Error::from(se))).ok();
                         return;
                     }

@@ -13,6 +13,7 @@ use crate::parser::Rule;
 ///
 /// [`pest::Pair`]: https://docs.rs/pest/latest/pest/iterators/struct.Pair.html
 pub trait FromPair<'i>: Sized {
+    /// The production rule the pair is expected to be obtained from.
     const RULE: Rule;
 
     /// Create a new instance from a `Pair` without checking the rule.

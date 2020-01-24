@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::num::NonZeroUsize;
@@ -27,7 +28,8 @@ use super::Rule;
 use super::FromPair;
 
 use super::consumer::Consumer;
-use super::consumer::ConsumerInput;
+use super::consumer::Input as ConsumerInput;
+use super::consumer::Output as ConsumerOutput;
 
 // ---
 
@@ -54,7 +56,7 @@ pub struct ThreadedReader<B: BufRead> {
     consumers: Vec<Consumer>,
 
     // communication channels
-    r_item: Receiver<Result<Frame, Error>>,
+    r_item: Receiver<ConsumerOutput>,
     s_text: Sender<Option<ConsumerInput>>,
 
     /// Buffer for the last line that was read.
@@ -65,15 +67,26 @@ pub struct ThreadedReader<B: BufRead> {
     /// Offsets to report proper error position
     line_offset: usize,
     offset: usize,
+
+    ///
+    ordered: bool,
+    read_index: usize,
+    sent_index: usize,
+    queue: HashMap<usize, Result<Frame, Error>>,
 }
 
 impl<B: BufRead> ThreadedReader<B> {
+    /// Create a new `ThreadedReader` with all available CPUs.
+    ///
+    /// The number of available CPUs will be polled at runtime and then the
+    /// right number of threads will be spawned accordingly.
     pub fn new(stream: B) -> Self {
         lazy_static !{ static ref THREADS: usize = num_cpus::get(); }
         let threads = unsafe { NonZeroUsize::new_unchecked(*THREADS) };
         Self::with_threads(stream, threads)
     }
 
+    /// Create a new `ThreadedReader` with the given number of threads.
     pub fn with_threads(mut stream: B, threads: NonZeroUsize) -> Self {
         //
         let mut frame_clauses = Vec::new();
@@ -130,7 +143,7 @@ impl<B: BufRead> ThreadedReader<B> {
         }
 
         // send the header to the channel (to get it back immediately after)
-        s_item.send(header).ok();
+        s_item.send(ConsumerOutput::new(header, 0)).ok();
 
         // return the parser
         Self {
@@ -142,11 +155,25 @@ impl<B: BufRead> ThreadedReader<B> {
             line,
             line_offset,
             offset,
+            ordered: false,
+            read_index: 0,
+            sent_index: 1,
+            queue: HashMap::new(),
             state: State::Idle,
         }
     }
 
-    pub fn into_underlying_reader(self) -> B {
+    /// Make the parser yield frames in the order they appear in the document.
+    ///
+    /// Note that this has a small performance impact, so this is disabled
+    /// by default.
+    pub fn ordered(&mut self, ordered: bool) -> &mut Self {
+        self.ordered = ordered;
+        self
+    }
+
+    /// Consume the reader and extract the internal reader.
+    pub fn into_inner(self) -> B {
         self.stream
     }
 }
@@ -185,14 +212,31 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
         }
 
         loop {
+            // return and item from the queue if in ordered mode
+            if self.ordered {
+                if let Some(result) = self.queue.remove(&self.read_index) {
+                    self.read_index += 1;
+                    return Some(result);
+                }
+            }
+
             // poll for parsed frames to return
-            match self.r_item.try_recv() {
-                // item is found: simply return it
-                Ok(Ok(entry)) => return Some(Ok(entry)),
+            match self.r_item.try_recv().map(|i| (i.res, i.index)) {
+                // item is found, don't care about order: simply return it
+                Ok((Ok(entry), _)) if !self.ordered => return Some(Ok(entry)),
                 // error is found: finalize and return it
-                Ok(Err(e)) => {
+                Ok((Err(e), _)) if !self.ordered => {
                     self.state = State::Finished;
                     return Some(Err(e));
+                }
+                // item is found and is the right index: return it
+                Ok((result, index)) if index == self.read_index => {
+                    self.read_index += 1;
+                    return Some(result);
+                }
+                // item is found but is not the right index: store it
+                Ok((result, index)) =>  {
+                    self.queue.insert(index, result);
                 }
                 // empty queue after all the threads were joined: we are done
                 Err(TryRecvError::Empty) if self.state == State::Waiting => {
@@ -250,9 +294,10 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
                         l = self.line.trim_start();
                         if l.starts_with('[') {
                             // send the entire frame with the location offsets
-                            let msg = ConsumerInput::new(lines, self.line_offset, self.offset);
+                            let msg = ConsumerInput::new(lines, self.sent_index, self.line_offset, self.offset);
                             send_or_error!(self.s_text, Some(msg));
                             // update the local offsets and bail out
+                            self.sent_index += 1;
                             self.line_offset += local_line_offset + 1;
                             self.offset += local_offset + self.line.len();
                             break;
@@ -261,7 +306,7 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
                             self.state = State::AtEof;
                             // if some lines remain, send them as text
                             if !lines.chars().all(|c| c.is_whitespace()) {
-                                let msg = ConsumerInput::new(lines, self.line_offset, self.offset);
+                                let msg = ConsumerInput::new(lines, self.sent_index, self.line_offset, self.offset);
                                 send_or_error!(self.s_text, Some(msg));
                             }
                             // poison-pill the remaining workers and bail out
@@ -284,6 +329,13 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
 impl<B: BufRead> TryFrom<ThreadedReader<B>> for OboDoc {
     type Error = Error;
     fn try_from(mut reader: ThreadedReader<B>) -> Result<Self, Self::Error> {
+        OboDoc::try_from(&mut reader)
+    }
+}
+
+impl<B: BufRead> TryFrom<&mut ThreadedReader<B>> for OboDoc {
+    type Error = Error;
+    fn try_from(reader: &mut ThreadedReader<B>) -> Result<Self, Self::Error> {
         // extract the header and create the doc
         let header = reader.next().unwrap()?.into_header_frame().unwrap();
 

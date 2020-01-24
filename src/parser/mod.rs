@@ -33,7 +33,9 @@ mod consumer;
 #[doc(inline)]
 pub use fastobo_syntax::OboParser;
 #[doc(inline)]
+/// The production rules of the OBO 1.4 PEG grammar.
 pub use fastobo_syntax::Rule;
+
 pub use self::from_pair::FromPair;
 pub use self::from_slice::FromSlice;
 pub use self::quickfind::QuickFind;
@@ -55,26 +57,25 @@ pub type FrameReader<B> = SequentialReader<B>;
 
 #[cfg(test)]
 mod tests {
-
+    use std::collections::HashSet;
     use std::io::Cursor;
     use textwrap_macros::dedent;
 
     use super::*;
     use crate::semantics::Identified;
 
-
     macro_rules! tests {
         ($constructor:expr) => {
             #[test]
             fn empty() {
-                let res = $constructor(Cursor::new(""));
+                let res = OboDoc::try_from($constructor(Cursor::new("")));
                 let doc = res.expect("document should parse properly");
                 assert!(doc.header().is_empty());
                 assert!(doc.entities().is_empty());
             }
 
             #[test]
-            fn two_frames() {
+            fn ordered() {
                 let txt = dedent!(
                     r#"
                     format-version: 1.2
@@ -84,14 +85,57 @@ mod tests {
 
                     [Term]
                     id: TST:002
+
+                    [Term]
+                    id: TST:003
+
+                    [Term]
+                    id: TST:004
                     "#
                 );
-                let res = $constructor(Cursor::new(&txt));
+                let res = OboDoc::try_from($constructor(Cursor::new(&txt)).ordered(true));
                 let doc = res.expect("document should parse fine");
 
-                assert_eq!(doc.entities().len(), 2);
+                assert_eq!(doc.entities().len(), 4);
                 assert_eq!(doc.entities()[0].as_id().to_string(), "TST:001");
                 assert_eq!(doc.entities()[1].as_id().to_string(), "TST:002");
+                assert_eq!(doc.entities()[2].as_id().to_string(), "TST:003");
+                assert_eq!(doc.entities()[3].as_id().to_string(), "TST:004");
+            }
+
+            #[test]
+            fn unordered() {
+                let txt = dedent!(
+                    r#"
+                    format-version: 1.2
+
+                    [Term]
+                    id: TST:001
+
+                    [Term]
+                    id: TST:002
+
+                    [Term]
+                    id: TST:003
+
+                    [Term]
+                    id: TST:004
+                    "#
+                );
+                let res = OboDoc::try_from($constructor(Cursor::new(&txt)).ordered(false));
+                let doc = res.expect("document should parse fine");
+
+                assert_eq!(doc.entities().len(), 4);
+                let ids: HashSet<String> = doc
+                    .entities()
+                    .iter()
+                    .map(|c| c.as_id().to_string())
+                    .collect();
+
+                assert!(ids.contains("TST:001"));
+                assert!(ids.contains("TST:002"));
+                assert!(ids.contains("TST:003"));
+                assert!(ids.contains("TST:004"));
             }
 
             mod errloc {
@@ -103,7 +147,7 @@ mod tests {
                 #[test]
                 fn invalid_header_date() {
                     let txt = "format-version: 1.4\ndate: nope";
-                    let res = $constructor(Cursor::new(&txt));
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
                     let err = res.expect_err("document should fail to parse");
 
                     let se = match err {
@@ -134,7 +178,7 @@ mod tests {
                 #[test]
                 fn invalid_header_date_indented() {
                     let txt = "format-version: 1.4\n  date: nope";
-                    let res = $constructor(Cursor::new(&txt));
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
                     let err = res.expect_err("document should fail to parse");
 
                     let se = match err {
@@ -165,7 +209,7 @@ mod tests {
                 #[test]
                 fn invalid_frame_def() {
                     let txt = "[Term]\nid: OK\ndef: no quote\n";
-                    let res = $constructor(Cursor::new(&txt));
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
                     let err = res.expect_err("document should fail to parse");
 
                     let se = match err {
@@ -196,7 +240,7 @@ mod tests {
                 #[test]
                 fn invalid_frame_def_2() {
                     let txt = "[Term]\nid: OK\n\n[Term]\nid: NO\ndef: no quote\n";
-                    let res = $constructor(Cursor::new(&txt));
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
                     let err = res.expect_err("document should fail to parse");
 
                     let se = match err {
@@ -227,7 +271,7 @@ mod tests {
                 #[test]
                 fn invalid_frame_def_indented() {
                     let txt = "[Term]\nid: OK\n   def: no quote\n";
-                    let res = $constructor(Cursor::new(&txt));
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
                     let err = res.expect_err("document should fail to parse");
 
                     let se = match err {
@@ -258,7 +302,7 @@ mod tests {
                 #[test]
                 fn invalid_frame_def_indented_2() {
                     let txt = "[Term]\nid: OK\n\n[Term]\nid: NO\n   def: no quote\n";
-                    let res = $constructor(Cursor::new(&txt));
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
                     let err = res.expect_err("document should fail to parse");
 
                     let se = match err {
@@ -291,17 +335,12 @@ mod tests {
 
     mod sequential {
         use super::*;
-        tests!(|x| OboDoc::try_from(SequentialReader::new(x)));
+        tests!(|x| SequentialReader::new(x));
     }
 
     #[cfg(feature = "threading")]
     mod threaded {
         use super::*;
-        tests!(|stream|
-            OboDoc::try_from(ThreadedReader::with_threads(
-                stream,
-                std::num::NonZeroUsize::new(1).unwrap()
-            ))
-        );
+        tests!(|x| ThreadedReader::new(x));
     }
 }

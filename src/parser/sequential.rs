@@ -90,6 +90,15 @@ impl<B: BufRead> SequentialReader<B> {
             header
         }
     }
+
+    /// Make the parser yield frames in the order they appear in the document.
+    ///
+    /// This has no effect on `SequentialReader` since the frames are always
+    /// processed in the document order, but this method is provided for
+    /// consistency of the [`FrameReader`](./type.FrameReader.html) type.
+    pub fn ordered(&mut self, _ordered: bool) -> &mut Self {
+        self
+    }
 }
 
 impl<B: BufRead> AsRef<B> for SequentialReader<B> {
@@ -161,9 +170,9 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
     }
 }
 
-impl<B: BufRead> TryFrom<SequentialReader<B>> for OboDoc {
+impl<B: BufRead> TryFrom<&mut SequentialReader<B>> for OboDoc {
     type Error = Error;
-    fn try_from(mut reader: SequentialReader<B>) -> Result<Self, Self::Error> {
+    fn try_from(reader: &mut SequentialReader<B>) -> Result<Self, Self::Error> {
         // extract the header and create the doc
         let header = reader.next().unwrap()?.into_header_frame().unwrap();
 
@@ -174,5 +183,12 @@ impl<B: BufRead> TryFrom<SequentialReader<B>> for OboDoc {
 
         // return the doc
         Ok(OboDoc::with_header(header).and_entities(entities))
+    }
+}
+
+impl<B: BufRead> TryFrom<SequentialReader<B>> for OboDoc {
+    type Error = Error;
+    fn try_from(mut reader: SequentialReader<B>) -> Result<Self, Self::Error> {
+        OboDoc::try_from(&mut reader)
     }
 }

@@ -21,32 +21,48 @@ use super::FromPair;
 
 // ---
 
-pub struct ConsumerInput {
-    text: String,
-    line_offset: usize,
-    offset: usize,
+pub struct Input {
+    pub text: String,
+    pub index: usize,
+    pub line_offset: usize,
+    pub offset: usize,
 }
 
-impl ConsumerInput {
-    pub fn new(text: String, line_offset: usize, offset: usize) -> Self {
+impl Input {
+    pub fn new(text: String, index: usize, line_offset: usize, offset: usize) -> Self {
         Self {
             text,
+            index,
             line_offset,
             offset
         }
     }
 }
 
+pub struct Output {
+    pub res: Result<Frame, Error>,
+    pub index: usize,
+}
+
+impl Output {
+    pub fn new(res: Result<Frame, Error>, index: usize) -> Self {
+        Self {
+            res,
+            index
+        }
+    }
+}
+
 pub struct Consumer {
-    r_text: Receiver< Option< ConsumerInput > >,
-    s_item: Sender< Result<Frame, Error> >,
+    r_text: Receiver<Option<Input>>,
+    s_item: Sender<Output>,
     handle: Option< JoinHandle<()> >
 }
 
 impl Consumer {
     pub fn new(
-        r_text: Receiver< Option<ConsumerInput> >,
-        s_item: Sender< Result<Frame, Error> >,
+        r_text: Receiver<Option<Input>>,
+        s_item: Sender<Output>,
     ) -> Self {
         Self {
             r_text,
@@ -75,13 +91,15 @@ impl Consumer {
                 match OboParser::parse(Rule::EntitySingle, &msg.text) {
                     Ok(mut pairs) => unsafe {
                         let pair = pairs.next().unwrap();
-                        let res = EntityFrame::from_pair_unchecked(pair);
-                        s_item.send(res.map(Frame::from).map_err(Error::from)).ok();
+                        let frame = EntityFrame::from_pair_unchecked(pair);
+                        let res = frame.map(Frame::from).map_err(Error::from);
+                        s_item.send(Output::new(res, msg.index)).ok();
                     }
                     Err(e) => {
                         let se = SyntaxError::from(e)
                             .with_offsets(msg.line_offset, msg.offset);
-                        s_item.send(Err(Error::from(se))).ok();
+                        let res = Err(Error::from(se));
+                        s_item.send(Output::new(res, msg.index)).ok();
                         return;
                     }
                 }

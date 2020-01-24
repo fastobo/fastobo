@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.1...HEAD
+
+
+## [v0.8.1] - 2020-01-24
+
+[v0.8.1]: https://github.com/fastobo/fastobo/compare/v0.7.5...v0.8.0
+
+### Added
+- [`FrameReader.ordered`](https://docs.rs/fastobo/0.8.1/fastobo/parser/struct.ThreadedReader.html#method.ordered)
+  method to make the reader preserve the order of the frames as they appear
+  in the source document.
+- `TryFrom<&mut FrameReader>` implementation for
+  [`OboDoc`](https://docs.rs/fastobo/latest/fastobo/ast/struct.OboDoc.html)
+  (allows giving a mutable reference and not only taking ownership of the
+  source reader).
 
 
 ## [v0.8.0] - 2020-01-23

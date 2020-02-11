@@ -7,12 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.2...HEAD
+
+
+## [v0.8.2] - 2020-02-11
+
+[v0.8.2]: https://github.com/fastobo/fastobo/compare/v0.8.1...v0.8.2
+
+### Fixed
+- `Display` implementation for the `HeaderClause::Unreserved` variant.
 
 
 ## [v0.8.1] - 2020-01-24
 
-[v0.8.1]: https://github.com/fastobo/fastobo/compare/v0.7.5...v0.8.0
+[v0.8.1]: https://github.com/fastobo/fastobo/compare/v0.8.0...v0.8.1
 
 ### Added
 - [`FrameReader.ordered`](https://docs.rs/fastobo/0.8.1/fastobo/parser/struct.ThreadedReader.html#method.ordered)

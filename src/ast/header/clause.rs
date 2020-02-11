@@ -68,7 +68,7 @@ pub enum HeaderClause {
     Ontology(UnquotedString),
     #[clause(tag = "owl-axioms")]
     OwlAxioms(UnquotedString),
-    #[clause(tag = 0)]
+    #[clause(tag = 0, format = "{0}: {1}")]
     Unreserved(UnquotedString, UnquotedString),
 }
 
@@ -280,5 +280,15 @@ mod tests {
         assert_lt!(fv1, dv2);
         assert_lt!(fv2, dv1);
         assert_lt!(fv2, dv2);
+    }
+
+    #[test]
+    fn display() {
+        let expected = "unreserved-thing: something";
+        let actual = HeaderClause::Unreserved(
+            UnquotedString::new("unreserved-thing"),
+            UnquotedString::new("something")
+        );
+        assert_eq!(&actual.to_string(), expected);
     }
 }

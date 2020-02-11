@@ -23,6 +23,8 @@ pub struct OboClauseVariant {
     tag: Option<syn::Lit>,
     #[darling(default)]
     cardinality: Option<syn::Path>,
+    #[darling(default)]
+    format: Option<syn::LitStr>,
 }
 
 impl OboClauseVariant {
@@ -64,10 +66,21 @@ impl OboClauseVariant {
         let id = &self.ident;
         let tag = self.tag();
 
-        // If the variant contain an option, we need two arms: one where the
-        // value is `Some` and the other when the value is `None`.
-        // NB: limited to a single `Option` per variant.
-        if let Some(idx) = self.fields.iter().position(|ty| is_option(ty)) {
+        if let Some(fmt_string) = self.format.as_ref() {
+            // If an explicit format string is given, use that string
+            // directly using argument bindings from the the format tag.
+
+            let catches: Vec<syn::Pat> = self.field_patterns();
+            let c1 = &catches;
+            let c2 = &catches;
+            vec![parse_quote! {
+                #id( #(ref #c1,)* ) => write!(f, #fmt_string, #(#c2,)*),
+            }]
+        } else if let Some(idx) = self.fields.iter().position(|ty| is_option(ty)) {
+            // If the variant contain an option, we need two arms: one where the
+            // value is `Some` and the other when the value is `None`.
+            // NB: limited to a single `Option` per variant.
+
             // The arm pattern and expression when the field is `None`
             let mut c1_none: Vec<syn::Pat> = self.field_patterns();
             c1_none[idx] = parse_quote!(None);
@@ -76,7 +89,7 @@ impl OboClauseVariant {
 
             // The arm pattern and expression when the field is `Some`
             let mut c1_some: Vec<syn::Pat> = self.field_patterns();
-            let ident = Ident::new(&format!("__{}_{}", &self.ident, idx), Span::call_site());
+            let ident = Ident::new(&format!("__{}_{}", id, idx), Span::call_site());
             c1_some[idx] = parse_quote!(Some(#ident));
             let c2_some: Vec<syn::Pat> = self.field_patterns();
 

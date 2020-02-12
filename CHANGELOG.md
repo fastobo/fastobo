@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.2...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.3...HEAD
+
+
+## [v0.8.3] - 2020-02-12
+
+[v0.8.3]: https://github.com/fastobo/fastobo/compare/v0.8.2...v0.8.3
+
+### Fixed
+- `IsoDateTime` formatting in `DD-MM-YYYY` format instead of `YYYY-MM-DD` 
+  format when serialized to `xsd:datetime`.
 
 
 ## [v0.8.2] - 2020-02-11

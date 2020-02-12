@@ -240,11 +240,15 @@ impl Display for IsoDateTime {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(
             f,
-            "{:02}-{:02}-{:04}T{:02}:{:02}:{:02}",
-            self.day, self.month, self.year, self.hour, self.minute, self.second,
+            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}",
+            self.year, self.month, self.day, self.hour, self.minute, self.second,
         )?;
-        match self.timezone {
-            Some(ref tz) => tz.fmt(f),
+        if let Some(ref frac) = self.fraction() {
+            let n = format!("{:.02}", frac);
+            f.write_str(&n[1..])?;
+        }
+        match self.timezone() {
+            Some(tz) => tz.fmt(f),
             None => Ok(()),
         }
     }
@@ -309,13 +313,17 @@ pub enum IsoTimezone {
 impl DateTime for IsoDateTime {
     /// Generate an XML Schema datetime serialization of the `IsoDateTime`.
     fn to_xsd_datetime(&self) -> String {
-        let tz = match self.timezone {
+        let tz = match self.timezone() {
             None => String::new(),
-            Some(ref dt) => dt.to_string(),
+            Some(dt) => dt.to_string(),
+        };
+        let fraction = match self.fraction() {
+            None => String::new(),
+            Some(frac) => format!("{:0.02}", frac)[1..].to_string(),
         };
         format!(
-            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}",
-            self.year, self.month, self.day, self.hour, self.minute, self.second, tz,
+            "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}{}",
+            self.year, self.month, self.day, self.hour, self.minute, self.second, fraction, tz,
         )
     }
 }
@@ -379,37 +387,24 @@ mod tests {
 
         use super::*;
 
+        macro_rules! assert_date_to_xsd {
+            ($x:expr) => {assert_date_to_xsd!($x, $x)};
+            ($x:expr, $y:expr) => {
+                match IsoDateTime::from_str($x) {
+                    Ok(x) => self::assert_eq!(x.to_xsd_datetime(), $y, "{}", x),
+                    Err(e) => panic!("{}", e),
+                }
+            }
+        }
+
         #[test]
         fn from_str() {
-            match IsoDateTime::from_str("2017-1-24T14:41:36Z") {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
-
-            match IsoDateTime::from_str("2015-08-11T15:05:12Z") {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
-
-            match IsoDateTime::from_str("2016-10-26T10:51:48Z") {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
-
-            match IsoDateTime::from_str("2017-1-24T14:41:36Z") {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
-
-            match IsoDateTime::from_str("2017-1-24T14:41:36.05Z") {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
-
-            match IsoDateTime::from_str("2017-1-24T14:41:36+01:30") {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
+            assert_date_to_xsd!("2017-1-24T14:41:36Z", "2017-01-24T14:41:36Z");
+            assert_date_to_xsd!("2015-08-11T15:05:12Z");
+            assert_date_to_xsd!("2016-10-26T10:51:48Z");
+            assert_date_to_xsd!("2017-1-24T14:41:36Z", "2017-01-24T14:41:36Z");
+            assert_date_to_xsd!("2017-1-24T14:41:36.05Z", "2017-01-24T14:41:36.05Z");
+            assert_date_to_xsd!("2017-1-24T14:41:36+01:30", "2017-01-24T14:41:36+01:30");
         }
 
     }

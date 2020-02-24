@@ -33,7 +33,7 @@ features = [ "_doc" ]
 
 [dependencies]
 err-derive = "0.2.0"
-pest = "=2.1.2"
+pest = "=2.1.3"
 opaque_typedef = "0.0.5"
 opaque_typedef_macros = "0.0.5"
 ordered-float = "1.0.2"

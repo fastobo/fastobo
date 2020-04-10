@@ -55,7 +55,6 @@ macro_rules! foundrytest {
 
 foundrytest!(po);
 foundrytest!(xao);
-foundrytest!(zfa);
 foundrytest!(bfo);
 foundrytest!(pato);
 foundrytest!(fao);
@@ -83,7 +82,6 @@ foundrytest!(peco);
 foundrytest!(apo);
 foundrytest!(ehdaa2);
 foundrytest!(taxrank);
-foundrytest!(plana);
 foundrytest!(ddpheno);
 foundrytest!(wbphenotype);
 foundrytest!(fbdv);
@@ -97,6 +95,9 @@ foundrytest!(doid);
 foundrytest!(zeco);
 foundrytest!(ro);
 foundrytest!(cl);
+foundrytest!(mi);
+foundrytest!(eco);
+foundrytest!(trans);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -131,11 +132,6 @@ foundrytest!(
 
 // --- Expected failures -----------------------------------------------------
 
-// Outdated syntax (`exact_synonym`, `xref_analog`)
-foundrytest!(
-    #[ignore]
-    trans
-);
 foundrytest!(
     #[ignore]
     fix
@@ -180,10 +176,6 @@ foundrytest!(
     #[ignore]
     mmo
 );
-foundrytest!(
-    #[ignore]
-    mi
-);
 // Invalid syntax
 foundrytest!(
     #[ignore]
@@ -206,6 +198,14 @@ foundrytest!(
     #[ignore]
     xlmod
 );
+foundrytest!(
+    #[ignore]
+    plana
+);
+foundrytest!(
+    #[ignore]
+    zfa
+);
 // Unescaped quotes in QuotedString
 foundrytest!(
     #[ignore]
@@ -225,9 +225,4 @@ foundrytest!(
 foundrytest!(
     #[ignore]
     cmo
-);
-// Invalid ISBN
-foundrytest!(
-    #[ignore]
-    eco
 );

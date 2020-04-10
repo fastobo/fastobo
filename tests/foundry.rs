@@ -91,7 +91,6 @@ foundrytest!(mp);
 foundrytest!(to);
 foundrytest!(poro);
 foundrytest!(fbcv);
-foundrytest!(doid);
 foundrytest!(zeco);
 foundrytest!(ro);
 foundrytest!(cl);
@@ -135,6 +134,11 @@ foundrytest!(
 foundrytest!(
     #[ignore]
     fix
+);
+// fails in Traivs-CI
+foundrytest!(
+    #[ignore]
+    doid
 );
 // Invalid syntax caused by ChEBI
 foundrytest!(

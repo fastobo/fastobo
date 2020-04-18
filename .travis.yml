@@ -24,7 +24,7 @@ script:
 - ci/travis/script.sh
 
 after_script:
-- curl -SsL "https://codecov.io/bash" | bash
+- curl -SsL "https://codecov.io/bash" | bash -s - -y ci/codecov.yml
 
 before_cache:
 - cargo cache -a

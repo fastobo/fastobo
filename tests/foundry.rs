@@ -75,7 +75,6 @@ foundrytest!(pdumdv);
 foundrytest!(oba);
 foundrytest!(hp);
 foundrytest!(phipo);
-foundrytest!(so);
 foundrytest!(mmusdv);
 foundrytest!(hsapdv);
 foundrytest!(peco);
@@ -130,6 +129,11 @@ foundrytest!(
 );
 
 // --- Expected failures -----------------------------------------------------
+
+foundrytest!(
+    #[ignore]
+    so
+);
 
 foundrytest!(
     #[ignore]

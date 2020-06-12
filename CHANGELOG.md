@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.3...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.4...HEAD
+
+
+## [v0.8.4] - 2020-06-12
+
+[v0.8.4]: https://github.com/fastobo/fastobo/compare/v0.8.3...v0.8.4
+
+### Changed
+- Relax exact version requirement for `pest` dependency.
+
+### Added
+- `SequentialParser.into_inner` method allowing to retrieve inner `BufRead`
+  from a `SequentialParser` instance.
 
 
 ## [v0.8.3] - 2020-02-12

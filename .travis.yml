@@ -7,7 +7,7 @@ cache:
 rust:
 - stable
 - beta
-- nightly
+- nightly-2020-06-02
 
 env:
   global:

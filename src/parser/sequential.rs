@@ -99,6 +99,11 @@ impl<B: BufRead> SequentialReader<B> {
     pub fn ordered(&mut self, _ordered: bool) -> &mut Self {
         self
     }
+
+    /// Consume the reader and extract the internal reader.
+    pub fn into_inner(self) -> B {
+        self.stream
+    }
 }
 
 impl<B: BufRead> AsRef<B> for SequentialReader<B> {

@@ -76,10 +76,10 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.prefix().is_canonical());
 /// assert_eq!(id.prefix(), "GO");
 /// ```
-#[derive(Clone, Debug, Eq, Ord)]
+#[derive(Clone, Debug, Eq, OpaqueTypedef, Ord)]
+#[opaque_typedef(derive(FromInner))]
 pub struct IdentPrefix {
     value: String,
-    canonical: bool,
 }
 
 impl IdentPrefix {
@@ -88,10 +88,8 @@ impl IdentPrefix {
     where
         S: Into<String>,
     {
-        let value = prefix.into();
         Self {
-            canonical: is_canonical(&value),
-            value,
+            value: prefix.into()
         }
     }
 
@@ -104,20 +102,21 @@ impl IdentPrefix {
     /// assert!(IdentPrefix::new(String::from("GO")).is_canonical());
     /// ```
     pub fn is_canonical(&self) -> bool {
-        self.canonical
+        // self.canonical
+        is_canonical(&self.value)
     }
 
-    /// Create a new `IdPrefix` without checking if it is canonical or not.
-    ///
-    /// This is unsafe because the `canonical` flag will be used to determine
-    /// if the prefix needs escaping. If not set right, the syntax of the
-    /// produced serialization could be invalid.
-    pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
-        Self {
-            canonical,
-            value: s,
-        }
-    }
+    // /// Create a new `IdPrefix` without checking if it is canonical or not.
+    // ///
+    // /// This is unsafe because the `canonical` flag will be used to determine
+    // /// if the prefix needs escaping. If not set right, the syntax of the
+    // /// produced serialization could be invalid.
+    // pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
+    //     Self {
+    //         canonical,
+    //         value: s,
+    //     }
+    // }
 
     /// Get the prefix as a string slice.
     pub fn as_str(&self) -> &str {
@@ -148,12 +147,6 @@ impl From<IdentPrefix> for String {
     }
 }
 
-impl From<String> for IdentPrefix {
-    fn from(s: String) -> Self {
-        Self::new(s)
-    }
-}
-
 impl From<&str> for IdentPrefix {
     fn from(s: &str) -> Self {
         Self::new(s)
@@ -166,7 +159,7 @@ impl<'i> FromPair<'i> for IdentPrefix {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
-            return Ok(Self::new_unchecked(inner.as_str().to_string(), true));
+            return Ok(Self::new(inner.as_str().to_string()));
         }
 
         // Unescape the prefix if it was not produced by CanonicalIdPrefix.
@@ -208,7 +201,7 @@ impl PartialOrd for IdentPrefix {
 
 impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
     fn share(&'a self) -> IdPrefix<'a> {
-        unsafe { IdPrefix::new_unchecked(&self.value, self.canonical) }
+        IdPrefix::new(&self.value)
     }
 }
 
@@ -216,14 +209,12 @@ impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
 pub struct IdPrefix<'a> {
     value: &'a str,
-    canonical: bool,
 }
 
 impl<'a> IdPrefix<'a> {
-    /// Create a new `IdPrf` from a borrowed string slice.
+    /// Create a new `IdPrefix` from a borrowed string slice.
     pub fn new(s: &'a str) -> Self {
         Self {
-            canonical: is_canonical(s),
             value: s,
         }
     }
@@ -232,12 +223,8 @@ impl<'a> IdPrefix<'a> {
         self.value
     }
 
-    /// Create a new `IdPrf` without checking if it is canonical or not.
-    pub unsafe fn new_unchecked(s: &'a str, canonical: bool) -> Self {
-        Self {
-            value: s,
-            canonical,
-        }
+    pub fn is_canonical(&self) -> bool {
+        is_canonical(&self.value)
     }
 }
 
@@ -249,7 +236,7 @@ impl<'a> AsRef<str> for IdPrefix<'a> {
 
 impl<'a> Display for IdPrefix<'a> {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        if self.canonical {
+        if self.is_canonical() {
             f.write_str(&self.value)
         } else {
             escape(f, &self.value)
@@ -268,14 +255,11 @@ impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {
-            Ok(Cow::Borrowed(IdPrefix::new_unchecked(inner.as_str(), true)))
+            Ok(Cow::Borrowed(IdPrefix::new(inner.as_str())))
         } else if inner.as_str().find('\\').is_some() {
             IdentPrefix::from_pair_unchecked(inner).map(Cow::Owned)
         } else {
-            Ok(Cow::Borrowed(IdPrefix::new_unchecked(
-                inner.as_str(),
-                false,
-            )))
+            Ok(Cow::Borrowed(IdPrefix::new(inner.as_str())))
         }
     }
 }
@@ -296,7 +280,7 @@ impl<'a> PartialOrd for IdPrefix<'a> {
 impl<'a> Redeem<'a> for IdPrefix<'a> {
     type Owned = IdentPrefix;
     fn redeem(&self) -> IdentPrefix {
-        unsafe { IdentPrefix::new_unchecked(self.value.to_string(), self.canonical) }
+        IdentPrefix::new(self.value.to_string())
     }
 }
 

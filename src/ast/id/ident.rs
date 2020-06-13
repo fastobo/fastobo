@@ -103,6 +103,7 @@ impl<'a> Share<'a, Id<'a>> for Ident {
 }
 
 /// A borrowed `Identifier`.
+#[derive(Clone, Debug, Hash)]
 pub enum Id<'a> {
     Prefixed(Cow<'a, PrefixedId<'a>>),
     Unprefixed(Cow<'a, &'a UnprefixedId>),
@@ -169,6 +170,9 @@ impl<'a> Redeem<'a> for Id<'a> {
 mod tests {
 
     use super::*;
+    use crate::parser::FromSlice;
+    use crate::ast::IdPrefix;
+    use crate::ast::IdLocal;
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
@@ -186,6 +190,14 @@ mod tests {
         let actual = Ident::from_str("goslim_plant").unwrap();
         let expected = Ident::from(UnprefixedIdent::new("goslim_plant"));
         assert_eq!(actual, expected);
+
+        let actual = Ident::from_str(r#"PDBeChem:Copper(II)\ chloride"#).unwrap();
+        let expected = Ident::from(PrefixedIdent::new("PDBeChem", "Copper(II) chloride"));
+        assert_eq!(actual, expected);
+
+        let actual = Id::from_slice(r#"PDBeChem:Copper(II)\ chloride"#).unwrap();
+        let expected = Id::from(PrefixedId::new(IdPrefix::new("PDBeChem"), IdLocal::new("Copper(II) chloride")));
+        assert_eq!(actual.redeem(), expected.redeem());
     }
 
     #[test]

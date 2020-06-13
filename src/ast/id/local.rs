@@ -242,7 +242,11 @@ impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
         if inner.as_rule() == Rule::CanonicalIdLocal {
             Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), true)))
         } else if inner.as_str().find('\\').is_some() {
-            IdentLocal::from_pair_unchecked(inner).map(Cow::Owned)
+            let escaped = inner.as_str().quickcount(b'\\');
+            let mut local = String::with_capacity(inner.as_str().len() + escaped);
+            unescape(&mut local, inner.as_str())
+                .expect("fmt::Write cannot fail on a String");
+            Ok(Cow::Owned(IdentLocal::new(local)))
         } else {
             Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), false)))
         }

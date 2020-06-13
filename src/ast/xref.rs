@@ -100,6 +100,12 @@ impl<'i> FromPair<'i> for Xref {
 }
 impl_fromstr!(Xref);
 
+impl From<Ident> for Xref {
+    fn from(id: Ident) -> Self {
+        Self::new(id)
+    }
+}
+
 impl Identified for Xref {
     fn as_id(&self) -> &Ident {
         &self.id
@@ -204,6 +210,49 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
+
+    mod xref {
+
+        use super::*;
+
+        #[test]
+        fn as_id() {
+            let actual = Xref::from_str("PMID:26585518").unwrap();
+            self::assert_eq!(actual.as_id(), &Ident::from(PrefixedIdent::new("PMID", "26585518")));
+        }
+
+        #[test]
+        fn new() {
+            let actual = Xref::from_str("PMID:26585518").unwrap();
+            let mut expected = Xref::new(PrefixedIdent::new("PMID", "26585518"));
+            self::assert_eq!(actual, expected);
+            assert!(expected.description().is_none());
+            assert!(expected.description_mut().is_none());
+        }
+
+        #[test]
+        fn with_desc() {
+            let actual = Xref::from_str("PMID:26585518 \"OrthoANI paper\"").unwrap();
+            let mut expected = Xref::with_desc(
+                PrefixedIdent::new("PMID", "26585518"),
+                QuotedString::from("OrthoANI paper")
+            );
+            self::assert_eq!(actual, expected);
+            assert!(expected.description().is_some());
+            assert!(expected.description_mut().is_some());
+        }
+
+        #[test]
+        fn display() {
+            let repr1 = "PMID:26585518";
+            let actual1 = Xref::from_str(repr1).unwrap();
+            self::assert_eq!(actual1.to_string(), repr1);
+
+            let repr2 = "PMID:26585518 \"OrthoANI paper\"";
+            let actual2 = Xref::from_str(repr2).unwrap();
+            self::assert_eq!(actual2.to_string(), repr2);
+        }
+    }
 
     mod list {
 

@@ -32,3 +32,4 @@ macro_rules! roundtriptest {
 
 roundtriptest!(msterm);
 roundtriptest!(mslite);
+roundtriptest!(importlist);

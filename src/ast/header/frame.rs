@@ -87,13 +87,13 @@ impl HeaderFrame {
     }
 
     /// Get the data version of the ontology, if any is declared.
-    pub fn data_version(&self) -> Result<&str, CardinalityError> {
-        let mut version: Option<&str> = None;
+    pub fn data_version(&self) -> Result<&UnquotedString, CardinalityError> {
+        let mut version: Option<&UnquotedString> = None;
         for clause in &self.clauses {
             if let HeaderClause::DataVersion(v) = clause {
                 match version {
                     Some(_) => return Err(CardinalityError::duplicate("data-version")),
-                    None => version = Some(v.as_str()),
+                    None => version = Some(&v),
                 }
             }
         }
@@ -215,6 +215,25 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
+    fn data_version() {
+        let mut frame = HeaderFrame::new();
+        self::assert_eq!(
+            frame.data_version(),
+            Err(CardinalityError::missing("data-version"))
+        );
+
+        let v = UnquotedString::from("1.4");
+        frame.push(HeaderClause::DataVersion(v.clone()));
+        self::assert_eq!(frame.data_version(), Ok(&v));
+
+        frame.push(HeaderClause::DataVersion(v.clone()));
+        self::assert_eq!(
+            frame.data_version(),
+            Err(CardinalityError::duplicate("data-version"))
+        );
+    }
+
+    #[test]
     fn default_namespace() {
         let mut frame = HeaderFrame::new();
         self::assert_eq!(
@@ -230,6 +249,25 @@ mod tests {
         self::assert_eq!(
             frame.default_namespace(),
             Err(CardinalityError::duplicate("default-namespace"))
+        );
+    }
+
+    #[test]
+    fn format_version() {
+        let mut frame = HeaderFrame::new();
+        self::assert_eq!(
+            frame.format_version(),
+            Err(CardinalityError::missing("format-version"))
+        );
+
+        let v = UnquotedString::from("1.4");
+        frame.push(HeaderClause::FormatVersion(v.clone()));
+        self::assert_eq!(frame.format_version(), Ok(&v));
+
+        frame.push(HeaderClause::FormatVersion(v.clone()));
+        self::assert_eq!(
+            frame.format_version(),
+            Err(CardinalityError::duplicate("format-version"))
         );
     }
 

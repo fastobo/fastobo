@@ -154,3 +154,48 @@ impl Orderable for EntityFrame {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn as_term_frame() {
+        let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
+        assert!(frame.as_term_frame().is_some());
+        let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
+        assert!(frame.as_term_frame().is_none());
+        let frame = EntityFrame::from_str("[Instance]\nid: TEST:002\n").unwrap();
+        assert!(frame.as_term_frame().is_none());
+    }
+
+    #[test]
+    fn as_typedef_frame() {
+        let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
+        assert!(frame.as_typedef_frame().is_none());
+        let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
+        assert!(frame.as_typedef_frame().is_some());
+        let frame = EntityFrame::from_str("[Instance]\nid: TEST:002\n").unwrap();
+        assert!(frame.as_typedef_frame().is_none());
+    }
+
+    #[test]
+    fn as_instance_frame() {
+        let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
+        assert!(frame.as_instance_frame().is_none());
+        let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
+        assert!(frame.as_instance_frame().is_none());
+        let frame = EntityFrame::from_str("[Instance]\nid: TEST:002\n").unwrap();
+        assert!(frame.as_instance_frame().is_some());
+    }
+
+    #[test]
+    fn as_id() {
+        let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
+        assert_eq!(frame.as_id(), &Ident::from_str("TEST:001").unwrap());
+        let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
+        assert_eq!(frame.as_id(), &Ident::from_str("TEST:002").unwrap());
+        let frame = EntityFrame::from_str("[Instance]\nid: TEST:003\n").unwrap();
+        assert_eq!(frame.as_id(), &Ident::from_str("TEST:003").unwrap());
+    }
+}

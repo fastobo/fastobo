@@ -9,7 +9,7 @@ use std::fmt::Write;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use opaque_typedef::OpaqueTypedefUnsized;
+use opaque_typedef::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::error::Error;
@@ -76,11 +76,9 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.prefix().is_canonical());
 /// assert_eq!(id.prefix(), "GO");
 /// ```
-#[derive(Clone, Debug, Eq, OpaqueTypedef, Ord)]
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
-pub struct IdentPrefix {
-    value: String,
-}
+pub struct IdentPrefix(String);
 
 impl IdentPrefix {
     /// Create a new identifier prefix.
@@ -88,9 +86,7 @@ impl IdentPrefix {
     where
         S: Into<String>,
     {
-        Self {
-            value: prefix.into()
-        }
+        Self(prefix.into())
     }
 
     /// Check if the identifier prefix is canonical or not.
@@ -103,51 +99,39 @@ impl IdentPrefix {
     /// ```
     pub fn is_canonical(&self) -> bool {
         // self.canonical
-        is_canonical(&self.value)
+        is_canonical(&self.0)
     }
-
-    // /// Create a new `IdPrefix` without checking if it is canonical or not.
-    // ///
-    // /// This is unsafe because the `canonical` flag will be used to determine
-    // /// if the prefix needs escaping. If not set right, the syntax of the
-    // /// produced serialization could be invalid.
-    // pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
-    //     Self {
-    //         canonical,
-    //         value: s,
-    //     }
-    // }
 
     /// Get the prefix as a string slice.
     pub fn as_str(&self) -> &str {
-        &self.value
+        &self.0
     }
 
     /// Extract the unescaped prefix as a `String`.
     pub fn into_string(self) -> String {
-        self.value
+        self.0
     }
 }
 
 impl AsRef<str> for IdentPrefix {
     fn as_ref(&self) -> &str {
-        &self.value
+        &self.0
     }
 }
 
 impl Display for IdentPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         if self.is_canonical() {
-            f.write_str(&self.value)
+            f.write_str(&self.0)
         } else {
-            escape(f, &self.value)
+            escape(f, &self.0)
         }
     }
 }
 
 impl From<IdentPrefix> for String {
     fn from(prefix: IdentPrefix) -> String {
-        prefix.value
+        prefix.0
     }
 }
 
@@ -179,27 +163,9 @@ impl<'i> FromPair<'i> for IdentPrefix {
 }
 impl_fromstr!(IdentPrefix);
 
-impl Hash for IdentPrefix {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.value.hash(state)
-    }
-}
-
-impl PartialEq for IdentPrefix {
-    fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
-    }
-}
-
 impl PartialEq<str> for IdentPrefix {
     fn eq(&self, other: &str) -> bool {
-        self.value == other
-    }
-}
-
-impl PartialOrd for IdentPrefix {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.value.partial_cmp(&other.value)
+        self.0 == other
     }
 }
 

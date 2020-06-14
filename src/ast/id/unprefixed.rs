@@ -6,7 +6,7 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::ops::Deref;
 
-use opaque_typedef::OpaqueTypedefUnsized;
+use opaque_typedef::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::error::Error;
@@ -50,9 +50,8 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 
 /// An identifier without a prefix.
 #[derive(Clone, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
-pub struct UnprefixedIdent {
-    value: String,
-}
+#[opaque_typedef(derive(FromInner))]
+pub struct UnprefixedIdent(String);
 
 impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
@@ -60,36 +59,31 @@ impl UnprefixedIdent {
     where
         S: Into<String>,
     {
-        Self { value: id.into() }
+        // FIXME: check the given string is a valid unprefixed identifier.
+        Self(id.into())
     }
 
     /// Return a reference to the underlying `str`.
     pub fn as_str(&self) -> &str {
-        &self.value
+        &self.0
     }
 }
 
 impl AsRef<str> for UnprefixedIdent {
     fn as_ref(&self) -> &str {
-        &self.value
+        &self.0
     }
 }
 
 impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        escape(f, &self.value)
+        escape(f, &self.0)
     }
 }
 
 impl From<UnprefixedIdent> for String {
     fn from(id: UnprefixedIdent) -> Self {
-        id.value
-    }
-}
-
-impl From<String> for UnprefixedIdent {
-    fn from(s: String) -> Self {
-        Self::new(s)
+        id.0
     }
 }
 

@@ -6,7 +6,7 @@ use std::fmt::Write;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use opaque_typedef::OpaqueTypedefUnsized;
+use opaque_typedef::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::error::Error;
@@ -67,11 +67,9 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.local().is_canonical());
 /// assert_eq!(id.local(), "0046154");
 /// ```
-#[derive(Clone, Debug, Ord, Eq)]
-pub struct IdentLocal {
-    value: String,
-    canonical: bool,
-}
+#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
+#[opaque_typedef(derive(FromInner))]
+pub struct IdentLocal(String);
 
 impl IdentLocal {
     /// Create a new local identifier.
@@ -79,52 +77,34 @@ impl IdentLocal {
     where
         S: Into<String>,
     {
-        let value = local.into();
-        Self {
-            canonical: is_canonical(&value),
-            value,
-        }
+        Self(local.into())
     }
 
     /// Check if the local identifier is canonical or not.
     pub fn is_canonical(&self) -> bool {
-        self.canonical
-    }
-
-    /// Create a new `IdLocal` without checking if it is canonical.
-    pub unsafe fn new_unchecked(s: String, canonical: bool) -> Self {
-        Self {
-            value: s,
-            canonical,
-        }
+        is_canonical(&self.0)
     }
 
     /// Get the local identifier as a string slice.
     pub fn as_str(&self) -> &str {
-        &self.value
+        &self.0
     }
 
     /// Extract the unescaped local identifier as a `String`.
     pub fn into_string(self) -> String {
-        self.value
+        self.0
     }
 }
 
 impl AsRef<str> for IdentLocal {
     fn as_ref(&self) -> &str {
-        &self.value
+        &self.0
     }
 }
 
 impl From<IdentLocal> for String {
     fn from(id: IdentLocal) -> Self {
-        id.value
-    }
-}
-
-impl From<String> for IdentLocal {
-    fn from(s: String) -> Self {
-        Self::new(s)
+        id.0
     }
 }
 
@@ -137,9 +117,9 @@ impl From<&str> for IdentLocal {
 impl Display for IdentLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         if self.is_canonical() {
-            f.write_str(&self.value)
+            f.write_str(&self.0)
         } else {
-            escape(f, &self.value)
+            escape(f, &self.0)
         }
     }
 }
@@ -150,7 +130,7 @@ impl<'i> FromPair<'i> for IdentLocal {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {
-            return Ok(Self::new_unchecked(inner.as_str().to_string(), true));
+            return Ok(Self::new(inner.as_str().to_string()));
         }
 
         // Unescape the local ID if it is non canonical.
@@ -167,27 +147,9 @@ impl<'i> FromPair<'i> for IdentLocal {
 }
 impl_fromstr!(IdentLocal);
 
-impl Hash for IdentLocal {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.value.hash(state)
-    }
-}
-
-impl PartialEq for IdentLocal {
-    fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
-    }
-}
-
 impl PartialEq<str> for IdentLocal {
     fn eq(&self, other: &str) -> bool {
-        self.value == other
-    }
-}
-
-impl PartialOrd for IdentLocal {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.value.partial_cmp(&other.value)
+        self.0 == other
     }
 }
 

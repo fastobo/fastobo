@@ -16,9 +16,6 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 /// The header frame, containing metadata about an OBO document.
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, OpaqueTypedef)]

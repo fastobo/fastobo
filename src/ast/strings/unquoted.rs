@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::borrow::Cow;
 use std::borrow::ToOwned;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -14,9 +15,6 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 // ---------------------------------------------------------------------------
 
@@ -151,12 +149,6 @@ impl<'i> FromPair<'i> for UnquotedString {
 }
 impl_fromstr!(UnquotedString);
 
-impl<'a> Share<'a, &'a UnquotedStr> for UnquotedString {
-    fn share(&'a self) -> &'a UnquotedStr {
-        UnquotedStr::new(&self.value)
-    }
-}
-
 /// A borrowed `UnquotedString`.
 #[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
@@ -176,7 +168,7 @@ impl<'a> Display for UnquotedStr {
     }
 }
 
-impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
+impl<'i> FromPair<'i> for Cow<'i, UnquotedStr> {
     const RULE: Rule = Rule::UnquotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         if pair.as_str().quickfind(b'\\').is_some() {
@@ -186,18 +178,11 @@ impl<'i> FromPair<'i> for Cow<'i, &'i UnquotedStr> {
         }
     }
 }
-impl_fromslice!('i, Cow<'i, &'i UnquotedStr>);
+// impl_fromslice!('i, Cow<'i, &'i UnquotedStr>);
 
 impl ToOwned for UnquotedStr {
     type Owned = UnquotedString;
     fn to_owned(&self) -> UnquotedString {
-        UnquotedString::new(self.0.to_owned())
-    }
-}
-
-impl<'a> Redeem<'a> for &'a UnquotedStr {
-    type Owned = UnquotedString;
-    fn redeem(&'a self) -> UnquotedString {
         UnquotedString::new(self.0.to_owned())
     }
 }

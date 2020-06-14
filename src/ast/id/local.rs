@@ -14,9 +14,6 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
@@ -139,7 +136,11 @@ impl From<&str> for IdentLocal {
 
 impl Display for IdentLocal {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.share().fmt(f)
+        if self.is_canonical() {
+            f.write_str(&self.value)
+        } else {
+            escape(f, &self.value)
+        }
     }
 }
 
@@ -187,89 +188,6 @@ impl PartialEq<str> for IdentLocal {
 impl PartialOrd for IdentLocal {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.value.partial_cmp(&other.value)
-    }
-}
-
-impl<'a> Share<'a, IdLocal<'a>> for IdentLocal {
-    fn share(&'a self) -> IdLocal<'a> {
-        unsafe { IdLocal::new_unchecked(&self.value, self.canonical) }
-    }
-}
-
-/// A borrowed `IdLocal`.
-#[derive(Clone, Debug, Ord, PartialEq, Hash, Eq)]
-pub struct IdLocal<'a> {
-    value: &'a str,
-    canonical: bool,
-}
-
-impl<'a> IdLocal<'a> {
-    pub fn new(s: &'a str) -> Self {
-        Self {
-            canonical: is_canonical(s),
-            value: s,
-        }
-    }
-
-    pub unsafe fn new_unchecked(s: &'a str, canonical: bool) -> Self {
-        Self {
-            value: s,
-            canonical,
-        }
-    }
-}
-
-impl<'a> AsRef<str> for IdLocal<'a> {
-    fn as_ref(&self) -> &str {
-        self.value
-    }
-}
-
-impl<'a> Display for IdLocal<'a> {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        if self.canonical {
-            f.write_str(&self.value)
-        } else {
-            escape(f, &self.value)
-        }
-    }
-}
-
-impl<'i> FromPair<'i> for Cow<'i, IdLocal<'i>> {
-    const RULE: Rule = Rule::IdLocal;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        let inner = pair.into_inner().next().unwrap();
-        if inner.as_rule() == Rule::CanonicalIdLocal {
-            Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), true)))
-        } else if inner.as_str().find('\\').is_some() {
-            let escaped = inner.as_str().quickcount(b'\\');
-            let mut local = String::with_capacity(inner.as_str().len() + escaped);
-            unescape(&mut local, inner.as_str())
-                .expect("fmt::Write cannot fail on a String");
-            Ok(Cow::Owned(IdentLocal::new(local)))
-        } else {
-            Ok(Cow::Borrowed(IdLocal::new_unchecked(inner.as_str(), false)))
-        }
-    }
-}
-impl_fromslice!('i, Cow<'i, IdLocal<'i>>);
-
-impl<'a> PartialEq<str> for IdLocal<'a> {
-    fn eq(&self, other: &str) -> bool {
-        self.value == other
-    }
-}
-
-impl<'a> PartialOrd for IdLocal<'a> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.value.partial_cmp(&other.value)
-    }
-}
-
-impl<'a> Redeem<'a> for IdLocal<'a> {
-    type Owned = IdentLocal;
-    fn redeem(&self) -> Self::Owned {
-        unsafe { IdentLocal::new_unchecked(self.value.to_owned(), self.canonical) }
     }
 }
 

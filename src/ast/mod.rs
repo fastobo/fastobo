@@ -5,9 +5,20 @@
 //! [`FromSlice::from_slice`], from a file with [`fastobo::from_file`], or from
 //! a buffered reader with [`fastobo::from_stream`].
 //!
+//! # About `FromStr`
+//! All types in this module should implement `FromStr` to allow them to be
+//! read from their string *serialization*. However, some types are simple
+//! wrappers for string types (e.g. [`UnquotedString`] and [`QuotedString`])
+//! and can be constructed from their string *value* using the `From<&str>`
+//! implementation. Make sure not to confuse how you instantiate these types
+//! depending on the content of the string you use.
+//!
+//! [`FromStr`]: https://doc.rust-lang.org/std/str/trait.FromStr.html
 //! [`FromStr::from_str`]: https://doc.rust-lang.org/std/str/trait.FromStr.html#tymethod.from_str
 //! [`FromSlice::from_slice`]: ../parser/trait.FromSlice.html#method.from_slice
 //! [`OboDoc`]: ./struct.OboDoc.html
+//! [`QuotedString`]: ./struct.QuotedString.html
+//! [`UnquotedString`]: ./struct.UnquotedString.html
 //! [`fastobo::from_file`]: ../fn.from_file.html
 //! [`fastobo::from_stream`]: ../fn.from_file.html
 //! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.

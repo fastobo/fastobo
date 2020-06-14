@@ -7,17 +7,12 @@ use std::fmt::Write;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
-use super::IdLocal;
-use super::IdPrefix;
 use super::IdentLocal;
 use super::IdentPrefix;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 /// An identifier with a prefix.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
@@ -102,7 +97,10 @@ impl PrefixedIdent {
 
 impl Display for PrefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.share().fmt(f)
+        self.prefix
+            .fmt(f)
+            .and(f.write_char(':'))
+            .and(self.local.fmt(f))
     }
 }
 
@@ -124,66 +122,6 @@ impl PartialOrd for PrefixedIdent {
             Some(Ordering::Equal) => self.local.partial_cmp(&other.local),
             Some(ord) => Some(ord),
         }
-    }
-}
-
-impl<'a> Share<'a, PrefixedId<'a>> for PrefixedIdent {
-    fn share(&'a self) -> PrefixedId<'a> {
-        PrefixedId::new(self.prefix.share(), self.local.share())
-    }
-}
-
-/// A borrowed `PrefixedIdent`.
-#[derive(Clone, Debug, Hash)]
-pub struct PrefixedId<'a> {
-    prefix: Cow<'a, IdPrefix<'a>>,
-    local: Cow<'a, IdLocal<'a>>,
-}
-
-impl<'a> PrefixedId<'a> {
-    /// Create a new `PrefixedId` from references.
-    pub fn new(prefix: IdPrefix<'a>, local: IdLocal<'a>) -> Self {
-        Self {
-            prefix: Cow::Borrowed(prefix),
-            local: Cow::Borrowed(local),
-        }
-    }
-
-    /// Get a reference to the prefix of the `PrefixedId`.
-    pub fn prefix(&'a self) -> IdPrefix<'a> {
-        self.prefix.share()
-    }
-
-    /// Get a reference to the local component of the `PrefixedId`.
-    pub fn local(&'a self) -> IdLocal<'a> {
-        self.local.share()
-    }
-}
-
-impl<'a> Display for PrefixedId<'a> {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.prefix
-            .fmt(f)
-            .and(f.write_char(':'))
-            .and(self.local.fmt(f))
-    }
-}
-
-impl<'i> FromPair<'i> for Cow<'i, PrefixedId<'i>> {
-    const RULE: Rule = Rule::PrefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        let mut inners = pair.into_inner();
-        let prefix = Cow::<IdPrefix>::from_pair_unchecked(inners.next().unwrap())?;
-        let local = Cow::<IdLocal>::from_pair_unchecked(inners.next().unwrap())?;
-        Ok(Cow::Borrowed(PrefixedId { prefix, local }))
-    }
-}
-impl_fromslice!('i, Cow<'i, PrefixedId<'i>>);
-
-impl<'a> Redeem<'a> for PrefixedId<'a> {
-    type Owned = PrefixedIdent;
-    fn redeem(&'a self) -> PrefixedIdent {
-        PrefixedIdent::new(self.prefix.redeem(), self.local.redeem())
     }
 }
 

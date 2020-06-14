@@ -14,9 +14,6 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
@@ -38,24 +35,19 @@ impl PropertyValue {
     }
 }
 
-impl<'a> Share<'a, PropVal<'a>> for PropertyValue {
-    fn share(&'a self) -> PropVal<'a> {
-        match self {
-            PropertyValue::Resource(p, v) => {
-                PropVal::Resource(Cow::Borrowed(p.share()), Cow::Borrowed(v.share()))
-            }
-            PropertyValue::Literal(p, v, t) => PropVal::Literal(
-                Cow::Borrowed(p.share()),
-                Cow::Borrowed(v.share()),
-                Cow::Borrowed(t.share()),
-            ),
-        }
-    }
-}
-
 impl Display for PropertyValue {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.share().fmt(f)
+        match self {
+            PropertyValue::Resource(relation, instance) => {
+                relation.fmt(f).and(f.write_char(' ')).and(instance.fmt(f))
+            }
+            PropertyValue::Literal(relation, desc, datatype) => relation
+                .fmt(f)
+                .and(f.write_char(' '))
+                .and(desc.fmt(f))
+                .and(f.write_char(' '))
+                .and(datatype.fmt(f)),
+        }
     }
 }
 
@@ -92,43 +84,6 @@ impl PartialOrd for PropertyValue {
             .cmp(&other.property())
             .then_with(|| self.to_string().cmp(&other.to_string()))
             .into()
-    }
-}
-
-/// A borrowed `PropertyValue`.
-pub enum PropVal<'a> {
-    Resource(Cow<'a, RelationId<'a>>, Cow<'a, Id<'a>>),
-    Literal(
-        Cow<'a, RelationId<'a>>,
-        Cow<'a, &'a QuotedStr>,
-        Cow<'a, Id<'a>>,
-    ),
-}
-
-impl<'a> Redeem<'a> for PropVal<'a> {
-    type Owned = PropertyValue;
-    fn redeem(&'a self) -> PropertyValue {
-        match self {
-            PropVal::Resource(p, v) => PropertyValue::Resource(p.redeem(), v.redeem()),
-            PropVal::Literal(p, v, t) => PropertyValue::Literal(p.redeem(), v.redeem(), t.redeem()),
-        }
-    }
-}
-
-impl<'a> Display for PropVal<'a> {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        use self::PropVal::*;
-        match self {
-            Resource(relation, instance) => {
-                relation.fmt(f).and(f.write_char(' ')).and(instance.fmt(f))
-            }
-            Literal(relation, desc, datatype) => relation
-                .fmt(f)
-                .and(f.write_char(' '))
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(datatype.fmt(f)),
-        }
     }
 }
 

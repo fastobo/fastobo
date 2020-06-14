@@ -1,3 +1,6 @@
+use std::borrow::Borrow;
+use std::borrow::Cow;
+use std::borrow::ToOwned;
 use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -14,9 +17,6 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
@@ -137,7 +137,11 @@ impl AsRef<str> for IdentPrefix {
 
 impl Display for IdentPrefix {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.share().fmt(f)
+        if self.is_canonical() {
+            f.write_str(&self.value)
+        } else {
+            escape(f, &self.value)
+        }
     }
 }
 
@@ -196,91 +200,6 @@ impl PartialEq<str> for IdentPrefix {
 impl PartialOrd for IdentPrefix {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.value.partial_cmp(&other.value)
-    }
-}
-
-impl<'a> Share<'a, IdPrefix<'a>> for IdentPrefix {
-    fn share(&'a self) -> IdPrefix<'a> {
-        IdPrefix::new(&self.value)
-    }
-}
-
-/// A borrowed `IdentPrefix`
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
-pub struct IdPrefix<'a> {
-    value: &'a str,
-}
-
-impl<'a> IdPrefix<'a> {
-    /// Create a new `IdPrefix` from a borrowed string slice.
-    pub fn new(s: &'a str) -> Self {
-        Self {
-            value: s,
-        }
-    }
-
-    pub fn as_str(&self) -> &'a str {
-        self.value
-    }
-
-    pub fn is_canonical(&self) -> bool {
-        is_canonical(&self.value)
-    }
-}
-
-impl<'a> AsRef<str> for IdPrefix<'a> {
-    fn as_ref(&self) -> &str {
-        &self.value
-    }
-}
-
-impl<'a> Display for IdPrefix<'a> {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        if self.is_canonical() {
-            f.write_str(&self.value)
-        } else {
-            escape(f, &self.value)
-        }
-    }
-}
-
-impl<'a> Into<&'a str> for IdPrefix<'a> {
-    fn into(self) -> &'a str {
-        self.value
-    }
-}
-
-impl<'i> FromPair<'i> for Cow<'i, IdPrefix<'i>> {
-    const RULE: Rule = Rule::IdPrefix;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        let inner = pair.into_inner().next().unwrap();
-        if inner.as_rule() == Rule::CanonicalIdPrefix {
-            Ok(Cow::Borrowed(IdPrefix::new(inner.as_str())))
-        } else if inner.as_str().find('\\').is_some() {
-            IdentPrefix::from_pair_unchecked(inner).map(Cow::Owned)
-        } else {
-            Ok(Cow::Borrowed(IdPrefix::new(inner.as_str())))
-        }
-    }
-}
-impl_fromslice!('i, Cow<'i, IdPrefix<'i>>);
-
-impl<'a> PartialEq<str> for IdPrefix<'a> {
-    fn eq(&self, other: &str) -> bool {
-        self.value == other
-    }
-}
-
-impl<'a> PartialOrd for IdPrefix<'a> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.value.partial_cmp(&other.value)
-    }
-}
-
-impl<'a> Redeem<'a> for IdPrefix<'a> {
-    type Owned = IdentPrefix;
-    fn redeem(&self) -> IdentPrefix {
-        IdentPrefix::new(self.value.to_string())
     }
 }
 

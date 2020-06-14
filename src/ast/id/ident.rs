@@ -11,13 +11,8 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
-use super::PrefixedId;
 use super::PrefixedIdent;
-use super::UnprefixedId;
 use super::UnprefixedIdent;
 use super::Url;
 
@@ -91,88 +86,11 @@ impl PartialOrd for Ident {
     }
 }
 
-impl<'a> Share<'a, Id<'a>> for Ident {
-    fn share(&'a self) -> Id<'a> {
-        use self::Ident::*;
-        match self {
-            Ident::Prefixed(ref id) => Id::Prefixed(Cow::Borrowed(id.share())),
-            Ident::Unprefixed(ref id) => Id::Unprefixed(Cow::Borrowed(id)),
-            Ident::Url(ref url) => Id::Url(Cow::Borrowed(url)),
-        }
-    }
-}
-
-/// A borrowed `Identifier`.
-#[derive(Clone, Debug, Hash)]
-pub enum Id<'a> {
-    Prefixed(Cow<'a, PrefixedId<'a>>),
-    Unprefixed(Cow<'a, &'a UnprefixedId>),
-    Url(Cow<'a, &'a Url>),
-}
-
-impl<'a> Display for Id<'a> {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        use self::Id::*;
-        match self {
-            Prefixed(id) => id.fmt(f),
-            Unprefixed(id) => id.fmt(f),
-            Url(url) => url.fmt(f),
-        }
-    }
-}
-
-impl<'a> From<PrefixedId<'a>> for Id<'a> {
-    fn from(id: PrefixedId<'a>) -> Self {
-        Id::Prefixed(Cow::Borrowed(id))
-    }
-}
-
-impl<'a> From<&'a UnprefixedId> for Id<'a> {
-    fn from(id: &'a UnprefixedId) -> Self {
-        Id::Unprefixed(Cow::Borrowed(id))
-    }
-}
-
-impl<'a> From<&'a Url> for Id<'a> {
-    fn from(url: &'a Url) -> Self {
-        Id::Url(Cow::Borrowed(url))
-    }
-}
-
-impl<'i> FromPair<'i> for Id<'i> {
-    const RULE: Rule = Rule::Id;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        let inner = pair.into_inner().next().unwrap();
-        match inner.as_rule() {
-            Rule::PrefixedId => Cow::<PrefixedId>::from_pair_unchecked(inner).map(Id::Prefixed),
-            Rule::UnprefixedId => {
-                Cow::<&UnprefixedId>::from_pair_unchecked(inner).map(Id::Unprefixed)
-            }
-            Rule::UrlId => Url::from_pair_unchecked(inner).map(Cow::Owned).map(Id::Url),
-            _ => unreachable!(),
-        }
-    }
-}
-impl_fromslice!('i, Id<'i>);
-
-impl<'a> Redeem<'a> for Id<'a> {
-    type Owned = Ident;
-    fn redeem(&'a self) -> Ident {
-        match self {
-            Id::Prefixed(cow) => Ident::Prefixed(cow.redeem()),
-            Id::Unprefixed(cow) => Ident::Unprefixed(cow.redeem()),
-            Id::Url(cow) => Ident::Url(cow.redeem()),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
     use super::*;
     use crate::parser::FromSlice;
-    use crate::ast::IdPrefix;
-    use crate::ast::IdLocal;
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
     use std::string::ToString;
@@ -194,10 +112,6 @@ mod tests {
         let actual = Ident::from_str(r#"PDBeChem:Copper(II)\ chloride"#).unwrap();
         let expected = Ident::from(PrefixedIdent::new("PDBeChem", "Copper(II) chloride"));
         assert_eq!(actual, expected);
-
-        let actual = Id::from_slice(r#"PDBeChem:Copper(II)\ chloride"#).unwrap();
-        let expected = Id::from(PrefixedId::new(IdPrefix::new("PDBeChem"), IdLocal::new("Copper(II) chloride")));
-        assert_eq!(actual.redeem(), expected.redeem());
     }
 
     #[test]

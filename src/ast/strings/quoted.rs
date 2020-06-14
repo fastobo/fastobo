@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::borrow::Borrow;
 use std::borrow::ToOwned;
 use std::fmt::Display;
@@ -14,9 +15,6 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::parser::Rule;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 // ---------------------------------------------------------------------------
 
@@ -108,7 +106,7 @@ impl AsRef<str> for QuotedString {
 
 impl AsRef<QuotedStr> for QuotedString {
     fn as_ref(&self) -> &QuotedStr {
-        self.share()
+        QuotedStr::new(&self.value)
     }
 }
 
@@ -163,12 +161,6 @@ impl PartialEq<String> for QuotedString {
     }
 }
 
-impl<'a> Share<'a, &'a QuotedStr> for QuotedString {
-    fn share(&'a self) -> &'a QuotedStr {
-        QuotedStr::new(&self.value)
-    }
-}
-
 /// A borrowed `QuotedString`.
 #[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
@@ -191,7 +183,7 @@ impl<'a> Display for QuotedStr {
     }
 }
 
-impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
+impl<'i> FromPair<'i> for Cow<'i, QuotedStr> {
     const RULE: Rule = Rule::QuotedString;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         if pair.as_str().quickfind(b'\\').is_some() {
@@ -201,7 +193,7 @@ impl<'i> FromPair<'i> for Cow<'i, &'i QuotedStr> {
         }
     }
 }
-impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
+// impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
 
 impl PartialEq<str> for QuotedStr {
     fn eq(&self, other: &str) -> bool {
@@ -212,13 +204,6 @@ impl PartialEq<str> for QuotedStr {
 impl PartialEq<String> for QuotedStr {
     fn eq(&self, other: &String) -> bool {
         &self.0 == other.as_str()
-    }
-}
-
-impl<'a> Redeem<'a> for &'a QuotedStr {
-    type Owned = QuotedString;
-    fn redeem(&self) -> QuotedString {
-        QuotedString::new(self.0.to_owned())
     }
 }
 

@@ -17,9 +17,6 @@ use crate::parser::FromPair;
 use crate::parser::Rule;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
-use crate::share::Cow;
-use crate::share::Redeem;
-use crate::share::Share;
 
 /// A complete OBO document in format version 1.4.
 #[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]

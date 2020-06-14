@@ -96,6 +96,7 @@ foundrytest!(cl);
 foundrytest!(mi);
 foundrytest!(eco);
 foundrytest!(trans);
+foundrytest!(doid);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -138,11 +139,6 @@ foundrytest!(
 foundrytest!(
     #[ignore]
     fix
-);
-// fails in Traivs-CI
-foundrytest!(
-    #[ignore]
-    doid
 );
 // Invalid syntax caused by ChEBI
 foundrytest!(

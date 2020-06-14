@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.8.4...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.9.0...HEAD
+
+
+## [v0.9.0] - 2020-06-14
+
+[v0.9.0]: https://github.com/fastobo/fastobo/compare/v0.8.4...v0.9.0
+
+### Removed
+- `fastobo::share` module.
+
+### Changed
+- `IdentPrefix` and `IdentLocal` do not store whether they are canonical or
+  not to reduce the global memory footprint.
 
 
 ## [v0.8.4] - 2020-06-12
@@ -27,7 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [v0.8.3]: https://github.com/fastobo/fastobo/compare/v0.8.2...v0.8.3
 
 ### Fixed
-- `IsoDateTime` formatting in `DD-MM-YYYY` format instead of `YYYY-MM-DD` 
+- `IsoDateTime` formatting in `DD-MM-YYYY` format instead of `YYYY-MM-DD`
   format when serialized to `xsd:datetime`.
 
 

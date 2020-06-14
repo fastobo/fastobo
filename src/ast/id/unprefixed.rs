@@ -7,6 +7,7 @@ use std::fmt::Write;
 use std::ops::Deref;
 
 use opaque_typedef::OpaqueTypedef;
+use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::error::Error;
@@ -75,9 +76,21 @@ impl AsRef<str> for UnprefixedIdent {
     }
 }
 
+impl AsRef<UnprefixedId> for UnprefixedIdent {
+    fn as_ref(&self) -> &UnprefixedId {
+        UnprefixedId::new(&self.0)
+    }
+}
+
+impl Borrow<UnprefixedId> for UnprefixedIdent {
+    fn borrow(&self) -> &UnprefixedId {
+        UnprefixedId::new(&self.0)
+    }
+}
+
 impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        escape(f, &self.0)
+        UnprefixedId::new(&self.0).fmt(f)
     }
 }
 
@@ -104,6 +117,31 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
     }
 }
 impl_fromstr!(UnprefixedIdent);
+
+/// A borrowed `UnprefixedIdent`.
+#[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
+#[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
+#[repr(transparent)]
+pub struct UnprefixedId(str);
+
+impl UnprefixedId {
+    pub fn new(s: &str) -> &Self {
+        unsafe { Self::from_inner_unchecked(s) }
+    }
+}
+
+impl Display for UnprefixedId {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        escape(f, &self.0)
+    }
+}
+
+impl ToOwned for UnprefixedId {
+    type Owned = UnprefixedIdent;
+    fn to_owned(&self) -> UnprefixedIdent {
+        UnprefixedIdent::new(self.0.to_owned())
+    }
+}
 
 #[cfg(test)]
 mod tests {

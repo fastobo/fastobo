@@ -178,7 +178,6 @@ impl<'i> FromPair<'i> for Cow<'i, UnquotedStr> {
         }
     }
 }
-// impl_fromslice!('i, Cow<'i, &'i UnquotedStr>);
 
 impl ToOwned for UnquotedStr {
     type Owned = UnquotedString;

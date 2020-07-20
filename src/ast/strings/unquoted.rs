@@ -10,6 +10,7 @@ use std::ops::Deref;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
+use crate::ast::StringType;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
@@ -76,14 +77,14 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 #[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
 pub struct UnquotedString {
-    value: String,
+    value: StringType,
 }
 
 impl UnquotedString {
     /// Create a new `UnquotedString` from an unescaped string.
     pub fn new<S>(s: S) -> Self
     where
-        S: Into<String>,
+        S: Into<StringType>,
     {
         UnquotedString { value: s.into() }
     }
@@ -95,6 +96,11 @@ impl UnquotedString {
 
     /// Retrieve the underlying unescaped string from the `UnquotedString`.
     pub fn into_string(self) -> String {
+        self.value.into()
+    }
+
+    /// Retrieve the underlying unescaped inner string from the `UnquotedString`.
+    pub fn into_inner(self) -> StringType {
         self.value
     }
 }
@@ -134,6 +140,18 @@ impl Display for UnquotedString {
 impl From<&str> for UnquotedString {
     fn from(s: &str) -> Self {
         Self::new(s)
+    }
+}
+
+impl PartialEq<str> for UnquotedString {
+    fn eq(&self, other: &str) -> bool {
+        self.value.as_str() == other
+    }
+}
+
+impl PartialEq<String> for UnquotedString {
+    fn eq(&self, other: &String) -> bool {
+        self.value.as_str() == other.as_str()
     }
 }
 

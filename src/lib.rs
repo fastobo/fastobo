@@ -27,6 +27,8 @@ extern crate crossbeam_channel;
 extern crate lazy_static;
 #[cfg(feature = "threading")]
 extern crate num_cpus;
+#[cfg(feature = "smartstring")]
+extern crate smartstring;
 
 #[macro_use]
 pub mod parser;

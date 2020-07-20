@@ -12,6 +12,7 @@ use std::hash::Hasher;
 use opaque_typedef::OpaqueTypedef;
 use pest::iterators::Pair;
 
+use crate::ast::StringType;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
@@ -78,13 +79,13 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// ```
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
-pub struct IdentPrefix(String);
+pub struct IdentPrefix(StringType);
 
 impl IdentPrefix {
     /// Create a new identifier prefix.
     pub fn new<S>(prefix: S) -> Self
     where
-        S: Into<String>,
+        S: Into<StringType>,
     {
         Self(prefix.into())
     }
@@ -109,6 +110,11 @@ impl IdentPrefix {
 
     /// Extract the unescaped prefix as a `String`.
     pub fn into_string(self) -> String {
+        self.0.into()
+    }
+
+    /// Extract the unescaped prefix as the raw inner type.
+    pub fn into_inner(self) -> StringType {
         self.0
     }
 }
@@ -129,8 +135,15 @@ impl Display for IdentPrefix {
     }
 }
 
+#[cfg(feature = "smartstring")]
 impl From<IdentPrefix> for String {
     fn from(prefix: IdentPrefix) -> String {
+        prefix.0.into()
+    }
+}
+
+impl From<IdentPrefix> for StringType {
+    fn from(prefix: IdentPrefix) -> Self {
         prefix.0
     }
 }
@@ -165,7 +178,7 @@ impl_fromstr!(IdentPrefix);
 
 impl PartialEq<str> for IdentPrefix {
     fn eq(&self, other: &str) -> bool {
-        self.0 == other
+        self.0.as_str() == other
     }
 }
 

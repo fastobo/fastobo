@@ -10,6 +10,7 @@ use opaque_typedef::OpaqueTypedef;
 use opaque_typedef::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
+use crate::ast::StringType;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
@@ -52,13 +53,13 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 /// An identifier without a prefix.
 #[derive(Clone, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
-pub struct UnprefixedIdent(String);
+pub struct UnprefixedIdent(StringType);
 
 impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
     pub fn new<S>(id: S) -> Self
     where
-        S: Into<String>,
+        S: Into<StringType>,
     {
         // FIXME: check the given string is a valid unprefixed identifier.
         Self(id.into())
@@ -94,9 +95,16 @@ impl Display for UnprefixedIdent {
     }
 }
 
-impl From<UnprefixedIdent> for String {
+impl From<UnprefixedIdent> for StringType {
     fn from(id: UnprefixedIdent) -> Self {
         id.0
+    }
+}
+
+#[cfg(feature = "smartstring")]
+impl From<UnprefixedIdent> for String {
+    fn from(id: UnprefixedIdent) -> Self {
+        id.0.into()
     }
 }
 

@@ -12,6 +12,7 @@ extern crate opaque_typedef_macros;
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
 
+extern crate blanket;
 #[cfg(feature = "memchr")]
 extern crate memchr;
 extern crate opaque_typedef;

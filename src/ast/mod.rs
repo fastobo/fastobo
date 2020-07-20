@@ -74,3 +74,19 @@ use crate::error::Error;
 use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
+
+/// The inner string type used to store prefix information.
+///
+/// If `fastobo` is compiled with the `smartstring` feature enabled, then this
+/// type will be [`smartstring::SmartString`]. Otherwise, plain [`String`] is
+/// used.
+///
+/// [`smartstring::SmartString`]: https://docs.rs/smartstring/latest/smartstring/struct.SmartString.html
+/// [`String`]: https://doc.rust-lang.org/std/string/struct.String.html
+pub type StringType = StringTypeImpl;
+
+#[cfg(feature = "smartstring")]
+type StringTypeImpl = smartstring::SmartString<smartstring::Compact>;
+
+#[cfg(not(feature = "smartstring"))]
+type StringTypeImpl = String;

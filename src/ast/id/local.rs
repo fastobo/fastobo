@@ -9,6 +9,7 @@ use std::hash::Hasher;
 use opaque_typedef::OpaqueTypedef;
 use pest::iterators::Pair;
 
+use crate::ast::StringType;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
@@ -69,13 +70,13 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// ```
 #[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
-pub struct IdentLocal(String);
+pub struct IdentLocal(StringType);
 
 impl IdentLocal {
     /// Create a new local identifier.
     pub fn new<S>(local: S) -> Self
     where
-        S: Into<String>,
+        S: Into<StringType>,
     {
         Self(local.into())
     }
@@ -92,6 +93,11 @@ impl IdentLocal {
 
     /// Extract the unescaped local identifier as a `String`.
     pub fn into_string(self) -> String {
+        self.0.into()
+    }
+
+    /// Extract the unescaped local identifier as the raw inner type.
+    pub fn into_inner(self) -> StringType {
         self.0
     }
 }
@@ -102,15 +108,22 @@ impl AsRef<str> for IdentLocal {
     }
 }
 
+#[cfg(feature = "smartstring")]
 impl From<IdentLocal> for String {
     fn from(id: IdentLocal) -> Self {
-        id.0
+        id.0.into()
     }
 }
 
 impl From<&str> for IdentLocal {
     fn from(s: &str) -> Self {
         Self::new(s)
+    }
+}
+
+impl From<IdentLocal> for StringType {
+    fn from(id: IdentLocal) -> Self {
+        id.0
     }
 }
 
@@ -149,7 +162,7 @@ impl_fromstr!(IdentLocal);
 
 impl PartialEq<str> for IdentLocal {
     fn eq(&self, other: &str) -> bool {
-        self.0 == other
+        self.0.as_str() == other
     }
 }
 

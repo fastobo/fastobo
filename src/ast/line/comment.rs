@@ -49,9 +49,10 @@ impl Display for Comment {
 }
 
 impl<'i> FromPair<'i> for Comment {
-    const RULE: Rule = Rule::HiddenComment;
+    const RULE: Rule = Rule::Comment;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        Ok(Comment::new(pair.as_str()[1..].trim().to_string()))
+        let txt = pair.into_inner().next().unwrap().as_str().trim().to_string();
+        Ok(Comment::new(txt))
     }
 }
 impl_fromstr!(Comment);

@@ -190,7 +190,7 @@ impl<'i> FromPair<'i> for Eol {
                 Rule::QualifierList => {
                     QualifierList::from_pair_unchecked(pair1).map(Eol::with_qualifiers)
                 }
-                Rule::HiddenComment => Comment::from_pair_unchecked(pair1).map(Eol::with_comment),
+                Rule::Comment => Comment::from_pair_unchecked(pair1).map(Eol::with_comment),
                 _ => unreachable!(),
             },
             (None, _) => Ok(Eol::new()),

@@ -75,9 +75,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 /// ```
 #[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
-pub struct QuotedString {
-    value: StringType,
-}
+pub struct QuotedString(StringType);
 
 impl QuotedString {
     /// Create a new `QuotedString` from an unescaped string.
@@ -85,22 +83,22 @@ impl QuotedString {
     where
         S: Into<StringType>,
     {
-        QuotedString { value: s.into() }
+        QuotedString(s.into())
     }
 
     /// Extracts a string slice containing the `QuotedString` value.
     pub fn as_str(&self) -> &str {
-        &self.value
+        &self.0
     }
 
     /// Retrieve the underlying unescaped string from the `QuotedString`.
     pub fn into_string(self) -> String {
-        self.value.into()
+        self.0.into()
     }
 
     /// Retrieve the underlying unescaped inner string from the `QuotedString`.
     pub fn into_inner(self) -> StringType {
-        self.value
+        self.0
     }
 }
 
@@ -112,7 +110,7 @@ impl AsRef<str> for QuotedString {
 
 impl AsRef<QuotedStr> for QuotedString {
     fn as_ref(&self) -> &QuotedStr {
-        QuotedStr::new(&self.value)
+        QuotedStr::new(&self.0)
     }
 }
 
@@ -157,13 +155,20 @@ impl_fromstr!(QuotedString);
 
 impl PartialEq<str> for QuotedString {
     fn eq(&self, other: &str) -> bool {
-        self.value.as_str() == other
+        self.0.as_str() == other
     }
 }
 
+#[cfg(feature = "smartstring")]
 impl PartialEq<String> for QuotedString {
     fn eq(&self, other: &String) -> bool {
-        self.value.as_str() == other.as_str()
+        self.0.as_str() == other.as_str()
+    }
+}
+
+impl PartialEq<StringType> for QuotedString {
+    fn eq(&self, other: &StringType) -> bool {
+        self.0.as_str() == other.as_str()
     }
 }
 

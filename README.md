@@ -2,7 +2,7 @@
 
 *Faultless AST for Open Biomedical Ontologies.*
 
-[![TravisCI](https://img.shields.io/travis/fastobo/fastobo/master.svg?maxAge=600&style=flat-square)](https://travis-ci.com/fastobo/fastobo/branches)
+[![TravisCI](https://img.shields.io/travis/com/fastobo/fastobo/master.svg?maxAge=600&style=flat-square)](https://travis-ci.com/fastobo/fastobo/branches)
 [![Codecov](https://img.shields.io/codecov/c/gh/fastobo/fastobo/master.svg?style=flat-square&maxAge=600)](https://codecov.io/gh/fastobo/fastobo)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square&maxAge=2678400)](https://choosealicense.com/licenses/mit/)
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=2678400&style=flat-square)](https://github.com/fastobo/fastobo)
@@ -50,14 +50,15 @@ manifest of your project:
 * **`threading`** - Use a multi-threaded parser (additionally depending on
   [`crossbeam-channel`](https://docs.rs/crossbeam-channel)), which can greatly
   improve the parser speed if parsing is CPU-bound.
-
+* **`smartstring`** - Use the [`smartstring`](https://docs.rs/smartstring)
+  library to reduce heap allocation for identifiers and string data.
 
 ## Usage
 
 Add `fastobo` to the `[dependencies]` sections of your `Cargo.toml` manifest:
 ```toml
 [dependencies]
-fastobo = "0.8.0"
+fastobo = "0.9.0"
 ```
 
 The top-level `fastobo` module provides several functions to parse an `OboDoc`.

@@ -75,7 +75,7 @@ use crate::parser::FromPair;
 use crate::parser::OboParser;
 use crate::parser::Rule;
 
-/// The inner string type used to store prefix information.
+/// The inner string type used to store text.
 ///
 /// If `fastobo` is compiled with the `smartstring` feature enabled, then this
 /// type will be [`smartstring::SmartString`]. Otherwise, plain [`String`] is

@@ -63,7 +63,7 @@ use crate::ast::*;
 ///
 /// Default implementations of this trait methods can be found in the
 /// [`visit`](./visit/index.html) submodule for easy composition.
-#[blanket(default="visit")]
+#[blanket(default="visit", derive(Mut, Box))]
 pub trait Visit<'ast> {
     fn visit_class_ident(&mut self, id: &'ast ClassIdent);
     fn visit_doc(&mut self, doc: &'ast OboDoc);
@@ -444,7 +444,7 @@ pub mod visit {
 ///
 /// Default implementations of this trait methods can be found in the
 /// [`visit_mut`](./visit_mut/index.html) submodule for easy composition.
-#[blanket(default="visit_mut")]
+#[blanket(default="visit_mut", derive(Mut, Box))]
 pub trait VisitMut {
     fn visit_class_ident(&mut self, id: &mut ClassIdent);
     fn visit_doc(&mut self, doc: &mut OboDoc);

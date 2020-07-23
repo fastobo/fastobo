@@ -19,7 +19,7 @@ use crate::semantics::Identified;
 use crate::semantics::Orderable;
 
 /// A complete OBO document in format version 1.4.
-#[derive(Clone, Default, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Default, Debug, Hash, Eq, FromStr, PartialEq)]
 pub struct OboDoc {
     header: HeaderFrame,
     entities: Vec<EntityFrame>,
@@ -368,7 +368,6 @@ impl<'i> FromPair<'i> for OboDoc {
         Ok(OboDoc { header, entities })
     }
 }
-impl_fromstr!(OboDoc);
 
 #[cfg(test)]
 mod tests {

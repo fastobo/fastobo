@@ -15,7 +15,7 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// An identifier with a prefix.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq)]
 pub struct PrefixedIdent {
     prefix: IdentPrefix,
     local: IdentLocal,
@@ -113,7 +113,6 @@ impl<'i> FromPair<'i> for PrefixedIdent {
         Ok(Self::new(prefix, local))
     }
 }
-impl_fromstr!(PrefixedIdent);
 
 impl PartialOrd for PrefixedIdent {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

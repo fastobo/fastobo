@@ -73,7 +73,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 /// assert_eq!(s.as_str(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, FromStr, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
 pub struct QuotedString(StringType);
 
@@ -151,7 +151,6 @@ impl<'i> FromPair<'i> for QuotedString {
         Ok(QuotedString::new(local))
     }
 }
-impl_fromstr!(QuotedString);
 
 impl PartialEq<str> for QuotedString {
     fn eq(&self, other: &str) -> bool {

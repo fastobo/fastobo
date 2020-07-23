@@ -77,7 +77,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.prefix().is_canonical());
 /// assert_eq!(id.prefix(), "GO");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
 pub struct IdentPrefix(StringType);
 
@@ -174,7 +174,6 @@ impl<'i> FromPair<'i> for IdentPrefix {
         Ok(Self::new(local))
     }
 }
-impl_fromstr!(IdentPrefix);
 
 impl PartialEq<str> for IdentPrefix {
     fn eq(&self, other: &str) -> bool {

@@ -16,7 +16,7 @@ use crate::semantics::Identified;
 use crate::semantics::Orderable;
 
 /// A qualifier, possibly used as a trailing modifier.
-#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct Qualifier {
     key: RelationIdent,
     value: QuotedString,
@@ -67,7 +67,6 @@ impl<'i> FromPair<'i> for Qualifier {
         Ok(Qualifier { key, value })
     }
 }
-impl_fromstr!(Qualifier);
 
 impl Identified for Qualifier {
     fn as_id(&self) -> &Ident {
@@ -79,7 +78,7 @@ impl Identified for Qualifier {
 }
 
 /// A list containing zero or more `Qualifier`s.
-#[derive(Clone, Default, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Default, Debug, Hash, Eq, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),
@@ -140,7 +139,6 @@ impl<'i> FromPair<'i> for QualifierList {
         Ok(QualifierList::new(qualifiers))
     }
 }
-impl_fromstr!(QualifierList);
 
 impl IntoIterator for QualifierList {
     type Item = Qualifier;

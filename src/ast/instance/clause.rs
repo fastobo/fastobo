@@ -13,7 +13,7 @@ use crate::syntax::Rule;
 use crate::semantics::OboClause;
 
 /// A clause appearing in an instance frame.
-#[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, Ord, OboClause, PartialEq, PartialOrd)]
 pub enum InstanceClause {
     #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
@@ -120,7 +120,6 @@ impl<'i> FromPair<'i> for InstanceClause {
         }
     }
 }
-impl_fromstr!(InstanceClause);
 
 impl<'i> FromPair<'i> for Line<InstanceClause> {
     const RULE: Rule = Rule::InstanceClauseLine;
@@ -131,4 +130,3 @@ impl<'i> FromPair<'i> for Line<InstanceClause> {
         Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
     }
 }
-impl_fromstr!(Line<InstanceClause>);

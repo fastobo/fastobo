@@ -16,7 +16,7 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// A clause value binding a property to a value in the relevant entity.
-#[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
+#[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq, Ord)]
 pub enum PropertyValue {
     /// A property-value binding where the value is specified with an ID.
     Resource(RelationIdent, Ident),
@@ -76,7 +76,6 @@ impl<'i> FromPair<'i> for PropertyValue {
         }
     }
 }
-impl_fromstr!(PropertyValue);
 
 impl PartialOrd for PropertyValue {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

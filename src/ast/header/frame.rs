@@ -18,7 +18,7 @@ use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
 
 /// The header frame, containing metadata about an OBO document.
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, OpaqueTypedef)]
+#[derive(Clone, Debug, Default, Eq, FromStr, Hash, PartialEq, OpaqueTypedef)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),
@@ -156,7 +156,6 @@ impl<'i> FromPair<'i> for HeaderFrame {
         Ok(HeaderFrame::with_clauses(clauses))
     }
 }
-impl_fromstr!(HeaderFrame);
 
 impl IntoIterator for HeaderFrame {
     type Item = HeaderClause;

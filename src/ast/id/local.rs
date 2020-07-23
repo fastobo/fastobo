@@ -68,7 +68,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.local().is_canonical());
 /// assert_eq!(id.local(), "0046154");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
 pub struct IdentLocal(StringType);
 
@@ -158,7 +158,6 @@ impl<'i> FromPair<'i> for IdentLocal {
         Ok(Self::new(local))
     }
 }
-impl_fromstr!(IdentLocal);
 
 impl PartialEq<str> for IdentLocal {
     fn eq(&self, other: &str) -> bool {

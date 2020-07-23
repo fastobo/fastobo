@@ -26,7 +26,7 @@ use crate::semantics::OboClause;
 /// specification: clauses will compare based on their serialization order
 /// rather than on their alphabetic order; clauses of the same kind will be
 /// ranked in the alphabetic order.
-#[derive(Clone, Debug, Eq, Hash, OboClause, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, FromStr, OboClause, Ord, PartialEq, PartialOrd)]
 pub enum HeaderClause {
     #[clause(tag = "format-version", cardinality = "ZeroOrOne")]
     FormatVersion(UnquotedString),
@@ -186,7 +186,6 @@ impl<'i> FromPair<'i> for HeaderClause {
         }
     }
 }
-impl_fromstr!(HeaderClause);
 
 #[cfg(test)]
 mod tests {

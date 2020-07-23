@@ -74,7 +74,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 /// let s = UnquotedString::new("Hello, world!");
 /// assert_eq!(s.to_string(), "Hello, world\\!");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
 pub struct UnquotedString(StringType);
 
@@ -170,7 +170,6 @@ impl<'i> FromPair<'i> for UnquotedString {
         Ok(UnquotedString::new(local))
     }
 }
-impl_fromstr!(UnquotedString);
 
 /// A borrowed `UnquotedString`.
 #[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]

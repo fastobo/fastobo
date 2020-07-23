@@ -11,7 +11,7 @@ use crate::syntax::Rule;
 use crate::semantics::OboClause;
 
 /// A clause appearing in a typedef frame.
-#[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, FromStr, Ord, OboClause, PartialEq, PartialOrd)]
 pub enum TypedefClause {
     #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
@@ -89,7 +89,6 @@ impl<'i> FromPair<'i> for Line<TypedefClause> {
         Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
     }
 }
-impl_fromstr!(Line<TypedefClause>);
 
 impl<'i> FromPair<'i> for TypedefClause {
     const RULE: Rule = Rule::TypedefClause;
@@ -270,4 +269,3 @@ impl<'i> FromPair<'i> for TypedefClause {
         }
     }
 }
-impl_fromstr!(TypedefClause);

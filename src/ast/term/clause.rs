@@ -20,7 +20,7 @@ use crate::semantics::OboClause;
 /// specification: clauses will compare based on their serialization order
 /// rather than on their alphabetic order; clauses of the same kind will be
 /// ranked in the alphabetic order.
-#[derive(Clone, Debug, Eq, Hash, Ord, OboClause, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, FromStr, Ord, OboClause, PartialEq, PartialOrd)]
 pub enum TermClause {
     #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
@@ -71,7 +71,6 @@ impl<'i> FromPair<'i> for Line<TermClause> {
         Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
     }
 }
-impl_fromstr!(Line<TermClause>);
 
 impl<'i> FromPair<'i> for TermClause {
     const RULE: Rule = Rule::TermClause;
@@ -179,7 +178,6 @@ impl<'i> FromPair<'i> for TermClause {
         }
     }
 }
-impl_fromstr!(TermClause);
 
 #[cfg(test)]
 mod tests {

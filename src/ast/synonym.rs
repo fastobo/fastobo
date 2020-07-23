@@ -13,7 +13,7 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// A synonym scope specifier.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, PartialEq, Ord, PartialOrd)]
 pub enum SynonymScope {
     Broad,
     Exact,
@@ -45,10 +45,9 @@ impl<'i> FromPair<'i> for SynonymScope {
         }
     }
 }
-impl_fromstr!(SynonymScope);
 
 /// A synonym, denoting an alternative name for the embedding entity.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, PartialEq, PartialOrd, Ord)]
 pub struct Synonym {
     desc: QuotedString,
     scope: SynonymScope,
@@ -206,7 +205,6 @@ impl<'i> FromPair<'i> for Synonym {
         }
     }
 }
-impl_fromstr!(Synonym);
 
 #[cfg(test)]
 mod tests {

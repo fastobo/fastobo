@@ -16,7 +16,7 @@ use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
 
 /// A typedef clause, describing a relationship.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, PartialEq)]
 pub struct TypedefFrame {
     id: Line<RelationIdent>,
     clauses: Vec<Line<TypedefClause>>,
@@ -136,7 +136,6 @@ impl<'i> FromPair<'i> for TypedefFrame {
         Ok(TypedefFrame { id, clauses })
     }
 }
-impl_fromstr!(TypedefFrame);
 
 impl IntoIterator for TypedefFrame {
     type Item = Line<TypedefClause>;

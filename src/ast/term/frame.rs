@@ -18,7 +18,7 @@ use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
 
 /// A term frame, describing a class.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, PartialEq)]
 pub struct TermFrame {
     id: Line<ClassIdent>,
     clauses: Vec<Line<TermClause>>,
@@ -194,7 +194,6 @@ impl<'i> FromPair<'i> for TermFrame {
         Ok(TermFrame { id, clauses })
     }
 }
-impl_fromstr!(TermFrame);
 
 impl IntoIterator for TermFrame {
     type Item = Line<TermClause>;

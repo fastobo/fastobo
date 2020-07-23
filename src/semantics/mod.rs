@@ -1,4 +1,4 @@
-//! A selection of useful traits that exceed the scope of OBO syntax.
+//! Selection of useful traits that exceed the syntactic scope.
 
 use std::cmp::Ordering;
 use std::collections::HashMap;

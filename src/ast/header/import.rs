@@ -17,7 +17,7 @@ use crate::syntax::Rule;
 //                   Abbreviated before Url. This will probably look nicer
 //                   but goes against the specification.
 /// A reference to another document to be imported.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Import {
     Abbreviated(Ident), // QUESTION(@althonos): IdentPrefix ?
     Url(Url),
@@ -77,7 +77,6 @@ impl<'i> FromPair<'i> for Import {
         }
     }
 }
-impl_fromstr!(Import);
 
 #[cfg(test)]
 mod tests {

@@ -27,7 +27,7 @@ use crate::semantics::Orderable;
 /// when the cross-reference is directly relevant to the annotated entity
 /// (e.g. when exporting an ontology from a knowledge-base to add an hyperlink
 /// to the original resource).
-#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct Xref {
     id: Ident,
     desc: Option<QuotedString>,
@@ -97,7 +97,6 @@ impl<'i> FromPair<'i> for Xref {
         Ok(Xref { id, desc })
     }
 }
-impl_fromstr!(Xref);
 
 impl From<Ident> for Xref {
     fn from(id: Ident) -> Self {
@@ -115,7 +114,7 @@ impl Identified for Xref {
 }
 
 /// A list of containing zero or more `Xref`s.
-#[derive(Clone, Default, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialOrd, PartialEq)]
+#[derive(Clone, Default, Debug, Hash, FromStr, Eq, OpaqueTypedef, Ord, PartialOrd, PartialEq)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),
@@ -180,7 +179,6 @@ impl<'i> FromPair<'i> for XrefList {
         Ok(Self { xrefs })
     }
 }
-impl_fromstr!(XrefList);
 
 impl IntoIterator for XrefList {
     type Item = Xref;

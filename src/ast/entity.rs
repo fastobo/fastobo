@@ -23,7 +23,7 @@ use crate::semantics::Identified;
 use crate::semantics::Orderable;
 
 /// An entity frame, either for a term, an instance, or a typedef.
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq)]
 pub enum EntityFrame {
     Term(TermFrame),
     Typedef(TypedefFrame),
@@ -133,7 +133,6 @@ impl<'i> FromPair<'i> for EntityFrame {
         }
     }
 }
-impl_fromstr!(EntityFrame);
 
 impl Orderable for EntityFrame {
     fn sort(&mut self) {

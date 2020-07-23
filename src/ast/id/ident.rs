@@ -17,7 +17,7 @@ use super::UnprefixedIdent;
 use super::Url;
 
 /// An identifier, either prefixed, unprefixed, or a valid URL.
-#[derive(Clone, Debug, PartialEq, Hash, Eq, Ord)]
+#[derive(Clone, Debug, PartialEq, FromStr, Hash, Eq, Ord)]
 pub enum Ident {
     Prefixed(PrefixedIdent),
     Unprefixed(UnprefixedIdent),
@@ -72,7 +72,6 @@ impl<'i> FromPair<'i> for Ident {
         }
     }
 }
-impl_fromstr!(Ident);
 
 impl PartialOrd for Ident {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

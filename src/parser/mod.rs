@@ -19,8 +19,6 @@ use crate::ast::OboDoc;
 use crate::error::Error;
 use crate::error::SyntaxError;
 
-#[macro_use]
-mod macros;
 mod from_pair;
 mod from_slice;
 mod quickfind;

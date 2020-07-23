@@ -16,7 +16,7 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// An inline comment without semantic value.
-#[derive(Clone, Debug, Eq, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(allow_mut_ref)]
 #[opaque_typedef(derive(
     AsRef(Inner, Self),
@@ -55,7 +55,6 @@ impl<'i> FromPair<'i> for Comment {
         Ok(Comment::new(txt))
     }
 }
-impl_fromstr!(Comment);
 
 #[cfg(test)]
 mod tests {

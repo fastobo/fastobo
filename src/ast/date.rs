@@ -33,7 +33,7 @@ pub trait DateTime {
 ///
 /// For historical reasons, OBO headers do not contain ISO datetimes but
 /// *day-month-year* dates, which can be confusing for US-based users.
-#[derive(Clone, Debug, Hash, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct NaiveDateTime {
     year: u16,
     month: u8,
@@ -139,10 +139,9 @@ impl<'i> FromPair<'i> for NaiveDateTime {
         })
     }
 }
-impl_fromstr!(NaiveDateTime);
 
 /// A comprehensive ISO-8601 datetime, as found in `creation_date` clauses.
-#[derive(Clone, Debug, Hash, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, FromStr, PartialEq, Ord, PartialOrd)]
 pub struct IsoDateTime {
     year: u16,
     month: u8,
@@ -287,7 +286,6 @@ impl<'i> FromPair<'i> for IsoDateTime {
         })
     }
 }
-impl_fromstr!(IsoDateTime);
 
 // // FIXME(@althonos): implement proper datetime handling.
 // impl Ord for IsoDateTime {
@@ -303,7 +301,7 @@ impl_fromstr!(IsoDateTime);
 // }
 
 /// An ISO-8601 timezone.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
 pub enum IsoTimezone {
     Minus(u8, Option<u8>),
     Utc,
@@ -362,7 +360,6 @@ impl<'i> FromPair<'i> for IsoTimezone {
         }
     }
 }
-impl_fromstr!(IsoTimezone);
 
 #[cfg(test)]
 mod tests {

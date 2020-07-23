@@ -17,7 +17,7 @@ use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
 
 /// An instance frame, describing a particular individual.
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, FromStr, Hash, PartialEq)]
 pub struct InstanceFrame {
     id: Line<InstanceIdent>,
     clauses: Vec<Line<InstanceClause>>,
@@ -137,7 +137,6 @@ impl<'i> FromPair<'i> for InstanceFrame {
         Ok(InstanceFrame { id, clauses })
     }
 }
-impl_fromstr!(InstanceFrame);
 
 impl IntoIterator for InstanceFrame {
     type Item = Line<InstanceClause>;

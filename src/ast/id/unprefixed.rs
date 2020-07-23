@@ -51,7 +51,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 }
 
 /// An identifier without a prefix.
-#[derive(Clone, Debug, Hash, Eq, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Hash, Eq, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
 #[opaque_typedef(derive(FromInner))]
 pub struct UnprefixedIdent(StringType);
 
@@ -124,7 +124,6 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
         Ok(Self::new(local))
     }
 }
-impl_fromstr!(UnprefixedIdent);
 
 /// A borrowed `UnprefixedIdent`.
 #[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]

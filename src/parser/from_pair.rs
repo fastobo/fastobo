@@ -63,7 +63,7 @@ mod tests {
 
     use super::*;
     use crate::ast::*;
-    use crate::parser::syntax::Lexer;
+    use crate::syntax::Lexer;
 
     mod url {
 

@@ -301,12 +301,19 @@ mod tests {
 
     mod intersection_of {
         use super::*;
+        use textwrap_macros::dedent;
 
         #[test]
         fn from_str() {
-            let actual =
-                Line::<TermClause>::from_str("intersection_of: part_of PO:0020039 ! leaf lamina\n")
-                    .unwrap();
+            let actual = TermFrame::from_str(
+                dedent!(
+                    "[Term]
+                    id: TST:001
+                    intersection_of: part_of PO:0020039 ! leaf lamina
+                    "
+                )
+            ).unwrap().into_iter().next().unwrap();
+
             let expected = Line::from(TermClause::IntersectionOf(
                 Some(RelationIdent::from(UnprefixedIdent::new("part_of"))),
                 ClassIdent::from(PrefixedIdent::new("PO", "0020039")),
@@ -314,9 +321,15 @@ mod tests {
             .and_comment(Comment::new("leaf lamina"));
             self::assert_eq!(actual, expected);
 
-            let actual =
-                Line::<TermClause>::from_str("intersection_of: PO:0006016 ! leaf epidermis\n")
-                    .unwrap();
+
+            let actual = TermFrame::from_str(
+                dedent!(
+                    "[Term]
+                    id: TST:001
+                    intersection_of: PO:0006016 ! leaf epidermis
+                    "
+                )
+            ).unwrap().into_iter().next().unwrap();
             let expected = Line::with_comment(Comment::new("leaf epidermis")).and_inner(
                 TermClause::IntersectionOf(
                     None,

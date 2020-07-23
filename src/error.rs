@@ -52,7 +52,8 @@ pub enum SyntaxError {
     /// # extern crate fastobo;
     /// # use fastobo::ast::*;
     /// # use fastobo::parser::*;
-    /// let pairs = OboParser::parse(Rule::UnquotedString, "hello, world!");
+    /// # use fastobo::syntax::*;
+    /// let pairs = Lexer::parse(Rule::UnquotedString, "hello, world!");
     /// # let err =
     /// QuotedString::from_pair(pairs.unwrap().next().unwrap()).unwrap_err();
     /// # match err {

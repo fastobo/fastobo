@@ -26,9 +26,14 @@ use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
 use super::FromPair;
-use super::consumer::Consumer;
-use super::consumer::Input as ConsumerInput;
-use super::consumer::Output as ConsumerOutput;
+
+use self::consumer::Consumer;
+use self::consumer::Input as ConsumerInput;
+use self::consumer::Output as ConsumerOutput;
+
+mod consumer;
+
+
 
 // ---
 

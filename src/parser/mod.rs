@@ -27,8 +27,6 @@ mod quickfind;
 mod sequential;
 #[cfg(feature = "threading")]
 mod threaded;
-#[cfg(feature = "threading")]
-mod consumer;
 
 pub use self::from_pair::FromPair;
 pub use self::from_slice::FromSlice;

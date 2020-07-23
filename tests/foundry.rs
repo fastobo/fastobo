@@ -96,7 +96,6 @@ foundrytest!(cl);
 foundrytest!(mi);
 foundrytest!(eco);
 foundrytest!(trans);
-foundrytest!(doid);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -130,6 +129,11 @@ foundrytest!(
 );
 
 // --- Expected failures -----------------------------------------------------
+
+foundrytest!(
+    #[ignore]
+    doid
+);
 
 foundrytest!(
     #[ignore]

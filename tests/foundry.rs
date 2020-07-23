@@ -42,9 +42,8 @@ macro_rules! foundrytest {
             let peek = buf.fill_buf().expect("could not read response");
 
             if peek.starts_with(b"format-version:") {
-                match fastobo::from_reader(&mut buf) {
-                    Ok(doc) => println!("{}", doc.header()),
-                    Err(e) => panic!("{}", e),
+                for item in fastobo::parser::FrameReader::new(buf) {
+                    item.unwrap();
                 }
             } else {
                 panic!("not an OBO file ({})", url);

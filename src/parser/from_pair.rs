@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 use crate::error::Error;
 use crate::error::SyntaxError;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
@@ -63,7 +63,7 @@ mod tests {
 
     use super::*;
     use crate::ast::*;
-    use crate::parser::OboParser;
+    use crate::parser::syntax::Lexer;
 
     mod url {
 
@@ -71,7 +71,7 @@ mod tests {
 
         #[test]
         fn from_pair() {
-            let pairs = OboParser::parse(Rule::UnquotedString, "http://not an url");
+            let pairs = Lexer::parse(Rule::UnquotedString, "http://not an url");
             let pair = pairs.unwrap().next().unwrap();
             unsafe { assert!(Url::from_pair_unchecked(pair).is_err()) }
         }
@@ -83,11 +83,11 @@ mod tests {
 
         #[test]
         fn from_pair() {
-            let pairs = OboParser::parse(Rule::Boolean, "true");
+            let pairs = Lexer::parse(Rule::Boolean, "true");
             let pair = pairs.unwrap().next().unwrap();
             assert_eq!(bool::from_pair(pair).unwrap(), true);
 
-            let pairs = OboParser::parse(Rule::Boolean, "false");
+            let pairs = Lexer::parse(Rule::Boolean, "false");
             let pair = pairs.unwrap().next().unwrap();
             assert_eq!(bool::from_pair(pair).unwrap(), false);
         }
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn unexpected_rule() {
-        let pairs = OboParser::parse(Rule::Boolean, "true");
+        let pairs = Lexer::parse(Rule::Boolean, "true");
         let pair = pairs.unwrap().next().unwrap();
 
         let err = Ident::from_pair(pair).unwrap_err();

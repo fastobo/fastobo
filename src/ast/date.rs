@@ -13,7 +13,7 @@ use pest::iterators::Pair;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 /// A trait for common operations on OBO datetimes.
 pub trait DateTime {

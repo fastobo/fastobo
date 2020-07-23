@@ -11,7 +11,7 @@ use crate::ast::*;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 // FIXME(@althonos): Ordering is not based on lexicographic order but will put
 //                   Abbreviated before Url. This will probably look nicer

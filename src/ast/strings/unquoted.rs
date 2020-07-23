@@ -15,7 +15,7 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 // ---------------------------------------------------------------------------
 

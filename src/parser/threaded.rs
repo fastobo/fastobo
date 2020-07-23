@@ -22,11 +22,10 @@ use crate::ast::OboDoc;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::error::ThreadingError;
+use crate::syntax::Lexer;
+use crate::syntax::Rule;
 
-use super::OboParser;
-use super::Rule;
 use super::FromPair;
-
 use super::consumer::Consumer;
 use super::consumer::Input as ConsumerInput;
 use super::consumer::Output as ConsumerOutput;
@@ -111,7 +110,7 @@ impl<B: BufRead> ThreadedReader<B> {
             // if the line is not empty, parse it
             if !l.starts_with('[') && !l.is_empty() {
                 // parse the header clause
-                let clause = OboParser::parse(Rule::HeaderClause, &line)
+                let clause = Lexer::parse(Rule::HeaderClause, &line)
                     .map_err(SyntaxError::from)
                     .map(|mut p| p.next().unwrap())
                     .and_then(HeaderClause::from_pair)

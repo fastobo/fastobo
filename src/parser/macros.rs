@@ -17,13 +17,13 @@ macro_rules! impl_fromstr {
             type Err = $crate::error::SyntaxError;
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 use $crate::error::Error;
-                use $crate::parser::OboParser;
+                use $crate::syntax::Lexer;
                 use $crate::pest::error::ErrorVariant;
                 use $crate::pest::Parser;
                 use $crate::pest::Position;
 
                 // Parse the input string
-                let mut pairs = OboParser::parse(Self::RULE, s)?;
+                let mut pairs = Lexer::parse(Self::RULE, s)?;
                 let pair = pairs.next().unwrap();
                 // Check EOI was reached
                 if pair.as_span().end() != s.len() {

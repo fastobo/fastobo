@@ -14,9 +14,9 @@ use crate::ast::HeaderFrame;
 use crate::ast::HeaderClause;
 use crate::error::Error;
 use crate::error::SyntaxError;
+use crate::syntax::Lexer;
+use crate::syntax::Rule;
 
-use super::OboParser;
-use super::Rule;
 use super::FromPair;
 
 // ---
@@ -88,7 +88,7 @@ impl Consumer {
                 };
 
                 // parse the string
-                match OboParser::parse(Rule::EntitySingle, &msg.text) {
+                match Lexer::parse(Rule::EntitySingle, &msg.text) {
                     Ok(mut pairs) => unsafe {
                         let pair = pairs.next().unwrap();
                         let frame = EntityFrame::from_pair_unchecked(pair);

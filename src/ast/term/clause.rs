@@ -10,7 +10,7 @@ use crate::ast::*;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 use crate::semantics::OboClause;
 
 /// A clause appearing in a term frame.

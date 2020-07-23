@@ -14,9 +14,9 @@ use crate::ast::HeaderFrame;
 use crate::ast::OboDoc;
 use crate::error::Error;
 use crate::error::SyntaxError;
+use crate::syntax::Lexer;
+use crate::syntax::Rule;
 
-use super::OboParser;
-use super::Rule;
 use super::FromPair;
 
 /// An iterator reading entity frames contained in an OBO stream sequentially.
@@ -52,8 +52,8 @@ impl<B: BufRead> SequentialReader<B> {
             // Parse header as long as we didn't reach EOL or first frame.
             if !l.starts_with('[') && !l.is_empty() {
                 unsafe {
-                    // use `OboParser` to tokenize the input
-                    let p = match OboParser::parse(Rule::HeaderClause, &line) {
+                    // use `fastobo_syntax::Lexer` to tokenize the input
+                    let p = match Lexer::parse(Rule::HeaderClause, &line) {
                         Ok(mut pairs) => pairs.next().unwrap(),
                         Err(e) => {
                             let err = SyntaxError::from(e).with_offsets(line_offset, offset);
@@ -151,7 +151,7 @@ impl<B: BufRead> Iterator for SequentialReader<B> {
             l = self.line.trim_start();
             if l.starts_with('[') || self.line.is_empty() {
                 let res = unsafe {
-                    match OboParser::parse(Rule::EntitySingle, &frame_lines) {
+                    match Lexer::parse(Rule::EntitySingle, &frame_lines) {
                         Ok(mut pairs) => EntityFrame::from_pair_unchecked(pairs.next().unwrap())
                             .map_err(Error::from),
                         Err(e) => Err(Error::from(

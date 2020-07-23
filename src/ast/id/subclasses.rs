@@ -8,7 +8,7 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::FromSlice;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 // FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! ident_subclass {

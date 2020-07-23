@@ -13,7 +13,7 @@ use crate::ast::*;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 /// A clause value binding a property to a value in the relevant entity.
 #[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]

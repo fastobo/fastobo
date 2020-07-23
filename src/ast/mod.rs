@@ -72,8 +72,7 @@ use pest::Parser;
 use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::parser::FromPair;
-use crate::parser::OboParser;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 /// The inner string type used to store text.
 ///

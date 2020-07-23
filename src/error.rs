@@ -10,7 +10,7 @@ use pest::Position;
 use pest::Span;
 
 use crate::ast::*;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 /// An error for cardinality violation.
 ///

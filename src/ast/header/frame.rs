@@ -13,7 +13,7 @@ use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
 

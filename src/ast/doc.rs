@@ -14,7 +14,7 @@ use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FrameReader;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
 

@@ -37,6 +37,7 @@ pub mod parser;
 pub mod ast;
 pub mod error;
 pub mod semantics;
+pub mod syntax;
 pub mod visit;
 
 use std::convert::TryFrom;

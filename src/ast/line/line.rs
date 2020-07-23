@@ -13,7 +13,7 @@ use crate::ast::*;
 use crate::error::Error;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::parser::Rule;
+use crate::syntax::Rule;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

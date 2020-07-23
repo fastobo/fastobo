@@ -30,12 +30,6 @@ mod threaded;
 #[cfg(feature = "threading")]
 mod consumer;
 
-#[doc(inline)]
-pub use fastobo_syntax::OboParser;
-#[doc(inline)]
-/// The production rules of the OBO 1.4 PEG grammar.
-pub use fastobo_syntax::Rule;
-
 pub use self::from_pair::FromPair;
 pub use self::from_slice::FromSlice;
 pub use self::quickfind::QuickFind;

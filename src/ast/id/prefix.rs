@@ -9,7 +9,8 @@ use std::fmt::Write;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use opaque_typedef::OpaqueTypedef;
+use fastobo_derive_internal::FromStr;
+use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;

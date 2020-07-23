@@ -7,6 +7,8 @@ use std::fmt::Write;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
+use fastobo_derive_internal::FromStr;
+use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::*;

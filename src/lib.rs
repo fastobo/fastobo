@@ -3,37 +3,33 @@
 #![warn(clippy::all)]
 #![allow(dead_code, unused_imports)]
 
-#[macro_use]
+extern crate blanket;
 extern crate err_derive;
-#[macro_use]
-extern crate opaque_typedef_macros;
-
-#[macro_use]
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
-
-extern crate blanket;
-#[cfg(feature = "memchr")]
-extern crate memchr;
 extern crate opaque_typedef;
+extern crate opaque_typedef_macros;
 extern crate ordered_float;
 extern crate pest;
-#[cfg(test)]
-extern crate textwrap_macros;
 extern crate url;
+
+#[cfg(feature = "memchr")]
+extern crate memchr;
+
 #[cfg(feature = "threading")]
 extern crate crossbeam_channel;
-#[macro_use]
 #[cfg(feature = "threading")]
 extern crate lazy_static;
 #[cfg(feature = "threading")]
 extern crate num_cpus;
+
 #[cfg(feature = "smartstring")]
 extern crate smartstring;
 
-#[macro_use]
-pub mod parser;
+#[cfg(test)]
+extern crate textwrap_macros;
 
+pub mod parser;
 pub mod ast;
 pub mod error;
 pub mod semantics;

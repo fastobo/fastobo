@@ -3,6 +3,7 @@
 use std::error::Error as StdError;
 use std::io::Error as IOError;
 
+use err_derive::Error;
 use pest::error::Error as PestError;
 use pest::error::InputLocation;
 use pest::error::LineColLocation;

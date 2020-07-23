@@ -13,6 +13,7 @@ use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use crossbeam_channel::TryRecvError;
 use crossbeam_channel::RecvTimeoutError;
+use lazy_static::lazy_static;
 
 use crate::ast::EntityFrame;
 use crate::ast::Frame;
@@ -32,8 +33,6 @@ use self::consumer::Input as ConsumerInput;
 use self::consumer::Output as ConsumerOutput;
 
 mod consumer;
-
-
 
 // ---
 

@@ -6,6 +6,7 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
+use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 use url::Url;
 

@@ -4,6 +4,9 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
 
+use fastobo_derive_internal::FromStr;
+use fastobo_derive_internal::OboClause;
+
 use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;

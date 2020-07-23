@@ -7,6 +7,8 @@ use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::str::FromStr;
 
+use fastobo_derive_internal::FromStr;
+use opaque_typedef_macros::OpaqueTypedef;
 use pest::error::Error as PestError;
 use pest::error::InputLocation;
 use pest::iterators::Pair;

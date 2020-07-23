@@ -3,6 +3,8 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
+use fastobo_derive_internal::FromStr;
+use fastobo_derive_internal::OboClause;
 use pest::iterators::Pair;
 
 use crate::ast::*;

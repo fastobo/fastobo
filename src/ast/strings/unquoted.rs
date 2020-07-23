@@ -7,7 +7,10 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::ops::Deref;
 
+use fastobo_derive_internal::FromStr;
 use opaque_typedef::OpaqueTypedefUnsized;
+use opaque_typedef_macros::OpaqueTypedef;
+use opaque_typedef_macros::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;

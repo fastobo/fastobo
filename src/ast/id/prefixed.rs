@@ -4,7 +4,7 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-use opaque_typedef::OpaqueTypedefUnsized;
+use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use super::IdentLocal;

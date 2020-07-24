@@ -85,15 +85,33 @@ impl<B: BufRead> AsRef<B> for ThreadedParser<B> {
     }
 }
 
+impl<B: BufRead> AsRef<B> for Box<ThreadedParser<B>> {
+    fn as_ref(&self) -> &B {
+        (**self).as_ref()
+    }
+}
+
 impl<B: BufRead> AsMut<B> for ThreadedParser<B> {
     fn as_mut(&mut self) -> &mut B {
         &mut self.stream
     }
 }
 
+impl<B: BufRead> AsMut<B> for Box<ThreadedParser<B>> {
+    fn as_mut(&mut self) -> &mut B {
+        (**self).as_mut()
+    }
+}
+
 impl<B: BufRead> From<B> for ThreadedParser<B> {
     fn from(reader: B) -> Self {
         <Self as Parser<B>>::new(reader)
+    }
+}
+
+impl<B: BufRead> From<B> for Box<ThreadedParser<B>> {
+    fn from(reader: B) -> Self {
+        Box::new(ThreadedParser::new(reader))
     }
 }
 
@@ -330,6 +348,26 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
     }
 }
 
+impl<B: BufRead> Parser<B> for Box<ThreadedParser<B>> {
+    fn new(stream: B) -> Self {
+        Box::new(ThreadedParser::new(stream))
+    }
+
+    fn with_threads(stream: B, threads: NonZeroUsize) -> Self {
+        Box::new(ThreadedParser::with_threads(stream, threads))
+    }
+
+
+    fn ordered(&mut self, ordered: bool) -> &mut Self {
+        (**self).ordered(ordered);
+        self
+    }
+
+    fn into_inner(self) -> B {
+        (*self).into_inner()
+    }
+}
+
 impl<B: BufRead> TryFrom<ThreadedParser<B>> for OboDoc {
     type Error = Error;
     fn try_from(mut reader: ThreadedParser<B>) -> Result<Self, Self::Error> {
@@ -353,8 +391,21 @@ impl<B: BufRead> TryFrom<&mut ThreadedParser<B>> for OboDoc {
     }
 }
 
+impl<B: BufRead> TryFrom<Box<ThreadedParser<B>>> for OboDoc {
+    type Error = Error;
+    fn try_from(mut reader: Box<ThreadedParser<B>>) -> Result<Self, Self::Error> {
+        OboDoc::try_from(&mut (*reader))
+    }
+}
+
 impl From<File> for ThreadedParser<BufReader<File>> {
     fn from(f: File) -> Self {
         Self::new(BufReader::new(f))
+    }
+}
+
+impl From<File> for Box<ThreadedParser<BufReader<File>>> {
+    fn from(f: File) -> Self {
+        Box::new(ThreadedParser::new(BufReader::new(f)))
     }
 }

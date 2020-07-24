@@ -47,7 +47,8 @@ use std::str::FromStr;
 use self::ast::OboDoc;
 use self::error::Error;
 use self::error::Result;
-use self::parser::FrameReader;
+use self::parser::DefaultParser;
+use self::parser::Parser;
 
 // ---------------------------------------------------------------------------
 
@@ -60,7 +61,7 @@ pub fn from_str<S: AsRef<str>>(src: S) -> Result<OboDoc> {
 /// Parse an OBO document from a `BufRead` implementor.
 #[inline]
 pub fn from_reader<B: BufRead>(r: B) -> Result<OboDoc> {
-    OboDoc::try_from(FrameReader::new(r))
+    OboDoc::try_from(DefaultParser::new(r))
 }
 
 /// Parse an OBO document from a file on the local filesystem.

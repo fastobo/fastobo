@@ -6,10 +6,12 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::iter::Iterator;
 use std::str::FromStr;
+use std::num::NonZeroUsize;
 
-use pest::Parser;
+use blanket::blanket;
 
 use crate::ast::EntityFrame;
+use crate::ast::Frame;
 use crate::ast::HeaderClause;
 use crate::ast::HeaderFrame;
 use crate::ast::TermFrame;
@@ -29,19 +31,52 @@ mod threaded;
 pub use self::from_pair::FromPair;
 pub use self::from_slice::FromSlice;
 pub use self::quickfind::QuickFind;
-pub use self::sequential::SequentialReader;
+pub use self::sequential::SequentialParser;
 #[cfg(feature = "threading")]
-pub use self::threaded::ThreadedReader;
+pub use self::threaded::ThreadedParser;
+
+// ---
+
+/// The common interface for OBO parsers.
+#[blanket]
+pub trait Parser<B: BufRead>: From<B> + Iterator<Item=Result<Frame, Error>> + AsRef<B> + AsMut<B> {
+    /// Create a new `Parser` reading from the reader.
+    fn new(stream: B) -> Self {
+        Self::from(stream)
+    }
+
+    /// Create a new `Parser` with the given number of threads.
+    ///
+    /// If multithreading is not supported by the parser, this method will
+    /// default to `Self::new`.
+    #[allow(unused)]
+    fn with_threads(stream: B, threads: NonZeroUsize) -> Self {
+        Self::new(stream)
+    }
+
+    /// Force the parser to yield frames in the order they appear in the document.
+    ///
+    /// Since this can have a small performance impact, parser are expected
+    /// not to care about frame order by default unless forced to by this
+    /// method.
+    #[allow(unused)]
+    fn ordered(&mut self, ordered: bool) -> &mut Self {
+        self
+    }
+
+    /// Extract the internal buffered reader from the parser.
+    fn into_inner(self) -> B;
+}
 
 // ---
 
 #[cfg(feature = "threading")]
 /// The default frame reader used by `fastobo`.
-pub type FrameReader<B> = ThreadedReader<B>;
+pub type DefaultParser<B> = ThreadedParser<B>;
 
 #[cfg(not(feature = "threading"))]
 /// The default frame reader used by `fastobo`.
-pub type FrameReader<B> = SequentialReader<B>;
+pub type DefaultParser<B> = SequentialParser<B>;
 
 // ---
 
@@ -325,12 +360,12 @@ mod tests {
 
     mod sequential {
         use super::*;
-        tests!(|x| SequentialReader::new(x));
+        tests!(|x| SequentialParser::new(x));
     }
 
     #[cfg(feature = "threading")]
     mod threaded {
         use super::*;
-        tests!(|x| ThreadedReader::new(x));
+        tests!(|x| ThreadedParser::new(x));
     }
 }

@@ -27,6 +27,7 @@ use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
 use super::FromPair;
+use super::Parser;
 
 use self::consumer::Consumer;
 use self::consumer::Input as ConsumerInput;
@@ -36,7 +37,7 @@ mod consumer;
 
 // ---
 
-/// The state of a `ThreadedReader` instance.
+/// The state of a `ThreadedParser` instance.
 #[derive(PartialEq, Eq)]
 enum State {
     Idle,
@@ -50,7 +51,7 @@ enum State {
 
 /// An iterator reading entity frames contained in an OBO stream in parallel.
 #[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
-pub struct ThreadedReader<B: BufRead> {
+pub struct ThreadedParser<B: BufRead> {
     // the reader
     stream: B,
     // the state of the parser
@@ -78,128 +79,25 @@ pub struct ThreadedReader<B: BufRead> {
     queue: HashMap<usize, Result<Frame, Error>>,
 }
 
-impl<B: BufRead> ThreadedReader<B> {
-    /// Create a new `ThreadedReader` with all available CPUs.
-    ///
-    /// The number of available CPUs will be polled at runtime and then the
-    /// right number of threads will be spawned accordingly.
-    pub fn new(stream: B) -> Self {
-        lazy_static !{ static ref THREADS: usize = num_cpus::get(); }
-        let threads = unsafe { NonZeroUsize::new_unchecked(*THREADS) };
-        Self::with_threads(stream, threads)
-    }
-
-    /// Create a new `ThreadedReader` with the given number of threads.
-    pub fn with_threads(mut stream: B, threads: NonZeroUsize) -> Self {
-        //
-        let mut frame_clauses = Vec::new();
-        let mut line = String::new();
-        let mut l: &str;
-        let mut offset = 0;
-        let mut line_offset = 0;
-
-        // create the communication channels
-        let (s_text, r_text) = crossbeam_channel::unbounded();
-        let (s_item, r_item) = crossbeam_channel::unbounded();
-
-        // read until we reach the first entity frame
-        let header = loop {
-            // Read the next line
-            line.clear();
-            if let Err(e) = stream.read_line(&mut line) {
-                break Err(Error::from(e));
-            };
-            l = line.trim_start();
-
-            // if the line is not empty, parse it
-            if !l.starts_with('[') && !l.is_empty() {
-                // parse the header clause
-                let clause = Lexer::parse(Rule::HeaderClause, &line)
-                    .map_err(SyntaxError::from)
-                    .map(|mut p| p.next().unwrap())
-                    .and_then(HeaderClause::from_pair)
-                    .map_err(SyntaxError::from);
-                // check if the clause was parsed properly or not
-                match clause {
-                    Ok(c) => frame_clauses.push(c),
-                    Err(e) => {
-                        let err = e.with_offsets(line_offset, offset);
-                        break Err(Error::from(err));
-                    },
-                };
-            }
-
-            // if the line is the beginning of an entity frame, stop
-            if l.starts_with('[') || line.is_empty() {
-                break Ok(Frame::Header(HeaderFrame::from(frame_clauses)));
-            } else {
-                line_offset += 1;
-                offset += line.len();
-            }
-        };
-
-        // create the consumers
-        let mut consumers = Vec::with_capacity(threads.get());
-        for _ in 0..threads.get() {
-            let c = Consumer::new(r_text.clone(), s_item.clone());
-            consumers.push(c);
-        }
-
-        // send the header to the channel (to get it back immediately after)
-        s_item.send(ConsumerOutput::new(header, 0)).ok();
-
-        // return the parser
-        Self {
-            stream,
-            r_item,
-            s_text,
-            threads,
-            consumers,
-            line,
-            line_offset,
-            offset,
-            ordered: false,
-            read_index: 0,
-            sent_index: 1,
-            queue: HashMap::new(),
-            state: State::Idle,
-        }
-    }
-
-    /// Make the parser yield frames in the order they appear in the document.
-    ///
-    /// Note that this has a small performance impact, so this is disabled
-    /// by default.
-    pub fn ordered(&mut self, ordered: bool) -> &mut Self {
-        self.ordered = ordered;
-        self
-    }
-
-    /// Consume the reader and extract the internal reader.
-    pub fn into_inner(self) -> B {
-        self.stream
-    }
-}
-
-impl<B: BufRead> AsRef<B> for ThreadedReader<B> {
+impl<B: BufRead> AsRef<B> for ThreadedParser<B> {
     fn as_ref(&self) -> &B {
         &self.stream
     }
 }
 
-impl<B: BufRead> AsMut<B> for ThreadedReader<B> {
+impl<B: BufRead> AsMut<B> for ThreadedParser<B> {
     fn as_mut(&mut self) -> &mut B {
         &mut self.stream
     }
 }
 
-impl From<File> for ThreadedReader<BufReader<File>> {
-    fn from(f: File) -> Self {
-        Self::new(BufReader::new(f))
+impl<B: BufRead> From<B> for ThreadedParser<B> {
+    fn from(reader: B) -> Self {
+        <Self as Parser<B>>::new(reader)
     }
 }
 
-impl<B: BufRead> Iterator for ThreadedReader<B> {
+impl<B: BufRead> Iterator for ThreadedParser<B> {
     type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -329,16 +227,119 @@ impl<B: BufRead> Iterator for ThreadedReader<B> {
     }
 }
 
-impl<B: BufRead> TryFrom<ThreadedReader<B>> for OboDoc {
+impl<B: BufRead> Parser<B> for ThreadedParser<B> {
+    /// Create a new `ThreadedParser` with all available CPUs.
+    ///
+    /// The number of available CPUs will be polled at runtime and then the
+    /// right number of threads will be spawned accordingly.
+    fn new(stream: B) -> Self {
+        lazy_static !{ static ref THREADS: usize = num_cpus::get(); }
+        let threads = unsafe { NonZeroUsize::new_unchecked(*THREADS) };
+        Self::with_threads(stream, threads)
+    }
+
+    /// Create a new `ThreadedParser` with the given number of threads.
+    fn with_threads(mut stream: B, threads: NonZeroUsize) -> Self {
+        //
+        let mut frame_clauses = Vec::new();
+        let mut line = String::new();
+        let mut l: &str;
+        let mut offset = 0;
+        let mut line_offset = 0;
+
+        // create the communication channels
+        let (s_text, r_text) = crossbeam_channel::unbounded();
+        let (s_item, r_item) = crossbeam_channel::unbounded();
+
+        // read until we reach the first entity frame
+        let header = loop {
+            // Read the next line
+            line.clear();
+            if let Err(e) = stream.read_line(&mut line) {
+                break Err(Error::from(e));
+            };
+            l = line.trim_start();
+
+            // if the line is not empty, parse it
+            if !l.starts_with('[') && !l.is_empty() {
+                // parse the header clause
+                let clause = Lexer::parse(Rule::HeaderClause, &line)
+                    .map_err(SyntaxError::from)
+                    .map(|mut p| p.next().unwrap())
+                    .and_then(HeaderClause::from_pair)
+                    .map_err(SyntaxError::from);
+                // check if the clause was parsed properly or not
+                match clause {
+                    Ok(c) => frame_clauses.push(c),
+                    Err(e) => {
+                        let err = e.with_offsets(line_offset, offset);
+                        break Err(Error::from(err));
+                    },
+                };
+            }
+
+            // if the line is the beginning of an entity frame, stop
+            if l.starts_with('[') || line.is_empty() {
+                break Ok(Frame::Header(HeaderFrame::from(frame_clauses)));
+            } else {
+                line_offset += 1;
+                offset += line.len();
+            }
+        };
+
+        // create the consumers
+        let mut consumers = Vec::with_capacity(threads.get());
+        for _ in 0..threads.get() {
+            let c = Consumer::new(r_text.clone(), s_item.clone());
+            consumers.push(c);
+        }
+
+        // send the header to the channel (to get it back immediately after)
+        s_item.send(ConsumerOutput::new(header, 0)).ok();
+
+        // return the parser
+        Self {
+            stream,
+            r_item,
+            s_text,
+            threads,
+            consumers,
+            line,
+            line_offset,
+            offset,
+            ordered: false,
+            read_index: 0,
+            sent_index: 1,
+            queue: HashMap::new(),
+            state: State::Idle,
+        }
+    }
+
+    /// Make the parser yield frames in the order they appear in the document.
+    ///
+    /// Note that this has a small performance impact, so this is disabled
+    /// by default.
+    fn ordered(&mut self, ordered: bool) -> &mut Self {
+        self.ordered = ordered;
+        self
+    }
+
+    /// Consume the reader and extract the internal reader.
+    fn into_inner(self) -> B {
+        self.stream
+    }
+}
+
+impl<B: BufRead> TryFrom<ThreadedParser<B>> for OboDoc {
     type Error = Error;
-    fn try_from(mut reader: ThreadedReader<B>) -> Result<Self, Self::Error> {
+    fn try_from(mut reader: ThreadedParser<B>) -> Result<Self, Self::Error> {
         OboDoc::try_from(&mut reader)
     }
 }
 
-impl<B: BufRead> TryFrom<&mut ThreadedReader<B>> for OboDoc {
+impl<B: BufRead> TryFrom<&mut ThreadedParser<B>> for OboDoc {
     type Error = Error;
-    fn try_from(reader: &mut ThreadedReader<B>) -> Result<Self, Self::Error> {
+    fn try_from(reader: &mut ThreadedParser<B>) -> Result<Self, Self::Error> {
         // extract the header and create the doc
         let header = reader.next().unwrap()?.into_header_frame().unwrap();
 
@@ -349,5 +350,11 @@ impl<B: BufRead> TryFrom<&mut ThreadedReader<B>> for OboDoc {
 
         // return the doc
         Ok(OboDoc::with_header(header).and_entities(entities))
+    }
+}
+
+impl From<File> for ThreadedParser<BufReader<File>> {
+    fn from(f: File) -> Self {
+        Self::new(BufReader::new(f))
     }
 }

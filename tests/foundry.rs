@@ -42,7 +42,7 @@ macro_rules! foundrytest {
             let peek = buf.fill_buf().expect("could not read response");
 
             if peek.starts_with(b"format-version:") {
-                for item in fastobo::parser::FrameReader::new(buf) {
+                for item in fastobo::parser::DefaultParser::from(buf) {
                     item.unwrap();
                 }
             } else {

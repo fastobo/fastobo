@@ -13,7 +13,6 @@ use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::error::Error;
 use crate::error::SyntaxError;
-use crate::parser::FrameReader;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 use crate::semantics::Identified;

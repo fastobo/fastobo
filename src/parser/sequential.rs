@@ -34,15 +34,33 @@ impl<B: BufRead> AsRef<B> for SequentialParser<B> {
     }
 }
 
+impl<B: BufRead> AsRef<B> for Box<SequentialParser<B>> {
+    fn as_ref(&self) -> &B {
+        (**self).as_ref()
+    }
+}
+
 impl<B: BufRead> AsMut<B> for SequentialParser<B> {
     fn as_mut(&mut self) -> &mut B {
         &mut self.stream
     }
 }
 
+impl<B: BufRead> AsMut<B> for Box<SequentialParser<B>> {
+    fn as_mut(&mut self) -> &mut B {
+        (**self).as_mut()
+    }
+}
+
 impl<B: BufRead> From<B> for SequentialParser<B> {
     fn from(reader: B) -> Self {
         <Self as Parser<B>>::new(reader)
+    }
+}
+
+impl<B: BufRead> From<B> for Box<SequentialParser<B>> {
+    fn from(stream: B) -> Self {
+        Box::new(SequentialParser::from(stream))
     }
 }
 
@@ -175,14 +193,36 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
     }
 }
 
+impl<B: BufRead> Parser<B> for Box<SequentialParser<B>> {
+    fn new(stream: B) -> Self {
+        Box::new(SequentialParser::new(stream))
+    }
+
+    fn ordered(&mut self, ordered: bool) -> &mut Self {
+        (**self).ordered(ordered);
+        self
+    }
+
+    fn into_inner(self) -> B {
+        (*self).into_inner()
+    }
+}
+
+impl<B: BufRead> TryFrom<SequentialParser<B>> for OboDoc {
+    type Error = Error;
+    fn try_from(mut parser: SequentialParser<B>) -> Result<Self, Self::Error> {
+        OboDoc::try_from(&mut parser)
+    }
+}
+
 impl<B: BufRead> TryFrom<&mut SequentialParser<B>> for OboDoc {
     type Error = Error;
-    fn try_from(reader: &mut SequentialParser<B>) -> Result<Self, Self::Error> {
+    fn try_from(parser: &mut SequentialParser<B>) -> Result<Self, Self::Error> {
         // extract the header and create the doc
-        let header = reader.next().unwrap()?.into_header_frame().unwrap();
+        let header = parser.next().unwrap()?.into_header_frame().unwrap();
 
         // extract the remaining entities
-        let entities = reader
+        let entities = parser
             .map(|r| r.map(|f| f.into_entity_frame().unwrap()))
             .collect::<Result<Vec<EntityFrame>, Error>>()?;
 
@@ -191,15 +231,21 @@ impl<B: BufRead> TryFrom<&mut SequentialParser<B>> for OboDoc {
     }
 }
 
-impl<B: BufRead> TryFrom<SequentialParser<B>> for OboDoc {
+impl<B: BufRead> TryFrom<Box<SequentialParser<B>>> for OboDoc {
     type Error = Error;
-    fn try_from(mut reader: SequentialParser<B>) -> Result<Self, Self::Error> {
-        OboDoc::try_from(&mut reader)
+    fn try_from(mut reader: Box<SequentialParser<B>>) -> Result<Self, Self::Error> {
+        OboDoc::try_from(&mut (*reader))
     }
 }
 
 impl From<File> for SequentialParser<BufReader<File>> {
     fn from(f: File) -> Self {
         Self::new(BufReader::new(f))
+    }
+}
+
+impl From<File> for Box<SequentialParser<BufReader<File>>> {
+    fn from(f: File) -> Self {
+        Box::new(SequentialParser::new(BufReader::new(f)))
     }
 }

@@ -38,7 +38,6 @@ pub use self::threaded::ThreadedParser;
 // ---
 
 /// The common interface for OBO parsers.
-#[blanket]
 pub trait Parser<B: BufRead>: From<B> + Iterator<Item=Result<Frame, Error>> + AsRef<B> + AsMut<B> {
     /// Create a new `Parser` reading from the reader.
     fn new(stream: B) -> Self {
@@ -71,11 +70,17 @@ pub trait Parser<B: BufRead>: From<B> + Iterator<Item=Result<Frame, Error>> + As
 // ---
 
 #[cfg(feature = "threading")]
-/// The default frame reader used by `fastobo`.
+/// The default parser used by [`fastobo::from_reader`] and [`fastobo::from_file`].
+///
+/// [`fastobo::from_reader`]: ../fn.from_reader.html
+/// [`fastobo::from_file`]: ../fn.from_file.html
 pub type DefaultParser<B> = ThreadedParser<B>;
 
 #[cfg(not(feature = "threading"))]
-/// The default frame reader used by `fastobo`.
+/// The default parser used by [`fastobo::from_reader`] and [`fastobo::from_file`].
+///
+/// [`fastobo::from_reader`]: ../fn.from_reader.html
+/// [`fastobo::from_file`]: ../fn.from_file.html
 pub type DefaultParser<B> = SequentialParser<B>;
 
 // ---

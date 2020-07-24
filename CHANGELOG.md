@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.10.0...HEAD
+
+
+## [v0.10.0] - 2020-07-24
+
+[v0.10.0]: https://github.com/fastobo/fastobo/compare/v0.9.0...v0.10.0
+
+### Added
+- `smartstring` feature to enable using the `smartstring` crate to store
+  strings instead of `std::string::String`.
+- Additional blanket implementations for `visit::Visit` and `visit::VisitMut`
+  traits using the `blanket` crate.
+- `fastobo::parser::Parser` to factor common operations on available OBO parsers.
+
+### Changed
+- Bumped `fastobo-syntax` dependency to `v0.4.0` to support line comments.
+- Moved `fastobo-syntax` re-exports to `fastobo::syntax`.
+- Renamed `fastobo::parser` structs.
 
 
 ## [v0.9.0] - 2020-06-14

@@ -910,7 +910,7 @@ impl VisitMut for IdCompactor {
         }
 
         if let Some(new_id) = new {
-            *id = Ident::Prefixed(new_id);
+            *id = Ident::Prefixed(Box::new(new_id));
         }
     }
 }
@@ -972,7 +972,7 @@ impl VisitMut for IdDecompactor {
         }
 
         if let Some(new_url) = new {
-            *id = Ident::Url(new_url);
+            *id = Ident::Url(Box::new(new_url));
         }
     }
 }

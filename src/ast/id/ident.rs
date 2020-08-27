@@ -20,9 +20,9 @@ use super::Url;
 /// An identifier, either prefixed, unprefixed, or a valid URL.
 #[derive(Clone, Debug, PartialEq, FromStr, Hash, Eq, Ord)]
 pub enum Ident {
-    Prefixed(PrefixedIdent),
-    Unprefixed(UnprefixedIdent),
-    Url(Url),
+    Prefixed(Box<PrefixedIdent>),
+    Unprefixed(Box<UnprefixedIdent>),
+    Url(Box<Url>),
 }
 
 impl AsRef<Ident> for Ident {
@@ -44,19 +44,19 @@ impl Display for Ident {
 
 impl From<PrefixedIdent> for Ident {
     fn from(id: PrefixedIdent) -> Self {
-        Ident::Prefixed(id)
+        Ident::Prefixed(Box::new(id))
     }
 }
 
 impl From<UnprefixedIdent> for Ident {
     fn from(id: UnprefixedIdent) -> Self {
-        Ident::Unprefixed(id)
+        Ident::Unprefixed(Box::new(id))
     }
 }
 
 impl From<Url> for Ident {
     fn from(url: Url) -> Self {
-        Ident::Url(url)
+        Ident::Url(Box::new(url))
     }
 }
 
@@ -68,7 +68,7 @@ impl<'i> FromPair<'i> for Ident {
             Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner).map(From::from),
             Rule::UnprefixedId => UnprefixedIdent::from_pair_unchecked(inner).map(From::from),
             // FIXME(@althonos): need proper error report if the parser fails.
-            Rule::UrlId => Url::from_pair_unchecked(inner).map(Ident::Url),
+            Rule::UrlId => Url::from_pair_unchecked(inner).map(Box::new).map(Ident::Url),
             _ => unreachable!(),
         }
     }

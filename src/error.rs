@@ -84,7 +84,7 @@ pub enum SyntaxError {
     #[error(display = "parser error: {}", error)]
     ParserError {
         #[error(cause)]
-        error: PestError<Rule>,
+        error: Box<PestError<Rule>>,
     },
 }
 
@@ -118,7 +118,7 @@ impl SyntaxError {
         match self {
             e @ UnexpectedRule { .. } => e,
             ParserError { error } => ParserError {
-                error: error.with_path(path),
+                error: Box::new(error.with_path(path)),
             },
         }
     }
@@ -134,12 +134,31 @@ impl SyntaxError {
                 //                   is no clean way to create an error at
                 //                   the right position with `pest::error`.
                 ParserError {
-                    error: PestError::new_from_span(error.variant, span),
+                    error: Box::new(PestError::new_from_span(error.variant, span)),
                 }
             }
         }
     }
 }
+
+impl From<PestError<Rule>> for SyntaxError {
+    fn from(error: PestError<Rule>) -> Self {
+        Self::from(Box::new(error))
+    }
+}
+
+/// A threading error.
+#[cfg(feature = "threading")]
+#[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
+#[derive(Debug, Eq, Error, PartialEq)]
+pub enum ThreadingError {
+    /// A communication channel unexpectedly disconnected.
+    #[error(display = "disconnected channel")]
+    DisconnectedChannel,
+}
+
+/// The result type for this crate.
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// The error type for this crate.
 #[derive(Debug, Error)]
@@ -148,7 +167,7 @@ pub enum Error {
     #[error(display = "Syntax error: {}", error)]
     SyntaxError {
         #[error(cause)]
-        error: SyntaxError,
+        error: Box<SyntaxError>,
     },
 
     /// An IO error occurred.
@@ -166,7 +185,7 @@ pub enum Error {
     #[error(display = "IO error: {}", error)]
     IOError {
         #[error(cause)]
-        error: IOError,
+        error: Box<IOError>,
     },
 
     /// A cardinality-related error occurred.
@@ -174,7 +193,7 @@ pub enum Error {
     CardinalityError {
         id: Option<Ident>,
         #[error(cause)]
-        inner: CardinalityError,
+        inner: Box<CardinalityError>,
     },
 
     /// A threading-related error occurred.
@@ -183,19 +202,25 @@ pub enum Error {
     #[error(display = "threading error: {}", error)]
     ThreadingError {
         #[error(cause)]
-        error: ThreadingError,
+        error: Box<ThreadingError>,
     }
 }
 
-/// A threading error.
-#[cfg(feature = "threading")]
-#[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
-#[derive(Debug, Eq, Error, PartialEq)]
-pub enum ThreadingError {
-    /// A communication channel unexpectedly disconnected.
-    #[error(display = "disconnected channel")]
-    DisconnectedChannel,
+impl From<IOError> for Error {
+    fn from(err: IOError) -> Self {
+        Self::from(Box::new(err))
+    }
 }
 
-/// The result type for this crate.
-pub type Result<T> = std::result::Result<T, Error>;
+#[cfg(feature = "threading")]
+impl From<ThreadingError> for Error {
+    fn from(err: ThreadingError) -> Self {
+        Self::from(Box::new(err))
+    }
+}
+
+impl From<SyntaxError> for Error {
+    fn from(err: SyntaxError) -> Self {
+        Self::from(Box::new(err))
+    }
+}

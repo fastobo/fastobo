@@ -886,7 +886,7 @@ impl VisitMut for IdCompactor {
         // collect all IDSpaces before processing the header
         for clause in header.iter() {
             if let HeaderClause::Idspace(prefix, url, _) = clause {
-                self.idspaces.insert(prefix.clone(), (**url).clone());
+                self.idspaces.insert(prefix.as_ref().clone(), (**url).clone());
             }
         }
 
@@ -903,7 +903,7 @@ impl VisitMut for IdCompactor {
             for (prefix, url) in self.idspaces.iter() {
                 if u.as_str().starts_with(url.as_str()) {
                     let local = IdentLocal::from(&u.as_str()[url.as_str().len()..]);
-                    new = Some(PrefixedIdent::new(prefix.clone(), local));
+                    new = Some(PrefixedIdent::new(prefix.as_ref().clone(), local));
                 }
             }
             // if none found, attempt to use the OBO factorisation
@@ -958,7 +958,7 @@ impl VisitMut for IdDecompactor {
         // collect all IDSpaces before processing the header
         for clause in header.iter() {
             if let HeaderClause::Idspace(prefix, url, _) = clause {
-                self.idspaces.insert(prefix.clone(), (**url).clone());
+                self.idspaces.insert(prefix.as_ref().clone(), (**url).clone());
             }
         }
 

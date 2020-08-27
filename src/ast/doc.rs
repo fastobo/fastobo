@@ -182,7 +182,7 @@ impl OboDoc {
                         continue $outer
                     }
                 }
-                $frame.push(Line::from($clause::Namespace($ns.clone())));
+                $frame.push(Line::from($clause::Namespace(Box::new($ns.clone()))));
             });
         }
 

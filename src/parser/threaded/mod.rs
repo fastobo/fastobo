@@ -298,7 +298,7 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
 
             // if the line is the beginning of an entity frame, stop
             if l.starts_with('[') || line.is_empty() {
-                break Ok(Frame::Header(HeaderFrame::from(frame_clauses)));
+                break Ok(Frame::from(HeaderFrame::from(frame_clauses)));
             } else {
                 line_offset += 1;
                 offset += line.len();

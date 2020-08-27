@@ -16,7 +16,7 @@ pub fn as_equivalent(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
-                            new.push(Line::from($clause::EquivalentTo(xref.id().clone().into())));
+                            new.push(Line::from($clause::EquivalentTo(Box::new(xref.id().clone().into()))));
                         }
                     }
                 }
@@ -49,7 +49,7 @@ pub fn as_is_a(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
-                            new.push(Line::from($clause::IsA(xref.id().clone().into())));
+                            new.push(Line::from($clause::IsA(Box::new(xref.id().clone().into()))));
                         }
                     }
                 }
@@ -103,7 +103,7 @@ pub fn as_has_subclass(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
         ($subcls:ident, $supercls:ident, $clause:ident) => {{
             $subcls
                 .clauses_mut()
-                .push(Line::from($clause::IsA($supercls.clone().into())));
+                .push(Line::from($clause::IsA(Box::new($supercls.clone().into()))));
         }};
     }
 
@@ -155,12 +155,12 @@ pub fn as_genus_differentia(
                             // add genus from Xref
                             new.push(Line::from(TermClause::IntersectionOf(
                                 None,
-                                xref.id().clone().into(),
+                                Box::new(xref.id().clone().into()),
                             )));
                             // add differentia from header
                             new.push(Line::from(TermClause::IntersectionOf(
-                                Some(relid.clone()),
-                                classid.clone(),
+                                Some(Box::new(relid.clone())),
+                                Box::new(classid.clone()),
                             )));
                         }
                     }
@@ -218,11 +218,11 @@ pub fn as_reverse_genus_differentia(
             let clauses = $frame.clauses_mut();
             clauses.push(Line::from($clause::IntersectionOf(
                 None,
-                $genus.clone().into(),
+                Box::new($genus.clone().into()),
             )));
             clauses.push(Line::from($clause::IntersectionOf(
-                Some(relid.clone()),
-                classid.clone(),
+                Some(Box::new(relid.clone())),
+                Box::new(classid.clone()),
             )));
         }};
     }
@@ -269,8 +269,8 @@ pub fn as_relationship(
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
                             new.push(Line::from($clause::Relationship(
-                                relid.clone(),
-                                xref.id().clone().into(),
+                                Box::new(relid.clone()),
+                                Box::new(xref.id().clone().into()),
                             )));
                         }
                     }

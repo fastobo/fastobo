@@ -167,7 +167,7 @@ pub enum Error {
     #[error(display = "Syntax error: {}", error)]
     SyntaxError {
         #[error(cause)]
-        error: Box<SyntaxError>,
+        error: SyntaxError,
     },
 
     /// An IO error occurred.
@@ -185,7 +185,7 @@ pub enum Error {
     #[error(display = "IO error: {}", error)]
     IOError {
         #[error(cause)]
-        error: Box<IOError>,
+        error: IOError,
     },
 
     /// A cardinality-related error occurred.
@@ -193,7 +193,7 @@ pub enum Error {
     CardinalityError {
         id: Option<Ident>,
         #[error(cause)]
-        inner: Box<CardinalityError>,
+        inner: CardinalityError,
     },
 
     /// A threading-related error occurred.
@@ -202,25 +202,6 @@ pub enum Error {
     #[error(display = "threading error: {}", error)]
     ThreadingError {
         #[error(cause)]
-        error: Box<ThreadingError>,
-    }
-}
-
-impl From<IOError> for Error {
-    fn from(err: IOError) -> Self {
-        Self::from(Box::new(err))
-    }
-}
-
-#[cfg(feature = "threading")]
-impl From<ThreadingError> for Error {
-    fn from(err: ThreadingError) -> Self {
-        Self::from(Box::new(err))
-    }
-}
-
-impl From<SyntaxError> for Error {
-    fn from(err: SyntaxError) -> Self {
-        Self::from(Box::new(err))
+        error: ThreadingError,
     }
 }

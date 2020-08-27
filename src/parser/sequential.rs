@@ -160,7 +160,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
 
             if l.starts_with('[') || line.is_empty() {
                 // Bail out if we reached EOL or first frame.
-                let frame = Frame::Header(HeaderFrame::from(frame_clauses));
+                let frame = Frame::from(HeaderFrame::from(frame_clauses));
                 break Some(Ok(frame));
             } else {
                 // Update offsets

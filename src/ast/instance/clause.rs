@@ -20,27 +20,27 @@ pub enum InstanceClause {
     #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
     #[clause(cardinality = "ZeroOrOne")]
-    Name(UnquotedString),
+    Name(Box<UnquotedString>),
     #[clause(cardinality = "One")]
-    Namespace(NamespaceIdent),
-    AltId(Ident),
+    Namespace(Box<NamespaceIdent>),
+    AltId(Box<Ident>),
     #[clause(cardinality = "ZeroOrOne")]
-    Def(QuotedString, XrefList),
-    Comment(UnquotedString),
-    Subset(SubsetIdent),
-    Synonym(Synonym),
-    Xref(Xref),
-    PropertyValue(PropertyValue),
-    InstanceOf(ClassIdent),
-    Relationship(RelationIdent, Ident), // QUESTION(@althonos): InstanceId ?
+    Def(Box<QuotedString>, Box<XrefList>),
+    Comment(Box<UnquotedString>),
+    Subset(Box<SubsetIdent>),
+    Synonym(Box<Synonym>),
+    Xref(Box<Xref>),
+    PropertyValue(Box<PropertyValue>),
+    InstanceOf(Box<ClassIdent>),
+    Relationship(Box<RelationIdent>, Box<Ident>), // QUESTION(@althonos): InstanceId ?
     #[clause(cardinality = "ZeroOrOne")]
-    CreatedBy(UnquotedString),
+    CreatedBy(Box<UnquotedString>),
     #[clause(cardinality = "ZeroOrOne")]
-    CreationDate(IsoDateTime),
+    CreationDate(Box<IsoDateTime>),
     #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
-    ReplacedBy(InstanceIdent),
-    Consider(Ident),
+    ReplacedBy(Box<InstanceIdent>),
+    Consider(Box<Ident>),
 }
 
 impl<'i> FromPair<'i> for InstanceClause {
@@ -54,57 +54,57 @@ impl<'i> FromPair<'i> for InstanceClause {
             }
             Rule::NameTag => {
                 let n = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Name(n))
+                Ok(InstanceClause::Name(Box::new(n)))
             }
             Rule::NamespaceTag => {
                 let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Namespace(ns))
+                Ok(InstanceClause::Namespace(Box::new(ns)))
             }
             Rule::AltIdTag => {
                 let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::AltId(id))
+                Ok(InstanceClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
                 let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Def(desc, xrefs))
+                Ok(InstanceClause::Def(Box::new(desc), Box::new(xrefs)))
             }
             Rule::CommentTag => {
                 let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Comment(s))
+                Ok(InstanceClause::Comment(Box::new(s)))
             }
             Rule::SubsetTag => {
                 let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Subset(id))
+                Ok(InstanceClause::Subset(Box::new(id)))
             }
             Rule::SynonymTag => {
                 let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Synonym(syn))
+                Ok(InstanceClause::Synonym(Box::new(syn)))
             }
             Rule::XrefTag => {
                 let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Xref(xref))
+                Ok(InstanceClause::Xref(Box::new(xref)))
             }
             Rule::PropertyValueTag => {
                 let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::PropertyValue(pv))
+                Ok(InstanceClause::PropertyValue(Box::new(pv)))
             }
             Rule::InstanceOfTag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::InstanceOf(id))
+                Ok(InstanceClause::InstanceOf(Box::new(id)))
             }
             Rule::RelationshipTag => {
                 let r = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Relationship(r, id))
+                Ok(InstanceClause::Relationship(Box::new(r), Box::new(id)))
             }
             Rule::CreatedByTag => {
                 let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::CreatedBy(s))
+                Ok(InstanceClause::CreatedBy(Box::new(s)))
             }
             Rule::CreationDateTag => {
                 let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::CreationDate(dt))
+                Ok(InstanceClause::CreationDate(Box::new(dt)))
             }
             Rule::IsObsoleteTag => {
                 let b = bool::from_pair_unchecked(inner.next().unwrap())?;
@@ -112,11 +112,11 @@ impl<'i> FromPair<'i> for InstanceClause {
             }
             Rule::ReplacedByTag => {
                 let id = InstanceIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::ReplacedBy(id))
+                Ok(InstanceClause::ReplacedBy(Box::new(id)))
             }
             Rule::ConsiderTag => {
                 let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Consider(id))
+                Ok(InstanceClause::Consider(Box::new(id)))
             }
             _ => unreachable!(),
         }

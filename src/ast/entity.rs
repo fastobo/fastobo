@@ -26,9 +26,9 @@ use crate::semantics::Orderable;
 /// An entity frame, either for a term, an instance, or a typedef.
 #[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq)]
 pub enum EntityFrame {
-    Term(TermFrame),
-    Typedef(TypedefFrame),
-    Instance(InstanceFrame),
+    Term(Box<TermFrame>),
+    Typedef(Box<TypedefFrame>),
+    Instance(Box<InstanceFrame>),
 }
 
 impl EntityFrame {
@@ -49,7 +49,7 @@ impl EntityFrame {
     /// ```
     pub fn as_term_frame(&self) -> Option<&TermFrame> {
         if let EntityFrame::Term(frame) = &self {
-            Some(frame)
+            Some(frame.as_ref())
         } else {
             None
         }
@@ -57,7 +57,7 @@ impl EntityFrame {
     /// Return the `TypedefFrame` if the entity frame is one, or `None`.
     pub fn as_typedef_frame(&self) -> Option<&TypedefFrame> {
         if let EntityFrame::Typedef(frame) = &self {
-            Some(frame)
+            Some(frame.as_ref())
         } else {
             None
         }
@@ -66,7 +66,7 @@ impl EntityFrame {
     /// Return the `InstanceFrame` if the entity frame is one, or `None`.
     pub fn as_instance_frame(&self) -> Option<&InstanceFrame> {
         if let EntityFrame::Instance(frame) = &self {
-            Some(frame)
+            Some(frame.as_ref())
         } else {
             None
         }
@@ -106,19 +106,19 @@ impl Display for EntityFrame {
 
 impl From<TermFrame> for EntityFrame {
     fn from(frame: TermFrame) -> Self {
-        EntityFrame::Term(frame)
+        EntityFrame::Term(Box::new(frame))
     }
 }
 
 impl From<TypedefFrame> for EntityFrame {
     fn from(frame: TypedefFrame) -> Self {
-        EntityFrame::Typedef(frame)
+        EntityFrame::Typedef(Box::new(frame))
     }
 }
 
 impl From<InstanceFrame> for EntityFrame {
     fn from(frame: InstanceFrame) -> Self {
-        EntityFrame::Instance(frame)
+        EntityFrame::Instance(Box::new(frame))
     }
 }
 

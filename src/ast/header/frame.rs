@@ -113,7 +113,7 @@ impl HeaderFrame {
 
         if !merged.is_empty() {
             let s = UnquotedString::new(merged.join("\n"));
-            self.clauses.push(HeaderClause::OwlAxioms(s));
+            self.clauses.push(HeaderClause::OwlAxioms(Box::new(s)));
         }
     }
 }

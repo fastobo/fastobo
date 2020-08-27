@@ -27,41 +27,36 @@ pub enum TermClause {
     #[clause(cardinality = "ZeroOrOne")]
     IsAnonymous(bool),
     #[clause(cardinality = "ZeroOrOne")]
-    Name(UnquotedString),
+    Name(Box<UnquotedString>),
     #[clause(cardinality = "One")]
-    Namespace(NamespaceIdent),
-    AltId(Ident),
+    Namespace(Box<NamespaceIdent>),
+    AltId(Box<Ident>),
     #[clause(cardinality = "ZeroOrOne")]
-    Def(QuotedString, XrefList),
+    Def(Box<QuotedString>, Box<XrefList>),
     #[clause(cardinality = "ZeroOrOne")]
-    Comment(UnquotedString),
-    Subset(SubsetIdent),
-    Synonym(Synonym),
-    Xref(Xref),
+    Comment(Box<UnquotedString>),
+    Subset(Box<SubsetIdent>),
+    Synonym(Box<Synonym>),
+    Xref(Box<Xref>),
     #[clause(cardinality = "ZeroOrOne")]
     Builtin(bool),
-    PropertyValue(PropertyValue),
-    IsA(ClassIdent),
+    PropertyValue(Box<PropertyValue>),
+    IsA(Box<ClassIdent>),
     #[clause(cardinality = "NotOne")]
-    IntersectionOf(Option<RelationIdent>, ClassIdent),
+    IntersectionOf(Option<Box<RelationIdent>>, Box<ClassIdent>),
     #[clause(cardinality = "NotOne")]
-    UnionOf(ClassIdent),
-    EquivalentTo(ClassIdent),
-    DisjointFrom(ClassIdent),
-    Relationship(RelationIdent, ClassIdent),
+    UnionOf(Box<ClassIdent>),
+    EquivalentTo(Box<ClassIdent>),
+    DisjointFrom(Box<ClassIdent>),
+    Relationship(Box<RelationIdent>, Box<ClassIdent>),
     #[clause(cardinality = "ZeroOrOne")]
-    CreatedBy(UnquotedString),
+    CreatedBy(Box<UnquotedString>),
     #[clause(cardinality = "ZeroOrOne")]
-    CreationDate(IsoDateTime),
+    CreationDate(Box<IsoDateTime>),
     #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
-    ReplacedBy(ClassIdent),
-    Consider(ClassIdent),
-    // FIXME(@althonos): in the guide but not in the syntax.
-    // ExpandAssertionTo(QuotedString, XrefList),
-    // ExpandExpressionTO(QuotedString, XrefList),
-    // IsMetadataTag(bool),
-    // IsClassLevel(bool),
+    ReplacedBy(Box<ClassIdent>),
+    Consider(Box<ClassIdent>),
 }
 
 impl<'i> FromPair<'i> for Line<TermClause> {
@@ -85,36 +80,36 @@ impl<'i> FromPair<'i> for TermClause {
             }
             Rule::NameTag => {
                 let name = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Name(name))
+                Ok(TermClause::Name(Box::new(name)))
             }
             Rule::NamespaceTag => {
                 let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Namespace(ns))
+                Ok(TermClause::Namespace(Box::new(ns)))
             }
             Rule::AltIdTag => {
                 let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::AltId(id))
+                Ok(TermClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
                 let def = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Def(def, xrefs))
+                Ok(TermClause::Def(Box::new(def), Box::new(xrefs)))
             }
             Rule::CommentTag => {
                 let comment = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Comment(comment))
+                Ok(TermClause::Comment(Box::new(comment)))
             }
             Rule::SubsetTag => {
                 let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Subset(id))
+                Ok(TermClause::Subset(Box::new(id)))
             }
             Rule::SynonymTag => {
                 let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Synonym(syn))
+                Ok(TermClause::Synonym(Box::new(syn)))
             }
             Rule::XrefTag => {
                 let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Xref(xref))
+                Ok(TermClause::Xref(Box::new(xref)))
             }
             Rule::BuiltinTag => {
                 let b = bool::from_pair_unchecked(inner.next().unwrap())?;
@@ -122,39 +117,39 @@ impl<'i> FromPair<'i> for TermClause {
             }
             Rule::PropertyValueTag => {
                 let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::PropertyValue(pv))
+                Ok(TermClause::PropertyValue(Box::new(pv)))
             }
             Rule::IsATag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::IsA(id))
+                Ok(TermClause::IsA(Box::new(id)))
             }
             Rule::IntersectionOfTag => {
                 let id = inner.next().unwrap();
                 if id.as_rule() == Rule::ClassId {
                     let classid = ClassIdent::from_pair_unchecked(id)?;
-                    Ok(TermClause::IntersectionOf(None, classid))
+                    Ok(TermClause::IntersectionOf(None, Box::new(classid)))
                 } else {
                     let relid = RelationIdent::from_pair_unchecked(id)?;
                     let classid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                    Ok(TermClause::IntersectionOf(Some(relid), classid))
+                    Ok(TermClause::IntersectionOf(Some(Box::new(relid)), Box::new(classid)))
                 }
             }
             Rule::UnionOfTag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::UnionOf(id))
+                Ok(TermClause::UnionOf(Box::new(id)))
             }
             Rule::EquivalentToTag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::EquivalentTo(id))
+                Ok(TermClause::EquivalentTo(Box::new(id)))
             }
             Rule::DisjointFromTag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::DisjointFrom(id))
+                Ok(TermClause::DisjointFrom(Box::new(id)))
             }
             Rule::RelationshipTag => {
                 let rel = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Relationship(rel, id))
+                Ok(TermClause::Relationship(Box::new(rel), Box::new(id)))
             }
             Rule::IsObsoleteTag => {
                 let b = bool::from_pair_unchecked(inner.next().unwrap())?;
@@ -162,19 +157,19 @@ impl<'i> FromPair<'i> for TermClause {
             }
             Rule::ReplacedByTag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::ReplacedBy(id))
+                Ok(TermClause::ReplacedBy(Box::new(id)))
             }
             Rule::ConsiderTag => {
                 let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Consider(id))
+                Ok(TermClause::Consider(Box::new(id)))
             }
             Rule::CreatedByTag => {
                 let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::CreatedBy(s))
+                Ok(TermClause::CreatedBy(Box::new(s)))
             }
             Rule::CreationDateTag => {
                 let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::CreationDate(dt))
+                Ok(TermClause::CreationDate(Box::new(dt)))
             }
             _ => unreachable!(),
         }

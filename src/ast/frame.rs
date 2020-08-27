@@ -12,17 +12,17 @@ use super::EntityFrame;
 /// properly separated there.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Frame {
-    Header(HeaderFrame),
-    Term(TermFrame),
-    Typedef(TypedefFrame),
-    Instance(InstanceFrame),
+    Header(Box<HeaderFrame>),
+    Term(Box<TermFrame>),
+    Typedef(Box<TypedefFrame>),
+    Instance(Box<InstanceFrame>),
 }
 
 impl Frame {
     /// Attempt to convert the frame into a `HeaderFrame`.
     pub fn into_header_frame(self) -> Option<HeaderFrame> {
         if let Frame::Header(h) = self {
-            Some(h)
+            Some(*h)
         } else {
             None
         }
@@ -41,25 +41,25 @@ impl Frame {
 
 impl From<HeaderFrame> for Frame {
     fn from(frame: HeaderFrame) -> Self {
-        Frame::Header(frame)
+        Frame::Header(Box::new(frame))
     }
 }
 
 impl From<TermFrame> for Frame {
     fn from(frame: TermFrame) -> Self {
-        Frame::Term(frame)
+        Frame::Term(Box::new(frame))
     }
 }
 
 impl From<TypedefFrame> for Frame {
     fn from(frame: TypedefFrame) -> Self {
-        Frame::Typedef(frame)
+        Frame::Typedef(Box::new(frame))
     }
 }
 
 impl From<InstanceFrame> for Frame {
     fn from(frame: InstanceFrame) -> Self {
-        Frame::Instance(frame)
+        Frame::Instance(Box::new(frame))
     }
 }
 

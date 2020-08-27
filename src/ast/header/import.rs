@@ -20,8 +20,8 @@ use crate::syntax::Rule;
 /// A reference to another document to be imported.
 #[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Import {
-    Abbreviated(Ident), // QUESTION(@althonos): IdentPrefix ?
-    Url(Url),
+    Abbreviated(Box<Ident>), // QUESTION(@althonos): IdentPrefix ?
+    Url(Box<Url>),
 }
 
 impl Import {
@@ -31,7 +31,7 @@ impl Import {
     /// an URL is built using the default OBO prefix (`http://purl.obolibrary.org/obo/`).
     pub fn into_url(self) -> Url {
         match self {
-            Import::Url(u) => u,
+            Import::Url(u) => *u,
             Import::Abbreviated(id) => {
                 Url::parse(&format!("http://purl.obolibrary.org/obo/{}.owl", id)).unwrap()
             }
@@ -41,13 +41,13 @@ impl Import {
 
 impl From<Url> for Import {
     fn from(url: Url) -> Self {
-        Import::Url(url)
+        Import::Url(Box::new(url))
     }
 }
 
 impl From<Ident> for Import {
     fn from(id: Ident) -> Self {
-        Import::Abbreviated(id)
+        Import::Abbreviated(Box::new(id))
     }
 }
 

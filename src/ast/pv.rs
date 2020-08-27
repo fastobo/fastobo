@@ -17,12 +17,12 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// A clause value binding a property to a value in the relevant entity.
-#[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq, Ord)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
 pub enum PropertyValue {
     /// A property-value binding where the value is specified with an ID.
-    Resource(RelationIdent, Ident),
+    Resource(Box<ResourcePropertyValue>),
     /// A property-value binding where the value is given by a typed literal.
-    Literal(RelationIdent, QuotedString, Ident),
+    Literal(Box<LiteralPropertyValue>),
 }
 
 impl PropertyValue {
@@ -30,8 +30,8 @@ impl PropertyValue {
     pub fn property(&self) -> &RelationIdent {
         use self::PropertyValue::*;
         match self {
-            Resource(ref prop, _) => prop,
-            Literal(ref prop, _, _) => prop,
+            Resource(pv) => pv.property(),
+            Literal(pv) => pv.property(),
         }
     }
 }
@@ -39,15 +39,8 @@ impl PropertyValue {
 impl Display for PropertyValue {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
-            PropertyValue::Resource(relation, instance) => {
-                relation.fmt(f).and(f.write_char(' ')).and(instance.fmt(f))
-            }
-            PropertyValue::Literal(relation, desc, datatype) => relation
-                .fmt(f)
-                .and(f.write_char(' '))
-                .and(desc.fmt(f))
-                .and(f.write_char(' '))
-                .and(datatype.fmt(f)),
+            PropertyValue::Resource(pv) => pv.fmt(f),
+            PropertyValue::Literal(pv) => pv.fmt(f),
         }
     }
 }
@@ -61,17 +54,17 @@ impl<'i> FromPair<'i> for PropertyValue {
         match second.as_rule() {
             Rule::Id => {
                 let id = Ident::from_pair_unchecked(second)?;
-                Ok(PropertyValue::Resource(relid, id))
+                Ok(PropertyValue::Resource(Box::new(ResourcePropertyValue::new(relid, id))))
             }
             Rule::PvValue => {
                 let desc = QuotedString::new(second.as_str().to_string());
                 let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
-                Ok(PropertyValue::Literal(relid, desc, datatype))
+                Ok(PropertyValue::Literal(Box::new(LiteralPropertyValue::new(relid, desc, datatype))))
             }
             Rule::QuotedString => {
                 let desc = QuotedString::from_pair_unchecked(second)?;
                 let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
-                Ok(PropertyValue::Literal(relid, desc, datatype))
+                Ok(PropertyValue::Literal(Box::new(LiteralPropertyValue::new(relid, desc, datatype))))
             }
             _ => unreachable!(),
         }
@@ -84,6 +77,97 @@ impl PartialOrd for PropertyValue {
             .cmp(&other.property())
             .then_with(|| self.to_string().cmp(&other.to_string()))
             .into()
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialOrd, Eq, PartialEq, Ord)]
+pub struct ResourcePropertyValue {
+    property: RelationIdent,
+    target: Ident,
+}
+
+impl ResourcePropertyValue {
+    pub fn new(property: RelationIdent, target: Ident) -> Self {
+        Self {
+            property,
+            target
+        }
+    }
+
+    /// Get the identifier of the declared property annotation.
+    pub fn property(&self) -> &RelationIdent {
+        &self.property
+    }
+
+    pub fn property_mut(&mut self) -> &mut RelationIdent {
+        &mut self.property
+    }
+
+    pub fn target(&self) -> &Ident {
+        &self.target
+    }
+
+    pub fn target_mut(&mut self) -> &mut Ident {
+        &mut self.target
+    }
+}
+
+impl Display for ResourcePropertyValue {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.property.fmt(f).and(f.write_char(' ')).and(self.target.fmt(f))
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialOrd, Eq, PartialEq, Ord)]
+pub struct LiteralPropertyValue {
+    property: RelationIdent,
+    literal: QuotedString,
+    datatype: Ident,
+}
+
+impl LiteralPropertyValue {
+    pub fn new(property: RelationIdent, literal: QuotedString, datatype: Ident) -> Self {
+        Self {
+            property,
+            literal,
+            datatype
+        }
+    }
+
+    /// Get the identifier of the declared property annotation.
+    pub fn property(&self) -> &RelationIdent {
+        &self.property
+    }
+
+    pub fn property_mut(&mut self) -> &mut RelationIdent {
+        &mut self.property
+    }
+
+    pub fn literal(&self) -> &QuotedString {
+        &self.literal
+    }
+
+    pub fn literal_mut(&mut self) -> &mut QuotedString {
+        &mut self.literal
+    }
+
+    pub fn datatype(&self) -> &Ident {
+        &self.datatype
+    }
+
+    pub fn datatype_mut(&mut self) -> &mut Ident {
+        &mut self.datatype
+    }
+}
+
+impl Display for LiteralPropertyValue {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        self.property
+            .fmt(f)
+            .and(f.write_char(' '))
+            .and(self.literal.fmt(f))
+            .and(f.write_char(' '))
+            .and(self.datatype.fmt(f))
     }
 }
 

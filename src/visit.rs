@@ -78,12 +78,14 @@ pub trait Visit<'ast> {
     fn visit_instance_frame(&mut self, frame: &'ast InstanceFrame);
     fn visit_instance_ident(&mut self, id: &'ast InstanceIdent);
     fn visit_iso_date(&mut self, date: &'ast IsoDateTime);
+    fn visit_literal_property_value(&mut self, id: &'ast LiteralPropertyValue);
     fn visit_naive_date(&mut self, date: &'ast NaiveDateTime);
     fn visit_namespace_ident(&mut self, id: &'ast NamespaceIdent);
     fn visit_property_value(&mut self, pv: &'ast PropertyValue);
     fn visit_prefixed_ident(&mut self, id: &'ast PrefixedIdent);
     fn visit_quoted_string(&mut self, string: &'ast QuotedString);
     fn visit_relation_ident(&mut self, id: &'ast RelationIdent);
+    fn visit_resource_property_value(&mut self, id: &'ast ResourcePropertyValue);
     fn visit_subset_ident(&mut self, id: &'ast SubsetIdent);
     fn visit_synonym(&mut self, syn: &'ast Synonym);
     fn visit_synonym_scope(&mut self, scope: &'ast SynonymScope);
@@ -253,6 +255,12 @@ pub mod visit {
     #[allow(unused_variables)]
     pub fn visit_iso_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, date: &'ast IsoDateTime) {}
 
+    pub fn visit_literal_property_value<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, pv: &'ast LiteralPropertyValue) {
+        visitor.visit_relation_ident(pv.property());
+        visitor.visit_quoted_string(pv.literal());
+        visitor.visit_ident(pv.datatype());
+    }
+
     #[allow(unused_variables)]
     pub fn visit_naive_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, date: &'ast NaiveDateTime) {}
 
@@ -263,15 +271,8 @@ pub mod visit {
     pub fn visit_property_value<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, pv: &'ast PropertyValue) {
         use self::PropertyValue::*;
         match &pv {
-            Resource(relation, value) => {
-                visitor.visit_relation_ident(relation);
-                visitor.visit_ident(value);
-            }
-            Literal(relation, value, ty) => {
-                visitor.visit_relation_ident(relation);
-                visitor.visit_quoted_string(value);
-                visitor.visit_ident(ty);
-            }
+            Resource(pv) => visitor.visit_resource_property_value(pv),
+            Literal(pv) => visitor.visit_literal_property_value(pv),
         }
     }
 
@@ -285,6 +286,11 @@ pub mod visit {
 
     pub fn visit_relation_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast RelationIdent) {
         visitor.visit_ident(id.as_ref())
+    }
+
+    pub fn visit_resource_property_value<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, pv: &'ast ResourcePropertyValue) {
+        visitor.visit_relation_ident(pv.property());
+        visitor.visit_ident(pv.target());
     }
 
     pub fn visit_subset_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast SubsetIdent) {
@@ -459,12 +465,14 @@ pub trait VisitMut {
     fn visit_instance_frame(&mut self, frame: &mut InstanceFrame);
     fn visit_instance_ident(&mut self, id: &mut InstanceIdent);
     fn visit_iso_date(&mut self, date: &mut IsoDateTime);
+    fn visit_literal_property_value(&mut self, id: &mut LiteralPropertyValue);
     fn visit_naive_date(&mut self, date: &mut NaiveDateTime);
     fn visit_namespace_ident(&mut self, id: &mut NamespaceIdent);
     fn visit_property_value(&mut self, pv: &mut PropertyValue);
     fn visit_prefixed_ident(&mut self, id: &mut PrefixedIdent);
     fn visit_quoted_string(&mut self, string: &mut QuotedString);
     fn visit_relation_ident(&mut self, id: &mut RelationIdent);
+    fn visit_resource_property_value(&mut self, id: &mut ResourcePropertyValue);
     fn visit_subset_ident(&mut self, id: &mut SubsetIdent);
     fn visit_synonym(&mut self, syn: &mut Synonym);
     fn visit_synonym_scope(&mut self, scope: &mut SynonymScope);
@@ -634,6 +642,12 @@ pub mod visit_mut {
     #[allow(unused_variables)]
     pub fn visit_iso_date<V: VisitMut + ?Sized>(visitor: &mut V, date: &mut IsoDateTime) {}
 
+    pub fn visit_literal_property_value<V: VisitMut + ?Sized>(visitor: &mut V, pv: &mut LiteralPropertyValue) {
+        visitor.visit_relation_ident(pv.property_mut());
+        visitor.visit_quoted_string(pv.literal_mut());
+        visitor.visit_ident(pv.datatype_mut());
+    }
+
     #[allow(unused_variables)]
     pub fn visit_naive_date<V: VisitMut + ?Sized>(visitor: &mut V, date: &mut NaiveDateTime) {}
 
@@ -644,15 +658,8 @@ pub mod visit_mut {
     pub fn visit_property_value<V: VisitMut + ?Sized>(visitor: &mut V, pv: &mut PropertyValue) {
         use self::PropertyValue::*;
         match pv {
-            Resource(ref mut relation, ref mut value) => {
-                visitor.visit_relation_ident(relation);
-                visitor.visit_ident(value);
-            }
-            Literal(ref mut relation, ref mut value, ref mut ty) => {
-                visitor.visit_relation_ident(relation);
-                visitor.visit_quoted_string(value);
-                visitor.visit_ident(ty);
-            }
+            Resource(pv) => visitor.visit_resource_property_value(pv),
+            Literal(pv) => visitor.visit_literal_property_value(pv),
         }
     }
 
@@ -666,6 +673,11 @@ pub mod visit_mut {
 
     pub fn visit_relation_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut RelationIdent) {
         visitor.visit_ident(id.as_mut())
+    }
+
+    pub fn visit_resource_property_value<V: VisitMut + ?Sized>(visitor: &mut V, pv: &mut ResourcePropertyValue) {
+        visitor.visit_relation_ident(pv.property_mut());
+        visitor.visit_ident(pv.target_mut());
     }
 
     pub fn visit_subset_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut SubsetIdent) {
@@ -874,7 +886,7 @@ impl VisitMut for IdCompactor {
         // collect all IDSpaces before processing the header
         for clause in header.iter() {
             if let HeaderClause::Idspace(prefix, url, _) = clause {
-                self.idspaces.insert(prefix.clone(), url.clone());
+                self.idspaces.insert(prefix.clone(), (**url).clone());
             }
         }
 
@@ -946,7 +958,7 @@ impl VisitMut for IdDecompactor {
         // collect all IDSpaces before processing the header
         for clause in header.iter() {
             if let HeaderClause::Idspace(prefix, url, _) = clause {
-                self.idspaces.insert(prefix.clone(), url.clone());
+                self.idspaces.insert(prefix.clone(), (**url).clone());
             }
         }
 

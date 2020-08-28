@@ -288,19 +288,6 @@ impl<'i> FromPair<'i> for IsoDateTime {
     }
 }
 
-// // FIXME(@althonos): implement proper datetime handling.
-// impl Ord for IsoDateTime {
-//     fn cmp(&self, other: &Self) -> Ordering {
-//         self.to_string().partial_cmp(&other.to_string()).unwrap()
-//     }
-// }
-//
-// impl PartialOrd for IsoDateTime {
-//     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-//         self.to_string().partial_cmp(&other.to_string())
-//     }
-// }
-
 /// An ISO-8601 timezone.
 #[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
 pub enum IsoTimezone {

@@ -86,6 +86,19 @@ impl PartialOrd for PropertyValue {
     }
 }
 
+/// A property-value where the triple target is refered to with an ID.
+///
+/// This kind of property can be used to declare triples in the OBO document
+/// where the property is an annotation property and the target is another
+/// element in the semantic graph not necessarily defined as an OBO entity,
+/// but for instance with an IDspace mapping:
+/// ```rust
+/// # extern crate fastobo;
+/// # use fastobo::ast::*;
+/// let property = RelationIdent::from(PrefixedIdent::new("dc", "creator"));
+/// let target = Ident::from(PrefixedIdent("ORCID", "0000-0002-3947-4444"));
+/// let property_value = ResourcePropertyValue::new(property, target);
+/// ```
 #[derive(Clone, Debug, Hash, FromStr, PartialOrd, Eq, PartialEq, Ord)]
 pub struct ResourcePropertyValue {
     property: RelationIdent,
@@ -134,6 +147,11 @@ impl<'i> FromPair<'i> for ResourcePropertyValue {
     }
 }
 
+/// A property-value binding where the value is given by a typed literal.
+///
+/// This kind of property can be used to add additional annotations to an entity
+/// where the annotation value is not an entity itself but a typed value such
+/// as a string (of type `xsd:string`), a date (`xsd:date`), etc.
 #[derive(Clone, Debug, Hash, FromStr, PartialOrd, Eq, PartialEq, Ord)]
 pub struct LiteralPropertyValue {
     property: RelationIdent,

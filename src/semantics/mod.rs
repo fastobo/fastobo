@@ -179,23 +179,23 @@ mod tests {
             assert_eq!(Cardinality::ZeroOrOne.to_error(0, "ok"), None);
             assert_eq!(
                 Cardinality::ZeroOrOne.to_error(2, "ok"),
-                Some(CardinalityError::DuplicateClauses { name: String::from("ok")})
+                Some(CardinalityError::duplicate("ok"))
             );
 
             assert_eq!(Cardinality::One.to_error(1, "ok"), None);
             assert_eq!(
                 Cardinality::One.to_error(2, "ok"),
-                Some(CardinalityError::DuplicateClauses { name: String::from("ok")})
+                Some(CardinalityError::duplicate("ok"))
             );
             assert_eq!(
                 Cardinality::One.to_error(0, "ok"),
-                Some(CardinalityError::MissingClause { name: String::from("ok")})
+                Some(CardinalityError::missing("ok"))
             );
 
             assert_eq!(Cardinality::NotOne.to_error(0, "ok"), None);
             assert_eq!(
                 Cardinality::NotOne.to_error(1, "ok"),
-                Some(CardinalityError::SingleClause { name: String::from("ok")})
+                Some(CardinalityError::single("ok"))
             );
 
             assert_eq!(Cardinality::Any.to_error(0, "ok"), None);

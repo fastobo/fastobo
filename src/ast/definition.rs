@@ -64,6 +64,12 @@ impl Display for Definition {
     }
 }
 
+impl From<QuotedString> for Definition {
+    fn from(s: QuotedString) -> Self {
+        Self::new(s)
+    }
+}
+
 impl<'i> FromPair<'i> for Definition {
     const RULE: Rule = Rule::Definition;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
@@ -71,5 +77,11 @@ impl<'i> FromPair<'i> for Definition {
         let text = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
         let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
         Ok(Self::with_xrefs(text, xrefs))
+    }
+}
+
+impl Into<QuotedString> for Definition {
+    fn into(self) -> QuotedString {
+        self.text
     }
 }

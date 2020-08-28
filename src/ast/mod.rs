@@ -57,7 +57,6 @@ pub use self::typedef::*;
 pub use self::xref::*;
 pub use self::frame::*;
 
-use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
@@ -69,7 +68,6 @@ use std::path::Path;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
-use pest::Parser;
 
 use crate::error::CardinalityError;
 use crate::error::Error;

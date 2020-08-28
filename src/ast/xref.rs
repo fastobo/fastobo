@@ -23,12 +23,15 @@ use crate::semantics::Orderable;
 
 /// A database cross-reference definition.
 ///
-/// Cross-references can be used in `Def` or `Synonym` clauses of entity
+/// Cross-references can be used in [`Definition`] or [`Synonym`] clauses of entity
 /// frames to add sources for the provided definition or evidence to show the
 /// actual existence of a synonym. They can also be found in `Xref` clauses
 /// when the cross-reference is directly relevant to the annotated entity
 /// (e.g. when exporting an ontology from a knowledge-base to add an hyperlink
 /// to the original resource).
+///
+/// [`Definition`]: ./struct.Definition.html
+/// [`Synonym`]: ./struct.Synonym.html
 #[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct Xref {
     id: Ident,

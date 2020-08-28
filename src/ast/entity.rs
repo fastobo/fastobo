@@ -23,7 +23,7 @@ use crate::syntax::Rule;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
 
-/// An entity frame, either for a term, an instance, or a typedef.
+/// An entity frame, describing either a term, an instance, or a typedef.
 #[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq)]
 pub enum EntityFrame {
     Term(Box<TermFrame>),
@@ -32,10 +32,13 @@ pub enum EntityFrame {
 }
 
 impl EntityFrame {
-    /// Return the `TermFrame` if the entity frame is one, or `None`.
+    /// Return the [`TermFrame`] if the entity frame is one, or `None`.
     ///
-    /// Use this function in conjunction with `Iterator::flat_map` to extract
+    /// Use this function in conjunction with [`Iterator::flat_map`] to extract
     /// all term frames from an iterator of `EntityFrame` references:
+    ///
+    /// [`Iterator::flat_map`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.flat_map
+    /// [`TermFrame`]: ./struct.TermFrame.html
     ///
     /// ```rust
     /// # extern crate fastobo;
@@ -55,7 +58,9 @@ impl EntityFrame {
         }
     }
 
-    /// Return the `TypedefFrame` if the entity frame is one, or `None`.
+    /// Return the [`TypedefFrame`] if the entity frame is one, or `None`.
+    ///
+    /// [`TypedefFrame`]: ./struct.TypedefFrame.html
     pub fn as_typedef_frame(&self) -> Option<&TypedefFrame> {
         if let EntityFrame::Typedef(frame) = &self {
             Some(frame.as_ref())
@@ -64,7 +69,9 @@ impl EntityFrame {
         }
     }
 
-    /// Return the `InstanceFrame` if the entity frame is one, or `None`.
+    /// Return the [`InstanceFrame`] if the entity frame is one, or `None`.
+    ///
+    /// [`InstanceFrame`]: ./struct.InstanceFrame.html
     pub fn as_instance_frame(&self) -> Option<&InstanceFrame> {
         if let EntityFrame::Instance(frame) = &self {
             Some(frame.as_ref())

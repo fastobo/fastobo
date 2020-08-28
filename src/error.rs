@@ -29,15 +29,15 @@ pub enum CardinalityError {
 }
 
 impl CardinalityError {
-    pub(crate) fn missing<S: Into<String>>(name: S) -> Self {
+    pub fn missing<S: Into<String>>(name: S) -> Self {
         CardinalityError::MissingClause { name: name.into() }
     }
 
-    pub(crate) fn duplicate<S: Into<String>>(name: S) -> Self {
+    pub fn duplicate<S: Into<String>>(name: S) -> Self {
         CardinalityError::DuplicateClauses { name: name.into() }
     }
 
-    pub(crate) fn single<S: Into<String>>(name: S) -> Self {
+    pub fn single<S: Into<String>>(name: S) -> Self {
         CardinalityError::DuplicateClauses { name: name.into() }
     }
 }

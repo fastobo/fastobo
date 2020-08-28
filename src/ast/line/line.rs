@@ -18,7 +18,7 @@ use crate::syntax::Rule;
 /// A line in an OBO file, possibly followed by qualifiers and a comment.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Line<T> {
-    inner: Box<T>,
+    inner: T,
     qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
     comment: Option<Comment>,
 }
@@ -86,7 +86,7 @@ impl<T> Line<T> {
 
     /// Get the actual OBO clause wrapped in the line.
     pub fn into_inner(self) -> T {
-        *self.inner
+        self.inner
     }
 }
 
@@ -149,7 +149,7 @@ where
 impl<T> From<T> for Line<T> {
     fn from(inner: T) -> Self {
         Line {
-            inner: Box::new(inner),
+            inner,
             qualifiers: None,
             comment: None,
         }
@@ -224,7 +224,7 @@ impl Eol {
     // Add content to the `Eol` to form a complete line.
     pub fn and_inner<T>(self, inner: T) -> Line<T> {
         Line {
-            inner: Box::new(inner),
+            inner,
             qualifiers: self.qualifiers,
             comment: self.comment,
         }

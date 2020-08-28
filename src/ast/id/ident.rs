@@ -97,8 +97,8 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl").unwrap();
-        let expected = Ident::Url(Url::parse("http://purl.obolibrary.org/obo/po.owl").unwrap());
+        let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl").map(Ident::from).unwrap();
+        let expected = Url::parse("http://purl.obolibrary.org/obo/po.owl").map(Ident::from).unwrap();
         assert_eq!(actual, expected);
 
         let actual = Ident::from_str("GO:0046154").unwrap();
@@ -116,16 +116,16 @@ mod tests {
 
     #[test]
     fn partial_cmp() {
-        let lp = Ident::Prefixed(PrefixedIdent::new("GO", "001"));
-        let rp = Ident::Prefixed(PrefixedIdent::new("GO", "002"));
+        let lp = Ident::from(PrefixedIdent::new("GO", "001"));
+        let rp = Ident::from(PrefixedIdent::new("GO", "002"));
         assert!(lp < rp);
 
-        let lu = Ident::Unprefixed(UnprefixedIdent::new("has_part"));
-        let ru = Ident::Unprefixed(UnprefixedIdent::new("part_of"));
+        let lu = Ident::from(UnprefixedIdent::new("has_part"));
+        let ru = Ident::from(UnprefixedIdent::new("part_of"));
         assert!(lu < ru);
 
-        let lurl = Ident::Url(Url::parse("http://doi.org/").unwrap());
-        let rurl = Ident::Url(Url::parse("http://nih.org").unwrap());
+        let lurl = Url::parse("http://doi.org/").map(Ident::from).unwrap();
+        let rurl = Url::parse("http://nih.org").map(Ident::from).unwrap();
         assert!(lurl < rurl);
 
         assert!(lp < ru);

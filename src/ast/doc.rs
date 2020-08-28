@@ -399,7 +399,7 @@ mod tests {
         .unwrap();
 
         let header = HeaderFrame::from_iter(vec![HeaderClause::FormatVersion(
-            UnquotedString::new("1.2"),
+            Box::new(UnquotedString::new("1.2")),
         )]);
         let term = TermFrame::new(ClassIdent::from(PrefixedIdent::new("TEST", "001")));
         self::assert_eq!(doc, OboDoc::from_iter(Some(term)).and_header(header));
@@ -413,8 +413,8 @@ mod tests {
 
         // `OboDoc` with only header frame should not add newline separator.
         let doc = OboDoc::with_header(HeaderFrame::from(vec![
-            HeaderClause::FormatVersion(UnquotedString::new("1.2")),
-            HeaderClause::Remark(UnquotedString::new("this is a test")),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.2"))),
+            HeaderClause::Remark(Box::new(UnquotedString::new("this is a test"))),
         ]));
         self::assert_eq!(
             doc.to_string(),

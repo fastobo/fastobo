@@ -25,7 +25,7 @@ pub enum InstanceClause {
     Namespace(Box<NamespaceIdent>),
     AltId(Box<Ident>),
     #[clause(cardinality = "ZeroOrOne")]
-    Def(Box<QuotedString>, Box<XrefList>),
+    Def(Box<Definition>),
     Comment(Box<UnquotedString>),
     Subset(Box<SubsetIdent>),
     Synonym(Box<Synonym>),
@@ -41,6 +41,12 @@ pub enum InstanceClause {
     IsObsolete(bool),
     ReplacedBy(Box<InstanceIdent>),
     Consider(Box<Ident>),
+}
+
+impl From<Definition> for InstanceClause {
+    fn from(d: Definition) -> Self {
+        InstanceClause::Def(Box::new(d))
+    }
 }
 
 impl<'i> FromPair<'i> for InstanceClause {
@@ -65,9 +71,8 @@ impl<'i> FromPair<'i> for InstanceClause {
                 Ok(InstanceClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
-                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(InstanceClause::Def(Box::new(desc), Box::new(xrefs)))
+                let def = Definition::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(InstanceClause::Def(Box::new(def)))
             }
             Rule::CommentTag => {
                 let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;

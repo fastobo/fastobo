@@ -17,7 +17,7 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// A clause value binding a property to a value in the relevant entity.
-#[derive(Clone, Debug, Hash, Eq, PartialEq, Ord)]
+#[derive(Clone, Debug, Hash, Eq, FromStr, PartialEq, Ord)]
 pub enum PropertyValue {
     /// A property-value binding where the value is specified with an ID.
     Resource(Box<ResourcePropertyValue>),
@@ -45,28 +45,34 @@ impl Display for PropertyValue {
     }
 }
 
+impl From<LiteralPropertyValue> for PropertyValue {
+    fn from(pv: LiteralPropertyValue) -> Self {
+        PropertyValue::Literal(Box::new(pv))
+    }
+}
+
+impl From<ResourcePropertyValue> for PropertyValue {
+    fn from(pv: ResourcePropertyValue) -> Self {
+        PropertyValue::Resource(Box::new(pv))
+    }
+}
+
 impl<'i> FromPair<'i> for PropertyValue {
     const RULE: Rule = Rule::PropertyValue;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        let mut inner = pair.into_inner();
-        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let second = inner.next().unwrap();
-        match second.as_rule() {
-            Rule::Id => {
-                let id = Ident::from_pair_unchecked(second)?;
-                Ok(PropertyValue::Resource(Box::new(ResourcePropertyValue::new(relid, id))))
+        let inner = pair.into_inner().next().unwrap();
+        match inner.as_rule() {
+            Rule::LiteralPropertyValue => {
+                LiteralPropertyValue::from_pair_unchecked(inner)
+                    .map(Box::new)
+                    .map(PropertyValue::Literal)
             }
-            Rule::PvValue => {
-                let desc = QuotedString::new(second.as_str().to_string());
-                let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
-                Ok(PropertyValue::Literal(Box::new(LiteralPropertyValue::new(relid, desc, datatype))))
+            Rule::ResourcePropertyValue => {
+                ResourcePropertyValue::from_pair_unchecked(inner)
+                    .map(Box::new)
+                    .map(PropertyValue::Resource)
             }
-            Rule::QuotedString => {
-                let desc = QuotedString::from_pair_unchecked(second)?;
-                let datatype = Ident::from_str(inner.next().unwrap().as_str())?;
-                Ok(PropertyValue::Literal(Box::new(LiteralPropertyValue::new(relid, desc, datatype))))
-            }
-            _ => unreachable!(),
+            _ => unreachable!()
         }
     }
 }
@@ -80,7 +86,7 @@ impl PartialOrd for PropertyValue {
     }
 }
 
-#[derive(Clone, Debug, Hash, PartialOrd, Eq, PartialEq, Ord)]
+#[derive(Clone, Debug, Hash, FromStr, PartialOrd, Eq, PartialEq, Ord)]
 pub struct ResourcePropertyValue {
     property: RelationIdent,
     target: Ident,
@@ -118,7 +124,17 @@ impl Display for ResourcePropertyValue {
     }
 }
 
-#[derive(Clone, Debug, Hash, PartialOrd, Eq, PartialEq, Ord)]
+impl<'i> FromPair<'i> for ResourcePropertyValue {
+    const RULE: Rule = Rule::ResourcePropertyValue;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+        let mut inner = pair.into_inner();
+        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+        let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
+        Ok(ResourcePropertyValue::new(relid, id))
+    }
+}
+
+#[derive(Clone, Debug, Hash, FromStr, PartialOrd, Eq, PartialEq, Ord)]
 pub struct LiteralPropertyValue {
     property: RelationIdent,
     literal: QuotedString,
@@ -171,6 +187,24 @@ impl Display for LiteralPropertyValue {
     }
 }
 
+impl<'i> FromPair<'i> for LiteralPropertyValue {
+    const RULE: Rule = Rule::LiteralPropertyValue;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+        let mut inner = pair.into_inner();
+
+        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+        let second = inner.next().unwrap();
+        let datatype = Ident::from_pair_unchecked(inner.next().unwrap())?;
+        let desc = match second.as_rule() {
+            Rule::QuotedString => QuotedString::from_pair_unchecked(second)?,
+            Rule::UnquotedPropertyValueTarget => QuotedString::new(second.as_str().to_string()),
+            _ => unreachable!(),
+        };
+
+        Ok(LiteralPropertyValue::new(relid, desc, datatype))
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -180,25 +214,21 @@ mod tests {
     #[test]
     fn from_str() {
         let actual = PropertyValue::from_str("married_to heather").unwrap();
-        let expected = PropertyValue::Resource(
-            RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from(
-                "married_to",
-            )))),
-            Ident::Unprefixed(UnprefixedIdent::new(String::from("heather"))),
-        );
+        let expected = PropertyValue::from(ResourcePropertyValue::new(
+            RelationIdent::from(UnprefixedIdent::new(String::from("married_to"))),
+            Ident::from(UnprefixedIdent::new(String::from("heather"))),
+        ));
         assert_eq!(actual, expected);
 
         let actual = PropertyValue::from_str("shoe_size \"8\" xsd:positiveInteger").unwrap();
-        let expected = PropertyValue::Literal(
-            RelationIdent::from(Ident::Unprefixed(UnprefixedIdent::new(String::from(
-                "shoe_size",
-            )))),
+        let expected = PropertyValue::from(LiteralPropertyValue::new(
+            RelationIdent::from(UnprefixedIdent::new(String::from("shoe_size"))),
             QuotedString::new(String::from("8")),
             Ident::from(PrefixedIdent::new(
                 IdentPrefix::new(String::from("xsd")),
                 IdentLocal::new(String::from("positiveInteger")),
             )),
-        );
+        ));
         assert_eq!(actual, expected);
     }
 

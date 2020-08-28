@@ -24,6 +24,7 @@
 //! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.
 
 mod date;
+mod definition;
 mod doc;
 mod entity;
 mod frame;
@@ -40,6 +41,7 @@ mod typedef;
 mod xref;
 
 pub use self::date::*;
+pub use self::definition::*;
 pub use self::doc::*;
 pub use self::entity::*;
 pub use self::header::*;

@@ -24,7 +24,7 @@ pub enum TypedefClause {
     Namespace(Box<NamespaceIdent>),
     AltId(Box<Ident>),
     #[clause(cardinality = "ZeroOrOne")]
-    Def(Box<QuotedString>, Box<XrefList>),
+    Def(Box<Definition>),
     #[clause(cardinality = "ZeroOrOne")]
     Comment(Box<UnquotedString>),
     Subset(Box<SubsetIdent>),
@@ -83,6 +83,12 @@ pub enum TypedefClause {
     IsClassLevel(bool),
 }
 
+impl From<Definition> for TypedefClause {
+    fn from(d: Definition) -> Self {
+        TypedefClause::Def(Box::new(d))
+    }
+}
+
 impl<'i> FromPair<'i> for Line<TypedefClause> {
     const RULE: Rule = Rule::TypedefClauseLine;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
@@ -115,9 +121,8 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
-                let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TypedefClause::Def(Box::new(desc), Box::new(xrefs)))
+                let def = Definition::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TypedefClause::Def(Box::new(def)))
             }
             Rule::CommentTag => {
                 let comment = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;

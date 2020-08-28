@@ -221,10 +221,10 @@ mod tests {
         );
 
         let v = UnquotedString::from("1.4");
-        frame.push(HeaderClause::DataVersion(v.clone()));
+        frame.push(HeaderClause::DataVersion(Box::new(v.clone())));
         self::assert_eq!(frame.data_version(), Ok(&v));
 
-        frame.push(HeaderClause::DataVersion(v.clone()));
+        frame.push(HeaderClause::DataVersion(Box::new(v.clone())));
         self::assert_eq!(
             frame.data_version(),
             Err(CardinalityError::duplicate("data-version"))
@@ -240,10 +240,10 @@ mod tests {
         );
 
         let ns = NamespaceIdent::from(UnprefixedIdent::new("TEST"));
-        frame.push(HeaderClause::DefaultNamespace(ns.clone()));
+        frame.push(HeaderClause::DefaultNamespace(Box::new(ns.clone())));
         self::assert_eq!(frame.default_namespace(), Ok(&ns));
 
-        frame.push(HeaderClause::DefaultNamespace(ns.clone()));
+        frame.push(HeaderClause::DefaultNamespace(Box::new(ns.clone())));
         self::assert_eq!(
             frame.default_namespace(),
             Err(CardinalityError::duplicate("default-namespace"))
@@ -259,10 +259,10 @@ mod tests {
         );
 
         let v = UnquotedString::from("1.4");
-        frame.push(HeaderClause::FormatVersion(v.clone()));
+        frame.push(HeaderClause::FormatVersion(Box::new(v.clone())));
         self::assert_eq!(frame.format_version(), Ok(&v));
 
-        frame.push(HeaderClause::FormatVersion(v.clone()));
+        frame.push(HeaderClause::FormatVersion(Box::new(v.clone())));
         self::assert_eq!(
             frame.format_version(),
             Err(CardinalityError::duplicate("format-version"))
@@ -271,7 +271,7 @@ mod tests {
 
     #[test]
     fn from_clause() {
-        let clause = HeaderClause::FormatVersion(UnquotedString::new("1.0"));
+        let clause = HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.0")));
 
         let frame = HeaderFrame::from_clause(clause.clone());
         self::assert_eq!(frame.clauses, vec![clause.clone()]);
@@ -295,19 +295,19 @@ mod tests {
 
         assert_eq!(
             actual.clauses[0],
-            HeaderClause::FormatVersion(UnquotedString::new("1.2")),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.2"))),
         );
 
         assert_eq!(
             actual.clauses[1],
-            HeaderClause::DataVersion(UnquotedString::new("releases/2019-03-17")),
+            HeaderClause::DataVersion(Box::new(UnquotedString::new("releases/2019-03-17"))),
         );
 
         assert_eq!(
             actual.clauses[2],
             HeaderClause::Subsetdef(
-                SubsetIdent::from(UnprefixedIdent::new("gocheck_do_not_annotate")),
-                QuotedString::new("Term not to be used for direct annotation"),
+                Box::new(SubsetIdent::from(UnprefixedIdent::new("gocheck_do_not_annotate"))),
+                Box::new(QuotedString::new("Term not to be used for direct annotation")),
             )
         );
     }
@@ -324,16 +324,16 @@ mod tests {
         assert!(frame.is_sorted());
 
         let frame = HeaderFrame::with_clauses(vec![
-            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4"))),
+            HeaderClause::DataVersion(Box::new(UnquotedString::new("v0.2.0"))),
+            HeaderClause::SavedBy(Box::new(UnquotedString::new("Martin Larralde"))),
         ]);
         assert!(frame.is_sorted());
 
         let frame = HeaderFrame::with_clauses(vec![
-            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4"))),
+            HeaderClause::SavedBy(Box::new(UnquotedString::new("Martin Larralde"))),
+            HeaderClause::DataVersion(Box::new(UnquotedString::new("v0.2.0"))),
         ]);
         assert!(!frame.is_sorted());
     }
@@ -341,17 +341,17 @@ mod tests {
     #[test]
     fn sort() {
         let mut frame = HeaderFrame::with_clauses(vec![
-            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+            HeaderClause::SavedBy(Box::new(UnquotedString::new("Martin Larralde"))),
+            HeaderClause::DataVersion(Box::new(UnquotedString::new("v0.2.0"))),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4"))),
         ]);
         frame.sort();
         assert_eq!(
             frame,
             HeaderFrame::with_clauses(vec![
-                HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-                HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-                HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
+                HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4"))),
+                HeaderClause::DataVersion(Box::new(UnquotedString::new("v0.2.0"))),
+                HeaderClause::SavedBy(Box::new(UnquotedString::new("Martin Larralde"))),
             ])
         );
     }
@@ -359,15 +359,15 @@ mod tests {
     #[test]
     fn cardinality_check() {
         let frame = HeaderFrame::with_clauses(vec![
-            HeaderClause::SavedBy(UnquotedString::new("Martin Larralde")),
-            HeaderClause::DataVersion(UnquotedString::new("v0.2.0")),
-            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
+            HeaderClause::SavedBy(Box::new(UnquotedString::new("Martin Larralde"))),
+            HeaderClause::DataVersion(Box::new(UnquotedString::new("v0.2.0"))),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4"))),
         ]);
         assert!(frame.cardinality_check().is_ok());
 
         let frame2 = HeaderFrame::with_clauses(vec![
-            HeaderClause::FormatVersion(UnquotedString::new("1.4")),
-            HeaderClause::FormatVersion(UnquotedString::new("1.5")),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4"))),
+            HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.5"))),
         ]);
         assert!(frame2.cardinality_check().is_err());
     }

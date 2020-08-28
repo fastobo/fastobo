@@ -197,27 +197,27 @@ mod tests {
 
     #[test]
     fn tag() {
-        let clause = HeaderClause::FormatVersion(UnquotedString::from("1.2"));
+        let clause = HeaderClause::FormatVersion(Box::new(UnquotedString::from("1.2")));
         assert_eq!(clause.tag(), "format-version");
 
         let clause = HeaderClause::Unreserved(
-            UnquotedString::from("something"),
-            UnquotedString::new(String::new()),
+            Box::new(UnquotedString::from("something")),
+            Box::new(UnquotedString::new(String::new())),
         );
         assert_eq!(clause.tag(), "something");
     }
 
     #[test]
     fn cardinality() {
-        let clause = HeaderClause::FormatVersion(UnquotedString::from("1.2"));
+        let clause = HeaderClause::FormatVersion(Box::new(UnquotedString::from("1.2")));
         assert_eq!(
             clause.cardinality(),
             crate::semantics::Cardinality::ZeroOrOne
         );
 
         let clause = HeaderClause::Unreserved(
-            UnquotedString::from("something"),
-            UnquotedString::new(String::new()),
+            Box::new(UnquotedString::from("something")),
+            Box::new(UnquotedString::new(String::new())),
         );
         assert_eq!(clause.cardinality(), crate::semantics::Cardinality::Any);
     }
@@ -225,36 +225,39 @@ mod tests {
     #[test]
     fn from_str() {
         let actual = HeaderClause::from_str("format-version: 1.2").unwrap();
-        let expected = HeaderClause::FormatVersion(UnquotedString::new(String::from("1.2")));
+        let expected = HeaderClause::FormatVersion(Box::new(UnquotedString::new(String::from("1.2"))));
         assert_eq!(actual, expected);
 
         let actual = HeaderClause::from_str("subsetdef: GO_SLIM \"GO Slim\"").unwrap();
         let expected = HeaderClause::Subsetdef(
-            SubsetIdent::from(UnprefixedIdent::new("GO_SLIM")),
-            QuotedString::new("GO Slim"),
+            Box::new(SubsetIdent::from(UnprefixedIdent::new("GO_SLIM"))),
+            Box::new(QuotedString::new("GO Slim")),
         );
         assert_eq!(actual, expected);
 
         let actual = HeaderClause::from_str("date: 17:03:2019 20:16").unwrap();
-        let expected = HeaderClause::Date(NaiveDateTime::new(17, 3, 2019, 20, 16));
+        let expected = HeaderClause::Date(Box::new(NaiveDateTime::new(17, 3, 2019, 20, 16)));
         assert_eq!(actual, expected);
 
         let actual =
             HeaderClause::from_str("namespace-id-rule: * XAO:$sequence(7,5000,9999999)$").unwrap();
-        let expected =
-            HeaderClause::NamespaceIdRule(UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"));
+        let expected = HeaderClause::NamespaceIdRule(
+            Box::new(UnquotedString::new("* XAO:$sequence(7,5000,9999999)$"))
+        );
         assert_eq!(actual, expected);
 
         let actual = HeaderClause::from_str("treat-xrefs-as-relationship: TEST rel").unwrap();
         let expected = HeaderClause::TreatXrefsAsRelationship(
-            IdentPrefix::new("TEST"),
-            RelationIdent::from(UnprefixedIdent::new("rel")),
+            Box::new(IdentPrefix::new("TEST")),
+            Box::new(RelationIdent::from(UnprefixedIdent::new("rel"))),
         );
         assert_eq!(actual, expected);
 
         let actual = HeaderClause::from_str("tag: value").unwrap();
-        let expected =
-            HeaderClause::Unreserved(UnquotedString::new("tag"), UnquotedString::new("value"));
+        let expected = HeaderClause::Unreserved(
+            Box::new(UnquotedString::new("tag")),
+            Box::new(UnquotedString::new("value"))
+        );
         assert_eq!(actual, expected);
     }
 
@@ -266,12 +269,12 @@ mod tests {
             };
         }
 
-        let fv1 = HeaderClause::FormatVersion(UnquotedString::new("1.4"));
-        let fv2 = HeaderClause::FormatVersion(UnquotedString::new("2"));
+        let fv1 = HeaderClause::FormatVersion(Box::new(UnquotedString::new("1.4")));
+        let fv2 = HeaderClause::FormatVersion(Box::new(UnquotedString::new("2")));
         assert_lt!(fv1, fv2);
 
-        let dv1 = HeaderClause::DataVersion(UnquotedString::new("1.4"));
-        let dv2 = HeaderClause::DataVersion(UnquotedString::new("2"));
+        let dv1 = HeaderClause::DataVersion(Box::new(UnquotedString::new("1.4")));
+        let dv2 = HeaderClause::DataVersion(Box::new(UnquotedString::new("2")));
         assert_lt!(dv1, dv2);
 
         assert_lt!(fv1, dv1);
@@ -284,8 +287,8 @@ mod tests {
     fn display() {
         let expected = "unreserved-thing: something";
         let actual = HeaderClause::Unreserved(
-            UnquotedString::new("unreserved-thing"),
-            UnquotedString::new("something")
+            Box::new(UnquotedString::new("unreserved-thing")),
+            Box::new(UnquotedString::new("something"))
         );
         assert_eq!(&actual.to_string(), expected);
     }

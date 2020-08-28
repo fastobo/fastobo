@@ -32,7 +32,7 @@ pub enum TermClause {
     Namespace(Box<NamespaceIdent>),
     AltId(Box<Ident>),
     #[clause(cardinality = "ZeroOrOne")]
-    Def(Box<QuotedString>, Box<XrefList>),
+    Def(Box<Definition>),
     #[clause(cardinality = "ZeroOrOne")]
     Comment(Box<UnquotedString>),
     Subset(Box<SubsetIdent>),
@@ -57,6 +57,12 @@ pub enum TermClause {
     IsObsolete(bool),
     ReplacedBy(Box<ClassIdent>),
     Consider(Box<ClassIdent>),
+}
+
+impl From<Definition> for TermClause {
+    fn from(d: Definition) -> Self {
+        TermClause::Def(Box::new(d))
+    }
 }
 
 impl<'i> FromPair<'i> for Line<TermClause> {
@@ -91,9 +97,8 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
-                let def = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TermClause::Def(Box::new(def), Box::new(xrefs)))
+                let def = Definition::from_pair_unchecked(inner.next().unwrap())?;
+                Ok(TermClause::Def(Box::new(def)))
             }
             Rule::CommentTag => {
                 let comment = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
@@ -194,7 +199,7 @@ mod tests {
 
         #[test]
         fn to_string() {
-            let clause = TermClause::Name(UnquotedString::new("sample name"));
+            let clause = TermClause::Name(Box::new(UnquotedString::new("sample name")));
             self::assert_eq!(clause.to_string(), "name: sample name")
         }
     }
@@ -205,13 +210,13 @@ mod tests {
         #[test]
         fn from_str() {
             let actual = TermClause::from_str("name: sample name").unwrap();
-            let expected = TermClause::Name(UnquotedString::new("sample name"));
+            let expected = TermClause::Name(Box::new(UnquotedString::new("sample name")));
             self::assert_eq!(actual, expected);
         }
 
         #[test]
         fn to_string() {
-            let clause = TermClause::Name(UnquotedString::new("sample name"));
+            let clause = TermClause::Name(Box::new(UnquotedString::new("sample name")));
             self::assert_eq!(clause.to_string(), "name: sample name")
         }
     }
@@ -229,19 +234,19 @@ mod tests {
                 "def: \"A reference string relevant to the sample under study.\" [PSI:MS]",
             )
             .unwrap();
-            let expected = TermClause::Def(
+            let expected = TermClause::Def(Box::new(Definition::with_xrefs(
                 QuotedString::new(String::from(
                     "A reference string relevant to the sample under study.",
                 )),
                 XrefList::from(vec![Xref::new(PrefixedIdent::new("PSI", "MS"))]),
-            );
+            )));
             self::assert_eq!(actual, expected);
 
             let actual = TermClause::from_str("def: \"OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms.\" [PSI:PI]").unwrap();
-            let expected = TermClause::Def(
+            let expected = TermClause::Def(Box::new(Definition::with_xrefs(
                 QuotedString::new("OBSOLETE: There is Phenyx:ScoringModel for Phenyx! Scoring model (more detailed granularity). TODO: add some child terms."),
                 XrefList::from(vec![Xref::new(PrefixedIdent::new("PSI", "PI"))])
-            );
+            )));
             self::assert_eq!(actual, expected);
         }
     }
@@ -257,11 +262,11 @@ mod tests {
         fn from_str() {
             let actual =
                 TermClause::from_str("synonym: \"chemical entity\" EXACT [UniProt]").unwrap();
-            let expected = TermClause::Synonym(Synonym::with_xrefs(
+            let expected = TermClause::Synonym(Box::new(Synonym::with_xrefs(
                 QuotedString::new("chemical entity"),
                 SynonymScope::Exact,
                 XrefList::from(vec![Xref::new(UnprefixedIdent::new("UniProt"))]),
-            ));
+            )));
             self::assert_eq!(actual, expected);
         }
     }
@@ -273,19 +278,19 @@ mod tests {
         fn from_str() {
             let actual =
                 TermClause::from_str("xref: CAS:22325-47-9 \"NIST Chemistry WebBook\"").unwrap();
-            let expected = TermClause::Xref(Xref::with_desc(
+            let expected = TermClause::Xref(Box::new(Xref::with_desc(
                 Ident::from(PrefixedIdent::new("CAS", "22325-47-9")),
                 QuotedString::new("NIST Chemistry WebBook"),
-            ));
+            )));
             self::assert_eq!(actual, expected);
 
             let actual =
                 TermClause::from_str("xref: Wikipedia:https\\://en.wikipedia.org/wiki/Gas")
                     .unwrap();
-            let expected = TermClause::Xref(Xref::new(PrefixedIdent::new(
+            let expected = TermClause::Xref(Box::new(Xref::new(PrefixedIdent::new(
                 "Wikipedia",
                 "https://en.wikipedia.org/wiki/Gas",
-            )));
+            ))));
             self::assert_eq!(actual, expected);
         }
     }
@@ -312,8 +317,8 @@ mod tests {
             ).unwrap().into_iter().next().unwrap();
 
             let expected = Line::from(TermClause::IntersectionOf(
-                Some(RelationIdent::from(UnprefixedIdent::new("part_of"))),
-                ClassIdent::from(PrefixedIdent::new("PO", "0020039")),
+                Some(Box::new(RelationIdent::from(UnprefixedIdent::new("part_of")))),
+                Box::new(ClassIdent::from(PrefixedIdent::new("PO", "0020039"))),
             ))
             .and_comment(Comment::new("leaf lamina"));
             self::assert_eq!(actual, expected);
@@ -330,7 +335,7 @@ mod tests {
             let expected = Line::with_comment(Comment::new("leaf epidermis")).and_inner(
                 TermClause::IntersectionOf(
                     None,
-                    ClassIdent::from(PrefixedIdent::new("PO", "0006016")),
+                    Box::new(ClassIdent::from(PrefixedIdent::new("PO", "0006016"))),
                 ),
             );
             self::assert_eq!(actual, expected);

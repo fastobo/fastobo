@@ -66,6 +66,7 @@ use crate::ast::*;
 #[blanket(default="visit", derive(Mut, Box))]
 pub trait Visit<'ast> {
     fn visit_class_ident(&mut self, id: &'ast ClassIdent);
+    fn visit_definition(&mut self, id: &'ast Definition);
     fn visit_doc(&mut self, doc: &'ast OboDoc);
     fn visit_entity_frame(&mut self, frame: &'ast EntityFrame);
     fn visit_header_clause(&mut self, clause: &'ast HeaderClause);
@@ -108,6 +109,11 @@ pub mod visit {
 
     pub fn visit_class_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast ClassIdent) {
         visitor.visit_ident(id.as_ref())
+    }
+
+    pub fn visit_definition<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, def: &'ast Definition) {
+        visitor.visit_quoted_string(def.text());
+        visitor.visit_xref_list(def.xrefs());
     }
 
     pub fn visit_doc<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, doc: &'ast OboDoc) {
@@ -219,10 +225,7 @@ pub mod visit {
             Name(s) => visitor.visit_unquoted_string(s),
             Namespace(id) => visitor.visit_namespace_ident(id),
             AltId(id) => visitor.visit_ident(id),
-            Def(s, xrefs) => {
-                visitor.visit_quoted_string(s);
-                visitor.visit_xref_list(xrefs);
-            }
+            Def(def) => visitor.visit_definition(def),
             Comment(s) => visitor.visit_unquoted_string(s),
             Subset(id) => visitor.visit_subset_ident(id),
             Synonym(s) => visitor.visit_synonym(s),
@@ -320,10 +323,7 @@ pub mod visit {
             Name(s) => visitor.visit_unquoted_string(s),
             Namespace(ns) => visitor.visit_namespace_ident(ns),
             AltId(id) => visitor.visit_ident(id),
-            Def(s, xrefs) => {
-                visitor.visit_quoted_string(s);
-                visitor.visit_xref_list(xrefs);
-            }
+            Def(def) => visitor.visit_definition(def),
             Comment(s) => visitor.visit_unquoted_string(s),
             Subset(id) => visitor.visit_subset_ident(id),
             Synonym(s) => visitor.visit_synonym(s),
@@ -366,10 +366,7 @@ pub mod visit {
             Name(s) => visitor.visit_unquoted_string(s),
             Namespace(ns) => visitor.visit_namespace_ident(ns),
             AltId(id) => visitor.visit_ident(id),
-            Def(s, xrefs) => {
-                visitor.visit_quoted_string(s);
-                visitor.visit_xref_list(xrefs);
-            }
+            Def(def) => visitor.visit_definition(def),
             Comment(s) => visitor.visit_unquoted_string(s),
             Subset(id) => visitor.visit_subset_ident(id),
             Synonym(s) => visitor.visit_synonym(s),
@@ -453,6 +450,7 @@ pub mod visit {
 #[blanket(default="visit_mut", derive(Mut, Box))]
 pub trait VisitMut {
     fn visit_class_ident(&mut self, id: &mut ClassIdent);
+    fn visit_definition(&mut self, id: &mut Definition);
     fn visit_doc(&mut self, doc: &mut OboDoc);
     fn visit_entity_frame(&mut self, frame: &mut EntityFrame);
     fn visit_header_clause(&mut self, clause: &mut HeaderClause);
@@ -495,6 +493,11 @@ pub mod visit_mut {
 
     pub fn visit_class_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut ClassIdent) {
         visitor.visit_ident(id.as_mut())
+    }
+
+    pub fn visit_definition<V: VisitMut + ?Sized>(visitor: &mut V, def: &mut Definition) {
+        visitor.visit_quoted_string(def.text_mut());
+        visitor.visit_xref_list(def.xrefs_mut());
     }
 
     pub fn visit_doc<V: VisitMut + ?Sized>(visitor: &mut V, doc: &mut OboDoc) {
@@ -606,10 +609,7 @@ pub mod visit_mut {
             Name(s) => visitor.visit_unquoted_string(s),
             Namespace(id) => visitor.visit_namespace_ident(id),
             AltId(id) => visitor.visit_ident(id),
-            Def(s, xrefs) => {
-                visitor.visit_quoted_string(s);
-                visitor.visit_xref_list(xrefs);
-            }
+            Def(def) => visitor.visit_definition(def),
             Comment(s) => visitor.visit_unquoted_string(s),
             Subset(id) => visitor.visit_subset_ident(id),
             Synonym(s) => visitor.visit_synonym(s),
@@ -707,10 +707,7 @@ pub mod visit_mut {
             Name(s) => visitor.visit_unquoted_string(s),
             Namespace(ns) => visitor.visit_namespace_ident(ns),
             AltId(id) => visitor.visit_ident(id),
-            Def(s, xrefs) => {
-                visitor.visit_quoted_string(s);
-                visitor.visit_xref_list(xrefs);
-            }
+            Def(def) => visitor.visit_definition(def),
             Comment(s) => visitor.visit_unquoted_string(s),
             Subset(id) => visitor.visit_subset_ident(id),
             Synonym(s) => visitor.visit_synonym(s),
@@ -755,10 +752,7 @@ pub mod visit_mut {
             Name(s) => visitor.visit_unquoted_string(s),
             Namespace(ns) => visitor.visit_namespace_ident(ns),
             AltId(id) => visitor.visit_ident(id),
-            Def(s, xrefs) => {
-                visitor.visit_quoted_string(s);
-                visitor.visit_xref_list(xrefs);
-            }
+            Def(def) => visitor.visit_definition(def),
             Comment(s) => visitor.visit_unquoted_string(s),
             Subset(id) => visitor.visit_subset_ident(id),
             Synonym(s) => visitor.visit_synonym(s),
@@ -1029,7 +1023,7 @@ mod tests {
                 let url = Url::from_str("http://en.wikipedia.org/wiki/Pupil").unwrap();
                 assert_eq!(
                     term.clauses()[1].as_inner(),
-                    &TermClause::Xref(Xref::new(url)),
+                    &TermClause::Xref(Box::new(Xref::new(url))),
                 );
             } else {
                 unreachable!()
@@ -1048,7 +1042,7 @@ mod tests {
 
             if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
                 let url = Url::from_str("http://purl.obolibrary.org/obo/MS_1000031").unwrap();
-                assert_eq!(term.id().as_inner().as_ref(), &Ident::Url(url),);
+                assert_eq!(term.id().as_inner().as_ref(), &Ident::from(url),);
             } else {
                 unreachable!()
             }
@@ -1088,7 +1082,7 @@ mod tests {
             if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
                 assert_eq!(
                     term.clauses()[1].as_inner(),
-                    &TermClause::Xref(Xref::new(PrefixedIdent::new("Wikipedia", "Pupil"))),
+                    &TermClause::Xref(Box::new(Xref::new(PrefixedIdent::new("Wikipedia", "Pupil")))),
                 );
             } else {
                 unreachable!()
@@ -1108,7 +1102,7 @@ mod tests {
             if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
                 assert_eq!(
                     term.id().as_inner().as_ref(),
-                    &Ident::Prefixed(PrefixedIdent::new("MS", "1000031")),
+                    &Ident::from(PrefixedIdent::new("MS", "1000031")),
                 );
             } else {
                 unreachable!()
@@ -1132,7 +1126,7 @@ mod tests {
                 let url = Url::from_str("http://purl.obolibrary.org/obo/PMC_2823822").unwrap();
                 assert_eq!(
                     term.clauses()[0].as_inner(),
-                    &TermClause::Xref(Xref::new(url)),
+                    &TermClause::Xref(Box::new(Xref::new(url))),
                 );
             } else {
                 unreachable!()

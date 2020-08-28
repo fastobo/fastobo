@@ -71,7 +71,7 @@ mod tests {
 
         #[test]
         fn from_pair() {
-            let pairs = Lexer::parse(Rule::UnquotedString, "http://not an url");
+            let pairs = Lexer::tokenize(Rule::UnquotedString, "http://not an url");
             let pair = pairs.unwrap().next().unwrap();
             unsafe { assert!(Url::from_pair_unchecked(pair).is_err()) }
         }
@@ -83,11 +83,11 @@ mod tests {
 
         #[test]
         fn from_pair() {
-            let pairs = Lexer::parse(Rule::Boolean, "true");
+            let pairs = Lexer::tokenize(Rule::Boolean, "true");
             let pair = pairs.unwrap().next().unwrap();
             assert_eq!(bool::from_pair(pair).unwrap(), true);
 
-            let pairs = Lexer::parse(Rule::Boolean, "false");
+            let pairs = Lexer::tokenize(Rule::Boolean, "false");
             let pair = pairs.unwrap().next().unwrap();
             assert_eq!(bool::from_pair(pair).unwrap(), false);
         }
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn unexpected_rule() {
-        let pairs = Lexer::parse(Rule::Boolean, "true");
+        let pairs = Lexer::tokenize(Rule::Boolean, "true");
         let pair = pairs.unwrap().next().unwrap();
 
         let err = Ident::from_pair(pair).unwrap_err();

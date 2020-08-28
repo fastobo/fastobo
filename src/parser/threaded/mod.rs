@@ -281,7 +281,7 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
             // if the line is not empty, parse it
             if !l.starts_with('[') && !l.is_empty() {
                 // parse the header clause
-                let clause = Lexer::parse(Rule::HeaderClause, &line)
+                let clause = Lexer::tokenize(Rule::HeaderClause, &line)
                     .map_err(SyntaxError::from)
                     .map(|mut p| p.next().unwrap())
                     .and_then(HeaderClause::from_pair)

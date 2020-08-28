@@ -53,7 +53,7 @@ pub enum SyntaxError {
     /// # use fastobo::ast::*;
     /// # use fastobo::parser::*;
     /// # use fastobo::syntax::*;
-    /// let pairs = Lexer::parse(Rule::UnquotedString, "hello, world!");
+    /// let pairs = Lexer::tokenize(Rule::UnquotedString, "hello, world!");
     /// # let err =
     /// QuotedString::from_pair(pairs.unwrap().next().unwrap()).unwrap_err();
     /// # match err {

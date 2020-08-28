@@ -88,7 +88,7 @@ impl Consumer {
                 };
 
                 // parse the string
-                match Lexer::parse(Rule::EntitySingle, &msg.text) {
+                match Lexer::tokenize(Rule::EntitySingle, &msg.text) {
                     Ok(mut pairs) => unsafe {
                         let pair = pairs.next().unwrap();
                         let frame = EntityFrame::from_pair_unchecked(pair);

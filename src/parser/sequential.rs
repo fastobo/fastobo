@@ -91,7 +91,7 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
             l = self.line.trim_start();
             if l.starts_with('[') || self.line.is_empty() {
                 let res = unsafe {
-                    match Lexer::parse(Rule::EntitySingle, &frame_lines) {
+                    match Lexer::tokenize(Rule::EntitySingle, &frame_lines) {
                         Ok(mut pairs) => EntityFrame::from_pair_unchecked(pairs.next().unwrap())
                             .map_err(Error::from),
                         Err(e) => Err(Error::from(
@@ -140,7 +140,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
             if !l.starts_with('[') && !l.is_empty() {
                 unsafe {
                     // use `fastobo_syntax::Lexer` to tokenize the input
-                    let p = match Lexer::parse(Rule::HeaderClause, &line) {
+                    let p = match Lexer::tokenize(Rule::HeaderClause, &line) {
                         Ok(mut pairs) => pairs.next().unwrap(),
                         Err(e) => {
                             let err = SyntaxError::from(e).with_offsets(line_offset, offset);

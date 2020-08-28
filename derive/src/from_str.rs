@@ -21,7 +21,7 @@ impl FromStrDerive {
                     use crate::pest::Position;
 
                     // Parse the input string
-                    let mut pairs = Lexer::parse(Self::RULE, s)?;
+                    let mut pairs = Lexer::tokenize(Self::RULE, s)?;
                     let pair = pairs.next().unwrap();
                     // Check EOI was reached
                     if pair.as_span().end() != s.len() {

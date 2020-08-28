@@ -154,6 +154,8 @@ impl OboClauseDerive {
             #[automatically_derived]
             impl std::fmt::Display for #id {
                 fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    use std::fmt::Write;
+                    use std::fmt::Display;
                     use self::#id::*;
                     match self {
                         #(#arms)*

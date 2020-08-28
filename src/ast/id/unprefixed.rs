@@ -1,16 +1,16 @@
-use std::borrow::Borrow;
-use std::borrow::ToOwned;
+
+
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-use std::ops::Deref;
+
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;

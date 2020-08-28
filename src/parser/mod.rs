@@ -1,25 +1,25 @@
 //! Parser and parsing-related traits for the OBO format.
 
-use std::convert::TryFrom;
-use std::fs::File;
+
+
 use std::io::BufRead;
-use std::io::BufReader;
+
 use std::iter::Iterator;
-use std::str::FromStr;
+
 use std::num::NonZeroUsize;
 
-use blanket::blanket;
 
-use crate::ast::EntityFrame;
+
+
 use crate::ast::Frame;
-use crate::ast::HeaderClause;
-use crate::ast::HeaderFrame;
-use crate::ast::TermFrame;
-use crate::ast::TypedefFrame;
-use crate::ast::InstanceFrame;
-use crate::ast::OboDoc;
+
+
+
+
+
+
 use crate::error::Error;
-use crate::error::SyntaxError;
+
 
 mod from_pair;
 mod from_slice;
@@ -88,10 +88,14 @@ pub type DefaultParser<B> = SequentialParser<B>;
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
+    use std::convert::TryFrom;
     use std::io::Cursor;
+
     use textwrap_macros::dedent;
 
     use super::*;
+    use crate::ast::OboDoc;
+    use crate::error::SyntaxError;
     use crate::semantics::Identified;
 
     macro_rules! tests {

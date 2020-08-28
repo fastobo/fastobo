@@ -7,7 +7,7 @@ use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::result::Result;
-use std::str::FromStr;
+
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
@@ -244,6 +244,7 @@ impl OboFrame for HeaderFrame {
 mod tests {
 
     use super::*;
+    use std::str::FromStr;
     use pretty_assertions::assert_eq;
 
     #[test]

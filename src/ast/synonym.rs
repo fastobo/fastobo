@@ -7,10 +7,10 @@ use std::ops::DerefMut;
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-use url::Url;
+
 
 use crate::ast::*;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;

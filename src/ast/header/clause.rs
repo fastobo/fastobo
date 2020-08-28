@@ -1,7 +1,3 @@
-use std::fmt::Display;
-use std::fmt::Formatter;
-use std::fmt::Result as FmtResult;
-use std::fmt::Write;
 use std::str::FromStr;
 
 use fastobo_derive_internal::OboClause;
@@ -10,7 +6,7 @@ use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;

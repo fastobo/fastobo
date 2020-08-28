@@ -5,7 +5,7 @@ use url::Url;
 
 use std::str::FromStr;
 
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::syntax::Rule;
 

@@ -1,7 +1,6 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
 use std::ops::Deref;
 use std::ops::DerefMut;
 

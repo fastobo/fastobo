@@ -10,7 +10,7 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;

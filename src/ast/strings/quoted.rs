@@ -11,7 +11,7 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
@@ -238,7 +238,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
-    use std::string::ToString;
+    
 
     #[test]
     fn from_str() {

@@ -3,12 +3,12 @@ use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
+
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
@@ -90,10 +90,10 @@ impl PartialOrd for Ident {
 mod tests {
 
     use super::*;
-    use crate::parser::FromSlice;
+    
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
-    use std::string::ToString;
+    
 
     #[test]
     fn from_str() {

@@ -9,12 +9,12 @@ use std::ops::DerefMut;
 use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-use pest::error::Error as PestError;
-use pest::error::InputLocation;
+
+
 use pest::iterators::Pair;
 
 use crate::ast::*;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;

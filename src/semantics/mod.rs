@@ -1,13 +1,13 @@
 //! Selection of useful traits that exceed the syntactic scope.
 
-use std::cmp::Ordering;
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::ptr::NonNull;
+
+
+
+
 
 use crate::ast::*;
 use crate::error::CardinalityError;
-use crate::visit::VisitMut;
+
 
 mod treat_xrefs;
 pub(crate) use self::treat_xrefs::*;
@@ -79,7 +79,7 @@ pub trait OboFrame {
     /// in a generic manner.
     fn cardinality_check(&self) -> Result<(), CardinalityError> {
         use std::collections::HashMap;
-        use std::mem::discriminant;
+        
 
         // Group clauses by variant kind
         let mut clause_index: HashMap<_, Vec<&Self::Clause>> = HashMap::new();

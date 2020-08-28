@@ -1,16 +1,10 @@
-use std::str::FromStr;
-
 use pest::iterators::Pair;
 use url::Url;
 
 use crate::ast::*;
-use crate::error::Error;
 use crate::error::SyntaxError;
-use crate::parser::FromPair;
-use crate::parser::FromSlice;
 use crate::syntax::Rule;
 
-// FIXME(@althonos): could probably be replaced with `opaque_typedef` macros.
 macro_rules! ident_subclass {
     (#[doc = $docstring:literal] $rule:expr => pub struct $name:ident) => {
         #[derive(Clone, Debug, PartialEq, Hash, Eq, PartialOrd, Ord)]

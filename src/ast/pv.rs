@@ -4,14 +4,14 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-use std::str::FromStr;
+
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-use url::Url;
+
 
 use crate::ast::*;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
@@ -227,6 +227,7 @@ impl<'i> FromPair<'i> for LiteralPropertyValue {
 mod tests {
 
     use super::*;
+    use std::str::FromStr;
     use pretty_assertions::assert_eq;
 
     #[test]

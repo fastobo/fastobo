@@ -1,5 +1,5 @@
 use std::cmp::Ord;
-use std::cmp::Ordering;
+
 use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -11,7 +11,7 @@ use fastobo_derive_internal::FromStr;
 use ordered_float::OrderedFloat;
 use pest::iterators::Pair;
 
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;

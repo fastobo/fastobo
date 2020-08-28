@@ -1,22 +1,22 @@
-use std::cmp::Ordering;
-use std::cmp::PartialOrd;
+
+
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
-use std::iter::FromIterator;
-use std::path::Path;
-use std::str::FromStr;
+
+
+
+
+
+
+
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-use pest::Parser;
+
 
 use crate::ast::*;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
@@ -183,6 +183,7 @@ impl Orderable for EntityFrame {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::str::FromStr;
 
     #[test]
     fn as_term_frame() {

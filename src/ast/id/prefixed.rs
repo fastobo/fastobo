@@ -9,7 +9,7 @@ use pest::iterators::Pair;
 
 use super::IdentLocal;
 use super::IdentPrefix;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;

@@ -1,13 +1,13 @@
 //! `Error` and `Result` types for this crate.
 
-use std::error::Error as StdError;
+
 use std::io::Error as IOError;
 
 use err_derive::Error;
 use pest::error::Error as PestError;
-use pest::error::InputLocation;
-use pest::error::LineColLocation;
-use pest::Position;
+
+
+
 use pest::Span;
 
 use crate::ast::*;

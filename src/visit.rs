@@ -49,7 +49,7 @@
 //!
 
 use std::collections::HashMap;
-use std::collections::HashSet;
+
 use std::str::FromStr;
 
 use blanket::blanket;
@@ -997,7 +997,7 @@ mod tests {
         use crate::ast::EntityFrame;
         use crate::ast::Ident;
         use crate::ast::OboDoc;
-        use crate::ast::PrefixedIdent;
+        
         use crate::ast::TermClause;
         use crate::ast::Url;
         use crate::ast::Xref;

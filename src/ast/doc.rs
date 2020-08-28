@@ -1,17 +1,17 @@
-use std::convert::TryFrom;
+
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-use std::str::FromStr;
+
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-use url::Url;
+
 
 use crate::ast::*;
 use crate::error::CardinalityError;
-use crate::error::Error;
+
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
@@ -373,8 +373,11 @@ impl<'i> FromPair<'i> for OboDoc {
 mod tests {
 
     use super::*;
-    use pretty_assertions::assert_eq;
+
     use std::iter::FromIterator;
+    use std::str::FromStr;
+
+    use pretty_assertions::assert_eq;
     use textwrap_macros::dedent;
 
     #[test]

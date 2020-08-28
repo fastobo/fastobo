@@ -8,9 +8,6 @@ use std::fmt::Write;
 use std::ops::Deref;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef::OpaqueTypedefUnsized;
-use opaque_typedef_macros::OpaqueTypedef;
-use opaque_typedef_macros::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
@@ -77,8 +74,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 /// let s = UnquotedString::new("Hello, world!");
 /// assert_eq!(s.to_string(), "Hello, world\\!");
 /// ```
-#[derive(Clone, Debug, Default, Eq, FromStr, Hash, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
+#[derive(Clone, Debug, Default, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
 pub struct UnquotedString(StringType);
 
 impl UnquotedString {
@@ -133,8 +129,7 @@ impl Deref for UnquotedString {
 
 impl Display for UnquotedString {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        let s: &UnquotedStr = self.borrow();
-        s.fmt(f)
+        <Self as Borrow<UnquotedStr>>::borrow(self).fmt(f)
     }
 }
 
@@ -175,15 +170,27 @@ impl<'i> FromPair<'i> for UnquotedString {
 }
 
 /// A borrowed `UnquotedString`.
-#[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[repr(transparent)]
 pub struct UnquotedStr(str);
 
 impl UnquotedStr {
     /// Create a new `QuotedStr`.
     pub fn new(s: &str) -> &Self {
-        unsafe { UnquotedStr::from_inner_unchecked(s) }
+        unsafe { &*(s as *const str as *const Self) }
+    }
+}
+
+impl AsRef<str> for UnquotedStr {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Deref for UnquotedStr {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -201,6 +208,18 @@ impl<'i> FromPair<'i> for Cow<'i, UnquotedStr> {
         } else {
             Ok(Cow::Borrowed(UnquotedStr::new(pair.as_str())))
         }
+    }
+}
+
+impl PartialEq<str> for UnquotedStr {
+    fn eq(&self, other: &str) -> bool {
+        &self.0 == other
+    }
+}
+
+impl PartialEq<String> for UnquotedStr {
+    fn eq(&self, other: &String) -> bool {
+        &self.0 == other.as_str()
     }
 }
 

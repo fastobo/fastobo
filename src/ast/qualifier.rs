@@ -3,9 +3,10 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::str::FromStr;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::*;
@@ -80,17 +81,7 @@ impl Identified for Qualifier {
 }
 
 /// A list containing zero or more `Qualifier`s.
-#[derive(Clone, Default, Debug, Hash, Eq, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(allow_mut_ref)]
-#[opaque_typedef(derive(
-    AsRef(Inner, Self),
-    AsMut(Inner, Self),
-    Deref,
-    DerefMut,
-    Into(Inner),
-    FromInner,
-    PartialEq(Inner),
-))]
+#[derive(Clone, Default, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct QualifierList {
     qualifiers: Vec<Qualifier>,
 }
@@ -105,6 +96,43 @@ impl QualifierList {
     }
 }
 
+impl AsMut<[Qualifier]> for QualifierList {
+    fn as_mut(&mut self) -> &mut [Qualifier] {
+        &mut self.qualifiers
+    }
+}
+
+impl AsMut<Vec<Qualifier>> for QualifierList {
+    fn as_mut(&mut self) -> &mut Vec<Qualifier> {
+        &mut self.qualifiers
+    }
+}
+
+impl AsRef<[Qualifier]> for QualifierList {
+    fn as_ref(&self) -> &[Qualifier] {
+        &self.qualifiers
+    }
+}
+
+impl AsRef<Vec<Qualifier>> for QualifierList {
+    fn as_ref(&self) -> &Vec<Qualifier> {
+        &self.qualifiers
+    }
+}
+
+impl Deref for QualifierList {
+    type Target = Vec<Qualifier>;
+    fn deref(&self) -> &Self::Target {
+        &self.qualifiers
+    }
+}
+
+impl DerefMut for QualifierList {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.qualifiers
+    }
+}
+
 impl Display for QualifierList {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         let mut qualifiers = self.qualifiers.iter().peekable();
@@ -116,6 +144,12 @@ impl Display for QualifierList {
             }
         }
         f.write_char('}')
+    }
+}
+
+impl From<Vec<Qualifier>> for QualifierList {
+    fn from(qualifiers: Vec<Qualifier>) -> Self {
+        Self { qualifiers }
     }
 }
 

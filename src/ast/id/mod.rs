@@ -21,5 +21,4 @@ pub use self::subclasses::RelationIdent;
 pub use self::subclasses::SubsetIdent;
 pub use self::subclasses::SynonymTypeIdent;
 pub use self::unprefixed::UnprefixedIdent;
-pub use self::unprefixed::UnprefixedId;
 pub use url::Url;

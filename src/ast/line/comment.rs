@@ -8,7 +8,6 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::*;
@@ -18,25 +17,24 @@ use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// An inline comment without semantic value.
-#[derive(Clone, Debug, Eq, FromStr, Hash, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(allow_mut_ref)]
-#[opaque_typedef(derive(
-    AsRef(Inner, Self),
-    AsMut(Inner, Self),
-    Deref,
-    DerefMut,
-    Into(Inner),
-    FromInner,
-    PartialEq(Inner),
-))]
+#[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
+// #[opaque_typedef(derive(
+//     AsRef(Inner, Self),
+//     AsMut(Inner, Self),
+//     Deref,
+//     DerefMut,
+//     Into(Inner),
+//     FromInner,
+//     PartialEq(Inner),
+// ))]
 pub struct Comment {
-    value: String,
+    value: StringType,
 }
 
 impl Comment {
     pub fn new<S>(value: S) -> Self
     where
-        S: Into<String>,
+        S: Into<StringType>,
     {
         Comment {
             value: value.into(),

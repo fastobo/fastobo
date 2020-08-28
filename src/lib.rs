@@ -7,8 +7,6 @@ extern crate blanket;
 extern crate err_derive;
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
-extern crate opaque_typedef;
-extern crate opaque_typedef_macros;
 extern crate ordered_float;
 extern crate pest;
 extern crate url;

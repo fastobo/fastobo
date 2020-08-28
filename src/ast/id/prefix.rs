@@ -10,7 +10,6 @@ use std::hash::Hash;
 use std::hash::Hasher;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
@@ -78,8 +77,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.prefix().is_canonical());
 /// assert_eq!(id.prefix(), "GO");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(FromInner))]
+#[derive(Clone, Debug, Eq, Hash, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct IdentPrefix(StringType);
 
 impl IdentPrefix {
@@ -151,6 +149,12 @@ impl From<IdentPrefix> for StringType {
 
 impl From<&str> for IdentPrefix {
     fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
+impl From<StringType> for IdentPrefix {
+    fn from(s: StringType) -> Self {
         Self::new(s)
     }
 }

@@ -9,7 +9,6 @@ use std::ops::DerefMut;
 use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef_macros::OpaqueTypedef;
 use pest::error::Error as PestError;
 use pest::error::InputLocation;
 use pest::iterators::Pair;
@@ -117,17 +116,7 @@ impl Identified for Xref {
 }
 
 /// A list of containing zero or more `Xref`s.
-#[derive(Clone, Default, Debug, Hash, FromStr, Eq, OpaqueTypedef, Ord, PartialOrd, PartialEq)]
-#[opaque_typedef(allow_mut_ref)]
-#[opaque_typedef(derive(
-    AsRef(Inner, Self),
-    AsMut(Inner, Self),
-    Deref,
-    DerefMut,
-    Into(Inner),
-    FromInner,
-    PartialEq(Inner),
-))]
+#[derive(Clone, Default, Debug, Hash, FromStr, Eq, Ord, PartialOrd, PartialEq)]
 pub struct XrefList {
     xrefs: Vec<Xref>,
 }
@@ -138,9 +127,40 @@ impl XrefList {
     }
 }
 
+impl AsMut<[Xref]> for XrefList {
+    fn as_mut(&mut self) -> &mut [Xref] {
+        &mut self.xrefs
+    }
+}
+
+impl AsMut<Vec<Xref>> for XrefList {
+    fn as_mut(&mut self) -> &mut Vec<Xref> {
+        &mut self.xrefs
+    }
+}
+
 impl AsRef<[Xref]> for XrefList {
     fn as_ref(&self) -> &[Xref] {
         &self.xrefs
+    }
+}
+
+impl AsRef<Vec<Xref>> for XrefList {
+    fn as_ref(&self) -> &Vec<Xref> {
+        &self.xrefs
+    }
+}
+
+impl Deref for XrefList {
+    type Target = Vec<Xref>;
+    fn deref(&self) -> &Self::Target {
+        &self.xrefs
+    }
+}
+
+impl DerefMut for XrefList {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.xrefs
     }
 }
 
@@ -162,6 +182,12 @@ impl Display for XrefList {
     }
 }
 
+impl From<Vec<Xref>> for XrefList {
+    fn from(xrefs: Vec<Xref>) -> Self {
+        Self { xrefs }
+    }
+}
+
 impl FromIterator<Xref> for XrefList {
     fn from_iter<T>(iter: T) -> Self
     where
@@ -180,6 +206,12 @@ impl<'i> FromPair<'i> for XrefList {
             xrefs.push(xref);
         }
         Ok(Self { xrefs })
+    }
+}
+
+impl Into<Vec<Xref>> for XrefList {
+    fn into(self) -> Vec<Xref> {
+        self.xrefs
     }
 }
 

@@ -7,7 +7,6 @@ use std::hash::Hash;
 use std::hash::Hasher;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
@@ -69,8 +68,7 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// assert!(id.local().is_canonical());
 /// assert_eq!(id.local(), "0046154");
 /// ```
-#[derive(Clone, Debug, Eq, Hash, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(FromInner))]
+#[derive(Clone, Debug, Eq, Hash, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct IdentLocal(StringType);
 
 impl IdentLocal {
@@ -118,6 +116,12 @@ impl From<IdentLocal> for String {
 
 impl From<&str> for IdentLocal {
     fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
+impl From<StringType> for IdentLocal {
+    fn from(s: StringType) -> Self {
         Self::new(s)
     }
 }

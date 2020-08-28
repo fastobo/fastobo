@@ -4,11 +4,12 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::iter::FromIterator;
 use std::iter::IntoIterator;
+use std::ops::Deref;
+use std::ops::DerefMut;
 use std::result::Result;
 use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef_macros::OpaqueTypedef;
 use pest::iterators::Pair;
 
 use crate::ast::*;
@@ -20,17 +21,7 @@ use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
 
 /// The header frame, containing metadata about an OBO document.
-#[derive(Clone, Debug, Default, Eq, FromStr, Hash, PartialEq, OpaqueTypedef)]
-#[opaque_typedef(allow_mut_ref)]
-#[opaque_typedef(derive(
-    AsRef(Inner, Self),
-    AsMut(Inner, Self),
-    Deref,
-    DerefMut,
-    Into(Inner),
-    FromInner,
-    PartialEq(Inner),
-))]
+#[derive(Clone, Debug, Default, Eq, FromStr, Hash, PartialEq)]
 pub struct HeaderFrame {
     clauses: Vec<HeaderClause>,
 }
@@ -118,9 +109,40 @@ impl HeaderFrame {
     }
 }
 
+impl AsMut<[HeaderClause]> for HeaderFrame {
+    fn as_mut(&mut self) -> &mut [HeaderClause] {
+        &mut self.clauses
+    }
+}
+
+impl AsMut<Vec<HeaderClause>> for HeaderFrame {
+    fn as_mut(&mut self) -> &mut Vec<HeaderClause> {
+        &mut self.clauses
+    }
+}
+
 impl AsRef<[HeaderClause]> for HeaderFrame {
     fn as_ref(&self) -> &[HeaderClause] {
         &self.clauses
+    }
+}
+
+impl AsRef<Vec<HeaderClause>> for HeaderFrame {
+    fn as_ref(&self) -> &Vec<HeaderClause> {
+        &self.clauses
+    }
+}
+
+impl Deref for HeaderFrame {
+    type Target = Vec<HeaderClause>;
+    fn deref(&self) -> &Self::Target {
+        &self.clauses
+    }
+}
+
+impl DerefMut for HeaderFrame {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.clauses
     }
 }
 
@@ -136,6 +158,12 @@ impl Display for HeaderFrame {
 impl From<HeaderClause> for HeaderFrame {
     fn from(clause: HeaderClause) -> Self {
         Self::from_clause(clause)
+    }
+}
+
+impl From<Vec<HeaderClause>> for HeaderFrame {
+    fn from(clauses: Vec<HeaderClause>) -> Self {
+        Self::with_clauses(clauses)
     }
 }
 
@@ -156,6 +184,12 @@ impl<'i> FromPair<'i> for HeaderFrame {
             clauses.push(HeaderClause::from_pair_unchecked(inner)?)
         }
         Ok(HeaderFrame::with_clauses(clauses))
+    }
+}
+
+impl Into<Vec<HeaderClause>> for HeaderFrame {
+    fn into(self) -> Vec<HeaderClause> {
+        self.clauses
     }
 }
 

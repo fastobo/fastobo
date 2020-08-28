@@ -7,9 +7,6 @@ use std::fmt::Write;
 use std::ops::Deref;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef::OpaqueTypedefUnsized;
-use opaque_typedef_macros::OpaqueTypedef;
-use opaque_typedef_macros::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
@@ -53,8 +50,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 }
 
 /// An identifier without a prefix.
-#[derive(Clone, Debug, Hash, Eq, FromStr, OpaqueTypedef, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(FromInner))]
+#[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct UnprefixedIdent(StringType);
 
 impl UnprefixedIdent {
@@ -79,21 +75,9 @@ impl AsRef<str> for UnprefixedIdent {
     }
 }
 
-impl AsRef<UnprefixedId> for UnprefixedIdent {
-    fn as_ref(&self) -> &UnprefixedId {
-        UnprefixedId::new(&self.0)
-    }
-}
-
-impl Borrow<UnprefixedId> for UnprefixedIdent {
-    fn borrow(&self) -> &UnprefixedId {
-        UnprefixedId::new(&self.0)
-    }
-}
-
 impl Display for UnprefixedIdent {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        UnprefixedId::new(&self.0).fmt(f)
+        escape(f, &self.0)
     }
 }
 
@@ -116,6 +100,12 @@ impl From<&str> for UnprefixedIdent {
     }
 }
 
+impl From<StringType> for UnprefixedIdent {
+    fn from(s: StringType) -> Self {
+        Self::new(s)
+    }
+}
+
 impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
@@ -124,31 +114,6 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
         let mut local = String::with_capacity(s.len() + escaped);
         unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
         Ok(Self::new(local))
-    }
-}
-
-/// A borrowed `UnprefixedIdent`.
-#[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
-#[repr(transparent)]
-pub struct UnprefixedId(str);
-
-impl UnprefixedId {
-    pub fn new(s: &str) -> &Self {
-        unsafe { Self::from_inner_unchecked(s) }
-    }
-}
-
-impl Display for UnprefixedId {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        escape(f, &self.0)
-    }
-}
-
-impl ToOwned for UnprefixedId {
-    type Owned = UnprefixedIdent;
-    fn to_owned(&self) -> UnprefixedIdent {
-        UnprefixedIdent::new(self.0.to_owned())
     }
 }
 

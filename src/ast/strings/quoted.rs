@@ -8,9 +8,6 @@ use std::fmt::Write;
 use std::ops::Deref;
 
 use fastobo_derive_internal::FromStr;
-use opaque_typedef::OpaqueTypedefUnsized;
-use opaque_typedef_macros::OpaqueTypedef;
-use opaque_typedef_macros::OpaqueTypedefUnsized;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
@@ -76,8 +73,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
 /// assert_eq!(s.as_str(), "Hello, world!");
 /// assert_eq!(s.to_string(), "\"Hello, world!\"");
 /// ```
-#[derive(Clone, Debug, Default, Eq, Hash, FromStr, Ord, OpaqueTypedef, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(AsRefInner, AsRefSelf, FromInner, IntoInner))]
+#[derive(Clone, Debug, Default, Eq, Hash, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct QuotedString(StringType);
 
 impl QuotedString {
@@ -132,8 +128,7 @@ impl Deref for QuotedString {
 
 impl Display for QuotedString {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        let s: &QuotedStr = self.borrow();
-        s.fmt(f)
+        <Self as Borrow<QuotedStr>>::borrow(self).fmt(f)
     }
 }
 
@@ -175,16 +170,27 @@ impl PartialEq<StringType> for QuotedString {
 }
 
 /// A borrowed `QuotedString`.
-#[derive(Debug, Eq, Hash, OpaqueTypedefUnsized, Ord, PartialEq, PartialOrd)]
-#[opaque_typedef(derive(Deref, AsRef(Inner, Self)))]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[repr(transparent)]
 pub struct QuotedStr(str);
 
 impl QuotedStr {
     /// Create a new `QuotedStr`.
     pub fn new(s: &str) -> &Self {
-        // Using `unchecked` because there is no validation needed.
-        unsafe { QuotedStr::from_inner_unchecked(s) }
+        unsafe { &*(s as *const str as *const Self) }
+    }
+}
+
+impl AsRef<str> for QuotedStr {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Deref for QuotedStr {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -206,7 +212,6 @@ impl<'i> FromPair<'i> for Cow<'i, QuotedStr> {
         }
     }
 }
-// impl_fromslice!('i, Cow<'i, &'i QuotedStr>);
 
 impl PartialEq<str> for QuotedStr {
     fn eq(&self, other: &str) -> bool {

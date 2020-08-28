@@ -54,6 +54,7 @@ impl EntityFrame {
             None
         }
     }
+
     /// Return the `TypedefFrame` if the entity frame is one, or `None`.
     pub fn as_typedef_frame(&self) -> Option<&TypedefFrame> {
         if let EntityFrame::Typedef(frame) = &self {
@@ -69,6 +70,24 @@ impl EntityFrame {
             Some(frame.as_ref())
         } else {
             None
+        }
+    }
+
+    /// Get the name of the entity, if exactly one is declared.
+    pub fn name(&self) -> Result<&UnquotedString, CardinalityError> {
+        match &self {
+            EntityFrame::Term(frame) => frame.name(),
+            EntityFrame::Typedef(frame) => frame.name(),
+            EntityFrame::Instance(frame) => frame.name(),
+        }
+    }
+
+    /// Get the definition of the entity, if exactly one is declared.
+    pub fn definition(&self) -> Result<&Definition, CardinalityError> {
+        match &self {
+            EntityFrame::Term(frame) => frame.definition(),
+            EntityFrame::Typedef(frame) => frame.definition(),
+            EntityFrame::Instance(frame) => frame.definition(),
         }
     }
 }

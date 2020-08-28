@@ -63,7 +63,7 @@ impl TypedefFrame {
         &mut self.clauses
     }
 
-    /// Get the name of the typedef, if one is declared.
+    /// Get the name of the typedef, if exactly one is declared.
     pub fn name(&self) -> Result<&UnquotedString, CardinalityError> {
         let mut name: Option<&UnquotedString> = None;
         for clause in &self.clauses {
@@ -75,6 +75,20 @@ impl TypedefFrame {
             }
         }
         name.ok_or_else(|| CardinalityError::missing("name"))
+    }
+
+    /// Get the definition of the typedef, if exactly one is declared.
+    pub fn definition(&self) -> Result<&Definition, CardinalityError> {
+        let mut def: Option<&Definition> = None;
+        for clause in &self.clauses {
+            if let TypedefClause::Def(n) = clause.as_inner() {
+                match def {
+                    Some(_) => return Err(CardinalityError::duplicate("def")),
+                    None => def = Some(&n),
+                }
+            }
+        }
+        def.ok_or_else(|| CardinalityError::missing("def"))
     }
 }
 

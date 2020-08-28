@@ -35,7 +35,7 @@ impl CardinalityError {
     }
 
     pub fn single<S: Into<String>>(name: S) -> Self {
-        CardinalityError::DuplicateClauses { name: name.into() }
+        CardinalityError::SingleClause { name: name.into() }
     }
 }
 

@@ -11,7 +11,6 @@ use fastobo_derive_internal::FromStr;
 use ordered_float::OrderedFloat;
 use pest::iterators::Pair;
 
-
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
@@ -268,7 +267,9 @@ impl<'i> FromPair<'i> for IsoDateTime {
         let hour = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
         let minute = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
         let second = u8::from_str_radix(time.next().unwrap().as_str(), 10).unwrap();
-        let fraction = time.next().map(|p| f32::from_str(p.as_str()).unwrap().into());
+        let fraction = time
+            .next()
+            .map(|p| f32::from_str(p.as_str()).unwrap().into());
 
         let timezone = match inner.next() {
             Some(pair) => Some(IsoTimezone::from_pair_unchecked(pair)?),
@@ -339,7 +340,9 @@ impl<'i> FromPair<'i> for IsoTimezone {
 
         let mut inner = pair.into_inner();
         let hh = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-        let mm = inner.next().map(|p| u8::from_str_radix(p.as_str(), 10).unwrap());
+        let mm = inner
+            .next()
+            .map(|p| u8::from_str_radix(p.as_str(), 10).unwrap());
 
         match tag {
             '+' => Ok(Plus(hh, mm)),
@@ -365,7 +368,6 @@ mod tests {
             let naive = NaiveDateTime::from_str("12:06:2018 17:13").unwrap();
             self::assert_eq!(naive, NaiveDateTime::new(12, 6, 2018, 17, 13));
         }
-
     }
 
     mod iso {
@@ -373,13 +375,15 @@ mod tests {
         use super::*;
 
         macro_rules! assert_date_to_xsd {
-            ($x:expr) => {assert_date_to_xsd!($x, $x)};
+            ($x:expr) => {
+                assert_date_to_xsd!($x, $x)
+            };
             ($x:expr, $y:expr) => {
                 match IsoDateTime::from_str($x) {
                     Ok(x) => self::assert_eq!(x.to_xsd_datetime(), $y, "{}", x),
                     Err(e) => panic!("{}", e),
                 }
-            }
+            };
         }
 
         #[test]
@@ -391,7 +395,5 @@ mod tests {
             assert_date_to_xsd!("2017-1-24T14:41:36.05Z", "2017-01-24T14:41:36.05Z");
             assert_date_to_xsd!("2017-1-24T14:41:36+01:30", "2017-01-24T14:41:36+01:30");
         }
-
     }
-
 }

@@ -3,11 +3,9 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::num::NonZeroUsize;
 
-
 use std::convert::TryFrom;
 use std::fs::File;
 use std::iter::Iterator;
-
 
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
@@ -17,8 +15,8 @@ use lazy_static::lazy_static;
 
 use crate::ast::EntityFrame;
 use crate::ast::Frame;
-use crate::ast::HeaderFrame;
 use crate::ast::HeaderClause;
+use crate::ast::HeaderFrame;
 use crate::ast::OboDoc;
 use crate::error::Error;
 use crate::error::SyntaxError;
@@ -119,7 +117,6 @@ impl<B: BufRead> Iterator for ThreadedParser<B> {
     type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-
         macro_rules! send_or_error {
             ($channel:expr, $msg:expr) => {
                 if $channel.send($msg).is_err() {
@@ -127,7 +124,7 @@ impl<B: BufRead> Iterator for ThreadedParser<B> {
                     let err = ThreadingError::DisconnectedChannel;
                     return Some(Err(Error::from(err)));
                 }
-            }
+            };
         }
 
         loop {
@@ -154,7 +151,7 @@ impl<B: BufRead> Iterator for ThreadedParser<B> {
                     return Some(result);
                 }
                 // item is found but is not the right index: store it
-                Ok((result, index)) =>  {
+                Ok((result, index)) => {
                     self.queue.insert(index, result);
                 }
                 // empty queue after all the threads were joined: we are done
@@ -213,7 +210,12 @@ impl<B: BufRead> Iterator for ThreadedParser<B> {
                         l = self.line.trim_start();
                         if l.starts_with('[') {
                             // send the entire frame with the location offsets
-                            let msg = ConsumerInput::new(lines, self.sent_index, self.line_offset, self.offset);
+                            let msg = ConsumerInput::new(
+                                lines,
+                                self.sent_index,
+                                self.line_offset,
+                                self.offset,
+                            );
                             send_or_error!(self.s_text, Some(msg));
                             // update the local offsets and bail out
                             self.sent_index += 1;
@@ -225,7 +227,12 @@ impl<B: BufRead> Iterator for ThreadedParser<B> {
                             self.state = State::AtEof;
                             // if some lines remain, send them as text
                             if !lines.chars().all(|c| c.is_whitespace()) {
-                                let msg = ConsumerInput::new(lines, self.sent_index, self.line_offset, self.offset);
+                                let msg = ConsumerInput::new(
+                                    lines,
+                                    self.sent_index,
+                                    self.line_offset,
+                                    self.offset,
+                                );
                                 send_or_error!(self.s_text, Some(msg));
                             }
                             // poison-pill the remaining workers and bail out
@@ -251,7 +258,9 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
     /// The number of available CPUs will be polled at runtime and then the
     /// right number of threads will be spawned accordingly.
     fn new(stream: B) -> Self {
-        lazy_static !{ static ref THREADS: usize = num_cpus::get(); }
+        lazy_static! {
+            static ref THREADS: usize = num_cpus::get();
+        }
         let threads = unsafe { NonZeroUsize::new_unchecked(*THREADS) };
         Self::with_threads(stream, threads)
     }
@@ -292,7 +301,7 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
                     Err(e) => {
                         let err = e.with_offsets(line_offset, offset);
                         break Err(Error::from(err));
-                    },
+                    }
                 };
             }
 
@@ -356,7 +365,6 @@ impl<B: BufRead> Parser<B> for Box<ThreadedParser<B>> {
     fn with_threads(stream: B, threads: NonZeroUsize) -> Self {
         Box::new(ThreadedParser::with_threads(stream, threads))
     }
-
 
     fn ordered(&mut self, ordered: bool) -> &mut Self {
         (**self).ordered(ordered);

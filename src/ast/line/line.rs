@@ -23,7 +23,6 @@ pub struct Line<T> {
     comment: Option<Box<Comment>>,
 }
 
-
 impl<T> Line<T> {
     /// Update the line comment with the given one.
     ///

@@ -4,7 +4,6 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::iter::Iterator;
 
-
 use super::Parser;
 
 use crate::ast::EntityFrame;
@@ -174,7 +173,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
             line,
             offset,
             line_offset,
-            header
+            header,
         }
     }
 

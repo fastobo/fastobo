@@ -26,9 +26,9 @@ extern crate smartstring;
 #[cfg(test)]
 extern crate textwrap_macros;
 
-pub mod parser;
 pub mod ast;
 pub mod error;
+pub mod parser;
 pub mod semantics;
 pub mod syntax;
 pub mod visit;

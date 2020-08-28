@@ -1,11 +1,11 @@
 #![feature(test)]
 
-extern crate test;
 extern crate fastobo;
+extern crate test;
 
-use std::io::Cursor;
-use std::io::BufRead;
 use std::convert::TryFrom;
+use std::io::BufRead;
+use std::io::Cursor;
 
 use fastobo::parser::Parser;
 
@@ -13,7 +13,8 @@ use fastobo::parser::Parser;
 fn bench_baseline_readline(b: &mut test::Bencher) {
     let s = std::fs::read_to_string("tests/data/ms.obo").unwrap();
     b.iter(|| {
-        std::io::BufReader::new(Cursor::new(&s)).lines()
+        std::io::BufReader::new(Cursor::new(&s))
+            .lines()
             .collect::<Result<Vec<_>, _>>()
             .unwrap();
     });

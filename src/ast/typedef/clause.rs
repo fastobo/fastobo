@@ -4,8 +4,8 @@ use fastobo_derive_internal::OboClause;
 use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::OboClause;
+use crate::syntax::Rule;
 
 /// A clause appearing in a typedef frame.
 #[derive(Clone, Debug, Eq, Hash, FromStr, Ord, OboClause, PartialEq, PartialOrd)]
@@ -252,12 +252,18 @@ impl<'i> FromPair<'i> for TypedefClause {
             Rule::ExpandAssertionToTag => {
                 let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TypedefClause::ExpandAssertionTo(Box::new(desc), Box::new(xrefs)))
+                Ok(TypedefClause::ExpandAssertionTo(
+                    Box::new(desc),
+                    Box::new(xrefs),
+                ))
             }
             Rule::ExpandExpressionToTag => {
                 let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
-                Ok(TypedefClause::ExpandExpressionTo(Box::new(desc), Box::new(xrefs)))
+                Ok(TypedefClause::ExpandExpressionTo(
+                    Box::new(desc),
+                    Box::new(xrefs),
+                ))
             }
             Rule::IsMetadataTagTag => {
                 let b = bool::from_pair_unchecked(inner.next().unwrap())?;

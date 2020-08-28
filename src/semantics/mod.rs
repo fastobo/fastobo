@@ -1,13 +1,7 @@
 //! Selection of useful traits that exceed the syntactic scope.
 
-
-
-
-
-
 use crate::ast::*;
 use crate::error::CardinalityError;
-
 
 mod treat_xrefs;
 pub(crate) use self::treat_xrefs::*;
@@ -79,7 +73,6 @@ pub trait OboFrame {
     /// in a generic manner.
     fn cardinality_check(&self) -> Result<(), CardinalityError> {
         use std::collections::HashMap;
-        
 
         // Group clauses by variant kind
         let mut clause_index: HashMap<_, Vec<&Self::Clause>> = HashMap::new();
@@ -140,7 +133,6 @@ pub trait Identified {
     /// Get a mutable reference to the identifier of the entity.
     fn as_id_mut(&mut self) -> &mut Ident;
 }
-
 
 #[cfg(test)]
 mod tests {

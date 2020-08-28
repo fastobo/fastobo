@@ -10,16 +10,15 @@ use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
 
-
 use pest::iterators::Pair;
 
 use crate::ast::*;
 
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
+use crate::syntax::Rule;
 
 /// A database cross-reference definition.
 ///
@@ -253,7 +252,10 @@ mod tests {
         #[test]
         fn as_id() {
             let actual = Xref::from_str("PMID:26585518").unwrap();
-            self::assert_eq!(actual.as_id(), &Ident::from(PrefixedIdent::new("PMID", "26585518")));
+            self::assert_eq!(
+                actual.as_id(),
+                &Ident::from(PrefixedIdent::new("PMID", "26585518"))
+            );
         }
 
         #[test]
@@ -270,7 +272,7 @@ mod tests {
             let actual = Xref::from_str("PMID:26585518 \"OrthoANI paper\"").unwrap();
             let mut expected = Xref::with_desc(
                 PrefixedIdent::new("PMID", "26585518"),
-                QuotedString::from("OrthoANI paper")
+                QuotedString::from("OrthoANI paper"),
             );
             self::assert_eq!(actual, expected);
             assert!(expected.description().is_some());

@@ -8,7 +8,6 @@ use std::ops::DerefMut;
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
-
 use crate::ast::*;
 
 use crate::error::SyntaxError;
@@ -260,7 +259,5 @@ mod tests {
                 "\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]"
             );
         }
-
     }
-
 }

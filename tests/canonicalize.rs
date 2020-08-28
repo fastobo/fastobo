@@ -1,7 +1,8 @@
-extern crate pretty_assertions;
 extern crate fastobo;
+extern crate pretty_assertions;
 
 use std::path::PathBuf;
+
 use pretty_assertions::assert_eq;
 
 macro_rules! canonicalizetest {

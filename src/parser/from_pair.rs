@@ -5,7 +5,6 @@ use url::Url;
 
 use std::str::FromStr;
 
-
 use crate::error::SyntaxError;
 use crate::syntax::Rule;
 
@@ -110,5 +109,4 @@ mod tests {
             e => panic!("unexpected error: {:?}", e),
         }
     }
-
 }

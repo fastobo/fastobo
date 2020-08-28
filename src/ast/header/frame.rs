@@ -8,7 +8,6 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::result::Result;
 
-
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
@@ -16,9 +15,9 @@ use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
+use crate::syntax::Rule;
 
 /// The header frame, containing metadata about an OBO document.
 #[derive(Clone, Debug, Default, Eq, FromStr, Hash, PartialEq)]
@@ -244,8 +243,8 @@ impl OboFrame for HeaderFrame {
 mod tests {
 
     use super::*;
-    use std::str::FromStr;
     use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     #[test]
     fn data_version() {
@@ -341,8 +340,12 @@ mod tests {
         assert_eq!(
             actual.clauses[2],
             HeaderClause::Subsetdef(
-                Box::new(SubsetIdent::from(UnprefixedIdent::new("gocheck_do_not_annotate"))),
-                Box::new(QuotedString::new("Term not to be used for direct annotation")),
+                Box::new(SubsetIdent::from(UnprefixedIdent::new(
+                    "gocheck_do_not_annotate"
+                ))),
+                Box::new(QuotedString::new(
+                    "Term not to be used for direct annotation"
+                )),
             )
         );
     }

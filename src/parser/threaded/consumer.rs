@@ -1,5 +1,3 @@
-
-
 use std::thread::JoinHandle;
 use std::time::Duration;
 
@@ -10,7 +8,6 @@ use crossbeam_channel::RecvTimeoutError;
 
 use crate::ast::EntityFrame;
 use crate::ast::Frame;
-
 
 use crate::error::Error;
 use crate::error::SyntaxError;
@@ -34,7 +31,7 @@ impl Input {
             text,
             index,
             line_offset,
-            offset
+            offset,
         }
     }
 }
@@ -46,24 +43,18 @@ pub struct Output {
 
 impl Output {
     pub fn new(res: Result<Frame, Error>, index: usize) -> Self {
-        Self {
-            res,
-            index
-        }
+        Self { res, index }
     }
 }
 
 pub struct Consumer {
     r_text: Receiver<Option<Input>>,
     s_item: Sender<Output>,
-    handle: Option< JoinHandle<()> >
+    handle: Option<JoinHandle<()>>,
 }
 
 impl Consumer {
-    pub fn new(
-        r_text: Receiver<Option<Input>>,
-        s_item: Sender<Output>,
-    ) -> Self {
+    pub fn new(r_text: Receiver<Option<Input>>, s_item: Sender<Output>) -> Self {
         Self {
             r_text,
             s_item,
@@ -94,10 +85,9 @@ impl Consumer {
                         let frame = EntityFrame::from_pair_unchecked(pair);
                         let res = frame.map(Frame::from).map_err(Error::from);
                         s_item.send(Output::new(res, msg.index)).ok();
-                    }
+                    },
                     Err(e) => {
-                        let se = SyntaxError::from(e)
-                            .with_offsets(msg.line_offset, msg.offset);
+                        let se = SyntaxError::from(e).with_offsets(msg.line_offset, msg.offset);
                         let res = Err(Error::from(se));
                         s_item.send(Output::new(res, msg.index)).ok();
                         return;

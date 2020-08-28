@@ -1,12 +1,9 @@
 //! `Error` and `Result` types for this crate.
 
-
 use std::io::Error as IOError;
 
 use err_derive::Error;
 use pest::error::Error as PestError;
-
-
 
 use pest::Span;
 
@@ -203,5 +200,5 @@ pub enum Error {
     ThreadingError {
         #[error(cause)]
         error: ThreadingError,
-    }
+    },
 }

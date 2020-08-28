@@ -1,25 +1,14 @@
 //! Parser and parsing-related traits for the OBO format.
 
-
-
 use std::io::BufRead;
 
 use std::iter::Iterator;
 
 use std::num::NonZeroUsize;
 
-
-
-
 use crate::ast::Frame;
 
-
-
-
-
-
 use crate::error::Error;
-
 
 mod from_pair;
 mod from_slice;
@@ -38,7 +27,9 @@ pub use self::threaded::ThreadedParser;
 // ---
 
 /// The common interface for OBO parsers.
-pub trait Parser<B: BufRead>: From<B> + Iterator<Item=Result<Frame, Error>> + AsRef<B> + AsMut<B> {
+pub trait Parser<B: BufRead>:
+    From<B> + Iterator<Item = Result<Frame, Error>> + AsRef<B> + AsMut<B>
+{
     /// Create a new `Parser` reading from the reader.
     fn new(stream: B) -> Self {
         Self::from(stream)
@@ -175,8 +166,8 @@ mod tests {
             mod errloc {
                 use super::*;
 
-                use pest::error::LineColLocation;
                 use pest::error::InputLocation;
+                use pest::error::LineColLocation;
 
                 #[test]
                 fn invalid_header_date() {
@@ -191,7 +182,7 @@ mod tests {
 
                     let pe = match se {
                         SyntaxError::ParserError { error: pe } => pe,
-                        _ => panic!("syntax error should be a ParserError")
+                        _ => panic!("syntax error should be a ParserError"),
                     };
 
                     match pe.line_col {
@@ -222,7 +213,7 @@ mod tests {
 
                     let pe = match se {
                         SyntaxError::ParserError { error: pe } => pe,
-                        _ => panic!("syntax error should be a ParserError")
+                        _ => panic!("syntax error should be a ParserError"),
                     };
 
                     match pe.line_col {
@@ -253,7 +244,7 @@ mod tests {
 
                     let pe = match se {
                         SyntaxError::ParserError { error: pe } => pe,
-                        _ => panic!("syntax error should be a ParserError")
+                        _ => panic!("syntax error should be a ParserError"),
                     };
 
                     match pe.line_col {
@@ -284,7 +275,7 @@ mod tests {
 
                     let pe = match se {
                         SyntaxError::ParserError { error: pe } => pe,
-                        _ => panic!("syntax error should be a ParserError")
+                        _ => panic!("syntax error should be a ParserError"),
                     };
 
                     match pe.line_col {
@@ -315,7 +306,7 @@ mod tests {
 
                     let pe = match se {
                         SyntaxError::ParserError { error: pe } => pe,
-                        _ => panic!("syntax error should be a ParserError")
+                        _ => panic!("syntax error should be a ParserError"),
                     };
 
                     match pe.line_col {
@@ -346,7 +337,7 @@ mod tests {
 
                     let pe = match se {
                         SyntaxError::ParserError { error: pe } => pe,
-                        _ => panic!("syntax error should be a ParserError")
+                        _ => panic!("syntax error should be a ParserError"),
                     };
 
                     match pe.line_col {
@@ -364,7 +355,7 @@ mod tests {
                     }
                 }
             }
-        }
+        };
     }
 
     mod sequential {

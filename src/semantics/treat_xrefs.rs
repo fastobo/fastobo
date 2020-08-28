@@ -16,7 +16,9 @@ pub fn as_equivalent(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
                         if p.prefix() == prefix {
-                            new.push(Line::from($clause::EquivalentTo(Box::new(xref.id().clone().into()))));
+                            new.push(Line::from($clause::EquivalentTo(Box::new(
+                                xref.id().clone().into(),
+                            ))));
                         }
                     }
                 }
@@ -345,9 +347,8 @@ mod tests {
 
     #[test]
     fn as_is_a() {
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-is_a: TEST
 
                 [Term]
@@ -357,8 +358,7 @@ mod tests {
                 [Term]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
@@ -379,9 +379,8 @@ mod tests {
             doc.to_string()
         );
 
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-is_a: TEST
 
                 [Typedef]
@@ -391,8 +390,7 @@ mod tests {
                 [Typedef]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
@@ -416,9 +414,8 @@ mod tests {
 
     #[test]
     fn as_has_subclass() {
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-has-subclass: TEST
 
                 [Term]
@@ -428,8 +425,7 @@ mod tests {
                 [Term]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
@@ -450,9 +446,8 @@ mod tests {
             doc.to_string()
         );
 
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-has-subclass: TEST
 
                 [Typedef]
@@ -462,8 +457,7 @@ mod tests {
                 [Typedef]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
         doc.treat_xrefs();
         self::assert_eq!(
@@ -487,9 +481,8 @@ mod tests {
 
     #[test]
     fn as_genus_differentia() {
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-genus-differentia: TEST part_of something
 
                 [Term]
@@ -499,8 +492,7 @@ mod tests {
                 [Term]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
 
         doc.treat_xrefs();
@@ -527,9 +519,8 @@ mod tests {
 
     #[test]
     fn as_reverse_genus_differentia() {
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-reverse-genus-differentia: TEST part_of something
 
                 [Term]
@@ -539,8 +530,7 @@ mod tests {
                 [Term]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
 
         doc.treat_xrefs();
@@ -567,9 +557,8 @@ mod tests {
 
     #[test]
     fn as_relationship() {
-        let mut doc = OboDoc::from_str(
-            dedent!(
-                r#"
+        let mut doc = OboDoc::from_str(dedent!(
+            r#"
                 treat-xrefs-as-relationship: TEST connected_to
 
                 [Term]
@@ -579,8 +568,7 @@ mod tests {
                 [Term]
                 id: TEST:002
                 "#
-            )
-        )
+        ))
         .unwrap();
 
         doc.treat_xrefs();

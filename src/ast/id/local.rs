@@ -1,10 +1,8 @@
-
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 use std::hash::Hash;
-
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
@@ -203,5 +201,4 @@ mod tests {
         self::assert_eq!(IdentLocal::new(":001").to_string(), "\\:001");
         self::assert_eq!(IdentLocal::new("0 01").to_string(), "0\\ 01");
     }
-
 }

@@ -4,10 +4,8 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
-
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-
 
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
@@ -26,9 +24,9 @@ pub enum Ident {
 }
 
 impl AsRef<Ident> for Ident {
-  fn as_ref(&self) -> &Self {
-    &self
-  }
+    fn as_ref(&self) -> &Self {
+        &self
+    }
 }
 
 impl Display for Ident {
@@ -68,7 +66,9 @@ impl<'i> FromPair<'i> for Ident {
             Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner).map(From::from),
             Rule::UnprefixedId => UnprefixedIdent::from_pair_unchecked(inner).map(From::from),
             // FIXME(@althonos): need proper error report if the parser fails.
-            Rule::UrlId => Url::from_pair_unchecked(inner).map(Box::new).map(Ident::Url),
+            Rule::UrlId => Url::from_pair_unchecked(inner)
+                .map(Box::new)
+                .map(Ident::Url),
             _ => unreachable!(),
         }
     }
@@ -90,15 +90,18 @@ impl PartialOrd for Ident {
 mod tests {
 
     use super::*;
-    
+
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
-    
 
     #[test]
     fn from_str() {
-        let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl").map(Ident::from).unwrap();
-        let expected = Url::parse("http://purl.obolibrary.org/obo/po.owl").map(Ident::from).unwrap();
+        let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl")
+            .map(Ident::from)
+            .unwrap();
+        let expected = Url::parse("http://purl.obolibrary.org/obo/po.owl")
+            .map(Ident::from)
+            .unwrap();
         assert_eq!(actual, expected);
 
         let actual = Ident::from_str("GO:0046154").unwrap();

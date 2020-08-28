@@ -44,6 +44,7 @@ pub use self::date::*;
 pub use self::definition::*;
 pub use self::doc::*;
 pub use self::entity::*;
+pub use self::frame::*;
 pub use self::header::*;
 pub use self::id::*;
 pub use self::instance::*;
@@ -55,24 +56,12 @@ pub use self::synonym::*;
 pub use self::term::*;
 pub use self::typedef::*;
 pub use self::xref::*;
-pub use self::frame::*;
-
-
-
-
-
-
 
 use std::iter::FromIterator;
-
-
 
 use pest::iterators::Pair;
 
 use crate::error::CardinalityError;
-
-
-
 
 /// The inner string type used to store text.
 ///

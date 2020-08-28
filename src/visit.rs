@@ -63,7 +63,7 @@ use crate::ast::*;
 ///
 /// Default implementations of this trait methods can be found in the
 /// [`visit`](./visit/index.html) submodule for easy composition.
-#[blanket(default="visit", derive(Mut, Box))]
+#[blanket(default = "visit", derive(Mut, Box))]
 pub trait Visit<'ast> {
     fn visit_class_ident(&mut self, id: &'ast ClassIdent);
     fn visit_definition(&mut self, id: &'ast Definition);
@@ -123,7 +123,10 @@ pub mod visit {
         }
     }
 
-    pub fn visit_entity_frame<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, frame: &'ast EntityFrame) {
+    pub fn visit_entity_frame<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        frame: &'ast EntityFrame,
+    ) {
         use self::EntityFrame::*;
         match frame {
             Term(ref t) => visitor.visit_term_frame(t),
@@ -132,7 +135,10 @@ pub mod visit {
         }
     }
 
-    pub fn visit_header_clause<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, clause: &'ast HeaderClause) {
+    pub fn visit_header_clause<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        clause: &'ast HeaderClause,
+    ) {
         use self::HeaderClause::*;
         match clause {
             FormatVersion(s) => visitor.visit_unquoted_string(s),
@@ -189,7 +195,10 @@ pub mod visit {
         }
     }
 
-    pub fn visit_header_frame<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, header: &'ast HeaderFrame) {
+    pub fn visit_header_frame<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        header: &'ast HeaderFrame,
+    ) {
         for clause in header.iter() {
             visitor.visit_header_clause(clause)
         }
@@ -205,10 +214,18 @@ pub mod visit {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_ident_local<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, prefix: &'ast IdentLocal) {}
+    pub fn visit_ident_local<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        prefix: &'ast IdentLocal,
+    ) {
+    }
 
     #[allow(unused_variables)]
-    pub fn visit_ident_prefix<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, prefix: &'ast IdentPrefix) {}
+    pub fn visit_ident_prefix<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        prefix: &'ast IdentPrefix,
+    ) {
+    }
 
     pub fn visit_import<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, import: &'ast Import) {
         use self::Import::*;
@@ -218,7 +235,10 @@ pub mod visit {
         }
     }
 
-    pub fn visit_instance_clause<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, clause: &'ast InstanceClause) {
+    pub fn visit_instance_clause<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        clause: &'ast InstanceClause,
+    ) {
         use self::InstanceClause::*;
         match clause {
             IsAnonymous(_) => (),
@@ -244,34 +264,54 @@ pub mod visit {
         }
     }
 
-    pub fn visit_instance_frame<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, frame: &'ast InstanceFrame) {
+    pub fn visit_instance_frame<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        frame: &'ast InstanceFrame,
+    ) {
         visitor.visit_instance_ident(frame.id());
         for clause in frame.iter() {
             visitor.visit_instance_clause(clause);
         }
     }
 
-    pub fn visit_instance_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast InstanceIdent) {
+    pub fn visit_instance_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        id: &'ast InstanceIdent,
+    ) {
         visitor.visit_ident(id.as_ref())
     }
 
     #[allow(unused_variables)]
-    pub fn visit_iso_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, date: &'ast IsoDateTime) {}
+    pub fn visit_iso_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, date: &'ast IsoDateTime) {
+    }
 
-    pub fn visit_literal_property_value<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, pv: &'ast LiteralPropertyValue) {
+    pub fn visit_literal_property_value<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        pv: &'ast LiteralPropertyValue,
+    ) {
         visitor.visit_relation_ident(pv.property());
         visitor.visit_quoted_string(pv.literal());
         visitor.visit_ident(pv.datatype());
     }
 
     #[allow(unused_variables)]
-    pub fn visit_naive_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, date: &'ast NaiveDateTime) {}
+    pub fn visit_naive_date<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        date: &'ast NaiveDateTime,
+    ) {
+    }
 
-    pub fn visit_namespace_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast NamespaceIdent) {
+    pub fn visit_namespace_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        id: &'ast NamespaceIdent,
+    ) {
         visitor.visit_ident(id.as_ref())
     }
 
-    pub fn visit_property_value<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, pv: &'ast PropertyValue) {
+    pub fn visit_property_value<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        pv: &'ast PropertyValue,
+    ) {
         use self::PropertyValue::*;
         match &pv {
             Resource(pv) => visitor.visit_resource_property_value(pv),
@@ -279,24 +319,40 @@ pub mod visit {
         }
     }
 
-    pub fn visit_prefixed_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast PrefixedIdent) {
+    pub fn visit_prefixed_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        id: &'ast PrefixedIdent,
+    ) {
         visitor.visit_ident_prefix(id.prefix());
         visitor.visit_ident_local(id.local());
     }
 
     #[allow(unused_variables)]
-    pub fn visit_quoted_string<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, string: &'ast QuotedString) {}
+    pub fn visit_quoted_string<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        string: &'ast QuotedString,
+    ) {
+    }
 
-    pub fn visit_relation_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast RelationIdent) {
+    pub fn visit_relation_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        id: &'ast RelationIdent,
+    ) {
         visitor.visit_ident(id.as_ref())
     }
 
-    pub fn visit_resource_property_value<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, pv: &'ast ResourcePropertyValue) {
+    pub fn visit_resource_property_value<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        pv: &'ast ResourcePropertyValue,
+    ) {
         visitor.visit_relation_ident(pv.property());
         visitor.visit_ident(pv.target());
     }
 
-    pub fn visit_subset_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast SubsetIdent) {
+    pub fn visit_subset_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        id: &'ast SubsetIdent,
+    ) {
         visitor.visit_ident(id.as_ref())
     }
 
@@ -310,13 +366,23 @@ pub mod visit {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_synonym_scope<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, scope: &'ast SynonymScope) {}
+    pub fn visit_synonym_scope<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        scope: &'ast SynonymScope,
+    ) {
+    }
 
-    pub fn visit_synonymtype_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast SynonymTypeIdent) {
+    pub fn visit_synonymtype_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        id: &'ast SynonymTypeIdent,
+    ) {
         visitor.visit_ident(id.as_ref())
     }
 
-    pub fn visit_term_clause<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, clause: &'ast TermClause) {
+    pub fn visit_term_clause<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        clause: &'ast TermClause,
+    ) {
         use self::TermClause::*;
         match clause {
             IsAnonymous(_) => (),
@@ -352,14 +418,20 @@ pub mod visit {
         }
     }
 
-    pub fn visit_term_frame<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, frame: &'ast TermFrame) {
+    pub fn visit_term_frame<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        frame: &'ast TermFrame,
+    ) {
         visitor.visit_class_ident(frame.id());
         for clause in frame.iter() {
             visitor.visit_term_clause(clause);
         }
     }
 
-    pub fn visit_typedef_clause<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, clause: &'ast TypedefClause) {
+    pub fn visit_typedef_clause<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        clause: &'ast TypedefClause,
+    ) {
         use self::TypedefClause::*;
         match clause {
             IsAnonymous(_) => (),
@@ -411,7 +483,10 @@ pub mod visit {
         }
     }
 
-    pub fn visit_typedef_frame<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, frame: &'ast TypedefFrame) {
+    pub fn visit_typedef_frame<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        frame: &'ast TypedefFrame,
+    ) {
         visitor.visit_relation_ident(frame.id());
         for clause in frame.iter() {
             visitor.visit_typedef_clause(clause);
@@ -419,10 +494,18 @@ pub mod visit {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_unprefixed_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, string: &'ast UnprefixedIdent) {}
+    pub fn visit_unprefixed_ident<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        string: &'ast UnprefixedIdent,
+    ) {
+    }
 
     #[allow(unused_variables)]
-    pub fn visit_unquoted_string<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, string: &'ast UnquotedString) {}
+    pub fn visit_unquoted_string<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        string: &'ast UnquotedString,
+    ) {
+    }
 
     #[allow(unused_variables)]
     pub fn visit_url<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, url: &'ast Url) {}
@@ -447,7 +530,7 @@ pub mod visit {
 ///
 /// Default implementations of this trait methods can be found in the
 /// [`visit_mut`](./visit_mut/index.html) submodule for easy composition.
-#[blanket(default="visit_mut", derive(Mut, Box))]
+#[blanket(default = "visit_mut", derive(Mut, Box))]
 pub trait VisitMut {
     fn visit_class_ident(&mut self, id: &mut ClassIdent);
     fn visit_definition(&mut self, id: &mut Definition);
@@ -602,7 +685,10 @@ pub mod visit_mut {
         }
     }
 
-    pub fn visit_instance_clause<V: VisitMut + ?Sized>(visitor: &mut V, clause: &mut InstanceClause) {
+    pub fn visit_instance_clause<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        clause: &mut InstanceClause,
+    ) {
         use self::InstanceClause::*;
         match clause {
             IsAnonymous(_) => (),
@@ -642,7 +728,10 @@ pub mod visit_mut {
     #[allow(unused_variables)]
     pub fn visit_iso_date<V: VisitMut + ?Sized>(visitor: &mut V, date: &mut IsoDateTime) {}
 
-    pub fn visit_literal_property_value<V: VisitMut + ?Sized>(visitor: &mut V, pv: &mut LiteralPropertyValue) {
+    pub fn visit_literal_property_value<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        pv: &mut LiteralPropertyValue,
+    ) {
         visitor.visit_relation_ident(pv.property_mut());
         visitor.visit_quoted_string(pv.literal_mut());
         visitor.visit_ident(pv.datatype_mut());
@@ -675,7 +764,10 @@ pub mod visit_mut {
         visitor.visit_ident(id.as_mut())
     }
 
-    pub fn visit_resource_property_value<V: VisitMut + ?Sized>(visitor: &mut V, pv: &mut ResourcePropertyValue) {
+    pub fn visit_resource_property_value<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        pv: &mut ResourcePropertyValue,
+    ) {
         visitor.visit_relation_ident(pv.property_mut());
         visitor.visit_ident(pv.target_mut());
     }
@@ -696,7 +788,10 @@ pub mod visit_mut {
     #[allow(unused_variables)]
     pub fn visit_synonym_scope<V: VisitMut + ?Sized>(visitor: &mut V, scope: &mut SynonymScope) {}
 
-    pub fn visit_synonymtype_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut SynonymTypeIdent) {
+    pub fn visit_synonymtype_ident<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        id: &mut SynonymTypeIdent,
+    ) {
         visitor.visit_ident(id.as_mut())
     }
 
@@ -807,10 +902,18 @@ pub mod visit_mut {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_unprefixed_ident<V: VisitMut + ?Sized>(visitor: &mut V, string: &mut UnprefixedIdent) {}
+    pub fn visit_unprefixed_ident<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        string: &mut UnprefixedIdent,
+    ) {
+    }
 
     #[allow(unused_variables)]
-    pub fn visit_unquoted_string<V: VisitMut + ?Sized>(visitor: &mut V, string: &mut UnquotedString) {}
+    pub fn visit_unquoted_string<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        string: &mut UnquotedString,
+    ) {
+    }
 
     #[allow(unused_variables)]
     pub fn visit_url<V: VisitMut + ?Sized>(visitor: &mut V, url: &mut Url) {}
@@ -880,7 +983,8 @@ impl VisitMut for IdCompactor {
         // collect all IDSpaces before processing the header
         for clause in header.iter() {
             if let HeaderClause::Idspace(prefix, url, _) = clause {
-                self.idspaces.insert(prefix.as_ref().clone(), (**url).clone());
+                self.idspaces
+                    .insert(prefix.as_ref().clone(), (**url).clone());
             }
         }
 
@@ -952,7 +1056,8 @@ impl VisitMut for IdDecompactor {
         // collect all IDSpaces before processing the header
         for clause in header.iter() {
             if let HeaderClause::Idspace(prefix, url, _) = clause {
-                self.idspaces.insert(prefix.as_ref().clone(), (**url).clone());
+                self.idspaces
+                    .insert(prefix.as_ref().clone(), (**url).clone());
             }
         }
 
@@ -991,13 +1096,13 @@ mod tests {
     use super::*;
 
     mod id_decompactor {
-        use std::str::FromStr;
         use pretty_assertions::assert_eq;
+        use std::str::FromStr;
 
         use crate::ast::EntityFrame;
         use crate::ast::Ident;
         use crate::ast::OboDoc;
-        
+
         use crate::ast::TermClause;
         use crate::ast::Url;
         use crate::ast::Xref;
@@ -1051,8 +1156,8 @@ mod tests {
 
     mod id_compactor {
 
-        use std::str::FromStr;
         use pretty_assertions::assert_eq;
+        use std::str::FromStr;
 
         use crate::ast::EntityFrame;
         use crate::ast::Ident;
@@ -1082,7 +1187,10 @@ mod tests {
             if let Some(EntityFrame::Term(term)) = doc.entities().get(0) {
                 assert_eq!(
                     term.clauses()[1].as_inner(),
-                    &TermClause::Xref(Box::new(Xref::new(PrefixedIdent::new("Wikipedia", "Pupil")))),
+                    &TermClause::Xref(Box::new(Xref::new(PrefixedIdent::new(
+                        "Wikipedia",
+                        "Pupil"
+                    )))),
                 );
             } else {
                 unreachable!()

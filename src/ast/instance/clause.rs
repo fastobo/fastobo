@@ -6,8 +6,8 @@ use crate::ast::*;
 
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::OboClause;
+use crate::syntax::Rule;
 
 /// A clause appearing in an instance frame.
 #[derive(Clone, Debug, Eq, FromStr, Hash, Ord, OboClause, PartialEq, PartialOrd)]

@@ -12,8 +12,8 @@ use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use quote::quote;
 
-use self::obo_clause::OboClauseDerive;
 use self::from_str::FromStrDerive;
+use self::obo_clause::OboClauseDerive;
 
 #[proc_macro_derive(OboClause, attributes(clause))]
 pub fn oboclause_derive(input: TokenStream) -> TokenStream {

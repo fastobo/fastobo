@@ -5,10 +5,8 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-
 
 use crate::ast::*;
 
@@ -62,17 +60,13 @@ impl<'i> FromPair<'i> for PropertyValue {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::LiteralPropertyValue => {
-                LiteralPropertyValue::from_pair_unchecked(inner)
-                    .map(Box::new)
-                    .map(PropertyValue::Literal)
-            }
-            Rule::ResourcePropertyValue => {
-                ResourcePropertyValue::from_pair_unchecked(inner)
-                    .map(Box::new)
-                    .map(PropertyValue::Resource)
-            }
-            _ => unreachable!()
+            Rule::LiteralPropertyValue => LiteralPropertyValue::from_pair_unchecked(inner)
+                .map(Box::new)
+                .map(PropertyValue::Literal),
+            Rule::ResourcePropertyValue => ResourcePropertyValue::from_pair_unchecked(inner)
+                .map(Box::new)
+                .map(PropertyValue::Resource),
+            _ => unreachable!(),
         }
     }
 }
@@ -107,10 +101,7 @@ pub struct ResourcePropertyValue {
 
 impl ResourcePropertyValue {
     pub fn new(property: RelationIdent, target: Ident) -> Self {
-        Self {
-            property,
-            target
-        }
+        Self { property, target }
     }
 
     /// Get the identifier of the declared property annotation.
@@ -133,7 +124,10 @@ impl ResourcePropertyValue {
 
 impl Display for ResourcePropertyValue {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.property.fmt(f).and(f.write_char(' ')).and(self.target.fmt(f))
+        self.property
+            .fmt(f)
+            .and(f.write_char(' '))
+            .and(self.target.fmt(f))
     }
 }
 
@@ -164,7 +158,7 @@ impl LiteralPropertyValue {
         Self {
             property,
             literal,
-            datatype
+            datatype,
         }
     }
 
@@ -227,8 +221,8 @@ impl<'i> FromPair<'i> for LiteralPropertyValue {
 mod tests {
 
     use super::*;
-    use std::str::FromStr;
     use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     #[test]
     fn from_str() {

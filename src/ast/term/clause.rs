@@ -8,8 +8,8 @@ use crate::ast::*;
 
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::OboClause;
+use crate::syntax::Rule;
 
 /// A clause appearing in a term frame.
 ///
@@ -132,7 +132,10 @@ impl<'i> FromPair<'i> for TermClause {
                 } else {
                     let relid = RelationIdent::from_pair_unchecked(id)?;
                     let classid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-                    Ok(TermClause::IntersectionOf(Some(Box::new(relid)), Box::new(classid)))
+                    Ok(TermClause::IntersectionOf(
+                        Some(Box::new(relid)),
+                        Box::new(classid),
+                    ))
                 }
             }
             Rule::UnionOfTag => {
@@ -303,31 +306,36 @@ mod tests {
 
         #[test]
         fn from_str() {
-            let actual = TermFrame::from_str(
-                dedent!(
-                    "[Term]
+            let actual = TermFrame::from_str(dedent!(
+                "[Term]
                     id: TST:001
                     intersection_of: part_of PO:0020039 ! leaf lamina
                     "
-                )
-            ).unwrap().into_iter().next().unwrap();
+            ))
+            .unwrap()
+            .into_iter()
+            .next()
+            .unwrap();
 
             let expected = Line::from(TermClause::IntersectionOf(
-                Some(Box::new(RelationIdent::from(UnprefixedIdent::new("part_of")))),
+                Some(Box::new(RelationIdent::from(UnprefixedIdent::new(
+                    "part_of",
+                )))),
                 Box::new(ClassIdent::from(PrefixedIdent::new("PO", "0020039"))),
             ))
             .and_comment(Comment::new("leaf lamina"));
             self::assert_eq!(actual, expected);
 
-
-            let actual = TermFrame::from_str(
-                dedent!(
-                    "[Term]
+            let actual = TermFrame::from_str(dedent!(
+                "[Term]
                     id: TST:001
                     intersection_of: PO:0006016 ! leaf epidermis
                     "
-                )
-            ).unwrap().into_iter().next().unwrap();
+            ))
+            .unwrap()
+            .into_iter()
+            .next()
+            .unwrap();
             let expected = Line::with_comment(Comment::new("leaf epidermis")).and_inner(
                 TermClause::IntersectionOf(
                     None,

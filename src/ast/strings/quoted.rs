@@ -1,5 +1,5 @@
-use std::borrow::Cow;
 use std::borrow::Borrow;
+use std::borrow::Cow;
 use std::borrow::ToOwned;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -238,7 +238,6 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
-    
 
     #[test]
     fn from_str() {

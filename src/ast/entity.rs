@@ -1,27 +1,17 @@
-
-
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
-
-
-
-
-
-
-
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-
 
 use crate::ast::*;
 
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
+use crate::syntax::Rule;
 
 /// An entity frame, describing either a term, an instance, or a typedef.
 #[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq)]

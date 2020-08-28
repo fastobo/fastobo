@@ -1,10 +1,7 @@
-
-
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;

@@ -1,8 +1,8 @@
+use super::EntityFrame;
 use super::HeaderFrame;
+use super::InstanceFrame;
 use super::TermFrame;
 use super::TypedefFrame;
-use super::InstanceFrame;
-use super::EntityFrame;
 
 /// Any kind of OBO frame.
 ///

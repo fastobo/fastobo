@@ -1,22 +1,19 @@
-
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
-
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-
 
 use crate::ast::*;
 use crate::error::CardinalityError;
 
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
-use crate::syntax::Rule;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
+use crate::syntax::Rule;
 
 /// A complete OBO document in format version 1.4.
 #[derive(Clone, Default, Debug, Hash, Eq, FromStr, PartialEq)]
@@ -401,9 +398,9 @@ mod tests {
         ))
         .unwrap();
 
-        let header = HeaderFrame::from_iter(vec![HeaderClause::FormatVersion(
-            Box::new(UnquotedString::new("1.2")),
-        )]);
+        let header = HeaderFrame::from_iter(vec![HeaderClause::FormatVersion(Box::new(
+            UnquotedString::new("1.2"),
+        ))]);
         let term = TermFrame::new(ClassIdent::from(PrefixedIdent::new("TEST", "001")));
         self::assert_eq!(doc, OboDoc::from_iter(Some(term)).and_header(header));
     }

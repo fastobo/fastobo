@@ -2,6 +2,8 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
@@ -52,7 +54,7 @@ impl<'i> FromPair<'i> for SynonymScope {
 pub struct Synonym {
     desc: QuotedString,
     scope: SynonymScope,
-    ty: Option<SynonymTypeIdent>,
+    ty: Option<Box<SynonymTypeIdent>>,
     xrefs: XrefList,
 }
 
@@ -62,12 +64,7 @@ impl Synonym {
     where
         D: Into<QuotedString>,
     {
-        Self {
-            desc: desc.into(),
-            scope,
-            ty: Default::default(),
-            xrefs: Default::default(),
-        }
+        Self::with_type(desc, scope, None)
     }
 
     /// Create a `Synonym` with the given description, scope, and type.
@@ -76,12 +73,7 @@ impl Synonym {
         D: Into<QuotedString>,
         T: Into<Option<SynonymTypeIdent>>,
     {
-        Self {
-            desc: desc.into(),
-            scope,
-            ty: ty.into(),
-            xrefs: Default::default(),
-        }
+        Self::with_type_and_xrefs(desc, scope, ty, XrefList::default())
     }
 
     /// Create a `Synonym` with the given description, scope, and xrefs.
@@ -90,12 +82,7 @@ impl Synonym {
         D: Into<QuotedString>,
         L: Into<XrefList>,
     {
-        Self {
-            desc: desc.into(),
-            scope,
-            ty: None,
-            xrefs: xrefs.into(),
-        }
+        Self::with_type_and_xrefs(desc, scope, None, xrefs)
     }
 
     /// Create a `Synonym` with the given description, scope, type, and xrefs.
@@ -108,7 +95,7 @@ impl Synonym {
         Self {
             desc: desc.into(),
             scope,
-            ty: ty.into(),
+            ty: ty.into().map(Box::new),
             xrefs: xrefs.into(),
         }
     }
@@ -137,12 +124,12 @@ impl Synonym {
 
     /// Get a reference to the type of the `Synonym`, if any.
     pub fn ty(&self) -> Option<&SynonymTypeIdent> {
-        self.ty.as_ref()
+        self.ty.as_ref().map(Deref::deref)
     }
 
     /// Get a mutable reference to the type of the `Synonym`, if any.
     pub fn ty_mut(&mut self) -> Option<&mut SynonymTypeIdent> {
-        self.ty.as_mut()
+        self.ty.as_mut().map(DerefMut::deref_mut)
     }
 
     /// Get a reference to the xrefs of the `Synonym`.
@@ -183,7 +170,7 @@ impl<'i> FromPair<'i> for Synonym {
         let nxt = inner.next().unwrap();
         match nxt.as_rule() {
             Rule::SynonymTypeId => {
-                let ty = Some(SynonymTypeIdent::from_pair_unchecked(nxt)?);
+                let ty = Some(Box::new(SynonymTypeIdent::from_pair_unchecked(nxt)?));
                 let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
                 Ok(Synonym {
                     desc,

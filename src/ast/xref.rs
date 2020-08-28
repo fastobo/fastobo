@@ -5,6 +5,7 @@ use std::fmt::Write;
 use std::iter::FromIterator;
 use std::iter::IntoIterator;
 use std::ops::Deref;
+use std::ops::DerefMut;
 use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
@@ -32,7 +33,7 @@ use crate::semantics::Orderable;
 #[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct Xref {
     id: Ident,
-    desc: Option<QuotedString>,
+    desc: Option<Box<QuotedString>>,
 }
 
 impl Xref {
@@ -52,7 +53,7 @@ impl Xref {
     {
         Self {
             id: id.into(),
-            desc: desc.into(),
+            desc: desc.into().map(Box::new),
         }
     }
 
@@ -68,12 +69,12 @@ impl Xref {
 
     /// Get a reference to the description of the xref, if any.
     pub fn description(&self) -> Option<&QuotedString> {
-        self.desc.as_ref()
+        self.desc.as_ref().map(Deref::deref)
     }
 
     /// Get a mutable reference to the description of the xref, if any.
     pub fn description_mut(&mut self) -> Option<&mut QuotedString> {
-        self.desc.as_mut()
+        self.desc.as_mut().map(DerefMut::deref_mut)
     }
 }
 
@@ -93,7 +94,7 @@ impl<'i> FromPair<'i> for Xref {
         let mut inner = pair.into_inner();
         let id = FromPair::from_pair_unchecked(inner.next().unwrap())?;
         let desc = match inner.next() {
-            Some(pair) => Some(QuotedString::from_pair_unchecked(pair)?),
+            Some(pair) => Some(QuotedString::from_pair_unchecked(pair).map(Box::new)?),
             None => None,
         };
         Ok(Xref { id, desc })

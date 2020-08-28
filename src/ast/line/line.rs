@@ -19,8 +19,8 @@ use crate::syntax::Rule;
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Line<T> {
     inner: T,
-    qualifiers: Option<QualifierList>, // FIXME(@althonos): use an `IndexMap` ?
-    comment: Option<Comment>,
+    qualifiers: Option<Box<QualifierList>>, // FIXME(@althonos): use an `IndexMap` ?
+    comment: Option<Box<Comment>>,
 }
 
 
@@ -42,7 +42,7 @@ impl<T> Line<T> {
         Self {
             inner: self.inner,
             qualifiers: self.qualifiers,
-            comment: comment.into(),
+            comment: comment.into().map(Box::new),
         }
     }
 
@@ -53,25 +53,25 @@ impl<T> Line<T> {
     {
         Self {
             inner: self.inner,
-            qualifiers: qualifiers.into(),
+            qualifiers: qualifiers.into().map(Box::new),
             comment: self.comment,
         }
     }
 
     pub fn qualifiers(&self) -> Option<&QualifierList> {
-        self.qualifiers.as_ref()
+        self.qualifiers.as_ref().map(Deref::deref)
     }
 
     pub fn qualifiers_mut(&mut self) -> Option<&mut QualifierList> {
-        self.qualifiers.as_mut()
+        self.qualifiers.as_mut().map(DerefMut::deref_mut)
     }
 
     pub fn comment(&self) -> Option<&Comment> {
-        self.comment.as_ref()
+        self.comment.as_ref().map(Deref::deref)
     }
 
     pub fn comment_mut(&mut self) -> Option<&mut Comment> {
-        self.comment.as_mut()
+        self.comment.as_mut().map(DerefMut::deref_mut)
     }
 
     /// Get a reference to the OBO clause wrapped in the line.

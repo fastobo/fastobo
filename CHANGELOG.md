@@ -6,10 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.11.1...HEAD
+
+## [v0.11.1] - 2020-08-31
+[v0.11.1]: https://github.com/fastobo/fastobo/compare/v0.11.0...v0.11.1
+### Changed
+- Comparison order of entity frames for consistency with the OBO 1.4
+  [serializer conventions](https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5).
 
 ## [v0.11.0] - 2020-08-29
-[v0.10.0]: https://github.com/fastobo/fastobo/compare/v0.10.0...v0.11.0
+[v0.11.0]: https://github.com/fastobo/fastobo/compare/v0.10.0...v0.11.0
 ### Added
 - Derived `Default` implementation for `QuotedString` and `UnquotedString` types.
 - `PropertyValue` variants now have actual corresponding structs

@@ -10,11 +10,17 @@ use super::TypedefFrame;
 /// all the frames of the OBO document. This type does however not appear in
 /// the `OboDoc` syntax tree since the `HeaderFrame` and `EntityFrame` are
 /// properly separated there.
+///
+/// # Ordering
+/// [Serializer conventions](https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5.2)
+/// dictate that frames should be Serialized first with `[Typedef]` frames, then
+/// `[Term]`, and then `[Instance]`, which is reflected here in the order of the
+/// variants.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Frame {
     Header(Box<HeaderFrame>),
-    Term(Box<TermFrame>),
     Typedef(Box<TypedefFrame>),
+    Term(Box<TermFrame>),
     Instance(Box<InstanceFrame>),
 }
 

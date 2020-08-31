@@ -14,10 +14,16 @@ use crate::semantics::Orderable;
 use crate::syntax::Rule;
 
 /// An entity frame, describing either a term, an instance, or a typedef.
+///
+/// # Ordering
+/// [Serializer conventions](https://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html#S.3.5.2)
+/// dictate that frames should be Serialized first with `[Typedef]` frames, then
+/// `[Term]`, and then `[Instance]`, which is reflected here in the order of the
+/// variants.
 #[derive(Clone, Debug, Hash, FromStr, Eq, PartialEq)]
 pub enum EntityFrame {
-    Term(Box<TermFrame>),
     Typedef(Box<TypedefFrame>),
+    Term(Box<TermFrame>),
     Instance(Box<InstanceFrame>),
 }
 

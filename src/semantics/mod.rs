@@ -16,6 +16,7 @@ pub enum Cardinality {
 }
 
 impl Cardinality {
+    /// Return `true` if the cardinality matches the gievn element count.
     pub fn is_match(&self, n: usize) -> bool {
         match self {
             Cardinality::ZeroOrOne => n < 2,
@@ -25,6 +26,7 @@ impl Cardinality {
         }
     }
 
+    /// Given a tag name, build an error from this cardinality if the count does not match.
     pub fn to_error<S: Into<String>>(&self, n: usize, tag: S) -> Option<CardinalityError> {
         use self::CardinalityError::*;
         let name = tag.into();

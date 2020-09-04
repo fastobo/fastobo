@@ -7,7 +7,6 @@ use darling::FromDeriveInput;
 use heck::SnakeCase;
 use syn::export::Span;
 use syn::parse_quote;
-use syn::spanned::Spanned;
 use syn::Ident;
 use syn::Type;
 

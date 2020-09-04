@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.11.2...HEAD
+
+## [v0.11.2] - 2020-09-04
+[v0.11.2]: https://github.com/fastobo/fastobo/compare/v0.11.1...v0.11.2
+### Fixed
+- Serialization of `SynonymTypedef` header clauses not using the correct tag.
+  ([pronto#97](https://github.com/althonos/pronto/issues/97)).
 
 ## [v0.11.1] - 2020-08-31
 [v0.11.1]: https://github.com/fastobo/fastobo/compare/v0.11.0...v0.11.1

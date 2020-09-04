@@ -54,7 +54,7 @@ pub struct OboDoc {
 ///
 /// let entities = vec![TermFrame::new(ClassIdent::from(PrefixedIdent::new("TEST", "001")))];
 /// let doc = OboDoc::from_iter(entities.into_iter())
-///     .and_header(HeaderFrame::from(HeaderClause::FormatVersion("1.4".into())));
+///     .and_header(HeaderFrame::from(HeaderClause::FormatVersion(Box::new("1.4".into()))));
 /// ```
 impl OboDoc {
     /// Create a new empty OBO document.

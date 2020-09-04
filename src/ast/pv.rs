@@ -90,7 +90,7 @@ impl PartialOrd for PropertyValue {
 /// # extern crate fastobo;
 /// # use fastobo::ast::*;
 /// let property = RelationIdent::from(PrefixedIdent::new("dc", "creator"));
-/// let target = Ident::from(PrefixedIdent("ORCID", "0000-0002-3947-4444"));
+/// let target = Ident::from(PrefixedIdent::new("ORCID", "0000-0002-3947-4444"));
 /// let property_value = ResourcePropertyValue::new(property, target);
 /// ```
 #[derive(Clone, Debug, Hash, FromStr, PartialOrd, Eq, PartialEq, Ord)]

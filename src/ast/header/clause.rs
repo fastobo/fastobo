@@ -3,7 +3,6 @@ use std::str::FromStr;
 use fastobo_derive_internal::FromStr;
 use fastobo_derive_internal::OboClause;
 use pest::iterators::Pair;
-use url::Url;
 
 use crate::ast::*;
 

@@ -38,7 +38,6 @@ fastobo-syntax = "0.6.2"
 fastobo-derive-internal = { version = "0.11.2", path = "derive" }
 ordered-float = "2.0.0"
 pest = "2.1.3"
-url = "2.1.0"
 # feature = "memchr"
 memchr = { version = "2.2.1", optional = true }
 # feature = "threading"

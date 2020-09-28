@@ -8,7 +8,6 @@ extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
 extern crate ordered_float;
 extern crate pest;
-extern crate url;
 
 #[cfg(feature = "memchr")]
 extern crate memchr;

@@ -1,7 +1,6 @@
 use pest::error::Error as PestError;
 use pest::error::ErrorVariant;
 use pest::iterators::Pair;
-use url::Url;
 
 use std::str::FromStr;
 
@@ -43,38 +42,12 @@ impl<'i> FromPair<'i> for bool {
     }
 }
 
-impl<'i> FromPair<'i> for Url {
-    const RULE: Rule = Rule::Iri;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        Url::parse(pair.as_str()).map_err(|e| {
-            SyntaxError::from(PestError::new_from_span(
-                ErrorVariant::CustomError {
-                    message: format!("could not parse URL: {}", e),
-                },
-                pair.as_span(),
-            ))
-        })
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
     use super::*;
     use crate::ast::*;
     use crate::syntax::Lexer;
-
-    mod url {
-
-        use super::*;
-
-        #[test]
-        fn from_pair() {
-            let pairs = Lexer::tokenize(Rule::UnquotedString, "http://not an url");
-            let pair = pairs.unwrap().next().unwrap();
-            unsafe { assert!(Url::from_pair_unchecked(pair).is_err()) }
-        }
-    }
 
     mod boolean {
 

@@ -66,9 +66,7 @@ impl<'i> FromPair<'i> for Ident {
             Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner).map(From::from),
             Rule::UnprefixedId => UnprefixedIdent::from_pair_unchecked(inner).map(From::from),
             // FIXME(@althonos): need proper error report if the parser fails.
-            Rule::UrlId => Url::from_pair_unchecked(inner)
-                .map(Box::new)
-                .map(Ident::Url),
+            Rule::UrlId => Url::from_pair_unchecked(inner).map(From::from),
             _ => unreachable!(),
         }
     }
@@ -99,7 +97,7 @@ mod tests {
         let actual = Ident::from_str("http://purl.obolibrary.org/obo/po.owl")
             .map(Ident::from)
             .unwrap();
-        let expected = Url::parse("http://purl.obolibrary.org/obo/po.owl")
+        let expected = Url::from_str("http://purl.obolibrary.org/obo/po.owl")
             .map(Ident::from)
             .unwrap();
         assert_eq!(actual, expected);
@@ -127,8 +125,8 @@ mod tests {
         let ru = Ident::from(UnprefixedIdent::new("part_of"));
         assert!(lu < ru);
 
-        let lurl = Url::parse("http://doi.org/").map(Ident::from).unwrap();
-        let rurl = Url::parse("http://nih.org").map(Ident::from).unwrap();
+        let lurl = Url::from_str("http://doi.org/").map(Ident::from).unwrap();
+        let rurl = Url::from_str("http://nih.org").map(Ident::from).unwrap();
         assert!(lurl < rurl);
 
         assert!(lp < ru);

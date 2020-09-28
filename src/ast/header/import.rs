@@ -1,10 +1,10 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
+use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
-use url::Url;
 
 use crate::ast::*;
 
@@ -31,7 +31,7 @@ impl Import {
         match self {
             Import::Url(u) => *u,
             Import::Abbreviated(id) => {
-                Url::parse(&format!("http://purl.obolibrary.org/obo/{}.owl", id)).unwrap()
+                Url::from_str(&format!("http://purl.obolibrary.org/obo/{}.owl", id)).unwrap()
             }
         }
     }
@@ -70,7 +70,7 @@ impl<'i> FromPair<'i> for Import {
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::Iri => Ok(Url::parse(inner.as_str()).unwrap().into()), // FIXME
+            Rule::Iri => Ok(Url::from_str(inner.as_str())?.into()), // FIXME
             Rule::Id => Ident::from_pair_unchecked(inner).map(From::from),
             _ => unreachable!(),
         }
@@ -88,13 +88,13 @@ mod tests {
         let i = Import::from(Ident::from(UnprefixedIdent::new("go")));
         assert_eq!(
             i.into_url(),
-            Url::parse("http://purl.obolibrary.org/obo/go.owl").unwrap()
+            Url::from_str("http://purl.obolibrary.org/obo/go.owl").unwrap()
         );
 
-        let i = Import::from(Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap());
+        let i = Import::from(Url::from_str("http://ontologies.berkeleybop.org/ms.obo").unwrap());
         assert_eq!(
             i.into_url(),
-            Url::parse("http://ontologies.berkeleybop.org/ms.obo").unwrap()
+            Url::from_str("http://ontologies.berkeleybop.org/ms.obo").unwrap()
         );
     }
 }

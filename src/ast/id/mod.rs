@@ -9,6 +9,7 @@ mod prefix;
 mod prefixed;
 mod subclasses;
 mod unprefixed;
+mod url;
 
 pub use self::ident::Ident;
 pub use self::local::IdentLocal;
@@ -21,4 +22,4 @@ pub use self::subclasses::RelationIdent;
 pub use self::subclasses::SubsetIdent;
 pub use self::subclasses::SynonymTypeIdent;
 pub use self::unprefixed::UnprefixedIdent;
-pub use url::Url;
+pub use self::url::Url;

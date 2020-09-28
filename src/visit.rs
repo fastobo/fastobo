@@ -49,11 +49,9 @@
 //!
 
 use std::collections::HashMap;
-
 use std::str::FromStr;
 
 use blanket::blanket;
-use url::Url;
 
 use crate::ast::*;
 

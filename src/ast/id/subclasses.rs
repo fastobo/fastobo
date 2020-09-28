@@ -1,5 +1,4 @@
 use pest::iterators::Pair;
-use url::Url;
 
 use crate::ast::*;
 use crate::error::SyntaxError;

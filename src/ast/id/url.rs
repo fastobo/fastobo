@@ -14,6 +14,10 @@ use crate::syntax::Rule;
 pub struct Url(StringType);
 
 impl Url {
+    pub fn parse(s: &str) -> Result<Self, SyntaxError> {
+        std::str::FromStr::from_str(s)
+    }
+
     pub fn as_str(&self) -> &str {
         self.0.as_str()
     }

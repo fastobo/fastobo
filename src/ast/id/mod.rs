@@ -5,6 +5,7 @@
 
 use std::fmt::Write;
 use std::fmt::Result as FmtResult;
+use std::fmt::Error as FmtError;
 
 mod ident;
 mod prefix;
@@ -49,7 +50,7 @@ fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
                 Some('f') => f.write_char('\u{000c}')?,
                 Some('t') => f.write_char('\t')?,
                 Some(other) => f.write_char(other)?,
-                None => panic!("invalid escape"), // FIXME(@althonos)
+                None => return Err(FmtError),
             }
         } else {
             f.write_char(char)?;

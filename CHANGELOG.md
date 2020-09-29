@@ -6,7 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.11.2...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.12.0...HEAD
+
+## [v0.12.0] - 2020-09-29
+[v0.12.0]: https://github.com/fastobo/fastobo/compare/v0.11.2...v0.12.0
+### Added
+- `fastobo::ast::Url` struct replacing `url::Url` to store URL identifiers.
+### Changed
+- Removed `url` crate dependency.
+- Bumped `fastobo-syntax` dependency to `v0.6.2` to fix parsing of some 
+  URLs with empty paths lacking a trailing slash (e.g. `http://example.com`).
 
 ## [v0.11.2] - 2020-09-04
 [v0.11.2]: https://github.com/fastobo/fastobo/compare/v0.11.1...v0.11.2

@@ -203,29 +203,31 @@ mod tests {
     mod scope {
 
         use self::SynonymScope::*;
+        use self::assert_eq;
         use super::*;
 
         #[test]
         fn from_str() {
-            self::assert_eq!(SynonymScope::from_str("EXACT").unwrap(), Exact);
-            self::assert_eq!(SynonymScope::from_str("BROAD").unwrap(), Broad);
-            self::assert_eq!(SynonymScope::from_str("NARROW").unwrap(), Narrow);
-            self::assert_eq!(SynonymScope::from_str("RELATED").unwrap(), Related);
+            assert_eq!(SynonymScope::from_str("EXACT").unwrap(), Exact);
+            assert_eq!(SynonymScope::from_str("BROAD").unwrap(), Broad);
+            assert_eq!(SynonymScope::from_str("NARROW").unwrap(), Narrow);
+            assert_eq!(SynonymScope::from_str("RELATED").unwrap(), Related);
             assert!(SynonymScope::from_str("something").is_err());
         }
 
         #[test]
         fn to_string() {
-            self::assert_eq!(Exact.to_string(), "EXACT");
-            self::assert_eq!(Broad.to_string(), "BROAD");
-            self::assert_eq!(Narrow.to_string(), "NARROW");
-            self::assert_eq!(Related.to_string(), "RELATED");
+            assert_eq!(Exact.to_string(), "EXACT");
+            assert_eq!(Broad.to_string(), "BROAD");
+            assert_eq!(Narrow.to_string(), "NARROW");
+            assert_eq!(Related.to_string(), "RELATED");
         }
     }
 
     mod synonym {
 
         use super::*;
+        use self::assert_eq;
 
         #[test]
         fn from_str() {
@@ -238,7 +240,7 @@ mod tests {
                 SynonymScope::Related,
                 vec![Xref::new(PrefixedIdent::new("GOC", "mah"))],
             );
-            self::assert_eq!(actual, expected);
+            assert_eq!(actual, expected);
         }
 
         #[test]
@@ -248,13 +250,10 @@ mod tests {
                     "ssDNA-specific endodeoxyribonuclease activity",
                 )),
                 SynonymScope::Related,
-                vec![Xref::new(Ident::from(PrefixedIdent::new(
-                    IdentPrefix::new(String::from("GOC")),
-                    IdentLocal::new(String::from("mah")),
-                )))],
+                vec![Xref::new(Ident::from(PrefixedIdent::new("GOC", "mah")))],
             );
 
-            self::assert_eq!(
+            assert_eq!(
                 s.to_string(),
                 "\"ssDNA-specific endodeoxyribonuclease activity\" RELATED [GOC:mah]"
             );

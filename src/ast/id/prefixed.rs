@@ -103,10 +103,12 @@ impl<'i> FromPair<'i> for PrefixedIdent {
         let local = inners.next().unwrap();
 
         let mut data = StringType::new();
-        unescape(&mut data, prefix.as_str());
+        unescape(&mut data, prefix.as_str())
+            .expect("cannot contain invalid escape characters");
 
         let local_offset = data.len();
-        unescape(&mut data, local.as_str());
+        unescape(&mut data, local.as_str())
+            .expect("cannot contain invalid escape characters");
 
         Ok(Self { data, local_offset })
     }

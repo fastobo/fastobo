@@ -1,8 +1,6 @@
-use pest::error::Error as PestError;
-use pest::error::ErrorVariant;
-use pest::iterators::Pair;
-
 use std::str::FromStr;
+
+use pest::iterators::Pair;
 
 use crate::error::SyntaxError;
 use crate::syntax::Rule;

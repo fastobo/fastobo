@@ -1,51 +1,20 @@
+use std::borrow::Borrow;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
 use std::hash::Hash;
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
-
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::syntax::Rule;
 
-fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
-    s.chars().try_for_each(|char| match char {
-        '\r' => f.write_str("\\r"),
-        '\n' => f.write_str("\\n"),
-        '\u{000c}' => f.write_str("\\f"),
-        ' ' => f.write_str("\\ "),
-        '\t' => f.write_str("\\t"),
-        ':' => f.write_str("\\:"),
-        '"' => f.write_str("\\\""),
-        '\\' => f.write_str("\\\\"),
-        _ => f.write_char(char),
-    })
-}
-
-fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
-    let mut chars = s.chars();
-    while let Some(char) = chars.next() {
-        if char == '\\' {
-            match chars.next() {
-                Some('r') => f.write_char('\r')?,
-                Some('n') => f.write_char('\n')?,
-                Some('f') => f.write_char('\u{000c}')?,
-                Some('t') => f.write_char('\t')?,
-                Some(other) => f.write_char(other)?,
-                None => panic!("invalid escape"), // FIXME(@althonos)
-            }
-        } else {
-            f.write_char(char)?;
-        }
-    }
-    Ok(())
-}
+use super::escape;
+use super::unescape;
 
 fn is_canonical<S: AsRef<str>>(s: S) -> bool {
     let string = s.as_ref();
@@ -116,6 +85,12 @@ impl IdentPrefix {
 impl AsRef<str> for IdentPrefix {
     fn as_ref(&self) -> &str {
         &self.0
+    }
+}
+
+impl Borrow<str> for IdentPrefix {
+    fn borrow(&self) -> &str {
+        self.as_str()
     }
 }
 

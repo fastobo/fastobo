@@ -10,16 +10,37 @@ use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
+/// A Uniform Resource Locator used as an identifier for an entity.
 #[derive(Clone, Debug, FromStr, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Url(StringType);
 
 impl Url {
+    /// Create a new `Url` from a string containing a URL representation.
+    ///
+    /// This method checks the URL is a syntactically correct IRI, but does
+    /// not attempt any kind of canonicalization. This can affect comparison
+    /// of semantically-equivalent URLs in the `PartialEq` implementation.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::Url;
+    /// assert!( Url::parse("http://example.com").is_ok() );
+    /// assert!( Url::parse("not a URL").is_err() );
+    /// ```
     pub fn parse(s: &str) -> Result<Self, SyntaxError> {
         std::str::FromStr::from_str(s)
     }
 
+    /// View the URL as a string slice.
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+}
+
+impl AsRef<str> for Url {
+    fn as_ref(&self) -> &str {
+        self.as_str()
     }
 }
 

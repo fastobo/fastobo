@@ -15,7 +15,7 @@ pub fn as_equivalent(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
-                        if p.prefix() == prefix {
+                        if p.prefix() == prefix.as_str() {
                             new.push(Line::from($clause::EquivalentTo(Box::new(
                                 xref.id().clone().into(),
                             ))));
@@ -50,7 +50,7 @@ pub fn as_is_a(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
-                        if p.prefix() == prefix {
+                        if p.prefix() == prefix.as_str() {
                             new.push(Line::from($clause::IsA(Box::new(xref.id().clone().into()))));
                         }
                     }
@@ -87,7 +87,7 @@ pub fn as_has_subclass(entities: &mut Vec<EntityFrame>, prefix: &IdentPrefix) {
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
-                        if p.prefix() == prefix {
+                        if p.prefix() == prefix.as_str() {
                             new.insert(
                                 $frame.id().clone().into_inner().into(),
                                 xref.id().clone().into(),
@@ -153,7 +153,7 @@ pub fn as_genus_differentia(
             for clause in x.clauses() {
                 if let TermClause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
-                        if p.prefix() == prefix {
+                        if p.prefix() == prefix.as_str() {
                             // add genus from Xref
                             new.push(Line::from(TermClause::IntersectionOf(
                                 None,
@@ -201,7 +201,7 @@ pub fn as_reverse_genus_differentia(
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
-                        if p.prefix() == prefix {
+                        if p.prefix() == prefix.as_str() {
                             new.insert(
                                 $frame.id().clone().into_inner().into(),
                                 xref.id().clone().into(),
@@ -269,7 +269,7 @@ pub fn as_relationship(
             for clause in $frame.clauses() {
                 if let $clause::Xref(xref) = clause.as_ref() {
                     if let Ident::Prefixed(p) = xref.id() {
-                        if p.prefix() == prefix {
+                        if p.prefix() == prefix.as_str() {
                             new.push(Line::from($clause::Relationship(
                                 Box::new(relid.clone()),
                                 Box::new(xref.id().clone().into()),

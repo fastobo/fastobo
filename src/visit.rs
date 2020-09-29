@@ -70,7 +70,6 @@ pub trait Visit<'ast> {
     fn visit_header_clause(&mut self, clause: &'ast HeaderClause);
     fn visit_header_frame(&mut self, header: &'ast HeaderFrame);
     fn visit_ident(&mut self, id: &'ast Ident);
-    fn visit_ident_local(&mut self, local: &'ast IdentLocal);
     fn visit_ident_prefix(&mut self, prefix: &'ast IdentPrefix);
     fn visit_import(&mut self, import: &'ast Import);
     fn visit_instance_clause(&mut self, clause: &'ast InstanceClause);
@@ -212,13 +211,6 @@ pub mod visit {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_ident_local<'ast, V: Visit<'ast> + ?Sized>(
-        visitor: &mut V,
-        prefix: &'ast IdentLocal,
-    ) {
-    }
-
-    #[allow(unused_variables)]
     pub fn visit_ident_prefix<'ast, V: Visit<'ast> + ?Sized>(
         visitor: &mut V,
         prefix: &'ast IdentPrefix,
@@ -317,12 +309,11 @@ pub mod visit {
         }
     }
 
+    #[allow(unused_variables)]
     pub fn visit_prefixed_ident<'ast, V: Visit<'ast> + ?Sized>(
         visitor: &mut V,
         id: &'ast PrefixedIdent,
     ) {
-        visitor.visit_ident_prefix(id.prefix());
-        visitor.visit_ident_local(id.local());
     }
 
     #[allow(unused_variables)]
@@ -537,7 +528,6 @@ pub trait VisitMut {
     fn visit_header_clause(&mut self, clause: &mut HeaderClause);
     fn visit_header_frame(&mut self, header: &mut HeaderFrame);
     fn visit_ident(&mut self, id: &mut Ident);
-    fn visit_ident_local(&mut self, prefix: &mut IdentLocal);
     fn visit_ident_prefix(&mut self, prefix: &mut IdentPrefix);
     fn visit_import(&mut self, import: &mut Import);
     fn visit_instance_clause(&mut self, clause: &mut InstanceClause);
@@ -670,9 +660,6 @@ pub mod visit_mut {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_ident_local<V: VisitMut + ?Sized>(visitor: &mut V, prefix: &mut IdentLocal) {}
-
-    #[allow(unused_variables)]
     pub fn visit_ident_prefix<V: VisitMut + ?Sized>(visitor: &mut V, prefix: &mut IdentPrefix) {}
 
     pub fn visit_import<V: VisitMut + ?Sized>(visitor: &mut V, import: &mut Import) {
@@ -750,9 +737,8 @@ pub mod visit_mut {
         }
     }
 
+    #[allow(unused_variables)]
     pub fn visit_prefixed_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut PrefixedIdent) {
-        visitor.visit_ident_prefix(id.prefix_mut());
-        visitor.visit_ident_local(id.local_mut());
     }
 
     #[allow(unused_variables)]
@@ -998,8 +984,8 @@ impl VisitMut for IdCompactor {
             // find a prefix from the idspaces declared in the document
             for (prefix, url) in self.idspaces.iter() {
                 if u.as_str().starts_with(url.as_str()) {
-                    let local = IdentLocal::from(&u.as_str()[url.as_str().len()..]);
-                    new = Some(PrefixedIdent::new(prefix.as_ref().clone(), local));
+                    let local = &u.as_str()[url.as_str().len()..];
+                    new = Some(PrefixedIdent::new(prefix.as_str(), local));
                 }
             }
             // if none found, attempt to use the OBO factorisation
@@ -1011,7 +997,7 @@ impl VisitMut for IdCompactor {
                     // the compaction/expansion would not roundtrip!)
                     let prefix = IdentPrefix::new(&raw_id[..i]);
                     if self.idspaces.get(&prefix).is_none() {
-                        new = Some(PrefixedIdent::new(prefix, &raw_id[i + 1..]));
+                        new = Some(PrefixedIdent::new(prefix.as_str(), &raw_id[i + 1..]));
                     }
                 }
             }
@@ -1068,13 +1054,13 @@ impl VisitMut for IdDecompactor {
         let mut new: Option<Url> = None;
         if let Ident::Prefixed(p) = id {
             if let Some(baseurl) = self.idspaces.get(p.prefix()) {
-                let newurl = format!("{}{}", baseurl, p.local().as_str());
+                let newurl = format!("{}{}", baseurl, p.local());
                 new = Some(Url::from_str(&newurl).expect("invalid URL"));
             } else {
                 let newurl = format!(
                     "http://purl.obolibrary.org/obo/{}_{}",
-                    p.prefix().as_str(),
-                    p.local().as_str()
+                    p.prefix(),
+                    p.local()
                 );
                 new = Some(Url::from_str(&newurl).expect("invalid URL"));
             }

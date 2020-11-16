@@ -93,7 +93,6 @@ foundrytest!(zeco);
 foundrytest!(ro);
 foundrytest!(cl);
 foundrytest!(mi);
-foundrytest!(eco);
 foundrytest!(trans);
 
 // --- Too large to run casually ---------------------------------------------
@@ -129,6 +128,11 @@ foundrytest!(
 
 // --- Expected failures -----------------------------------------------------
 
+// Invalid Xref
+foundrytest!(
+    #[ignore]
+    eco
+);
 foundrytest!(
     #[ignore]
     doid

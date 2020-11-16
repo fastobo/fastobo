@@ -33,7 +33,7 @@ features = [ "_doc" ]
 
 [dependencies]
 blanket = "0.1.2"
-err-derive = "0.2.0"
+thiserror = "1.0.0"
 fastobo-syntax = "0.6.2"
 fastobo-derive-internal = { version = "0.12.0", path = "derive" }
 ordered-float = "2.0.0"

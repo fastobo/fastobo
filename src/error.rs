@@ -2,8 +2,8 @@
 
 use std::io::Error as IOError;
 
-use err_derive::Error;
 use pest::error::Error as PestError;
+use thiserror::Error;
 
 use pest::Span;
 
@@ -17,11 +17,11 @@ use crate::syntax::Rule;
 /// to the end-user.
 #[derive(Debug, Eq, Error, PartialEq)]
 pub enum CardinalityError {
-    #[error(display = "missing {:?} clause", name)]
+    #[error("missing {name} clause")]
     MissingClause { name: String },
-    #[error(display = "duplicate {:?} clauses", name)]
+    #[error("duplicate {name} clauses")]
     DuplicateClauses { name: String },
-    #[error(display = "invalid single {:?} clause", name)]
+    #[error("invalid single {name} clause")]
     SingleClause { name: String },
 }
 
@@ -61,7 +61,7 @@ pub enum SyntaxError {
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     /// ```
-    #[error(display = "unexpected rule: {:?} (expected {:?})", actual, expected)]
+    #[error("unexpected rule: {actual:?} (expected {expected:?})")]
     UnexpectedRule { expected: Rule, actual: Rule },
 
     /// The underlying parser encountered an error.
@@ -78,9 +78,9 @@ pub enum SyntaxError {
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
     /// ```
-    #[error(display = "parser error: {}", error)]
+    #[error("parser error: {error}")]
     ParserError {
-        #[error(cause)]
+        #[from]
         error: Box<PestError<Rule>>,
     },
 }
@@ -150,7 +150,7 @@ impl From<PestError<Rule>> for SyntaxError {
 #[derive(Debug, Eq, Error, PartialEq)]
 pub enum ThreadingError {
     /// A communication channel unexpectedly disconnected.
-    #[error(display = "disconnected channel")]
+    #[error("disconnected channel")]
     DisconnectedChannel,
 }
 
@@ -161,9 +161,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Error)]
 pub enum Error {
     /// A syntax error occurred.
-    #[error(display = "Syntax error: {}", error)]
+    #[error("syntax error: {error}")]
     SyntaxError {
-        #[error(cause)]
+        #[from]
         error: SyntaxError,
     },
 
@@ -179,26 +179,26 @@ pub enum Error {
     /// #   fastobo::error::Error::IOError { .. } => (),
     /// #   e => panic!("unexpected error: {:?}", e),
     /// # };
-    #[error(display = "IO error: {}", error)]
+    #[error("IO error: {error}")]
     IOError {
-        #[error(cause)]
+        #[from]
         error: IOError,
     },
 
     /// A cardinality-related error occurred.
-    #[error(display = "cardinality error: {}", inner)]
+    #[error("cardinality error: {inner}")]
     CardinalityError {
         id: Option<Ident>,
-        #[error(cause)]
+        #[source]
         inner: CardinalityError,
     },
 
     /// A threading-related error occurred.
     #[cfg(feature = "threading")]
     #[cfg_attr(feature = "_doc", doc(cfg(feature = "threading")))]
-    #[error(display = "threading error: {}", error)]
+    #[error("threading error: {error}")]
     ThreadingError {
-        #[error(cause)]
+        #[from]
         error: ThreadingError,
     },
 }

@@ -3,11 +3,11 @@
 #![warn(clippy::all)]
 
 extern crate blanket;
-extern crate err_derive;
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
 extern crate ordered_float;
 extern crate pest;
+extern crate thiserror;
 
 #[cfg(feature = "memchr")]
 extern crate memchr;

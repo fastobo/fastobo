@@ -3,9 +3,9 @@
 //! `Ident` refers to an *owned* identifier, while `Id` refers to its *borrowed*
 //! counterpart.
 
-use std::fmt::Write;
-use std::fmt::Result as FmtResult;
 use std::fmt::Error as FmtError;
+use std::fmt::Result as FmtResult;
+use std::fmt::Write;
 
 mod ident;
 mod prefix;

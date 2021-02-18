@@ -237,7 +237,7 @@ mod tests {
         let expected = PropertyValue::from(LiteralPropertyValue::new(
             RelationIdent::from(UnprefixedIdent::new(String::from("shoe_size"))),
             QuotedString::new(String::from("8")),
-            Ident::from(PrefixedIdent::new("xsd", "positiveInteger"))
+            Ident::from(PrefixedIdent::new("xsd", "positiveInteger")),
         ));
         assert_eq!(actual, expected);
     }

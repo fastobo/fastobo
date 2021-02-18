@@ -202,8 +202,8 @@ mod tests {
 
     mod scope {
 
-        use self::SynonymScope::*;
         use self::assert_eq;
+        use self::SynonymScope::*;
         use super::*;
 
         #[test]
@@ -226,8 +226,8 @@ mod tests {
 
     mod synonym {
 
-        use super::*;
         use self::assert_eq;
+        use super::*;
 
         #[test]
         fn from_str() {

@@ -37,7 +37,7 @@ impl PrefixedIdent {
     pub fn new(prefix: &str, local: &str) -> Self {
         Self {
             data: StringType::from(format!("{}{}", prefix, local)),
-            local_offset: prefix.len()
+            local_offset: prefix.len(),
         }
     }
 
@@ -103,12 +103,10 @@ impl<'i> FromPair<'i> for PrefixedIdent {
         let local = inners.next().unwrap();
 
         let mut data = StringType::new();
-        unescape(&mut data, prefix.as_str())
-            .expect("cannot contain invalid escape characters");
+        unescape(&mut data, prefix.as_str()).expect("cannot contain invalid escape characters");
 
         let local_offset = data.len();
-        unescape(&mut data, local.as_str())
-            .expect("cannot contain invalid escape characters");
+        unescape(&mut data, local.as_str()).expect("cannot contain invalid escape characters");
 
         Ok(Self { data, local_offset })
     }
@@ -147,7 +145,7 @@ mod tests {
         assert_eq!(actual, expected);
 
         let actual = PrefixedIdent::from_str("web:https\\://example.com").unwrap();
-        let expected = PrefixedIdent::new("web","https://example.com");
+        let expected = PrefixedIdent::new("web", "https://example.com");
         assert_eq!(actual, expected);
 
         assert!(PrefixedIdent::from_str("[Term]").is_err());

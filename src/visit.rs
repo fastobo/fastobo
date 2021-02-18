@@ -738,8 +738,7 @@ pub mod visit_mut {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_prefixed_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut PrefixedIdent) {
-    }
+    pub fn visit_prefixed_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut PrefixedIdent) {}
 
     #[allow(unused_variables)]
     pub fn visit_quoted_string<V: VisitMut + ?Sized>(visitor: &mut V, string: &mut QuotedString) {}

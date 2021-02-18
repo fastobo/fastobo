@@ -5,7 +5,6 @@ use darling::ast::Fields;
 use darling::util::Ignored;
 use darling::FromDeriveInput;
 use heck::SnakeCase;
-use syn::export::Span;
 use syn::parse_quote;
 use syn::Ident;
 use syn::Type;
@@ -31,7 +30,7 @@ impl OboClauseVariant {
         self.fields
             .iter()
             .enumerate()
-            .map(|(n, _)| Ident::new(&format!("__{}_{}", &self.ident, n), Span::call_site()))
+            .map(|(n, _)| Ident::new(&format!("__{}_{}", &self.ident, n), self.ident.span()))
             .map(|id| parse_quote!(#id))
             .collect()
     }
@@ -88,7 +87,7 @@ impl OboClauseVariant {
 
             // The arm pattern and expression when the field is `Some`
             let mut c1_some: Vec<syn::Pat> = self.field_patterns();
-            let ident = Ident::new(&format!("__{}_{}", id, idx), Span::call_site());
+            let ident = Ident::new(&format!("__{}_{}", id, idx), self.ident.span());
             c1_some[idx] = parse_quote!(Some(#ident));
             let c2_some: Vec<syn::Pat> = self.field_patterns();
 

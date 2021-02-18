@@ -6,7 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.13.0...HEAD
+
+## [v0.13.0] - 2021-02-18
+[v0.13.0]: https://github.com/fastobo/fastobo/compare/v0.12.0...v0.13.0
+### Changed
+- Make `PrefixedIdent` store both ID components contiguously and make it immutable.
+- Bumped outdated dependencies.
+- Replaced `err-derive` with `thiserror` to derive `std::error::Error` on error types.
+### Fixed
+- Compilation issues caused by latest version of `syn`.
+### Removed
+- `fastobo::ast::id::local` module.
 
 ## [v0.12.0] - 2020-09-29
 [v0.12.0]: https://github.com/fastobo/fastobo/compare/v0.11.2...v0.12.0

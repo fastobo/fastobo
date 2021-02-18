@@ -25,7 +25,7 @@ jobs:
         command: publish
         args: --manifest-path derive/Cargo.toml --token ${{ secrets.CRATES_IO_TOKEN }}
   publish:
-    needs: publish-impl
+    needs: publish-derive
     runs-on: ubuntu-latest
     environment: Crates.io
     name: Publish Rust crate

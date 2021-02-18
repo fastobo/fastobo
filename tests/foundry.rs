@@ -11,7 +11,8 @@ lazy_static::lazy_static! {
     /// The latest OBO Foundry listing.
     static ref FOUNDRY: obofoundry::Foundry = {
         let response = ureq::get("http://www.obofoundry.org/registry/ontologies.yml")
-            .call();
+            .call()
+            .unwrap();
         serde_yaml::from_reader(response.into_reader())
             .expect("could not read the OBO Foundry listing")
     };
@@ -35,7 +36,7 @@ macro_rules! foundrytest {
                 .ontology_purl;
 
             // get the OBO document
-            let res = ureq::get(url.as_str()).call();
+            let res = ureq::get(url.as_str()).call().unwrap();
 
             // parse the OBO file if it is a correct OBO file.
             let mut buf = BufReader::new(res.into_reader());

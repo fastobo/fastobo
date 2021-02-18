@@ -73,7 +73,7 @@ extern crate ureq;
 
 fn main() {
     let response = ureq::get("http://purl.obolibrary.org/obo/ms.obo").call();
-    let mut reader = std::io::BufReader::new(response.into_reader());
+    let mut reader = std::io::BufReader::new(response.unwrap().into_reader());
 
     match fastobo::from_reader(&mut reader) {
         Ok(doc) => println!("Number of MS entities: {}", doc.entities().len()),

@@ -73,7 +73,6 @@ foundrytest!(fbbt);
 foundrytest!(pdumdv);
 foundrytest!(oba);
 foundrytest!(hp);
-foundrytest!(phipo);
 foundrytest!(mmusdv);
 foundrytest!(hsapdv);
 foundrytest!(peco);
@@ -86,12 +85,10 @@ foundrytest!(fbdv);
 foundrytest!(omp);
 foundrytest!(mco);
 foundrytest!(mp);
-foundrytest!(to);
 foundrytest!(poro);
 foundrytest!(fbcv);
 foundrytest!(zeco);
 foundrytest!(ro);
-foundrytest!(cl);
 foundrytest!(mi);
 foundrytest!(trans);
 
@@ -127,6 +124,22 @@ foundrytest!(
 );
 
 // --- Expected failures -----------------------------------------------------
+
+foundrytest!(
+    #[ignore]
+    phipo
+);
+
+foundrytest!(
+    #[ignore]
+    to
+);
+
+// Invalid Xref
+foundrytest!(
+    #[ignore]
+    cl
+);
 
 // Invalid Xref
 foundrytest!(

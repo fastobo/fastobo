@@ -30,7 +30,7 @@ impl OboClauseVariant {
         self.fields
             .iter()
             .enumerate()
-            .map(|(n, _)| Ident::new(&format!("__{}_{}", &self.ident, n), self.ident.span()))
+            .map(|(n, _)| Ident::new(&format!("__{}_{}", &self.ident.to_string().to_lowercase(), n), self.ident.span()))
             .map(|id| parse_quote!(#id))
             .collect()
     }
@@ -39,7 +39,7 @@ impl OboClauseVariant {
         // match
         if let Some(tag) = &self.tag {
             if let syn::Lit::Int(i) = tag {
-                let id = Ident::new(&format!("__{}_{}", &self.ident, i), tag.span());
+                let id = Ident::new(&format!("__{}_{}", &self.ident.to_string().to_lowercase(), i), tag.span());
                 parse_quote!(#id)
             } else {
                 parse_quote!(#tag)
@@ -87,7 +87,7 @@ impl OboClauseVariant {
 
             // The arm pattern and expression when the field is `Some`
             let mut c1_some: Vec<syn::Pat> = self.field_patterns();
-            let ident = Ident::new(&format!("__{}_{}", id, idx), self.ident.span());
+            let ident = Ident::new(&format!("__{}_{}", id.to_string().to_lowercase(), idx), self.ident.span());
             c1_some[idx] = parse_quote!(Some(#ident));
             let c2_some: Vec<syn::Pat> = self.field_patterns();
 

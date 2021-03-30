@@ -56,7 +56,8 @@ impl PrefixedIdent {
     /// assert!(!noncanonical_id.is_canonical());
     /// ```
     pub fn is_canonical(&self) -> bool {
-        todo!()
+        super::prefix::is_canonical(self.prefix())
+        && self.local().chars().all(|c| c.is_ascii_digit())
     }
 
     /// Get the prefix part of the identifier.

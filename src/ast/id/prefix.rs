@@ -16,7 +16,8 @@ use crate::syntax::Rule;
 use super::escape;
 use super::unescape;
 
-fn is_canonical<S: AsRef<str>>(s: S) -> bool {
+/// Return whether a prefix is canonical.
+pub fn is_canonical<S: AsRef<str>>(s: S) -> bool {
     let string = s.as_ref();
     let mut chars = string.chars();
     if let Some(c) = chars.next() {

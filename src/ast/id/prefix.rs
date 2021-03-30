@@ -32,15 +32,6 @@ fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 ///   followed by either an underscore or other alphabetic characters.
 /// * A non-canonical ID prefix can contain any character besides `:`.
 ///
-/// # Example
-/// ```rust
-/// # extern crate fastobo;
-/// # use fastobo::ast::PrefixedIdent;
-/// # use std::str::FromStr;
-/// let id = PrefixedIdent::from_str("GO:0046154").unwrap();
-/// assert!(id.prefix().is_canonical());
-/// assert_eq!(id.prefix(), "GO");
-/// ```
 #[derive(Clone, Debug, Eq, Hash, FromStr, Ord, PartialEq, PartialOrd)]
 pub struct IdentPrefix(StringType);
 

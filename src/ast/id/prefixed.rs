@@ -29,9 +29,10 @@ impl PrefixedIdent {
     ///
     /// ```rust
     /// # extern crate fastobo;
+    /// # use std::str::FromStr;
     /// # use fastobo::ast::*;
     /// let id1 = PrefixedIdent::new("MS", "1000031");
-    /// let id2 = PrefixedIdent::from_str("MS:1000031"));
+    /// let id2 = PrefixedIdent::from_str("MS:1000031").unwrap();
     /// assert_eq!(id1, id2);
     /// ```
     pub fn new(prefix: &str, local: &str) -> Self {
@@ -58,10 +59,28 @@ impl PrefixedIdent {
         todo!()
     }
 
+    /// Get the prefix part of the identifier.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let id = PrefixedIdent::new("MS", "1000031");
+    /// assert_eq!(id.prefix(), "MS");
+    /// ```
     pub fn prefix(&self) -> &str {
         &self.data.as_str()[..self.local_offset]
     }
 
+    /// Get the local part of the identifier.
+    ///
+    /// # Example
+    /// ```rust
+    /// # extern crate fastobo;
+    /// # use fastobo::ast::*;
+    /// let id = PrefixedIdent::new("MS", "1000031");
+    /// assert_eq!(id.local(), "1000031");
+    /// ```
     pub fn local(&self) -> &str {
         &self.data.as_str()[self.local_offset..]
     }

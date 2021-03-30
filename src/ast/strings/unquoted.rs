@@ -28,6 +28,8 @@ fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
         '\\' => f.write_str("\\\\"),
         // ':' => f.write_str("\\:"),
         '!' => f.write_str("\\!"),
+        '{' => f.write_str("\\{"),
+        '}' => f.write_str("\\}"),
         _ => f.write_char(char),
     })
 }

@@ -1,0 +1,9 @@
+format-version: 1.4
+ontology: rhea
+
+[Term]
+id: RHEA:10612
+name: N(4)-\{beta-D-GlcNAc-(1->2)-alpha-D-Man-(1->3)-[beta-D-GlcNAc-(1->2)-alpha-D-Man-(1->6)]-beta-D-Man-(1->4)-beta-D-GlcNAc-(1->4)-beta-D-GlcNAc\}-L-asparaginyl-[protein] + UDP-alpha-D-xylose = H(+) + N(4)-\{beta-D-GlcNAc-(1->2)-alpha-D-Man-(1->3)-[beta-D-GlcNAc-(1->2)-alpha-D-Man-(1->6)]-[beta-D-Xyl-(1->2)]-beta-D-Man-(1->4)-beta-D-GlcNAcl-(1->4)-beta-D-GlcNAc\}-L-asparaginyl-[protein] + UDP
+xref: EC:2.4.2.38
+xref: PMID:10781814
+xref: PMID:15686448

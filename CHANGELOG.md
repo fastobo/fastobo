@@ -6,7 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.13.1...HEAD
+
+## [v0.13.1] - 2021-03-30
+[v0.13.1]: https://github.com/fastobo/fastobo/compare/v0.13.0...v0.13.1
+### Added
+- Missing implementation of `fastobo::ast::PrefixedIdent::is_canonical`.
+### Fixed
+- Curly braces not being escaped from `fastobo::ast::UnquotedString`.
 
 ## [v0.13.0] - 2021-02-18
 [v0.13.0]: https://github.com/fastobo/fastobo/compare/v0.12.0...v0.13.0

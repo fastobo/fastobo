@@ -1,0 +1,20 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: pretty_assertions
+    versions:
+    - 0.7.1
+  - dependency-name: ureq
+    versions:
+    - 2.0.1
+  - dependency-name: darling
+    versions:
+    - 0.12.0
+  - dependency-name: obofoundry
+    versions:
+    - 0.7.0

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 [Unreleased]: https://github.com/fastobo/fastobo/compare/v0.13.1...HEAD
 
+## [v0.13.2] - 2022-01-11
+[v0.13.2]
+### Fixed
+- `fastobo::to_writer` not writing newlines between entity frames.
+
 ## [v0.13.1] - 2021-03-30
 [v0.13.1]: https://github.com/fastobo/fastobo/compare/v0.13.0...v0.13.1
 ### Added
@@ -32,7 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `fastobo::ast::Url` struct replacing `url::Url` to store URL identifiers.
 ### Changed
 - Removed `url` crate dependency.
-- Bumped `fastobo-syntax` dependency to `v0.6.2` to fix parsing of some 
+- Bumped `fastobo-syntax` dependency to `v0.6.2` to fix parsing of some
   URLs with empty paths lacking a trailing slash (e.g. `http://example.com`).
 
 ## [v0.11.2] - 2020-09-04

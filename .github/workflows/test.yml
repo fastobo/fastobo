@@ -51,17 +51,12 @@ jobs:
       uses: actions/cache@v2
       with:
         path: target
-        key: ${{ runner.os }}-cargo-${{ matrix.rust-toolchain }}
+        key: ${{ runner.os }}-cargo-${{ matrix.rust-toolchain }}-${{ matrix.feature }}
     - name: Test with ${{ matrix.feature }} feature
       uses: actions-rs/cargo@v1
       with:
         command: test
         args: '--lib --test canonicalize --test roundtrip --no-default-features --features=${{ matrix.feature }}'
-    - name: Upload coverage statistics
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        flags: rust-${{ matrix.rust-toolchain }},${{ matrix.feature }}
   cover:
     name: Coverage (${{ matrix.feature }})
     runs-on: ubuntu-latest
@@ -87,7 +82,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: target
-        key: ${{ runner.os }}-cargo-${{ matrix.rust-toolchain }}
+        key: ${{ runner.os }}-cargo-${{ matrix.rust-toolchain }}-${{ matrix.feature }}
     - name: Measure code coverage with ${{ matrix.feature }} feature
       uses: actions-rs/tarpaulin@v0.1
       with:

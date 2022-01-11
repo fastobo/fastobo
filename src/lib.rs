@@ -86,9 +86,15 @@ pub fn to_writer<W: Write>(mut writer: W, doc: &OboDoc) -> Result<()> {
     if !doc.header().is_empty() && !doc.entities().is_empty() {
         writeln!(writer)?;
     }
-    for entity in doc.entities() {
+
+    let mut entities = doc.entities().iter().peekable();
+    while let Some(entity) = entities.next() {
         write!(writer, "{}", entity)?;
+        if entities.peek().is_some() {
+            writeln!(writer)?;
+        }
     }
+
     Ok(())
 }
 

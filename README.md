@@ -93,6 +93,8 @@ fn main() {
   this crate.
 * [`fastobo-validator`](https://crates.io/crates/fastobo-validator): Standalone CLI
   to validate OBO files against the specification.
+* [`horned-functional`](https://crates.io/crates/horned-functional): Parser for
+  OWL2 Functional Syntax (can be used to parse `owl-axioms` clauses).
 
 
 ## Feedback

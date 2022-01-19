@@ -1,5 +1,6 @@
 use fastobo_derive_internal::FromStr;
 use fastobo_derive_internal::OboClause;
+use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;

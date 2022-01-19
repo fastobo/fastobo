@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -7,7 +8,7 @@ use std::fmt::Write;
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
-use crate::ast::StringType;
+use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
@@ -18,10 +19,8 @@ use super::unescape;
 /// An identifier with a prefix.
 #[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq)]
 pub struct PrefixedIdent {
-    data: StringType,
-    local_offset: usize,
-    // prefix: IdentPrefix,
-    // local: IdentLocal,
+    prefix: IdentType,
+    local: IdentType,
 }
 
 impl PrefixedIdent {
@@ -35,10 +34,14 @@ impl PrefixedIdent {
     /// let id2 = PrefixedIdent::from_str("MS:1000031").unwrap();
     /// assert_eq!(id1, id2);
     /// ```
-    pub fn new(prefix: &str, local: &str) -> Self {
+    pub fn new<P, L>(prefix: P, local: L) -> Self
+    where
+        P: Into<IdentType>,
+        L: Into<IdentType>,
+    {
         Self {
-            data: StringType::from(format!("{}{}", prefix, local)),
-            local_offset: prefix.len(),
+            prefix: prefix.into(),
+            local: local.into(),
         }
     }
 
@@ -70,7 +73,7 @@ impl PrefixedIdent {
     /// assert_eq!(id.prefix(), "MS");
     /// ```
     pub fn prefix(&self) -> &str {
-        &self.data.as_str()[..self.local_offset]
+        &self.prefix
     }
 
     /// Get the local part of the identifier.
@@ -83,28 +86,8 @@ impl PrefixedIdent {
     /// assert_eq!(id.local(), "1000031");
     /// ```
     pub fn local(&self) -> &str {
-        &self.data.as_str()[self.local_offset..]
+        &self.local
     }
-
-    // /// Get a reference to the prefix of the `PrefixedIdent`.
-    // pub fn prefix(&self) -> &IdentPrefix {
-    //     &self.prefix
-    // }
-    //
-    // /// Get a mutable reference to the prefix of the `PrefixedIdent`.
-    // pub fn prefix_mut(&mut self) -> &mut IdentPrefix {
-    //     &mut self.prefix
-    // }
-    //
-    // /// Get a reference to the local component of the `PrefixedIdent`.
-    // pub fn local(&self) -> &IdentLocal {
-    //     &self.local
-    // }
-    //
-    // /// Get a mutable reference to the local component of the `PrefixedIdent`.
-    // pub fn local_mut(&mut self) -> &mut IdentLocal {
-    //     &mut self.local
-    // }
 }
 
 impl Display for PrefixedIdent {
@@ -122,13 +105,25 @@ impl<'i> FromPair<'i> for PrefixedIdent {
         let prefix = inners.next().unwrap();
         let local = inners.next().unwrap();
 
-        let mut data = StringType::new();
-        unescape(&mut data, prefix.as_str()).expect("cannot contain invalid escape characters");
+        // unescape prefix part if needed, otherwise don't allocate
+        let p = if prefix.as_str().contains('\\') {
+            let mut p = String::new();
+            unescape(&mut p, prefix.as_str()).expect("cannot contain invalid escape characters");
+            Cow::Owned(p)
+        } else {
+            Cow::Borrowed(prefix.as_str())
+        };
+        // unescape local part if needed, otherwise don't allocate
+        let l = if local.as_str().contains('\\') {
+            let mut l = String::new();
+            unescape(&mut l, local.as_str()).expect("cannot contain invalid escape characters");
+            Cow::Owned(l)
+        } else {
+            Cow::Borrowed(local.as_str())
+        };
 
-        let local_offset = data.len();
-        unescape(&mut data, local.as_str()).expect("cannot contain invalid escape characters");
-
-        Ok(Self { data, local_offset })
+        // FIXME: use a builder to allow recycling the string data
+        Ok(Self::new::<&str, &str>(&p, &l))
     }
 }
 

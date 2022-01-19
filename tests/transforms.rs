@@ -9,7 +9,7 @@ fn assign_namespaces_no_default_namespace() {
     let mut doc = OboDoc::new();
     for i in 0..10 {
         let ns = NamespaceIdent::from(UnprefixedIdent::new("test_namespace"));
-        let id = PrefixedIdent::new("GO", &format!("{:08}", i));
+        let id = PrefixedIdent::new("GO", format!("{:08}", i));
         let mut frame = TermFrame::new(Line::from(ClassIdent::from(id)));
         frame
             .clauses_mut()
@@ -22,7 +22,7 @@ fn assign_namespaces_no_default_namespace() {
         .expect("all frames have a namespace so `default-namespace` is not required");
 
     // now add a frame without a namespace
-    let id = PrefixedIdent::new("GO", &format!("{:08}", 10));
+    let id = PrefixedIdent::new("GO", format!("{:08}", 10));
     let frame = TermFrame::new(Line::from(ClassIdent::from(id)));
     doc.entities_mut().push(EntityFrame::from(frame));
 

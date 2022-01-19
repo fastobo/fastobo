@@ -5,7 +5,7 @@ use std::fmt::Result as FmtResult;
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
-use crate::ast::StringType;
+use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
@@ -16,15 +16,15 @@ use super::unescape;
 
 /// An identifier without a prefix.
 #[derive(Clone, Debug, Hash, Eq, FromStr, Ord, PartialEq, PartialOrd)]
-pub struct UnprefixedIdent(StringType);
+pub struct UnprefixedIdent(IdentType);
 
 impl UnprefixedIdent {
     /// Create a new unprefixed identifier.
     pub fn new<S>(id: S) -> Self
     where
-        S: Into<StringType>,
+        S: Into<IdentType>,
     {
-        // FIXME: check the given string is a valid unprefixed identifier.
+        // FIXME: check the given string is a valid unprefixed identifier?.
         Self(id.into())
     }
 
@@ -46,16 +46,9 @@ impl Display for UnprefixedIdent {
     }
 }
 
-impl From<UnprefixedIdent> for StringType {
+impl From<UnprefixedIdent> for IdentType {
     fn from(id: UnprefixedIdent) -> Self {
         id.0
-    }
-}
-
-#[cfg(feature = "smartstring")]
-impl From<UnprefixedIdent> for String {
-    fn from(id: UnprefixedIdent) -> Self {
-        id.0.into()
     }
 }
 
@@ -65,8 +58,8 @@ impl From<&str> for UnprefixedIdent {
     }
 }
 
-impl From<StringType> for UnprefixedIdent {
-    fn from(s: StringType) -> Self {
+impl From<IdentType> for UnprefixedIdent {
+    fn from(s: IdentType) -> Self {
         Self::new(s)
     }
 }

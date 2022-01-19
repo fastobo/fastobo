@@ -7,7 +7,7 @@ use std::hash::Hash;
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
-use crate::ast::StringType;
+use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
@@ -34,13 +34,13 @@ pub fn is_canonical<S: AsRef<str>>(s: S) -> bool {
 /// * A non-canonical ID prefix can contain any character besides `:`.
 ///
 #[derive(Clone, Debug, Eq, Hash, FromStr, Ord, PartialEq, PartialOrd)]
-pub struct IdentPrefix(StringType);
+pub struct IdentPrefix(IdentType);
 
 impl IdentPrefix {
     /// Create a new identifier prefix.
-    pub fn new<S>(prefix: S) -> Self
+    pub fn new<P>(prefix: P) -> Self
     where
-        S: Into<StringType>,
+        P: Into<IdentType>,
     {
         Self(prefix.into())
     }
@@ -65,11 +65,11 @@ impl IdentPrefix {
 
     /// Extract the unescaped prefix as a `String`.
     pub fn into_string(self) -> String {
-        self.0.into()
+        self.0.as_ref().into()
     }
 
     /// Extract the unescaped prefix as the raw inner type.
-    pub fn into_inner(self) -> StringType {
+    pub fn into_inner(self) -> IdentType {
         self.0
     }
 }
@@ -96,14 +96,7 @@ impl Display for IdentPrefix {
     }
 }
 
-#[cfg(feature = "smartstring")]
-impl From<IdentPrefix> for String {
-    fn from(prefix: IdentPrefix) -> String {
-        prefix.0.into()
-    }
-}
-
-impl From<IdentPrefix> for StringType {
+impl From<IdentPrefix> for IdentType {
     fn from(prefix: IdentPrefix) -> Self {
         prefix.0
     }
@@ -115,9 +108,9 @@ impl From<&str> for IdentPrefix {
     }
 }
 
-impl From<StringType> for IdentPrefix {
-    fn from(s: StringType) -> Self {
-        Self::new(s)
+impl From<IdentType> for IdentPrefix {
+    fn from(i: IdentType) -> Self {
+        Self::new(i)
     }
 }
 
@@ -144,7 +137,7 @@ impl<'i> FromPair<'i> for IdentPrefix {
 
 impl PartialEq<str> for IdentPrefix {
     fn eq(&self, other: &str) -> bool {
-        self.0.as_str() == other
+        self.0.as_ref() == other
     }
 }
 

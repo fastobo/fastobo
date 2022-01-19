@@ -984,7 +984,7 @@ impl VisitMut for IdCompactor {
             for (prefix, url) in self.idspaces.iter() {
                 if u.as_str().starts_with(url.as_str()) {
                     let local = &u.as_str()[url.as_str().len()..];
-                    new = Some(PrefixedIdent::new(prefix.as_str(), local));
+                    new = Some(PrefixedIdent::new(prefix.clone(), local));
                 }
             }
             // if none found, attempt to use the OBO factorisation

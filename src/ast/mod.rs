@@ -57,11 +57,7 @@ pub use self::term::*;
 pub use self::typedef::*;
 pub use self::xref::*;
 
-use std::iter::FromIterator;
-
-use pest::iterators::Pair;
-
-use crate::error::CardinalityError;
+use super::error::CardinalityError;
 
 /// The inner string type used to store text.
 ///
@@ -78,3 +74,18 @@ type StringTypeImpl = smartstring::SmartString<smartstring::Compact>;
 
 #[cfg(not(feature = "smartstring"))]
 type StringTypeImpl = String;
+
+/// The inner string type used to store identifiers.
+///
+/// If `fastobo` is compiled with the `threading` feature enabled, then this
+/// type will be [`Arc<str>`]. Otherwise, plain [`Rc<str>`] is used.
+///
+/// [`Rc<str>`]: https://doc.rust-lang.org/std/rc/struct.Rc.html
+/// [`Arc<str>`]: https://doc.rust-lang.org/std/sync/struct.Arc.html
+pub type IdentType = IdentTypeImpl;
+
+#[cfg(feature = "threading")]
+type IdentTypeImpl = std::sync::Arc<str>;
+
+#[cfg(not(feature = "smartstring"))]
+type IdentTypeImpl = std::rc::Rc<str>;

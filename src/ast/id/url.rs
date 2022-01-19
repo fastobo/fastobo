@@ -5,14 +5,14 @@ use std::fmt::Result as FmtResult;
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
-use crate::ast::StringType;
+use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// A Uniform Resource Locator used as an identifier for an entity.
 #[derive(Clone, Debug, FromStr, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Url(StringType);
+pub struct Url(IdentType);
 
 impl Url {
     /// Create a new `Url` from a string containing a URL representation.
@@ -34,7 +34,7 @@ impl Url {
 
     /// View the URL as a string slice.
     pub fn as_str(&self) -> &str {
-        self.0.as_str()
+        self.0.as_ref()
     }
 }
 
@@ -53,6 +53,6 @@ impl Display for Url {
 impl<'i> FromPair<'i> for Url {
     const RULE: Rule = Rule::Iri;
     unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-        Ok(Url(StringType::from(pair.as_str())))
+        Ok(Url(IdentType::from(pair.as_str())))
     }
 }

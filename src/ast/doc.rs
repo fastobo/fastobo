@@ -134,10 +134,11 @@ impl OboDoc {
     /// frames that have none.
     ///
     /// # Errors
-    /// - `CardinalityError::MissingClause`: if the header frame does not
-    ///   contain any default namespace definition.
-    /// - `CardinalityError::DuplicateClauses` if the header frame does
-    ///   contain more than one default namespace definition.
+    ///
+    /// If all frames already have a `namespace` clause, this function will
+    /// not check the contents of the header, return `Ok(())`. However, if
+    /// a frame requires the assignment of the default namespace, then a
+    /// [`CardinalityError`](../error/enum.CardinalityError.html) may be raised depending on the header contents.
     ///
     /// # Example
     /// ```rust
@@ -147,7 +148,7 @@ impl OboDoc {
     /// # use std::string::ToString;
     /// # use fastobo::ast::*;
     /// let mut doc = OboDoc::from_str(
-    /// "default-namespace: TST
+    /// "default-namespace: test
     ///
     /// [Term]
     /// id: TST:01
@@ -157,14 +158,12 @@ impl OboDoc {
     /// namespace: quality
     /// ").unwrap();
     ///
-    /// doc.assign_namespaces().unwrap();
-    ///
-    /// assert_eq!(doc.to_string(),
-    /// "default-namespace: TST
+    /// assert_eq!(doc.assign_namespaces().unwrap().to_string(),
+    /// "default-namespace: test
     ///
     /// [Term]
     /// id: TST:01
-    /// namespace: TST
+    /// namespace: test
     ///
     /// [Term]
     /// id: PATO:0000001
@@ -173,26 +172,32 @@ impl OboDoc {
     ///
     pub fn assign_namespaces(&mut self) -> Result<(), CardinalityError> {
         macro_rules! expand {
-            ($frame:ident, $clause:ident, $ns:ident, $outer:lifetime) => ({
-                for clause in $frame.iter() {
-                    if let $clause::Namespace(_) = clause.as_ref() {
-                        continue $outer
+            ($frame:ident, $clause:ident, $ns:ident, $outer:lifetime) => {{
+                if !$frame
+                    .iter()
+                    .any(|clause| matches!(clause.as_ref(), $clause::Namespace(_)))
+                {
+                    match $ns {
+                        Err(e) => return Err(e.clone()),
+                        Ok(&ns) => {
+                            $frame.push(Line::from($clause::Namespace(Box::new(ns.clone()))))
+                        }
                     }
                 }
-                $frame.push(Line::from($clause::Namespace(Box::new($ns.clone()))));
-            });
+            }};
         }
 
         use self::EntityFrame::*;
 
         // Force borrowck to split borrows: we shoudl be able to borrow
         // the header AND the entities at the same time.
-        let ns = self.header.default_namespace()?;
-        'outer: for entity in &mut self.entities {
+        let ns = self.header.default_namespace();
+        let ns_ref = ns.as_ref();
+        for entity in &mut self.entities {
             match entity {
-                Term(x) => expand!(x, TermClause, ns, 'outer),
-                Typedef(x) => expand!(x, TypedefClause, ns, 'outer),
-                Instance(x) => expand!(x, InstanceClause, ns, 'outer),
+                Term(x) => expand!(x, TermClause, ns_ref, 'outer),
+                Typedef(x) => expand!(x, TypedefClause, ns_ref, 'outer),
+                Instance(x) => expand!(x, InstanceClause, ns_ref, 'outer),
             }
         }
 

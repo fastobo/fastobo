@@ -15,7 +15,7 @@ use crate::syntax::Rule;
 /// This error is highly dependent on the function that returns it: the `name`
 /// field can provide more information about the specific clause that errored
 /// to the end-user.
-#[derive(Debug, Eq, Error, PartialEq)]
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum CardinalityError {
     #[error("missing {name} clause")]
     MissingClause { name: String },

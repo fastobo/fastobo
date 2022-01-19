@@ -327,7 +327,8 @@ impl Orderable for OboDoc {
     fn sort(&mut self) {
         self.header.sort_unstable();
         // FIXME(@althonos): should probably not require cloning here.
-        self.entities.sort_unstable_by_key(|e| e.as_id().clone());
+        self.entities
+            .sort_unstable_by(|e1, e2| e1.as_id().cmp(e2.as_id()));
         for entity in &mut self.entities {
             entity.sort()
         }

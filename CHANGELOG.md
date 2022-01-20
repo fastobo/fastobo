@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.14.1...HEAD
+
+## [v0.14.1] - 2022-01-11
+[v0.14.1]: https://github.com/fastobo/fastobo/compare/v0.14.0...v0.14.1
+### Fixed
+- Rendering of documentation on `docs.rs`.
 
 ## [v0.14.0] - 2022-01-11
 [v0.14.0]: https://github.com/fastobo/fastobo/compare/v0.13.2...v0.14.0

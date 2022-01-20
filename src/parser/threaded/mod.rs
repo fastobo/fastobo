@@ -76,9 +76,6 @@ pub struct ThreadedParser<B: BufRead> {
     read_index: usize,
     sent_index: usize,
 
-    /// String interner.
-    interner: Arc<Cache>,
-
     /// Result queue to maintain frame order if in ordered mode.
     queue: HashMap<usize, Result<Frame, Error>>,
 }
@@ -341,7 +338,6 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
             line,
             line_offset,
             offset,
-            interner,
             ordered: false,
             read_index: 0,
             sent_index: 1,

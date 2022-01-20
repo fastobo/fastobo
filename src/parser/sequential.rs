@@ -124,12 +124,12 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
     /// error if it fails. The header can then be accessed using the `header`
     /// method.
     fn new(mut stream: B) -> Self {
+        let cache = Cache::default();
         let mut line = String::new();
         let mut l: &str;
         let mut offset = 0;
         let mut line_offset = 0;
         let mut frame_clauses = Vec::new();
-        let mut cache = Cache::default();
 
         let header = loop {
             // Read the next line

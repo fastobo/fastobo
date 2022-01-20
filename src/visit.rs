@@ -49,11 +49,12 @@
 //!
 
 use std::collections::HashMap;
-use std::str::FromStr;
 
 use blanket::blanket;
 
 use crate::ast::*;
+use crate::parser::Cache;
+use crate::parser::QuickFind;
 
 // ---------------------------------------------------------------------------
 
@@ -998,13 +999,12 @@ pub mod visit_mut {
 #[derive(Clone, Debug, Default)]
 pub struct IdCompactor {
     idspaces: HashMap<IdentPrefix, Url>,
+    interner: Cache,
 }
 
 impl IdCompactor {
     pub fn new() -> Self {
-        Self {
-            idspaces: HashMap::new(),
-        }
+        Self::default()
     }
 }
 
@@ -1030,20 +1030,23 @@ impl VisitMut for IdCompactor {
             // find a prefix from the idspaces declared in the document
             for (prefix, url) in self.idspaces.iter() {
                 if u.as_str().starts_with(url.as_str()) {
-                    let local = &u.as_str()[url.as_str().len()..];
+                    let local = self.interner.intern(&u.as_str()[url.as_str().len()..]);
                     new = Some(PrefixedIdent::new(prefix.clone(), local));
                 }
             }
             // if none found, attempt to use the OBO factorisation
             const OBO_URL: &str = "http://purl.obolibrary.org/obo/";
-            if new.is_none() && u.as_str().starts_with(OBO_URL) {
-                let raw_id = &u.as_str()[OBO_URL.len()..];
-                if let Some(i) = raw_id.find('_') {
-                    // check we are not using a declared prefix (otherwise
-                    // the compaction/expansion would not roundtrip!)
-                    let prefix = IdentPrefix::new(&raw_id[..i]);
-                    if self.idspaces.get(&prefix).is_none() {
-                        new = Some(PrefixedIdent::new(prefix.as_str(), &raw_id[i + 1..]));
+            if new.is_none() {
+                if let Some(raw_id) = u.as_str().strip_prefix(OBO_URL) {
+                    if let Some(i) = raw_id.quickfind(b'_') {
+                        // check we are not using a declared prefix (otherwise
+                        // the compaction/expansion would not roundtrip!)
+                        // let prefix = IdentPrefix::new(self.intern(&raw_id[..i]));
+                        if self.idspaces.get(&raw_id[..i]).is_none() {
+                            let prefix = IdentPrefix::new(self.interner.intern(&raw_id[..i]));
+                            let local = self.interner.intern(&raw_id[i + 1..]);
+                            new = Some(PrefixedIdent::new(prefix, local));
+                        }
                     }
                 }
             }
@@ -1071,13 +1074,12 @@ impl VisitMut for IdCompactor {
 #[derive(Clone, Debug, Default)]
 pub struct IdDecompactor {
     idspaces: HashMap<IdentPrefix, Url>,
+    interner: Cache,
 }
 
 impl IdDecompactor {
     pub fn new() -> Self {
-        Self {
-            idspaces: HashMap::new(),
-        }
+        Self::default()
     }
 }
 
@@ -1099,21 +1101,19 @@ impl VisitMut for IdDecompactor {
         // the compacted id.
         let mut new: Option<Url> = None;
         if let Ident::Prefixed(p) = id {
-            if let Some(baseurl) = self.idspaces.get(p.prefix()) {
-                let newurl = format!("{}{}", baseurl, p.local());
-                new = Some(Url::from_str(&newurl).expect("invalid URL"));
-            } else {
-                let newurl = format!(
+            let new_url = match self.idspaces.get(p.prefix()) {
+                Some(base_url) => format!("{}{}", base_url, p.local()),
+                None => format!(
                     "http://purl.obolibrary.org/obo/{}_{}",
                     p.prefix(),
                     p.local()
-                );
-                new = Some(Url::from_str(&newurl).expect("invalid URL"));
-            }
+                ),
+            };
+            new = Url::new(self.interner.intern(&new_url)).ok();
         }
 
-        if let Some(new_url) = new {
-            *id = Ident::Url(Box::new(new_url));
+        if let Some(new_id) = new {
+            *id = Ident::Url(Box::new(new_id));
         }
     }
 }

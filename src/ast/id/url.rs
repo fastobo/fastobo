@@ -3,12 +3,15 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
 use fastobo_derive_internal::FromStr;
+use pest::error::ErrorVariant;
 use pest::iterators::Pair;
+use pest::Position;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
+use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
 /// A Uniform Resource Locator used as an identifier for an entity.
@@ -16,7 +19,7 @@ use crate::syntax::Rule;
 pub struct Url(IdentType);
 
 impl Url {
-    /// Create a new `Url` from a string containing a URL representation.
+    /// Create a new `Url` from an `IdentType`.
     ///
     /// This method checks the URL is a syntactically correct IRI, but does
     /// not attempt any kind of canonicalization. This can affect comparison
@@ -29,8 +32,25 @@ impl Url {
     /// assert!( Url::parse("http://example.com").is_ok() );
     /// assert!( Url::parse("not a URL").is_err() );
     /// ```
-    pub fn parse(s: &str) -> Result<Self, SyntaxError> {
-        std::str::FromStr::from_str(s)
+    pub fn new<S>(url: S) -> Result<Self, SyntaxError>
+    where
+        S: Into<IdentType>,
+    {
+        let u = url.into();
+
+        let pair = Lexer::tokenize(Self::RULE, &u)?.next().unwrap();
+        if pair.as_span().end() != u.as_ref().len() {
+            let span = pair
+                .as_span()
+                .end_pos()
+                .span(&Position::new(&u, u.len()).unwrap());
+            let variant = ErrorVariant::CustomError {
+                message: "remaining input".to_string(),
+            };
+            Err(pest::error::Error::new_from_span(variant, span).into())
+        } else {
+            Ok(Url(u))
+        }
     }
 
     /// View the URL as a string slice.

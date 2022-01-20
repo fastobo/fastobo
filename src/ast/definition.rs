@@ -8,6 +8,7 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -71,10 +72,13 @@ impl From<QuotedString> for Definition {
 
 impl<'i> FromPair<'i> for Definition {
     const RULE: Rule = Rule::Definition;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let text = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+        let text = QuotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
+        let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap(), cache)?;
         Ok(Self::with_xrefs(text, xrefs))
     }
 }

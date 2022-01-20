@@ -10,6 +10,7 @@ use pest::iterators::Pair;
 use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
@@ -357,15 +358,18 @@ impl Orderable for OboDoc {
 
 impl<'i> FromPair<'i> for OboDoc {
     const RULE: Rule = Rule::OboDoc;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
 
         let mut entities = Vec::new();
-        let header = HeaderFrame::from_pair_unchecked(inner.next().unwrap())?;
+        let header = HeaderFrame::from_pair_unchecked(inner.next().unwrap(), cache)?;
 
         let mut pair = inner.next().unwrap();
         while pair.as_rule() != Rule::EOI {
-            entities.push(EntityFrame::from_pair_unchecked(pair)?);
+            entities.push(EntityFrame::from_pair_unchecked(pair, cache)?);
             pair = inner.next().unwrap();
         }
         Ok(OboDoc { header, entities })

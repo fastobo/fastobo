@@ -2,6 +2,8 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
+use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 macro_rules! ident_subclass {
@@ -66,10 +68,13 @@ macro_rules! ident_subclass {
             }
         }
 
-        impl<'i> crate::parser::FromPair<'i> for $name {
+        impl<'i> FromPair<'i> for $name {
             const RULE: Rule = $rule;
-            unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
-                Ident::from_pair_unchecked(pair.into_inner().next().unwrap()).map(From::from)
+            unsafe fn from_pair_unchecked(
+                pair: Pair<'i, Rule>,
+                cache: &Cache,
+            ) -> Result<Self, SyntaxError> {
+                Ident::from_pair_unchecked(pair.into_inner().next().unwrap(), cache).map(From::from)
             }
         }
 

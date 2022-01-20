@@ -9,6 +9,7 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::OboFrame;
@@ -137,14 +138,17 @@ impl Identified for InstanceFrame {
 
 impl<'i> FromPair<'i> for InstanceFrame {
     const RULE: Rule = Rule::InstanceFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let iid = InstanceIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(iid);
+        let iid = InstanceIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
+        let id = Eol::from_pair_unchecked(inner.next().unwrap(), cache)?.and_inner(iid);
 
         let mut clauses = Vec::new();
         for pair in inner {
-            clauses.push(Line::<InstanceClause>::from_pair_unchecked(pair)?);
+            clauses.push(Line::<InstanceClause>::from_pair_unchecked(pair, cache)?);
         }
 
         Ok(InstanceFrame { id, clauses })

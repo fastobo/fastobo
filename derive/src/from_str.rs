@@ -34,7 +34,8 @@ impl FromStrDerive {
                         };
                         Err(crate::pest::error::Error::new_from_span(variant, span).into())
                     } else {
-                        unsafe { <Self as FromPair>::from_pair_unchecked(pair) }
+                        let cache = crate::parser::Cache::default();
+                        unsafe { <Self as FromPair>::from_pair_unchecked(pair, &cache) }
                     }
                 }
             }

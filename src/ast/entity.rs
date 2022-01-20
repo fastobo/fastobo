@@ -6,8 +6,8 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
@@ -146,12 +146,15 @@ impl From<InstanceFrame> for EntityFrame {
 
 impl<'i> FromPair<'i> for EntityFrame {
     const RULE: Rule = Rule::EntityFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::TermFrame => TermFrame::from_pair_unchecked(inner).map(From::from),
-            Rule::TypedefFrame => TypedefFrame::from_pair_unchecked(inner).map(From::from),
-            Rule::InstanceFrame => InstanceFrame::from_pair_unchecked(inner).map(From::from),
+            Rule::TermFrame => TermFrame::from_pair_unchecked(inner, cache).map(From::from),
+            Rule::TypedefFrame => TypedefFrame::from_pair_unchecked(inner, cache).map(From::from),
+            Rule::InstanceFrame => InstanceFrame::from_pair_unchecked(inner, cache).map(From::from),
             _ => unreachable!(),
         }
     }

@@ -7,8 +7,8 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -67,11 +67,14 @@ impl Display for Import {
 
 impl<'i> FromPair<'i> for Import {
     const RULE: Rule = Rule::Import;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iri => Ok(Url::from_str(inner.as_str())?.into()), // FIXME
-            Rule::Id => Ident::from_pair_unchecked(inner).map(From::from),
+            Rule::Id => Ident::from_pair_unchecked(inner, cache).map(From::from),
             _ => unreachable!(),
         }
     }

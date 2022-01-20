@@ -10,8 +10,8 @@ use std::ops::DerefMut;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -176,21 +176,24 @@ pub type Eol = Line<()>;
 
 impl<'i> FromPair<'i> for Eol {
     const RULE: Rule = Rule::EOL;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let opt1 = inner.next();
         let opt2 = inner.next();
         match (opt1, opt2) {
             (Some(pair1), Some(pair2)) => {
-                let comment = Comment::from_pair_unchecked(pair2)?;
-                let qualifiers = QualifierList::from_pair_unchecked(pair1)?;
+                let comment = Comment::from_pair_unchecked(pair2, cache)?;
+                let qualifiers = QualifierList::from_pair_unchecked(pair1, cache)?;
                 Ok(Eol::with_qualifiers(qualifiers).and_comment(comment))
             }
             (Some(pair1), None) => match pair1.as_rule() {
                 Rule::QualifierList => {
-                    QualifierList::from_pair_unchecked(pair1).map(Eol::with_qualifiers)
+                    QualifierList::from_pair_unchecked(pair1, cache).map(Eol::with_qualifiers)
                 }
-                Rule::Comment => Comment::from_pair_unchecked(pair1).map(Eol::with_comment),
+                Rule::Comment => Comment::from_pair_unchecked(pair1, cache).map(Eol::with_comment),
                 _ => unreachable!(),
             },
             (None, _) => Ok(Eol::new()),

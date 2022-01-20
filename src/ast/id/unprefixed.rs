@@ -7,6 +7,7 @@ use pest::iterators::Pair;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::syntax::Rule;
@@ -66,7 +67,10 @@ impl From<IdentType> for UnprefixedIdent {
 
 impl<'i> FromPair<'i> for UnprefixedIdent {
     const RULE: Rule = Rule::UnprefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\');
         let mut local = String::with_capacity(s.len() + escaped);

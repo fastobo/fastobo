@@ -9,12 +9,11 @@ use std::ops::DerefMut;
 use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
@@ -91,11 +90,14 @@ impl Display for Xref {
 
 impl<'i> FromPair<'i> for Xref {
     const RULE: Rule = Rule::Xref;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let id = FromPair::from_pair_unchecked(inner.next().unwrap())?;
+        let id = FromPair::from_pair_unchecked(inner.next().unwrap(), cache)?;
         let desc = match inner.next() {
-            Some(pair) => Some(QuotedString::from_pair_unchecked(pair).map(Box::new)?),
+            Some(pair) => Some(QuotedString::from_pair_unchecked(pair, cache).map(Box::new)?),
             None => None,
         };
         Ok(Xref { id, desc })
@@ -201,9 +203,13 @@ impl FromIterator<Xref> for XrefList {
 
 impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
+            // FIXME: avoid using Xref::from_str here?
             let xref = Xref::from_str(inner.as_str()).map_err(|e| e.with_span(inner.as_span()))?;
             xrefs.push(xref);
         }

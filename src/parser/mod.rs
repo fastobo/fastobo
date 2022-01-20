@@ -1,13 +1,10 @@
 //! Parser and parsing-related traits for the OBO format.
 
 use std::io::BufRead;
-
 use std::iter::Iterator;
-
 use std::num::NonZeroUsize;
 
 use crate::ast::Frame;
-
 use crate::error::Error;
 
 mod from_pair;
@@ -17,6 +14,7 @@ mod sequential;
 #[cfg(feature = "threading")]
 mod threaded;
 
+pub use self::from_pair::Cache;
 pub use self::from_pair::FromPair;
 pub use self::from_slice::FromSlice;
 pub use self::quickfind::QuickFind;

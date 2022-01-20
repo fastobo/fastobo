@@ -9,7 +9,7 @@ use pest::iterators::Pair;
 
 use crate::ast::StringType;
 use crate::error::SyntaxError;
-use crate::parser::Context;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::syntax::Rule;
@@ -112,7 +112,7 @@ impl Display for IdentLocal {
 
 impl<'i> FromPair<'i> for IdentLocal {
     const RULE: Rule = Rule::IdLocal;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
         // Bail out if the local ID is canonical (digits only).
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdLocal {

@@ -7,6 +7,7 @@ use pest::iterators::Pair;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -52,7 +53,10 @@ impl Display for Url {
 
 impl<'i> FromPair<'i> for Url {
     const RULE: Rule = Rule::Iri;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        _cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         Ok(Url(IdentType::from(pair.as_str())))
     }
 }

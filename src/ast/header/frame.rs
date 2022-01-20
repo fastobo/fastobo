@@ -14,6 +14,7 @@ use pest::iterators::Pair;
 use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
@@ -177,10 +178,13 @@ impl FromIterator<HeaderClause> for HeaderFrame {
 
 impl<'i> FromPair<'i> for HeaderFrame {
     const RULE: Rule = Rule::HeaderFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut clauses = Vec::new();
         for inner in pair.into_inner() {
-            clauses.push(HeaderClause::from_pair_unchecked(inner)?)
+            clauses.push(HeaderClause::from_pair_unchecked(inner, cache)?)
         }
         Ok(HeaderFrame::with_clauses(clauses))
     }

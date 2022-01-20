@@ -9,8 +9,8 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -37,7 +37,10 @@ impl Display for SynonymScope {
 
 impl<'i> FromPair<'i> for SynonymScope {
     const RULE: Rule = Rule::SynonymScope;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         match pair.as_str() {
             "EXACT" => Ok(SynonymScope::Exact),
             "BROAD" => Ok(SynonymScope::Broad),
@@ -160,17 +163,20 @@ impl Display for Synonym {
 
 impl<'i> FromPair<'i> for Synonym {
     const RULE: Rule = Rule::Synonym;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
 
-        let desc = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
-        let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap())?;
+        let desc = QuotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
+        let scope = SynonymScope::from_pair_unchecked(inner.next().unwrap(), cache)?;
 
         let nxt = inner.next().unwrap();
         match nxt.as_rule() {
             Rule::SynonymTypeId => {
-                let ty = Some(Box::new(SynonymTypeIdent::from_pair_unchecked(nxt)?));
-                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap())?;
+                let ty = Some(Box::new(SynonymTypeIdent::from_pair_unchecked(nxt, cache)?));
+                let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(Synonym {
                     desc,
                     scope,
@@ -180,7 +186,7 @@ impl<'i> FromPair<'i> for Synonym {
             }
             Rule::XrefList => {
                 let ty = None;
-                let xrefs = XrefList::from_pair_unchecked(nxt)?;
+                let xrefs = XrefList::from_pair_unchecked(nxt, cache)?;
                 Ok(Synonym {
                     desc,
                     scope,

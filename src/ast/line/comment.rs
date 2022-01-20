@@ -7,20 +7,12 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
 /// An inline comment without semantic value.
 #[derive(Clone, Debug, Eq, FromStr, Hash, Ord, PartialEq, PartialOrd)]
-// #[opaque_typedef(derive(
-//     AsRef(Inner, Self),
-//     AsMut(Inner, Self),
-//     Deref,
-//     DerefMut,
-//     Into(Inner),
-//     FromInner,
-//     PartialEq(Inner),
-// ))]
 pub struct Comment {
     value: StringType,
 }
@@ -44,7 +36,10 @@ impl Display for Comment {
 
 impl<'i> FromPair<'i> for Comment {
     const RULE: Rule = Rule::Comment;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let txt = pair
             .into_inner()
             .next()

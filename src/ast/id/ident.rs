@@ -8,6 +8,7 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -60,13 +61,18 @@ impl From<Url> for Ident {
 
 impl<'i> FromPair<'i> for Ident {
     const RULE: Rule = Rule::Id;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner).map(From::from),
-            Rule::UnprefixedId => UnprefixedIdent::from_pair_unchecked(inner).map(From::from),
+            Rule::PrefixedId => PrefixedIdent::from_pair_unchecked(inner, cache).map(From::from),
+            Rule::UnprefixedId => {
+                UnprefixedIdent::from_pair_unchecked(inner, cache).map(From::from)
+            }
             // FIXME(@althonos): need proper error report if the parser fails.
-            Rule::UrlId => Url::from_pair_unchecked(inner).map(From::from),
+            Rule::UrlId => Url::from_pair_unchecked(inner, cache).map(From::from),
             _ => unreachable!(),
         }
     }

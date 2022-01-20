@@ -5,8 +5,8 @@ use fastobo_derive_internal::OboClause;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::OboClause;
 use crate::syntax::Rule;
@@ -63,75 +63,78 @@ impl From<Definition> for TermClause {
 
 impl<'i> FromPair<'i> for Line<TermClause> {
     const RULE: Rule = Rule::TermClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let clause = TermClause::from_pair_unchecked(inner.next().unwrap())?;
+        let clause = TermClause::from_pair_unchecked(inner.next().unwrap(), cache)?;
         let eol = inner.next().unwrap();
-        Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
+        Ok(Eol::from_pair_unchecked(eol, cache)?.and_inner(clause))
     }
 }
 
 impl<'i> FromPair<'i> for TermClause {
     const RULE: Rule = Rule::TermClause;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         match inner.next().unwrap().as_rule() {
             Rule::IsAnonymousTag => {
-                let b = bool::from_str(inner.next().unwrap().as_str()).unwrap();
+                let b = bool::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::IsAnonymous(b))
             }
             Rule::NameTag => {
-                let name = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let name = UnquotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Name(Box::new(name)))
             }
             Rule::NamespaceTag => {
-                let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Namespace(Box::new(ns)))
             }
             Rule::AltIdTag => {
-                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
-                let def = Definition::from_pair_unchecked(inner.next().unwrap())?;
+                let def = Definition::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Def(Box::new(def)))
             }
             Rule::CommentTag => {
-                let comment = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let comment = UnquotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Comment(Box::new(comment)))
             }
             Rule::SubsetTag => {
-                let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Subset(Box::new(id)))
             }
             Rule::SynonymTag => {
-                let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
+                let syn = Synonym::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Synonym(Box::new(syn)))
             }
             Rule::XrefTag => {
-                let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
+                let xref = Xref::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Xref(Box::new(xref)))
             }
             Rule::BuiltinTag => {
-                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                let b = bool::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Builtin(b))
             }
             Rule::PropertyValueTag => {
-                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
+                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::PropertyValue(Box::new(pv)))
             }
             Rule::IsATag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::IsA(Box::new(id)))
             }
             Rule::IntersectionOfTag => {
                 let id = inner.next().unwrap();
                 if id.as_rule() == Rule::ClassId {
-                    let classid = ClassIdent::from_pair_unchecked(id)?;
+                    let classid = ClassIdent::from_pair_unchecked(id, cache)?;
                     Ok(TermClause::IntersectionOf(None, Box::new(classid)))
                 } else {
-                    let relid = RelationIdent::from_pair_unchecked(id)?;
-                    let classid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                    let relid = RelationIdent::from_pair_unchecked(id, cache)?;
+                    let classid = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                     Ok(TermClause::IntersectionOf(
                         Some(Box::new(relid)),
                         Box::new(classid),
@@ -139,40 +142,40 @@ impl<'i> FromPair<'i> for TermClause {
                 }
             }
             Rule::UnionOfTag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::UnionOf(Box::new(id)))
             }
             Rule::EquivalentToTag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::EquivalentTo(Box::new(id)))
             }
             Rule::DisjointFromTag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::DisjointFrom(Box::new(id)))
             }
             Rule::RelationshipTag => {
-                let rel = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let rel = RelationIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Relationship(Box::new(rel), Box::new(id)))
             }
             Rule::IsObsoleteTag => {
-                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                let b = bool::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::IsObsolete(b))
             }
             Rule::ReplacedByTag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::ReplacedBy(Box::new(id)))
             }
             Rule::ConsiderTag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::Consider(Box::new(id)))
             }
             Rule::CreatedByTag => {
-                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::CreatedBy(Box::new(s)))
             }
             Rule::CreationDateTag => {
-                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
+                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::CreationDate(Box::new(dt)))
             }
             _ => unreachable!(),

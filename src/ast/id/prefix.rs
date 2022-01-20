@@ -9,6 +9,7 @@ use pest::iterators::Pair;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::syntax::Rule;
@@ -116,7 +117,10 @@ impl From<IdentType> for IdentPrefix {
 
 impl<'i> FromPair<'i> for IdentPrefix {
     const RULE: Rule = Rule::IdPrefix;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         // Bail out if the local prefix is canonical (alphanumeric only)
         let inner = pair.into_inner().next().unwrap();
         if inner.as_rule() == Rule::CanonicalIdPrefix {

@@ -10,6 +10,7 @@ use pest::iterators::Pair;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -100,7 +101,10 @@ impl Display for PrefixedIdent {
 
 impl<'i> FromPair<'i> for PrefixedIdent {
     const RULE: Rule = Rule::PrefixedId;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inners = pair.into_inner();
         let prefix = inners.next().unwrap();
         let local = inners.next().unwrap();

@@ -4,8 +4,6 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::iter::Iterator;
 
-use super::Parser;
-
 use crate::ast::EntityFrame;
 use crate::ast::Frame;
 use crate::ast::HeaderClause;
@@ -16,7 +14,9 @@ use crate::error::SyntaxError;
 use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
+use super::Cache;
 use super::FromPair;
+use super::Parser;
 
 /// An iterator reading entity frames contained in an OBO stream sequentially.
 pub struct SequentialParser<B: BufRead> {
@@ -25,6 +25,7 @@ pub struct SequentialParser<B: BufRead> {
     offset: usize,
     line_offset: usize,
     header: Option<Result<Frame, Error>>,
+    cache: Cache,
 }
 
 impl<B: BufRead> AsRef<B> for SequentialParser<B> {
@@ -91,8 +92,10 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
             if l.starts_with('[') || self.line.is_empty() {
                 let res = unsafe {
                     match Lexer::tokenize(Rule::EntitySingle, &frame_lines) {
-                        Ok(mut pairs) => EntityFrame::from_pair_unchecked(pairs.next().unwrap())
-                            .map_err(Error::from),
+                        Ok(mut pairs) => {
+                            EntityFrame::from_pair_unchecked(pairs.next().unwrap(), &self.cache)
+                                .map_err(Error::from)
+                        }
                         Err(e) => Err(Error::from(
                             SyntaxError::from(e).with_offsets(self.line_offset, self.offset),
                         )),
@@ -126,6 +129,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
         let mut offset = 0;
         let mut line_offset = 0;
         let mut frame_clauses = Vec::new();
+        let mut cache = Cache::default();
 
         let header = loop {
             // Read the next line
@@ -147,7 +151,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
                         }
                     };
                     // produce a header clause from the token stream
-                    match HeaderClause::from_pair_unchecked(p) {
+                    match HeaderClause::from_pair_unchecked(p, &cache) {
                         Ok(clause) => frame_clauses.push(clause),
                         Err(e) => {
                             let err = e.with_offsets(line_offset, offset);
@@ -174,6 +178,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
             offset,
             line_offset,
             header,
+            cache,
         }
     }
 

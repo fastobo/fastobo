@@ -12,6 +12,7 @@ use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
@@ -62,10 +63,10 @@ impl Display for Qualifier {
 
 impl<'i> FromPair<'i> for Qualifier {
     const RULE: Rule = Rule::Qualifier;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let key = RelationIdent::from_str(inner.next().unwrap().as_str())?;
-        let value = QuotedString::from_pair_unchecked(inner.next().unwrap())?;
+        let value = QuotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
         Ok(Qualifier { key, value })
     }
 }
@@ -166,10 +167,13 @@ where
 
 impl<'i> FromPair<'i> for QualifierList {
     const RULE: Rule = Rule::QualifierList;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut qualifiers = Vec::new();
         for pair in pair.into_inner() {
-            qualifiers.push(Qualifier::from_pair_unchecked(pair)?);
+            qualifiers.push(Qualifier::from_pair_unchecked(pair, cache)?);
         }
         Ok(QualifierList::new(qualifiers))
     }

@@ -9,8 +9,8 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::syntax::Rule;
 
@@ -57,13 +57,16 @@ impl From<ResourcePropertyValue> for PropertyValue {
 
 impl<'i> FromPair<'i> for PropertyValue {
     const RULE: Rule = Rule::PropertyValue;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::LiteralPropertyValue => LiteralPropertyValue::from_pair_unchecked(inner)
+            Rule::LiteralPropertyValue => LiteralPropertyValue::from_pair_unchecked(inner, cache)
                 .map(Box::new)
                 .map(PropertyValue::Literal),
-            Rule::ResourcePropertyValue => ResourcePropertyValue::from_pair_unchecked(inner)
+            Rule::ResourcePropertyValue => ResourcePropertyValue::from_pair_unchecked(inner, cache)
                 .map(Box::new)
                 .map(PropertyValue::Resource),
             _ => unreachable!(),
@@ -133,10 +136,13 @@ impl Display for ResourcePropertyValue {
 
 impl<'i> FromPair<'i> for ResourcePropertyValue {
     const RULE: Rule = Rule::ResourcePropertyValue;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
+        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
+        let id = Ident::from_pair_unchecked(inner.next().unwrap(), cache)?;
         Ok(ResourcePropertyValue::new(relid, id))
     }
 }
@@ -201,14 +207,17 @@ impl Display for LiteralPropertyValue {
 
 impl<'i> FromPair<'i> for LiteralPropertyValue {
     const RULE: Rule = Rule::LiteralPropertyValue;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
 
-        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
+        let relid = RelationIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
         let second = inner.next().unwrap();
-        let datatype = Ident::from_pair_unchecked(inner.next().unwrap())?;
+        let datatype = Ident::from_pair_unchecked(inner.next().unwrap(), cache)?;
         let desc = match second.as_rule() {
-            Rule::QuotedString => QuotedString::from_pair_unchecked(second)?,
+            Rule::QuotedString => QuotedString::from_pair_unchecked(second, cache)?,
             Rule::UnquotedPropertyValueTarget => QuotedString::new(second.as_str().to_string()),
             _ => unreachable!(),
         };

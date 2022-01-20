@@ -1,9 +1,17 @@
+use std::collections::HashSet;
 use std::str::FromStr;
 
 use pest::iterators::Pair;
 
+use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::syntax::Rule;
+
+/// A string cache to recycle memory for shared values.
+#[derive(Debug, Default)]
+pub struct Cache {
+    cache: HashSet<IdentType>,
+}
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
@@ -17,25 +25,26 @@ pub trait FromPair<'i>: Sized {
     /// # Safety
     /// May panic if the pair was not produced by the right rule, i.e.
     /// `pair.as_rule() != <Self as FromPair>::RULE`.
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError>;
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>, cache: &Cache)
+        -> Result<Self, SyntaxError>;
 
     /// Create a new instance from a `Pair`.
     #[inline]
-    fn from_pair(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    fn from_pair(pair: Pair<'i, Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
         if pair.as_rule() != Self::RULE {
-            return Err(SyntaxError::UnexpectedRule {
+            Err(SyntaxError::UnexpectedRule {
                 actual: pair.as_rule(),
                 expected: Self::RULE,
-            });
+            })
+        } else {
+            unsafe { Self::from_pair_unchecked(pair, cache) }
         }
-
-        unsafe { Self::from_pair_unchecked(pair) }
     }
 }
 
 impl<'i> FromPair<'i> for bool {
     const RULE: Rule = Rule::Boolean;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>, ctx: &Cache) -> Result<Self, SyntaxError> {
         Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
     }
 }

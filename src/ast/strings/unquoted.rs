@@ -11,8 +11,8 @@ use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::StringType;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
 use crate::syntax::Rule;
@@ -162,7 +162,10 @@ impl PartialEq<String> for UnquotedString {
 
 impl<'i> FromPair<'i> for UnquotedString {
     const RULE: Rule = Rule::UnquotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\'); // number of escaped characters
         let mut local = String::with_capacity(s.len() + escaped);
@@ -204,9 +207,12 @@ impl<'a> Display for UnquotedStr {
 
 impl<'i> FromPair<'i> for Cow<'i, UnquotedStr> {
     const RULE: Rule = Rule::UnquotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         if pair.as_str().quickfind(b'\\').is_some() {
-            UnquotedString::from_pair_unchecked(pair).map(Cow::Owned)
+            UnquotedString::from_pair_unchecked(pair, cache).map(Cow::Owned)
         } else {
             Ok(Cow::Borrowed(UnquotedStr::new(pair.as_str())))
         }

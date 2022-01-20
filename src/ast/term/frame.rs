@@ -11,6 +11,7 @@ use pest::iterators::Pair;
 use crate::ast::*;
 use crate::error::CardinalityError;
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::OboFrame;
@@ -191,18 +192,21 @@ impl From<ClassIdent> for TermFrame {
 
 impl<'i> FromPair<'i> for TermFrame {
     const RULE: Rule = Rule::TermFrame;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         use crate::parser::QuickFind;
         let n = pair.as_str().quickcount(b'\n');
 
         let mut inner = pair.into_inner();
-        let clsid = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
-        let id = Eol::from_pair_unchecked(inner.next().unwrap())?.and_inner(clsid);
+        let clsid = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
+        let id = Eol::from_pair_unchecked(inner.next().unwrap(), cache)?.and_inner(clsid);
 
         let mut clauses = Vec::with_capacity(n - 1);
 
         for pair in inner {
-            clauses.push(Line::<TermClause>::from_pair_unchecked(pair)?);
+            clauses.push(Line::<TermClause>::from_pair_unchecked(pair, cache)?);
         }
 
         Ok(TermFrame { id, clauses })

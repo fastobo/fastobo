@@ -3,8 +3,8 @@ use fastobo_derive_internal::OboClause;
 use pest::iterators::Pair;
 
 use crate::ast::*;
-
 use crate::error::SyntaxError;
+use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::OboClause;
 use crate::syntax::Rule;
@@ -46,76 +46,79 @@ impl From<Definition> for InstanceClause {
 
 impl<'i> FromPair<'i> for InstanceClause {
     const RULE: Rule = Rule::InstanceClause;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         match inner.next().unwrap().as_rule() {
             Rule::IsAnonymousTag => {
-                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                let b = bool::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::IsAnonymous(b))
             }
             Rule::NameTag => {
-                let n = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let n = UnquotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Name(Box::new(n)))
             }
             Rule::NamespaceTag => {
-                let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let ns = NamespaceIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Namespace(Box::new(ns)))
             }
             Rule::AltIdTag => {
-                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::AltId(Box::new(id)))
             }
             Rule::DefTag => {
-                let def = Definition::from_pair_unchecked(inner.next().unwrap())?;
+                let def = Definition::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Def(Box::new(def)))
             }
             Rule::CommentTag => {
-                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Comment(Box::new(s)))
             }
             Rule::SubsetTag => {
-                let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = SubsetIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Subset(Box::new(id)))
             }
             Rule::SynonymTag => {
-                let syn = Synonym::from_pair_unchecked(inner.next().unwrap())?;
+                let syn = Synonym::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Synonym(Box::new(syn)))
             }
             Rule::XrefTag => {
-                let xref = Xref::from_pair_unchecked(inner.next().unwrap())?;
+                let xref = Xref::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Xref(Box::new(xref)))
             }
             Rule::PropertyValueTag => {
-                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap())?;
+                let pv = PropertyValue::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::PropertyValue(Box::new(pv)))
             }
             Rule::InstanceOfTag => {
-                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = ClassIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::InstanceOf(Box::new(id)))
             }
             Rule::RelationshipTag => {
-                let r = RelationIdent::from_pair_unchecked(inner.next().unwrap())?;
-                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
+                let r = RelationIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Relationship(Box::new(r), Box::new(id)))
             }
             Rule::CreatedByTag => {
-                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap())?;
+                let s = UnquotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::CreatedBy(Box::new(s)))
             }
             Rule::CreationDateTag => {
-                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap())?;
+                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::CreationDate(Box::new(dt)))
             }
             Rule::IsObsoleteTag => {
-                let b = bool::from_pair_unchecked(inner.next().unwrap())?;
+                let b = bool::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::IsObsolete(b))
             }
             Rule::ReplacedByTag => {
-                let id = InstanceIdent::from_pair_unchecked(inner.next().unwrap())?;
+                let id = InstanceIdent::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::ReplacedBy(Box::new(id)))
             }
             Rule::ConsiderTag => {
-                let id = Ident::from_pair_unchecked(inner.next().unwrap())?;
+                let id = Ident::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::Consider(Box::new(id)))
             }
             _ => unreachable!(),
@@ -125,10 +128,13 @@ impl<'i> FromPair<'i> for InstanceClause {
 
 impl<'i> FromPair<'i> for Line<InstanceClause> {
     const RULE: Rule = Rule::InstanceClauseLine;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let clause = InstanceClause::from_pair_unchecked(inner.next().unwrap())?;
+        let clause = InstanceClause::from_pair_unchecked(inner.next().unwrap(), cache)?;
         let eol = inner.next().unwrap();
-        Ok(Eol::from_pair_unchecked(eol)?.and_inner(clause))
+        Ok(Eol::from_pair_unchecked(eol, cache)?.and_inner(clause))
     }
 }

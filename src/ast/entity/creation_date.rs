@@ -2,6 +2,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
+use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
@@ -29,7 +30,7 @@ use crate::syntax::Rule;
 /// make this a hard error, and instead to support incomplete dates, for
 /// intercompatibility with older ontologies that are otherwise parsing fine.
 ///
-#[derive(Clone, Debug, Hash, PartialOrd, Ord, Eq, PartialEq)]
+#[derive(Clone, Debug, FromStr, Hash, PartialOrd, Ord, Eq, PartialEq)]
 pub enum CreationDate {
     /// A creation date missing the time component of an ISO8601 datetime.
     Date(Box<IsoDate>),

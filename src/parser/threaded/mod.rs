@@ -1,16 +1,15 @@
 use std::collections::HashMap;
-use std::io::BufRead;
-use std::io::BufReader;
-use std::num::NonZeroUsize;
-
 use std::convert::TryFrom;
 use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::iter::Iterator;
+use std::num::NonZeroUsize;
+use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use crossbeam_channel::TryRecvError;
-
 use lazy_static::lazy_static;
 
 use crate::ast::EntityFrame;
@@ -24,6 +23,7 @@ use crate::error::ThreadingError;
 use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
+use super::Cache;
 use super::FromPair;
 use super::Parser;
 
@@ -54,7 +54,7 @@ pub struct ThreadedParser<B: BufRead> {
     stream: B,
     // the state of the parser
     state: State,
-    //
+    // the consumer threads
     consumers: Vec<Consumer>,
 
     // communication channels
@@ -63,6 +63,7 @@ pub struct ThreadedParser<B: BufRead> {
 
     /// Buffer for the last line that was read.
     line: String,
+
     /// Number of threads requested by the user
     threads: NonZeroUsize,
 
@@ -70,10 +71,15 @@ pub struct ThreadedParser<B: BufRead> {
     line_offset: usize,
     offset: usize,
 
-    ///
+    /// Local progress counters
     ordered: bool,
     read_index: usize,
     sent_index: usize,
+
+    /// String interner.
+    interner: Arc<Cache>,
+
+    /// Result queue to maintain frame order if in ordered mode.
     queue: HashMap<usize, Result<Frame, Error>>,
 }
 
@@ -267,12 +273,13 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
 
     /// Create a new `ThreadedParser` with the given number of threads.
     fn with_threads(mut stream: B, threads: NonZeroUsize) -> Self {
-        //
+        // create the buffers and counters
         let mut frame_clauses = Vec::new();
         let mut line = String::new();
         let mut l: &str;
         let mut offset = 0;
         let mut line_offset = 0;
+        let interner = Arc::new(Cache::default());
 
         // create the communication channels
         let (s_text, r_text) = crossbeam_channel::unbounded();
@@ -293,7 +300,7 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
                 let clause = Lexer::tokenize(Rule::HeaderClause, &line)
                     .map_err(SyntaxError::from)
                     .map(|mut p| p.next().unwrap())
-                    .and_then(HeaderClause::from_pair)
+                    .and_then(|p| HeaderClause::from_pair(p, &interner))
                     .map_err(SyntaxError::from);
                 // check if the clause was parsed properly or not
                 match clause {
@@ -317,7 +324,7 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
         // create the consumers
         let mut consumers = Vec::with_capacity(threads.get());
         for _ in 0..threads.get() {
-            let c = Consumer::new(r_text.clone(), s_item.clone());
+            let c = Consumer::new(r_text.clone(), s_item.clone(), interner.clone());
             consumers.push(c);
         }
 
@@ -334,6 +341,7 @@ impl<B: BufRead> Parser<B> for ThreadedParser<B> {
             line,
             line_offset,
             offset,
+            interner,
             ordered: false,
             read_index: 0,
             sent_index: 1,

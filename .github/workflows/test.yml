@@ -132,3 +132,22 @@ jobs:
       with:
         command: publish
         args: '--token ${{ secrets.CRATES_IO_TOKEN }}'
+  release:
+    environment: GitHub Releases
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/v')"
+    name: Release
+    needs: publish
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Set up Ruby 2.7
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+    - name: Install chandler gem
+      run: gem install chandler
+    - name: Update releases messages
+      run: chandler push --github="${{ github.repository }}" --changelog="CHANGELOG.md"
+      env:
+        CHANDLER_GITHUB_API_TOKEN: ${{ secrets.CHANDLER_GITHUB_API_TOKEN }}

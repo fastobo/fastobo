@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use std::str::FromStr;
-use std::sync::RwLock;
 
 use pest::iterators::Pair;
 
@@ -11,7 +10,10 @@ use crate::syntax::Rule;
 /// A string cache to recycle memory for shared values.
 #[derive(Debug, Default)]
 pub struct Cache {
-    cache: RwLock<HashSet<IdentType>>,
+    #[cfg(feature = "threading")]
+    cache: std::sync::RwLock<HashSet<IdentType>>,
+    #[cfg(not(feature = "threading"))]
+    cache: std::cell::RefCell<HashSet<IdentType>>,
 }
 
 impl Cache {
@@ -22,17 +24,34 @@ impl Cache {
 
     /// Obtain a new `IndentType` for this string, or return the cached one.
     pub fn intern(&self, s: &str) -> IdentType {
-        // read-only if the string was already interned
-        let readable = self.cache.read().expect("failed to acquire lock");
-        if let Some(interned) = readable.get(s) {
-            return interned.clone();
+        #[cfg(feature = "threading")]
+        {
+            // read-only if the string was already interned
+            let readable = self.cache.read().expect("failed to acquire lock");
+            if let Some(interned) = readable.get(s) {
+                return interned.clone();
+            }
+            drop(readable);
+            // write access if the string was not interned
+            let new = IdentType::from(s);
+            let mut writable = self.cache.write().expect("failed to acquire lock");
+            writable.insert(new.clone());
+            new
         }
-        drop(readable);
-        // write access if the string was not interned
-        let new = IdentType::from(s);
-        let mut writable = self.cache.write().expect("failed to acquire lock");
-        writable.insert(new.clone());
-        new
+        #[cfg(not(feature = "threading"))]
+        {
+            // read-only if the string was already interned
+            let readable = self.cache.borrow();
+            if let Some(interned) = readable.get(s) {
+                return interned.clone();
+            }
+            drop(readable);
+            // write access if the string was not interned
+            let new = IdentType::from(s);
+            let mut writable = self.cache.borrow_mut();
+            writable.insert(new.clone());
+            new
+        }
     }
 }
 

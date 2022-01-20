@@ -4,7 +4,7 @@ use darling::ast::Data;
 use darling::ast::Fields;
 use darling::util::Ignored;
 use darling::FromDeriveInput;
-use heck::SnakeCase;
+use heck::ToSnakeCase;
 use syn::parse_quote;
 use syn::Ident;
 use syn::Type;

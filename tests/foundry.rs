@@ -66,7 +66,6 @@ foundrytest!(cio);
 foundrytest!(zfs);
 foundrytest!(emapa);
 foundrytest!(xpo);
-foundrytest!(exo);
 foundrytest!(wbls);
 foundrytest!(olatdv);
 foundrytest!(planp);
@@ -92,6 +91,13 @@ foundrytest!(zeco);
 foundrytest!(ro);
 foundrytest!(mi);
 foundrytest!(trans);
+foundrytest!(ecocore);
+foundrytest!(phipo);
+foundrytest!(to);
+foundrytest!(cl);
+foundrytest!(fypo);
+foundrytest!(doid);
+foundrytest!(xlmod);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -123,23 +129,17 @@ foundrytest!(
     #[ignore]
     tto
 );
+foundrytest!(
+    #[ignore]
+    uberon
+);
 
 // --- Expected failures -----------------------------------------------------
 
+// Invalid namespace
 foundrytest!(
     #[ignore]
-    phipo
-);
-
-foundrytest!(
-    #[ignore]
-    to
-);
-
-// Invalid Xref
-foundrytest!(
-    #[ignore]
-    cl
+    exo
 );
 
 // Invalid Xref
@@ -147,11 +147,6 @@ foundrytest!(
     #[ignore]
     eco
 );
-foundrytest!(
-    #[ignore]
-    doid
-);
-
 foundrytest!(
     #[ignore]
     so
@@ -164,26 +159,15 @@ foundrytest!(
 // Invalid syntax caused by ChEBI
 foundrytest!(
     #[ignore]
-    fypo
-);
-foundrytest!(
-    #[ignore]
     sibo
 );
-// Invalid syntax caused by ENVO
-foundrytest!(
-    #[ignore]
-    ecocore
-);
+
 // Invalid Xref syntax
 foundrytest!(
     #[ignore]
     chebi
 );
-foundrytest!(
-    #[ignore]
-    uberon
-);
+
 foundrytest!(
     #[ignore]
     xco
@@ -219,10 +203,6 @@ foundrytest!(
     zp
 );
 
-foundrytest!(
-    #[ignore]
-    xlmod
-);
 foundrytest!(
     #[ignore]
     plana

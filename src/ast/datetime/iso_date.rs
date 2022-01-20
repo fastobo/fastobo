@@ -3,16 +3,11 @@ use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
-use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-use ordered_float::OrderedFloat;
 use pest::iterators::Pair;
 
 use super::Date;
-use super::DateTime;
-use super::IsoTimezone;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
@@ -57,7 +52,7 @@ impl<'i> FromPair<'i> for IsoDate {
     const RULE: Rule = Rule::Iso8601Date;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let year = u16::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();

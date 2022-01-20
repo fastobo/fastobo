@@ -2,8 +2,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-use std::ops::Deref;
-use std::ops::DerefMut;
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
@@ -126,12 +124,12 @@ impl Synonym {
 
     /// Get a reference to the type of the `Synonym`, if any.
     pub fn ty(&self) -> Option<&SynonymTypeIdent> {
-        self.ty.as_ref().map(Deref::deref)
+        self.ty.as_deref()
     }
 
     /// Get a mutable reference to the type of the `Synonym`, if any.
     pub fn ty_mut(&mut self) -> Option<&mut SynonymTypeIdent> {
-        self.ty.as_mut().map(DerefMut::deref_mut)
+        self.ty.as_deref_mut()
     }
 
     /// Get a reference to the xrefs of the `Synonym`.

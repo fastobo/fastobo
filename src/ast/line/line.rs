@@ -58,19 +58,19 @@ impl<T> Line<T> {
     }
 
     pub fn qualifiers(&self) -> Option<&QualifierList> {
-        self.qualifiers.as_ref().map(Deref::deref)
+        self.qualifiers.as_deref()
     }
 
     pub fn qualifiers_mut(&mut self) -> Option<&mut QualifierList> {
-        self.qualifiers.as_mut().map(DerefMut::deref_mut)
+        self.qualifiers.as_deref_mut()
     }
 
     pub fn comment(&self) -> Option<&Comment> {
-        self.comment.as_ref().map(Deref::deref)
+        self.comment.as_deref()
     }
 
     pub fn comment_mut(&mut self) -> Option<&mut Comment> {
-        self.comment.as_mut().map(DerefMut::deref_mut)
+        self.comment.as_deref_mut()
     }
 
     /// Get a reference to the OBO clause wrapped in the line.

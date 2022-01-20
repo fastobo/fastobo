@@ -5,7 +5,6 @@ use std::fmt::Write;
 use std::iter::FromIterator;
 use std::ops::Deref;
 use std::ops::DerefMut;
-use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
@@ -217,6 +216,7 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     #[test]
     fn from_str() {

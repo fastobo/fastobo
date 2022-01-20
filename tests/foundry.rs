@@ -24,7 +24,7 @@ macro_rules! foundrytest {
         #[test]
         fn $ont() {
             // get the URL to the OBO product
-            let ref url = FOUNDRY
+            let url = &FOUNDRY
                 .ontologies
                 .iter()
                 .find(|onto| onto.id == stringify!($ont))

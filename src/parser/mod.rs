@@ -358,12 +358,12 @@ mod tests {
 
     mod sequential {
         use super::*;
-        tests!(|x| SequentialParser::new(x));
+        tests!(SequentialParser::new);
     }
 
     #[cfg(feature = "threading")]
     mod threaded {
         use super::*;
-        tests!(|x| ThreadedParser::new(x));
+        tests!(ThreadedParser::new);
     }
 }

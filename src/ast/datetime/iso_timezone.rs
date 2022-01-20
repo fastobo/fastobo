@@ -4,10 +4,8 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 use std::fmt::Write;
-use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-use ordered_float::OrderedFloat;
 use pest::iterators::Pair;
 
 use crate::error::SyntaxError;
@@ -40,7 +38,7 @@ impl<'i> FromPair<'i> for IsoTimezone {
         pair: Pair<'i, Rule>,
         _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
-        let mut inner = pair.into_inner().next().unwrap();
+        let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iso8601TimeZoneUtc => Ok(IsoTimezone::Utc),
             Rule::Iso8601TimeZoneOffset => {

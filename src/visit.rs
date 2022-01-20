@@ -373,7 +373,7 @@ pub mod visit {
     pub fn visit_synonym<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, syn: &'ast Synonym) {
         visitor.visit_quoted_string(syn.description());
         visitor.visit_synonym_scope(syn.scope());
-        if let Some(ref id) = syn.ty() {
+        if let Some(id) = syn.ty() {
             visitor.visit_synonymtype_ident(id);
         }
         visitor.visit_xref_list(syn.xrefs())
@@ -526,7 +526,7 @@ pub mod visit {
 
     pub fn visit_xref<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, xref: &'ast Xref) {
         visitor.visit_ident(xref.id());
-        if let Some(ref d) = xref.description() {
+        if let Some(d) = xref.description() {
             visitor.visit_quoted_string(d);
         }
     }

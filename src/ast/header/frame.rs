@@ -69,7 +69,7 @@ impl HeaderFrame {
             if let HeaderClause::FormatVersion(v) = clause {
                 match version {
                     Some(_) => return Err(CardinalityError::duplicate("format-version")),
-                    None => version = Some(&v),
+                    None => version = Some(v),
                 }
             }
         }
@@ -83,7 +83,7 @@ impl HeaderFrame {
             if let HeaderClause::DataVersion(v) = clause {
                 match version {
                     Some(_) => return Err(CardinalityError::duplicate("data-version")),
-                    None => version = Some(&v),
+                    None => version = Some(v),
                 }
             }
         }
@@ -262,7 +262,7 @@ mod tests {
         frame.push(HeaderClause::DataVersion(Box::new(v.clone())));
         self::assert_eq!(frame.data_version(), Ok(&v));
 
-        frame.push(HeaderClause::DataVersion(Box::new(v.clone())));
+        frame.push(HeaderClause::DataVersion(Box::new(v)));
         self::assert_eq!(
             frame.data_version(),
             Err(CardinalityError::duplicate("data-version"))
@@ -281,7 +281,7 @@ mod tests {
         frame.push(HeaderClause::DefaultNamespace(Box::new(ns.clone())));
         self::assert_eq!(frame.default_namespace(), Ok(&ns));
 
-        frame.push(HeaderClause::DefaultNamespace(Box::new(ns.clone())));
+        frame.push(HeaderClause::DefaultNamespace(Box::new(ns)));
         self::assert_eq!(
             frame.default_namespace(),
             Err(CardinalityError::duplicate("default-namespace"))
@@ -300,7 +300,7 @@ mod tests {
         frame.push(HeaderClause::FormatVersion(Box::new(v.clone())));
         self::assert_eq!(frame.format_version(), Ok(&v));
 
-        frame.push(HeaderClause::FormatVersion(Box::new(v.clone())));
+        frame.push(HeaderClause::FormatVersion(Box::new(v)));
         self::assert_eq!(
             frame.format_version(),
             Err(CardinalityError::duplicate("format-version"))

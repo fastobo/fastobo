@@ -26,7 +26,7 @@ pub enum Ident {
 
 impl AsRef<Ident> for Ident {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 

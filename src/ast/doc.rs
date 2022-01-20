@@ -238,21 +238,19 @@ impl OboDoc {
         // Apply all `treat-xrefs` macros to the document.
         for clause in &self.header {
             match clause {
-                TreatXrefsAsEquivalent(prefix) => {
-                    crate::semantics::as_equivalent(entities, &prefix)
-                }
-                TreatXrefsAsIsA(prefix) => crate::semantics::as_is_a(entities, &prefix),
+                TreatXrefsAsEquivalent(prefix) => crate::semantics::as_equivalent(entities, prefix),
+                TreatXrefsAsIsA(prefix) => crate::semantics::as_is_a(entities, prefix),
                 TreatXrefsAsHasSubclass(prefix) => {
-                    crate::semantics::as_has_subclass(entities, &prefix)
+                    crate::semantics::as_has_subclass(entities, prefix)
                 }
                 TreatXrefsAsGenusDifferentia(prefix, rel, cls) => {
-                    crate::semantics::as_genus_differentia(entities, &prefix, &rel, &cls)
+                    crate::semantics::as_genus_differentia(entities, prefix, rel, cls)
                 }
                 TreatXrefsAsReverseGenusDifferentia(prefix, rel, cls) => {
-                    crate::semantics::as_reverse_genus_differentia(entities, &prefix, &rel, &cls)
+                    crate::semantics::as_reverse_genus_differentia(entities, prefix, rel, cls)
                 }
                 TreatXrefsAsRelationship(prefix, rel) => {
-                    crate::semantics::as_relationship(entities, &prefix, &rel)
+                    crate::semantics::as_relationship(entities, prefix, rel)
                 }
                 _ => (),
             }

@@ -19,6 +19,7 @@ use super::escape;
 use super::unescape;
 
 /// Return whether a prefix is canonical.
+#[allow(clippy::redundant_closure)]
 pub fn is_canonical<S: AsRef<str>>(s: S) -> bool {
     let string = s.as_ref();
     let mut chars = string.chars();
@@ -130,7 +131,7 @@ impl<'i> FromPair<'i> for IdentPrefix {
 
         // Unescape the prefix if it was not produced by CanonicalIdPrefix.
         let s = inner.as_str();
-        let prefix = if let Some(_) = s.quickfind(b'\\') {
+        let prefix = if s.quickfind(b'\\').is_some() {
             let mut prefix = String::with_capacity(s.len());
             unescape(&mut prefix, s).expect("fmt::Write cannot fail on a String");
             Cow::Owned(prefix)

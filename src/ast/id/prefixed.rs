@@ -111,7 +111,7 @@ impl<'i> FromPair<'i> for PrefixedIdent {
         let local = inners.next().unwrap();
 
         // unescape prefix part if needed, otherwise don't allocate
-        let p = if let Some(_) = prefix.as_str().quickfind(b'\\') {
+        let p = if prefix.as_str().quickfind(b'\\').is_some() {
             let mut p = String::with_capacity(prefix.as_str().len());
             unescape(&mut p, prefix.as_str()).expect("cannot contain invalid escape characters");
             Cow::Owned(p)
@@ -119,7 +119,7 @@ impl<'i> FromPair<'i> for PrefixedIdent {
             Cow::Borrowed(prefix.as_str())
         };
         // unescape local part if needed, otherwise don't allocate
-        let l = if let Some(_) = local.as_str().quickfind(b'\\') {
+        let l = if local.as_str().quickfind(b'\\').is_some() {
             let mut l = String::with_capacity(local.as_str().len());
             unescape(&mut l, local.as_str()).expect("cannot contain invalid escape characters");
             Cow::Owned(l)

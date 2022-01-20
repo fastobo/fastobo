@@ -77,7 +77,7 @@ impl<'i> FromPair<'i> for PropertyValue {
 impl PartialOrd for PropertyValue {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.property()
-            .cmp(&other.property())
+            .cmp(other.property())
             .then_with(|| self.to_string().cmp(&other.to_string()))
             .into()
     }

@@ -70,7 +70,7 @@ impl InstanceFrame {
             if let InstanceClause::Name(n) = clause.as_inner() {
                 match name {
                     Some(_) => return Err(CardinalityError::duplicate("name")),
-                    None => name = Some(&n),
+                    None => name = Some(n),
                 }
             }
         }
@@ -84,7 +84,7 @@ impl InstanceFrame {
             if let InstanceClause::Def(n) = clause.as_inner() {
                 match def {
                     Some(_) => return Err(CardinalityError::duplicate("def")),
-                    None => def = Some(&n),
+                    None => def = Some(n),
                 }
             }
         }

@@ -1,10 +1,7 @@
-use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
 
-use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
 use crate::ast::*;
@@ -43,7 +40,7 @@ pub enum CreationDate {
 impl AsRef<IsoDate> for CreationDate {
     fn as_ref(&self) -> &IsoDate {
         match self {
-            CreationDate::Date(d) => &d,
+            CreationDate::Date(d) => d,
             CreationDate::DateTime(dt) => dt.date(),
         }
     }
@@ -60,15 +57,15 @@ impl Display for CreationDate {
 
 impl Date for CreationDate {
     fn year(&self) -> u16 {
-        <Self as AsRef<IsoDate>>::as_ref(&self).year()
+        <Self as AsRef<IsoDate>>::as_ref(self).year()
     }
 
     fn month(&self) -> u8 {
-        <Self as AsRef<IsoDate>>::as_ref(&self).month()
+        <Self as AsRef<IsoDate>>::as_ref(self).month()
     }
 
     fn day(&self) -> u8 {
-        <Self as AsRef<IsoDate>>::as_ref(&self).day()
+        <Self as AsRef<IsoDate>>::as_ref(self).day()
     }
 }
 
@@ -102,7 +99,7 @@ impl<'i> FromPair<'i> for CreationDate {
         pair: Pair<'i, Rule>,
         cache: &Cache,
     ) -> Result<Self, SyntaxError> {
-        let mut inner = pair.into_inner().next().unwrap();
+        let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
             Rule::Iso8601DateTime => IsoDateTime::from_pair(inner, cache).map(From::from),
             Rule::Iso8601Date => IsoDate::from_pair(inner, cache).map(From::from),

@@ -3,18 +3,14 @@ use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
-use std::fmt::Write;
-use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
-use ordered_float::OrderedFloat;
 use pest::iterators::Pair;
 
 use super::Date;
 use super::DateTime;
 use super::IsoDate;
 use super::IsoTime;
-use super::IsoTimezone;
 use super::Time;
 use crate::error::SyntaxError;
 use crate::parser::Cache;

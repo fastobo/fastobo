@@ -87,5 +87,5 @@ pub type IdentType = IdentTypeImpl;
 #[cfg(feature = "threading")]
 type IdentTypeImpl = std::sync::Arc<str>;
 
-#[cfg(not(feature = "smartstring"))]
+#[cfg(not(feature = "threading"))]
 type IdentTypeImpl = std::rc::Rc<str>;

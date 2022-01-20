@@ -16,6 +16,7 @@ use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
+use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
 /// A qualifier, possibly used as a trailing modifier.
@@ -64,11 +65,20 @@ impl Display for Qualifier {
 impl<'i> FromPair<'i> for Qualifier {
     const RULE: Rule = Rule::Qualifier;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
-        // FIXME: avoid using `from_str` to parse the RelationIdent
+        // store the first pair
         let mut inner = pair.into_inner();
-        let key = RelationIdent::from_str(inner.next().unwrap().as_str())?;
+        let p1 = inner.next().unwrap();
+        // parse value from the second pair
         let value = QuotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
-        Ok(Qualifier { key, value })
+        // tokenize the first pair again
+        match Lexer::tokenize(Rule::RelationId, p1.as_str())
+            .map_err(SyntaxError::from)
+            .map(|mut pairs| pairs.next().unwrap())
+            .and_then(|pair| RelationIdent::from_pair(pair, cache))
+        {
+            Ok(key) => Ok(Qualifier { key, value }),
+            Err(error) => Err(error.with_span(p1.as_span())),
+        }
     }
 }
 

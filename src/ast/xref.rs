@@ -17,6 +17,7 @@ use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
+use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
 /// A database cross-reference definition.
@@ -205,13 +206,21 @@ impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        _cache: &Cache,
+        cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
-            // FIXME: avoid using Xref::from_str here
-            let xref = Xref::from_str(inner.as_str()).map_err(|e| e.with_span(inner.as_span()))?;
-            xrefs.push(xref);
+            // We have to re-tokenize here because the identifier
+            // rule would allow some identifiers that could break
+            // the parsing of the xref list.
+            match Lexer::tokenize(Rule::Xref, inner.as_str())
+                .map_err(SyntaxError::from)
+                .map(|mut pairs| pairs.next().unwrap())
+                .and_then(|pair| Xref::from_pair(pair, cache))
+            {
+                Ok(xref) => xrefs.push(xref),
+                Err(error) => return Err(error.with_span(inner.as_span())),
+            }
         }
         Ok(Self { xrefs })
     }

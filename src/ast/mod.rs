@@ -23,6 +23,9 @@
 //! [`fastobo::from_stream`]: ../fn.from_file.html
 //! [OBO format version 1.4]: http://owlcollab.github.io/oboformat/doc/GO.format.obo-1_4.html.
 
+#[macro_use]
+pub(self) mod macros;
+
 mod datetime;
 mod doc;
 mod entity;

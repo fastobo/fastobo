@@ -79,11 +79,7 @@ pub enum TypedefClause {
     IsClassLevel(bool),
 }
 
-impl From<Definition> for TypedefClause {
-    fn from(d: Definition) -> Self {
-        TypedefClause::Def(Box::new(d))
-    }
-}
+clause_impl_from!(TypedefClause);
 
 impl<'i> FromPair<'i> for Line<TypedefClause> {
     const RULE: Rule = Rule::TypedefClauseLine;

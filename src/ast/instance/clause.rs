@@ -38,11 +38,7 @@ pub enum InstanceClause {
     Consider(Box<Ident>),
 }
 
-impl From<Definition> for InstanceClause {
-    fn from(d: Definition) -> Self {
-        InstanceClause::Def(Box::new(d))
-    }
-}
+clause_impl_from!(InstanceClause);
 
 impl<'i> FromPair<'i> for InstanceClause {
     const RULE: Rule = Rule::InstanceClause;

@@ -10,6 +10,7 @@ pub use self::iso_time::IsoTime;
 pub use self::iso_timezone::IsoTimezone;
 pub use self::naive_datetime::NaiveDateTime;
 
+/// A trait for common attributes of OBO times.
 pub trait Date {
     /// Get the year component of the date.
     fn year(&self) -> u16;
@@ -26,6 +27,7 @@ pub trait Date {
     }
 }
 
+/// A trait for common attributes of OBO times.
 pub trait Time {
     fn hour(&self) -> u8;
     fn minute(&self) -> u8;

@@ -53,11 +53,7 @@ pub enum TermClause {
     Consider(Box<ClassIdent>),
 }
 
-impl From<Definition> for TermClause {
-    fn from(d: Definition) -> Self {
-        TermClause::Def(Box::new(d))
-    }
-}
+clause_impl_from!(TermClause);
 
 impl<'i> FromPair<'i> for Line<TermClause> {
     const RULE: Rule = Rule::TermClauseLine;

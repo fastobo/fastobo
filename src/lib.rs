@@ -1,3 +1,4 @@
+#![cfg_attr(feature = "_doc", feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 #![warn(clippy::all)]
 #![allow(clippy::module_inception)]

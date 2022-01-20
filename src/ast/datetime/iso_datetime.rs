@@ -34,40 +34,39 @@ impl IsoDateTime {
         IsoDateTime { date, time }
     }
 
-    // /// Change the timezone component of the `IsoDateTime`.
-    // pub fn with_timezone<I>(mut self, tz: I) -> Self
-    // where
-    //     I: Into<Option<IsoTimezone>>,
-    // {
-    //     self.timezone = tz.into();
-    //     self
-    // }
-    //
-    // /// Change the date component of the `IsoDateTime`.
-    // pub fn with_date(mut self, day: u8, month: u8, year: u16) -> Self {
-    //     self.day = day;
-    //     self.month = month;
-    //     self.year = year;
-    //     self
-    // }
-    //
-    // /// Change the time component of the `IsoDateTime`.
-    // pub fn with_time(mut self, hour: u8, minute: u8, second: u8) -> Self {
-    //     self.hour = hour;
-    //     self.minute = minute;
-    //     self.second = second;
-    //     self
-    // }
-    //
-    // /// Get the fraction of the `IsoDateTime`.
-    // pub fn fraction(&self) -> Option<f32> {
-    //     self.fraction.as_ref().map(|f| f.0)
-    // }
-    //
-    // /// Get the timezone of the `IsoDateTime`, if any.
-    // pub fn timezone(&self) -> Option<&IsoTimezone> {
-    //     self.timezone.as_ref()
-    // }
+    // Get the date component of the `IsoDateTime`.
+    pub fn date(&self) -> &IsoDate {
+        &self.date
+    }
+
+    // Get the date component of the `IsoDateTime`.
+    pub fn time(&self) -> &IsoTime {
+        &self.time
+    }
+
+    /// Change the date component of the `IsoDateTime`.
+    pub fn with_date(mut self, date: IsoDate) -> Self {
+        self.date = date;
+        self
+    }
+
+    /// Change the time component of the `IsoDateTime`.
+    pub fn with_time(mut self, time: IsoTime) -> Self {
+        self.time = time;
+        self
+    }
+}
+
+impl AsRef<IsoDate> for IsoDateTime {
+    fn as_ref(&self) -> &IsoDate {
+        self.date()
+    }
+}
+
+impl AsRef<IsoTime> for IsoDateTime {
+    fn as_ref(&self) -> &IsoTime {
+        self.time()
+    }
 }
 
 impl Date for IsoDateTime {

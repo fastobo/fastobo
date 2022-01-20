@@ -6,10 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.14.0...HEAD
+
+## [v0.14.0] - 2022-01-11
+[v0.14.0]: https://github.com/fastobo/fastobo/compare/v0.13.2...v0.14.0
+### Added
+- `IsoDate` and `IsoTime` to manage individuals components of an `IsoDateTime`.
+- `CreationDate` to store the date declared in a `creation_date` clause.
+- `Display` and `Orderable` trait implementations for `ast::Frame`.
+### Changed
+- Bump `fastobo-syntax` dependency to `v0.7.1`.
+- Use string interning for all identifier types allowing reference counting for common strings.
+- `fastobo::parser::FromPair` trait now takes a cache argument for interning strings.
+- `XrefList::from_pair` and `QualifierList::from_pair` will now use `Xref::from_pair` and `Qualifier::from_pair` instead of `FromStr::from_str` like before.
+### Fixed
+- `OboDoc.assign_namespaces` will not raise a `CardinalityError` on documents where all entities already have a namespace clause.
+- `OboDoc.sort` will not clone identifiers anymore before comparing entities.
 
 ## [v0.13.2] - 2022-01-11
-[v0.13.2]
+[v0.13.2]: https://github.com/fastobo/fastobo/compare/v0.13.1...v0.13.2
 ### Fixed
 - `fastobo::to_writer` not writing newlines between entity frames.
 

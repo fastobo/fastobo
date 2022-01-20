@@ -12,6 +12,7 @@ use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
+use crate::parser::QuickFind;
 use crate::syntax::Rule;
 
 use super::escape;
@@ -110,24 +111,25 @@ impl<'i> FromPair<'i> for PrefixedIdent {
         let local = inners.next().unwrap();
 
         // unescape prefix part if needed, otherwise don't allocate
-        let p = if prefix.as_str().contains('\\') {
-            let mut p = String::new();
+        let p = if let Some(_) = prefix.as_str().quickfind(b'\\') {
+            let mut p = String::with_capacity(prefix.as_str().len());
             unescape(&mut p, prefix.as_str()).expect("cannot contain invalid escape characters");
             Cow::Owned(p)
         } else {
             Cow::Borrowed(prefix.as_str())
         };
         // unescape local part if needed, otherwise don't allocate
-        let l = if local.as_str().contains('\\') {
-            let mut l = String::new();
+        let l = if let Some(_) = local.as_str().quickfind(b'\\') {
+            let mut l = String::with_capacity(local.as_str().len());
             unescape(&mut l, local.as_str()).expect("cannot contain invalid escape characters");
             Cow::Owned(l)
         } else {
             Cow::Borrowed(local.as_str())
         };
 
-        // FIXME: use a builder to allow recycling the string data
-        Ok(Self::new::<&str, &str>(&p, &l))
+        // use a builder to allow recycling the string data, in particular
+        // the prefix which should be shared by a lot of identifiers
+        Ok(Self::new(cache.intern(&p), cache.intern(&l)))
     }
 }
 

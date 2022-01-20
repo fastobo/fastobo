@@ -55,8 +55,8 @@ impl<'i> FromPair<'i> for Url {
     const RULE: Rule = Rule::Iri;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        _cache: &Cache,
+        cache: &Cache,
     ) -> Result<Self, SyntaxError> {
-        Ok(Url(IdentType::from(pair.as_str())))
+        Ok(Url(cache.intern(pair.as_str())))
     }
 }

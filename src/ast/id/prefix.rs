@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::borrow::Cow;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -129,13 +130,18 @@ impl<'i> FromPair<'i> for IdentPrefix {
 
         // Unescape the prefix if it was not produced by CanonicalIdPrefix.
         let s = inner.as_str();
-        let escaped = s.quickcount(b'\\');
-        let mut local = String::with_capacity(s.len() + escaped);
-        unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
+        let prefix = if let Some(_) = s.quickfind(b'\\') {
+            let mut prefix = String::with_capacity(s.len());
+            unescape(&mut prefix, s).expect("fmt::Write cannot fail on a String");
+            Cow::Owned(prefix)
+        } else {
+            Cow::Borrowed(s)
+        };
+
         // FIXME(@althonos): possible syntax issue, which uses a non-canonical
         //                   rule on canonical prefixes (workaround is to check
         //                   one more time if the prefix is canonical)
-        Ok(Self::new(local))
+        Ok(Self::new(cache.intern(&prefix)))
     }
 }
 

@@ -75,7 +75,7 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
         let escaped = s.quickcount(b'\\');
         let mut local = String::with_capacity(s.len() + escaped);
         unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
-        Ok(Self::new(local))
+        Ok(Self::new(cache.intern(&local)))
     }
 }
 

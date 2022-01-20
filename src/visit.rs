@@ -64,6 +64,7 @@ use crate::ast::*;
 #[blanket(default = "visit", derive(Mut, Box))]
 pub trait Visit<'ast> {
     fn visit_class_ident(&mut self, id: &'ast ClassIdent);
+    fn visit_creation_date(&mut self, creation_date: &'ast CreationDate);
     fn visit_definition(&mut self, id: &'ast Definition);
     fn visit_doc(&mut self, doc: &'ast OboDoc);
     fn visit_entity_frame(&mut self, frame: &'ast EntityFrame);
@@ -75,7 +76,9 @@ pub trait Visit<'ast> {
     fn visit_instance_clause(&mut self, clause: &'ast InstanceClause);
     fn visit_instance_frame(&mut self, frame: &'ast InstanceFrame);
     fn visit_instance_ident(&mut self, id: &'ast InstanceIdent);
-    fn visit_iso_date(&mut self, date: &'ast IsoDateTime);
+    fn visit_iso_date(&mut self, date: &'ast IsoDate);
+    fn visit_iso_datetime(&mut self, datetime: &'ast IsoDateTime);
+    fn visit_iso_time(&mut self, time: &'ast IsoTime);
     fn visit_literal_property_value(&mut self, id: &'ast LiteralPropertyValue);
     fn visit_naive_date(&mut self, date: &'ast NaiveDateTime);
     fn visit_namespace_ident(&mut self, id: &'ast NamespaceIdent);
@@ -106,6 +109,17 @@ pub mod visit {
 
     pub fn visit_class_ident<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, id: &'ast ClassIdent) {
         visitor.visit_ident(id.as_ref())
+    }
+
+    pub fn visit_creation_date<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        creation_date: &'ast CreationDate,
+    ) {
+        use self::CreationDate::*;
+        match creation_date {
+            Date(ref d) => visitor.visit_iso_date(d.as_ref()),
+            DateTime(ref d) => visitor.visit_iso_datetime(d.as_ref()),
+        }
     }
 
     pub fn visit_definition<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, def: &'ast Definition) {
@@ -247,7 +261,7 @@ pub mod visit {
                 visitor.visit_ident(id);
             }
             CreatedBy(s) => visitor.visit_unquoted_string(s),
-            CreationDate(dt) => visitor.visit_iso_date(dt),
+            CreationDate(dt) => visitor.visit_creation_date(dt),
             IsObsolete(_) => (),
             ReplacedBy(id) => visitor.visit_instance_ident(id),
             Consider(id) => visitor.visit_ident(id),
@@ -272,8 +286,19 @@ pub mod visit {
     }
 
     #[allow(unused_variables)]
-    pub fn visit_iso_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, date: &'ast IsoDateTime) {
+    pub fn visit_iso_date<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, datetime: &'ast IsoDate) {
     }
+
+    pub fn visit_iso_datetime<'ast, V: Visit<'ast> + ?Sized>(
+        visitor: &mut V,
+        datetime: &'ast IsoDateTime,
+    ) {
+        visitor.visit_iso_date(datetime.as_ref());
+        visitor.visit_iso_time(datetime.as_ref());
+    }
+
+    #[allow(unused_variables)]
+    pub fn visit_iso_time<'ast, V: Visit<'ast> + ?Sized>(visitor: &mut V, time: &'ast IsoTime) {}
 
     pub fn visit_literal_property_value<'ast, V: Visit<'ast> + ?Sized>(
         visitor: &mut V,
@@ -403,7 +428,7 @@ pub mod visit {
             ReplacedBy(id) => visitor.visit_class_ident(id),
             Consider(id) => visitor.visit_class_ident(id),
             CreatedBy(s) => visitor.visit_unquoted_string(s),
-            CreationDate(dt) => visitor.visit_iso_date(dt),
+            CreationDate(dt) => visitor.visit_creation_date(dt),
         }
     }
 
@@ -462,7 +487,7 @@ pub mod visit {
             ReplacedBy(id) => visitor.visit_relation_ident(id),
             Consider(id) => visitor.visit_ident(id),
             CreatedBy(s) => visitor.visit_unquoted_string(s),
-            CreationDate(dt) => visitor.visit_iso_date(dt),
+            CreationDate(dt) => visitor.visit_creation_date(dt),
             ExpandAssertionTo(s, xrefs) | ExpandExpressionTo(s, xrefs) => {
                 visitor.visit_quoted_string(s);
                 visitor.visit_xref_list(xrefs);
@@ -522,6 +547,7 @@ pub mod visit {
 #[blanket(default = "visit_mut", derive(Mut, Box))]
 pub trait VisitMut {
     fn visit_class_ident(&mut self, id: &mut ClassIdent);
+    fn visit_creation_date(&mut self, creation_date: &mut CreationDate);
     fn visit_definition(&mut self, id: &mut Definition);
     fn visit_doc(&mut self, doc: &mut OboDoc);
     fn visit_entity_frame(&mut self, frame: &mut EntityFrame);
@@ -533,7 +559,9 @@ pub trait VisitMut {
     fn visit_instance_clause(&mut self, clause: &mut InstanceClause);
     fn visit_instance_frame(&mut self, frame: &mut InstanceFrame);
     fn visit_instance_ident(&mut self, id: &mut InstanceIdent);
-    fn visit_iso_date(&mut self, date: &mut IsoDateTime);
+    fn visit_iso_date(&mut self, date: &mut IsoDate);
+    fn visit_iso_datetime(&mut self, datetime: &mut IsoDateTime);
+    fn visit_iso_time(&mut self, time: &mut IsoTime);
     fn visit_literal_property_value(&mut self, id: &mut LiteralPropertyValue);
     fn visit_naive_date(&mut self, date: &mut NaiveDateTime);
     fn visit_namespace_ident(&mut self, id: &mut NamespaceIdent);
@@ -564,6 +592,17 @@ pub mod visit_mut {
 
     pub fn visit_class_ident<V: VisitMut + ?Sized>(visitor: &mut V, id: &mut ClassIdent) {
         visitor.visit_ident(id.as_mut())
+    }
+
+    pub fn visit_creation_date<V: VisitMut + ?Sized>(
+        visitor: &mut V,
+        creation_date: &mut CreationDate,
+    ) {
+        use self::CreationDate::*;
+        match creation_date {
+            Date(d) => visitor.visit_iso_date(d.as_mut()),
+            DateTime(dt) => visitor.visit_iso_datetime(dt.as_mut()),
+        }
     }
 
     pub fn visit_definition<V: VisitMut + ?Sized>(visitor: &mut V, def: &mut Definition) {
@@ -692,7 +731,7 @@ pub mod visit_mut {
                 visitor.visit_ident(id);
             }
             CreatedBy(s) => visitor.visit_unquoted_string(s),
-            CreationDate(dt) => visitor.visit_iso_date(dt),
+            CreationDate(dt) => visitor.visit_creation_date(dt),
             IsObsolete(_) => (),
             ReplacedBy(id) => visitor.visit_instance_ident(id),
             Consider(id) => visitor.visit_ident(id),
@@ -710,8 +749,16 @@ pub mod visit_mut {
         visitor.visit_ident(id.as_mut())
     }
 
+    pub fn visit_iso_datetime<V: VisitMut + ?Sized>(visitor: &mut V, datetime: &mut IsoDateTime) {
+        visitor.visit_iso_date(datetime.as_mut());
+        visitor.visit_iso_time(datetime.as_mut());
+    }
+
     #[allow(unused_variables)]
-    pub fn visit_iso_date<V: VisitMut + ?Sized>(visitor: &mut V, date: &mut IsoDateTime) {}
+    pub fn visit_iso_date<V: VisitMut + ?Sized>(visitor: &mut V, date: &mut IsoDate) {}
+
+    #[allow(unused_variables)]
+    pub fn visit_iso_time<V: VisitMut + ?Sized>(visitor: &mut V, date: &mut IsoTime) {}
 
     pub fn visit_literal_property_value<V: VisitMut + ?Sized>(
         visitor: &mut V,
@@ -810,7 +857,7 @@ pub mod visit_mut {
             ReplacedBy(id) => visitor.visit_class_ident(id),
             Consider(id) => visitor.visit_class_ident(id),
             CreatedBy(s) => visitor.visit_unquoted_string(s),
-            CreationDate(dt) => visitor.visit_iso_date(dt),
+            CreationDate(dt) => visitor.visit_creation_date(dt),
         }
     }
 
@@ -865,7 +912,7 @@ pub mod visit_mut {
             ReplacedBy(id) => visitor.visit_relation_ident(id),
             Consider(id) => visitor.visit_ident(id),
             CreatedBy(s) => visitor.visit_unquoted_string(s),
-            CreationDate(dt) => visitor.visit_iso_date(dt),
+            CreationDate(dt) => visitor.visit_creation_date(dt),
             ExpandAssertionTo(s, xrefs) | ExpandExpressionTo(s, xrefs) => {
                 visitor.visit_quoted_string(s);
                 visitor.visit_xref_list(xrefs);

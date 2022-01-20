@@ -63,9 +63,21 @@ impl AsRef<IsoDate> for IsoDateTime {
     }
 }
 
+impl AsMut<IsoDate> for IsoDateTime {
+    fn as_mut(&mut self) -> &mut IsoDate {
+        &mut self.date
+    }
+}
+
 impl AsRef<IsoTime> for IsoDateTime {
     fn as_ref(&self) -> &IsoTime {
         self.time()
+    }
+}
+
+impl AsMut<IsoTime> for IsoDateTime {
+    fn as_mut(&mut self) -> &mut IsoTime {
+        &mut self.time
     }
 }
 

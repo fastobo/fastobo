@@ -55,6 +55,22 @@ impl Cache {
     }
 }
 
+impl Clone for Cache {
+    #[cfg(feature = "threading")]
+    fn clone(&self) -> Self {
+        let set = self.cache.read().expect("failed to acquire lock").clone();
+        Cache {
+            cache: std::sync::RwLock::new(set),
+        }
+    }
+    #[cfg(not(feature = "threading"))]
+    fn clone(&self) -> Self {
+        Cache {
+            cache: self.cache.clone(),
+        }
+    }
+}
+
 /// A trait for structures that can be parsed from a [`pest::Pair`].
 ///
 /// [`pest::Pair`]: https://docs.rs/pest/latest/pest/iterators/struct.Pair.html

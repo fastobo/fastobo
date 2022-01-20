@@ -58,21 +58,15 @@ pub trait OboFrame {
     type Clause: OboClause;
 
     /// Get a vector of references to the clauses of a frame.
-    ///
-    /// # Note
-    /// While currently returning a `Box<Iterator>`, this method will be changed
-    /// to return an associated type when [RFC1598] is implemented and available
-    /// in *stable* Rust.
-    ///
-    /// [RFC1598]: https://github.com/rust-lang/rfcs/blob/master/text/1598-generic_associated_types.md
     fn clauses_ref(&self) -> Vec<&Self::Clause>;
 
-    /// Check the frame only contains clauses with the right cardinality.
+    /// Check that the frame only contains clauses with the right cardinality.
     ///
     /// # Note
     /// The current implementation does not check for missing clauses: good
     /// ergonomics are to be found to provide a collection of required clauses
     /// in a generic manner.
+    ///
     fn cardinality_check(&self) -> Result<(), CardinalityError> {
         use std::collections::HashMap;
 

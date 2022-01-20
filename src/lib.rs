@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![warn(clippy::all)]
+#![allow(clippy::module_inception)]
 
 extern crate blanket;
 extern crate fastobo_derive_internal;

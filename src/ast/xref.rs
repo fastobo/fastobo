@@ -186,6 +186,12 @@ impl Display for XrefList {
     }
 }
 
+impl From<XrefList> for Vec<Xref> {
+    fn from(list: XrefList) -> Self {
+        list.xrefs
+    }
+}
+
 impl From<Vec<Xref>> for XrefList {
     fn from(xrefs: Vec<Xref>) -> Self {
         Self { xrefs }
@@ -222,12 +228,6 @@ impl<'i> FromPair<'i> for XrefList {
             }
         }
         Ok(Self { xrefs })
-    }
-}
-
-impl Into<Vec<Xref>> for XrefList {
-    fn into(self) -> Vec<Xref> {
-        self.xrefs
     }
 }
 

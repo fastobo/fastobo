@@ -155,6 +155,12 @@ impl Display for HeaderFrame {
     }
 }
 
+impl From<HeaderFrame> for Vec<HeaderClause> {
+    fn from(frame: HeaderFrame) -> Self {
+        frame.clauses
+    }
+}
+
 impl From<HeaderClause> for HeaderFrame {
     fn from(clause: HeaderClause) -> Self {
         Self::from_clause(clause)
@@ -187,12 +193,6 @@ impl<'i> FromPair<'i> for HeaderFrame {
             clauses.push(HeaderClause::from_pair_unchecked(inner, cache)?)
         }
         Ok(HeaderFrame::with_clauses(clauses))
-    }
-}
-
-impl Into<Vec<HeaderClause>> for HeaderFrame {
-    fn into(self) -> Vec<HeaderClause> {
-        self.clauses
     }
 }
 

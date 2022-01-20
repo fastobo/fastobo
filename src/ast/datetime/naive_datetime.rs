@@ -41,6 +41,7 @@ impl NaiveDateTime {
     }
 
     /// Change the date component of the `NaiveDateTime`.
+    #[must_use]
     pub fn with_date(mut self, day: u8, month: u8, year: u16) -> Self {
         self.day = day;
         self.month = month;
@@ -49,6 +50,7 @@ impl NaiveDateTime {
     }
 
     /// Change the time component of the `NaiveDateTime`.
+    #[must_use]
     pub fn with_time(mut self, hour: u8, minute: u8) -> Self {
         self.hour = hour;
         self.minute = minute;
@@ -102,18 +104,14 @@ impl<'i> FromPair<'i> for NaiveDateTime {
         _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let date = inner.next().unwrap();
-        let time = inner.next().unwrap();
-
-        let datestr = date.as_str();
-        let timestr = time.as_str();
-
+        let mut date = inner.next().unwrap().into_inner();
+        let mut time = inner.next().unwrap().into_inner();
         Ok(NaiveDateTime {
-            day: u8::from_str_radix(&datestr[..2], 10).unwrap(),
-            month: u8::from_str_radix(&datestr[3..5], 10).unwrap(),
-            year: u16::from_str_radix(&datestr[6..10], 10).unwrap(),
-            hour: u8::from_str_radix(&timestr[..2], 10).unwrap(),
-            minute: u8::from_str_radix(&timestr[3..5], 10).unwrap(),
+            day: date.next().unwrap().as_str().parse::<u8>().unwrap(),
+            month: date.next().unwrap().as_str().parse::<u8>().unwrap(),
+            year: date.next().unwrap().as_str().parse::<u16>().unwrap(),
+            hour: time.next().unwrap().as_str().parse::<u8>().unwrap(),
+            minute: time.next().unwrap().as_str().parse::<u8>().unwrap(),
         })
     }
 }

@@ -72,6 +72,7 @@ impl OboDoc {
     }
 
     /// Use the provided frame as the header of the OBO document.
+    #[must_use]
     pub fn and_header(mut self, header: HeaderFrame) -> Self {
         self.header = header;
         self
@@ -86,6 +87,7 @@ impl OboDoc {
     }
 
     /// Use the provided entity frames as the content of the OBO document.
+    #[must_use]
     pub fn and_entities(mut self, entities: Vec<EntityFrame>) -> Self {
         self.entities = entities;
         self

@@ -55,9 +55,9 @@ impl<'i> FromPair<'i> for IsoDate {
         _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
-        let year = u16::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-        let month = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-        let day = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
+        let year = inner.next().unwrap().as_str().parse::<u16>().unwrap();
+        let month = inner.next().unwrap().as_str().parse::<u8>().unwrap();
+        let day = inner.next().unwrap().as_str().parse::<u8>().unwrap();
         Ok(IsoDate::new(year, month, day))
     }
 }

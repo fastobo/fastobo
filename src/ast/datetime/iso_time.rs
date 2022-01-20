@@ -74,9 +74,9 @@ impl<'i> FromPair<'i> for IsoTime {
 
         let mut fraction = None;
         let mut timezone = None;
-        let hour = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-        let minute = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-        let second = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
+        let hour = inner.next().unwrap().as_str().parse::<u8>().unwrap();
+        let minute = inner.next().unwrap().as_str().parse::<u8>().unwrap();
+        let second = inner.next().unwrap().as_str().parse::<u8>().unwrap();
 
         if let Some(pair) = inner.next() {
             match pair.as_rule() {

@@ -44,8 +44,8 @@ impl<'i> FromPair<'i> for IsoTimezone {
             Rule::Iso8601TimeZoneOffset => {
                 let mut inner = inner.into_inner();
                 let sign = inner.next().unwrap();
-                let hh = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
-                let mm = u8::from_str_radix(inner.next().unwrap().as_str(), 10).unwrap();
+                let hh = inner.next().unwrap().as_str().parse::<u8>().unwrap();
+                let mm = inner.next().unwrap().as_str().parse::<u8>().unwrap();
                 match sign.as_str() {
                     "+" => Ok(IsoTimezone::Plus(hh, mm)),
                     "-" | "−" | "–" => Ok(IsoTimezone::Minus(hh, mm)),

@@ -64,6 +64,12 @@ impl Display for Definition {
     }
 }
 
+impl From<Definition> for QuotedString {
+    fn from(d: Definition) -> Self {
+        d.text
+    }
+}
+
 impl From<QuotedString> for Definition {
     fn from(s: QuotedString) -> Self {
         Self::new(s)
@@ -80,11 +86,5 @@ impl<'i> FromPair<'i> for Definition {
         let text = QuotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;
         let xrefs = XrefList::from_pair_unchecked(inner.next().unwrap(), cache)?;
         Ok(Self::with_xrefs(text, xrefs))
-    }
-}
-
-impl Into<QuotedString> for Definition {
-    fn into(self) -> QuotedString {
-        self.text
     }
 }

@@ -34,6 +34,7 @@ impl<T> Line<T> {
     ///     .and_comment(Comment::new("deprecated in v3"));
     /// assert_eq!(line.to_string(), "is_obsolete: true ! deprecated in v3\n");
     /// ```
+    #[must_use]
     pub fn and_comment<C>(self, comment: C) -> Self
     where
         C: Into<Option<Comment>>,
@@ -46,6 +47,7 @@ impl<T> Line<T> {
     }
 
     /// Update the line qualifier list with the given one.
+    #[must_use]
     pub fn and_qualifiers<Q>(self, qualifiers: Q) -> Self
     where
         Q: Into<Option<QualifierList>>,
@@ -224,6 +226,7 @@ impl Eol {
     }
 
     // Add content to the `Eol` to form a complete line.
+    #[must_use]
     pub fn and_inner<T>(self, inner: T) -> Line<T> {
         Line {
             inner,

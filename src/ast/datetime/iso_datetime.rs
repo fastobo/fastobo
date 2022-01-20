@@ -41,12 +41,14 @@ impl IsoDateTime {
     }
 
     /// Change the date component of the `IsoDateTime`.
+    #[must_use]
     pub fn with_date(mut self, date: IsoDate) -> Self {
         self.date = date;
         self
     }
 
     /// Change the time component of the `IsoDateTime`.
+    #[must_use]
     pub fn with_time(mut self, time: IsoTime) -> Self {
         self.time = time;
         self

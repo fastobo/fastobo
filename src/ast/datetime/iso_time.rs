@@ -27,6 +27,37 @@ pub struct IsoTime {
 }
 
 impl IsoTime {
+    /// Create a new `IsoDate` with the given day, month and year.
+    pub fn new(hour: u8, minute: u8, second: u8) -> Self {
+        Self {
+            hour,
+            minute,
+            second,
+            fraction: None,
+            timezone: None,
+        }
+    }
+
+    /// Change the fraction component of the `IsoTime`.
+    #[must_use]
+    pub fn with_fraction<F>(mut self, fraction: F) -> Self
+    where
+        F: Into<Option<f32>>,
+    {
+        self.fraction = fraction.into().map(OrderedFloat::from);
+        self
+    }
+
+    /// Change the timezone component of the `IsoTime`.
+    #[must_use]
+    pub fn with_timezone<TZ>(mut self, timezone: TZ) -> Self
+    where
+        TZ: Into<Option<IsoTimezone>>,
+    {
+        self.timezone = timezone.into();
+        self
+    }
+
     /// Get the fraction of the `IsoTime`, if any.
     pub fn fraction(&self) -> Option<f32> {
         self.fraction.as_ref().map(|f| f.0)

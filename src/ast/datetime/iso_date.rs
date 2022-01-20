@@ -22,7 +22,7 @@ pub struct IsoDate {
 }
 
 impl IsoDate {
-    /// Create a new `IsoDate` without the given day, month and year.
+    /// Create a new `IsoDate` with the given day, month and year.
     pub fn new(year: u16, month: u8, day: u8) -> Self {
         IsoDate { day, month, year }
     }

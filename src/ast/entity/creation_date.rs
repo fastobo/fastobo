@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
@@ -31,12 +32,12 @@ use crate::syntax::Rule;
 /// make this a hard error, and instead to support incomplete dates, for
 /// intercompatibility with older ontologies that are otherwise parsing fine.
 ///
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialOrd, Ord, Eq, PartialEq)]
 pub enum CreationDate {
-    /// A creation date specified as a complete ISO8601 datetime string.
-    DateTime(Box<IsoDateTime>),
     /// A creation date missing the time component of an ISO8601 datetime.
     Date(Box<IsoDate>),
+    /// A creation date specified as a complete ISO8601 datetime string.
+    DateTime(Box<IsoDateTime>),
 }
 
 impl AsRef<IsoDate> for CreationDate {
@@ -45,6 +46,29 @@ impl AsRef<IsoDate> for CreationDate {
             CreationDate::Date(d) => &d,
             CreationDate::DateTime(dt) => dt.date(),
         }
+    }
+}
+
+impl Display for CreationDate {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        match self {
+            CreationDate::Date(d) => d.fmt(f),
+            CreationDate::DateTime(d) => d.fmt(f),
+        }
+    }
+}
+
+impl Date for CreationDate {
+    fn year(&self) -> u16 {
+        <Self as AsRef<IsoDate>>::as_ref(&self).year()
+    }
+
+    fn month(&self) -> u8 {
+        <Self as AsRef<IsoDate>>::as_ref(&self).month()
+    }
+
+    fn day(&self) -> u8 {
+        <Self as AsRef<IsoDate>>::as_ref(&self).day()
     }
 }
 
@@ -84,28 +108,5 @@ impl<'i> FromPair<'i> for CreationDate {
             Rule::Iso8601Date => IsoDate::from_pair(inner, cache).map(From::from),
             rule => unreachable!("unexpected rule in CreationDate::from_pair: {:?}", rule),
         }
-    }
-}
-
-impl Display for CreationDate {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        match self {
-            CreationDate::Date(d) => d.fmt(f),
-            CreationDate::DateTime(d) => d.fmt(f),
-        }
-    }
-}
-
-impl Date for CreationDate {
-    fn year(&self) -> u16 {
-        <Self as AsRef<IsoDate>>::as_ref(&self).year()
-    }
-
-    fn month(&self) -> u8 {
-        <Self as AsRef<IsoDate>>::as_ref(&self).month()
-    }
-
-    fn day(&self) -> u8 {
-        <Self as AsRef<IsoDate>>::as_ref(&self).day()
     }
 }

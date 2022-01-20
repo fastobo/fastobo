@@ -70,7 +70,7 @@ pub enum TypedefClause {
     #[clause(cardinality = "ZeroOrOne")]
     CreatedBy(Box<UnquotedString>),
     #[clause(cardinality = "ZeroOrOne")]
-    CreationDate(Box<IsoDateTime>),
+    CreationDate(Box<CreationDate>),
     ExpandAssertionTo(Box<QuotedString>, Box<XrefList>),
     ExpandExpressionTo(Box<QuotedString>, Box<XrefList>),
     #[clause(cardinality = "ZeroOrOne")]
@@ -254,7 +254,7 @@ impl<'i> FromPair<'i> for TypedefClause {
                 Ok(TypedefClause::CreatedBy(Box::new(person)))
             }
             Rule::CreationDateTag => {
-                let date = IsoDateTime::from_pair_unchecked(inner.next().unwrap(), cache)?;
+                let date = CreationDate::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TypedefClause::CreationDate(Box::new(date)))
             }
             Rule::ExpandAssertionToTag => {

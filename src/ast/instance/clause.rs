@@ -31,7 +31,7 @@ pub enum InstanceClause {
     #[clause(cardinality = "ZeroOrOne")]
     CreatedBy(Box<UnquotedString>),
     #[clause(cardinality = "ZeroOrOne")]
-    CreationDate(Box<IsoDateTime>),
+    CreationDate(Box<CreationDate>),
     #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
     ReplacedBy(Box<InstanceIdent>),
@@ -106,7 +106,7 @@ impl<'i> FromPair<'i> for InstanceClause {
                 Ok(InstanceClause::CreatedBy(Box::new(s)))
             }
             Rule::CreationDateTag => {
-                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap(), cache)?;
+                let dt = CreationDate::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(InstanceClause::CreationDate(Box::new(dt)))
             }
             Rule::IsObsoleteTag => {

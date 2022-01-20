@@ -46,7 +46,7 @@ pub enum TermClause {
     #[clause(cardinality = "ZeroOrOne")]
     CreatedBy(Box<UnquotedString>),
     #[clause(cardinality = "ZeroOrOne")]
-    CreationDate(Box<IsoDateTime>),
+    CreationDate(Box<CreationDate>),
     #[clause(cardinality = "ZeroOrOne")]
     IsObsolete(bool),
     ReplacedBy(Box<ClassIdent>),
@@ -173,7 +173,7 @@ impl<'i> FromPair<'i> for TermClause {
                 Ok(TermClause::CreatedBy(Box::new(s)))
             }
             Rule::CreationDateTag => {
-                let dt = IsoDateTime::from_pair_unchecked(inner.next().unwrap(), cache)?;
+                let dt = CreationDate::from_pair_unchecked(inner.next().unwrap(), cache)?;
                 Ok(TermClause::CreationDate(Box::new(dt)))
             }
             _ => unreachable!(),

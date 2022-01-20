@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::str::FromStr;
+use std::sync::RwLock;
 
 use pest::iterators::Pair;
 
@@ -10,7 +11,29 @@ use crate::syntax::Rule;
 /// A string cache to recycle memory for shared values.
 #[derive(Debug, Default)]
 pub struct Cache {
-    cache: HashSet<IdentType>,
+    cache: RwLock<HashSet<IdentType>>,
+}
+
+impl Cache {
+    /// Create a new string cache.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Obtain a new `IndentType` for this string, or return the cached one.
+    pub fn intern(&self, s: &str) -> IdentType {
+        // read-only if the string was already interned
+        let readable = self.cache.read().expect("failed to acquire lock");
+        if let Some(interned) = readable.get(s) {
+            return interned.clone();
+        }
+        drop(readable);
+        // write access if the string was not interned
+        let new = IdentType::from(s);
+        let mut writable = self.cache.write().expect("failed to acquire lock");
+        writable.insert(new.clone());
+        new
+    }
 }
 
 /// A trait for structures that can be parsed from a [`pest::Pair`].
@@ -44,7 +67,10 @@ pub trait FromPair<'i>: Sized {
 
 impl<'i> FromPair<'i> for bool {
     const RULE: Rule = Rule::Boolean;
-    unsafe fn from_pair_unchecked(pair: Pair<'i, Rule>, ctx: &Cache) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(
+        pair: Pair<'i, Rule>,
+        _cache: &Cache,
+    ) -> Result<Self, SyntaxError> {
         Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
     }
 }
@@ -62,22 +88,26 @@ mod tests {
 
         #[test]
         fn from_pair() {
+            let cache = Cache::default();
+
             let pairs = Lexer::tokenize(Rule::Boolean, "true");
             let pair = pairs.unwrap().next().unwrap();
-            assert_eq!(bool::from_pair(pair).unwrap(), true);
+            assert_eq!(bool::from_pair(pair, &cache).unwrap(), true);
 
             let pairs = Lexer::tokenize(Rule::Boolean, "false");
             let pair = pairs.unwrap().next().unwrap();
-            assert_eq!(bool::from_pair(pair).unwrap(), false);
+            assert_eq!(bool::from_pair(pair, &cache).unwrap(), false);
         }
     }
 
     #[test]
     fn unexpected_rule() {
+        let cache = Cache::default();
+
         let pairs = Lexer::tokenize(Rule::Boolean, "true");
         let pair = pairs.unwrap().next().unwrap();
 
-        let err = Ident::from_pair(pair).unwrap_err();
+        let err = Ident::from_pair(pair, &cache).unwrap_err();
         match err {
             SyntaxError::UnexpectedRule {
                 ref actual,

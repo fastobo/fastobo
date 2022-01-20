@@ -64,6 +64,7 @@ impl Display for Qualifier {
 impl<'i> FromPair<'i> for Qualifier {
     const RULE: Rule = Rule::Qualifier;
     unsafe fn from_pair_unchecked(pair: Pair<Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
+        // FIXME: avoid using `from_str` to parse the RelationIdent
         let mut inner = pair.into_inner();
         let key = RelationIdent::from_str(inner.next().unwrap().as_str())?;
         let value = QuotedString::from_pair_unchecked(inner.next().unwrap(), cache)?;

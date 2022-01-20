@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use fastobo_derive_internal::FromStr;
 use fastobo_derive_internal::OboClause;
 use pest::iterators::Pair;
@@ -188,6 +186,7 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
+    use std::str::FromStr;
 
     mod is_anonymous {
         use super::*;

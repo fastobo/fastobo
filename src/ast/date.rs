@@ -124,7 +124,7 @@ impl<'i> FromPair<'i> for NaiveDateTime {
     const RULE: Rule = Rule::NaiveDateTime;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let mut inner = pair.into_inner();
         let date = inner.next().unwrap();
@@ -338,7 +338,7 @@ impl<'i> FromPair<'i> for IsoTimezone {
     const RULE: Rule = Rule::Iso8601TimeZone;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         use self::IsoTimezone::*;
 

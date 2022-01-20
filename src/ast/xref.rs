@@ -205,11 +205,11 @@ impl<'i> FromPair<'i> for XrefList {
     const RULE: Rule = Rule::XrefList;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let mut xrefs = Vec::new();
         for inner in pair.into_inner() {
-            // FIXME: avoid using Xref::from_str here?
+            // FIXME: avoid using Xref::from_str here
             let xref = Xref::from_str(inner.as_str()).map_err(|e| e.with_span(inner.as_span()))?;
             xrefs.push(xref);
         }

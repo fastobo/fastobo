@@ -38,7 +38,7 @@ impl<'i> FromPair<'i> for Comment {
     const RULE: Rule = Rule::Comment;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let txt = pair
             .into_inner()

@@ -140,7 +140,7 @@ impl From<&str> for QuotedString {
 
 impl<'i> FromPair<'i> for QuotedString {
     const RULE: Rule = Rule::QuotedString;
-    unsafe fn from_pair_unchecked(pair: Pair<Rule>, cache: &Cache) -> Result<Self, SyntaxError> {
+    unsafe fn from_pair_unchecked(pair: Pair<Rule>, _cache: &Cache) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\');
         let mut local = String::with_capacity(s.len() + escaped);

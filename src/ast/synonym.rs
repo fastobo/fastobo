@@ -39,7 +39,7 @@ impl<'i> FromPair<'i> for SynonymScope {
     const RULE: Rule = Rule::SynonymScope;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         match pair.as_str() {
             "EXACT" => Ok(SynonymScope::Exact),

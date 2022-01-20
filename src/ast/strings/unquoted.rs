@@ -164,7 +164,7 @@ impl<'i> FromPair<'i> for UnquotedString {
     const RULE: Rule = Rule::UnquotedString;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
-        cache: &Cache,
+        _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\'); // number of escaped characters

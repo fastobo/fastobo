@@ -16,7 +16,6 @@ use crate::utils::is_option;
 pub struct OboClauseVariant {
     ident: Ident,
     fields: Fields<Type>,
-    attrs: Vec<syn::Attribute>,
     #[darling(default)]
     tag: Option<syn::Lit>,
     #[darling(default)]

@@ -30,6 +30,7 @@ macro_rules! roundtriptest {
     };
 }
 
+roundtriptest!(creation_dates);
 roundtriptest!(msterm);
 roundtriptest!(mslite);
 roundtriptest!(importlist);

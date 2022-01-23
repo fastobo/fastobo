@@ -1,0 +1,19 @@
+format-version: 1.4
+ontology: test
+default-namespace: test
+
+[Term]
+id: TST:001
+creation_date: 2020-02-11T15:32:35Z
+
+[Term]
+id: TST:002
+creation_date: 2020-02-11T15:32:35+01:00
+
+[Term]
+id: TST:003
+creation_date: 2020-02-11T15:32:35-02:30
+
+[Term]
+id: TST:004
+creation_date: 2020-02-11

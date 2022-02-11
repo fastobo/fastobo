@@ -26,7 +26,7 @@ pub use self::subclasses::SynonymTypeIdent;
 pub use self::unprefixed::UnprefixedIdent;
 pub use self::url::Url;
 
-pub(super) fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     s.chars().try_for_each(|char| match char {
         '\r' => f.write_str("\\r"),
         '\n' => f.write_str("\\n"),
@@ -40,7 +40,7 @@ pub(super) fn escape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     })
 }
 
-pub(super) fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
+fn unescape<W: Write>(f: &mut W, s: &str) -> FmtResult {
     let mut chars = s.chars();
     while let Some(char) = chars.next() {
         if char == '\\' {

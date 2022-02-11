@@ -1102,7 +1102,7 @@ impl VisitMut for IdDecompactor {
         let mut new: Option<Url> = None;
         if let Ident::Prefixed(p) = id {
             let new_url = match self.idspaces.get(p.prefix()) {
-                Some(base_url) => format!("{}{}", base_url, p.local()),
+                Some(base_url) => format!("{}{}", base_url.as_str(), p.local()),
                 None => format!(
                     "http://purl.obolibrary.org/obo/{}_{}",
                     p.prefix(),

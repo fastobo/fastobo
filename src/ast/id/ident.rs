@@ -108,6 +108,14 @@ mod tests {
             .unwrap();
         assert_eq!(actual, expected);
 
+        let actual = Ident::from_str("https://purl.obolibrary.org/obo/po.owl")
+            .map(Ident::from)
+            .unwrap();
+        let expected = Url::from_str("https://purl.obolibrary.org/obo/po.owl")
+            .map(Ident::from)
+            .unwrap();
+        assert_eq!(actual, expected);
+
         let actual = Ident::from_str("GO:0046154").unwrap();
         let expected = Ident::from(PrefixedIdent::new("GO", "0046154"));
         assert_eq!(actual, expected);

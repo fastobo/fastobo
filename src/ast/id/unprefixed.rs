@@ -73,9 +73,13 @@ impl<'i> FromPair<'i> for UnprefixedIdent {
     ) -> Result<Self, SyntaxError> {
         let s = pair.as_str();
         let escaped = s.quickcount(b'\\');
-        let mut local = String::with_capacity(s.len() + escaped);
-        unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
-        Ok(Self::new(cache.intern(&local)))
+        if escaped > 0 {
+            let mut local = String::with_capacity(s.len() + escaped);
+            unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
+            Ok(Self::new(cache.intern(&local)))
+        } else {
+            Ok(Self::new(cache.intern(s)))
+        }
     }
 }
 

@@ -11,8 +11,12 @@ use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
+use crate::parser::QuickFind;
 use crate::syntax::Lexer;
 use crate::syntax::Rule;
+
+use super::escape;
+use super::unescape;
 
 /// A Uniform Resource Locator used as an identifier for an entity.
 #[derive(Clone, Debug, FromStr, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -67,7 +71,7 @@ impl AsRef<str> for Url {
 
 impl Display for Url {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        self.0.fmt(f)
+        escape(f, &self.0)
     }
 }
 
@@ -77,6 +81,14 @@ impl<'i> FromPair<'i> for Url {
         pair: Pair<'i, Rule>,
         cache: &Cache,
     ) -> Result<Self, SyntaxError> {
-        Ok(Url(cache.intern(pair.as_str())))
+        let s = pair.as_str();
+        let escaped = s.quickcount(b'\\');
+        if escaped > 0 {
+            let mut local = String::with_capacity(s.len() + escaped);
+            unescape(&mut local, s).expect("fmt::Write cannot fail on a String");
+            Ok(Url(cache.intern(&local)))
+        } else {
+            Ok(Url(cache.intern(s)))
+        }
     }
 }

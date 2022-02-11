@@ -6,6 +6,8 @@ use std::str::FromStr;
 use fastobo_derive_internal::FromStr;
 use pest::iterators::Pair;
 
+use crate::ast::id::escape;
+use crate::ast::id::unescape;
 use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
@@ -59,7 +61,7 @@ impl Display for Import {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         use self::Import::*;
         match self {
-            Url(url) => url.fmt(f),
+            Url(url) => escape(f, &url),
             Abbreviated(id) => id.fmt(f),
         }
     }
@@ -73,8 +75,8 @@ impl<'i> FromPair<'i> for Import {
     ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::Iri => Ok(Url::from_str(inner.as_str())?.into()), // FIXME
             Rule::Id => Ident::from_pair_unchecked(inner, cache).map(From::from),
+            Rule::Iri => Url::from_pair_unchecked(pair, cache).map(From::from),
             _ => unreachable!(),
         }
     }

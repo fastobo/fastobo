@@ -6,7 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.14.2...HEAD
+
+## [v0.14.2] - 2022-02-11
+[v0.14.2]: https://github.com/fastobo/fastobo/compare/v0.14.1...v0.14.2
+### Added
+- Conversion traits to build a `TermClause` or `TypedefClause` from a `Synonym` or `PropertyValue`.
+- Unescaping of IRI containing OBO-escaped path components.
+### Fixed
+- Parsing of `Url` identifiers with a scheme different of HTTP.
 
 ## [v0.14.1] - 2022-01-11
 [v0.14.1]: https://github.com/fastobo/fastobo/compare/v0.14.0...v0.14.1

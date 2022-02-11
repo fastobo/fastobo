@@ -161,7 +161,8 @@ impl OboDoc {
     /// namespace: quality
     /// ").unwrap();
     ///
-    /// assert_eq!(doc.assign_namespaces().unwrap().to_string(),
+    /// doc.assign_namespaces().unwrap();
+    /// assert_eq!(doc.to_string(),
     /// "default-namespace: test
     ///
     /// [Term]

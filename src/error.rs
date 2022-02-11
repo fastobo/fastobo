@@ -50,9 +50,11 @@ pub enum SyntaxError {
     /// # use fastobo::ast::*;
     /// # use fastobo::parser::*;
     /// # use fastobo::syntax::*;
+    /// let cache = Cache::new();
     /// let pairs = Lexer::tokenize(Rule::UnquotedString, "hello, world!");
+    /// let pair = pairs.unwrap().next().unwrap();
     /// # let err =
-    /// QuotedString::from_pair(pairs.unwrap().next().unwrap()).unwrap_err();
+    /// QuotedString::from_pair(pair, &cache).unwrap_err();
     /// # match err {
     /// #   fastobo::error::SyntaxError::UnexpectedRule { expected, actual } => {
     /// #       assert_eq!(expected, Rule::QuotedString);

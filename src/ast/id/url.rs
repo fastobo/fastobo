@@ -15,7 +15,6 @@ use crate::parser::QuickFind;
 use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
-use super::escape;
 use super::unescape;
 
 /// A Uniform Resource Locator used as an identifier for an entity.
@@ -32,9 +31,10 @@ impl Url {
     /// # Example
     /// ```
     /// # extern crate fastobo;
+    /// # use std::str::FromStr;
     /// # use fastobo::ast::Url;
-    /// assert!( Url::parse("http://example.com").is_ok() );
-    /// assert!( Url::parse("not a URL").is_err() );
+    /// assert!( Url::from_str("http://example.com/resource").is_ok() );
+    /// assert!( Url::from_str("not a URL").is_err() );
     /// ```
     pub fn new<S>(url: S) -> Result<Self, SyntaxError>
     where
@@ -71,7 +71,7 @@ impl AsRef<str> for Url {
 
 impl Display for Url {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        escape(f, &self.0)
+        self.0.fmt(f)
     }
 }
 

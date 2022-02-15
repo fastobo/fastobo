@@ -6,7 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.0...HEAD
+
+## [v0.15.0] - 2022-02-15
+[v0.15.0]: https://github.com/fastobo/fastobo/compare/v0.14.2...v0.15.0
+### Added
+- `as_id` and `as_id_mut` methods to `Ident` newtype wrappers.
+- `as_prefixed`, `as_unprefixed` and `as_url` methods to destructurate `Ident` variants.
+### Changed
+- Shorten `Frame` and `EntityFrame` methods by removing the `_frame` suffix where applicable.
 
 ## [v0.14.2] - 2022-02-11
 [v0.14.2]: https://github.com/fastobo/fastobo/compare/v0.14.1...v0.14.2

@@ -24,6 +24,74 @@ pub enum Ident {
     Url(Box<Url>),
 }
 
+impl Ident {
+    /// Return a reference to the [`PrefixedIdent`] if the identifier is one, or `None`.
+    ///
+    /// [`PrefixedIdent`]: ./struct.PrefixedIdent.html
+    pub fn as_prefixed(&self) -> Option<&PrefixedIdent> {
+        if let Ident::Prefixed(prefixed) = self {
+            Some(prefixed.as_ref())
+        } else {
+            None
+        }
+    }
+
+    /// Return a mutable reference to the [`PrefixedIdent`] if the identifier is one, or `None`.
+    ///
+    /// [`PrefixedIdent`]: ./struct.PrefixedIdent.html
+    pub fn as_prefixed_mut(&mut self) -> Option<&mut PrefixedIdent> {
+        if let Ident::Prefixed(prefixed) = self {
+            Some(prefixed.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`UnprefixedIdent`] if the identifier is one, or `None`.
+    ///
+    /// [`UnprefixedIdent`]: ./struct.UnprefixedIdent.html
+    pub fn as_unprefixed(&self) -> Option<&UnprefixedIdent> {
+        if let Ident::Unprefixed(unprefixed) = self {
+            Some(unprefixed.as_ref())
+        } else {
+            None
+        }
+    }
+
+    /// Return a mutable reference to the [`UnprefixedIdent`] if the identifier is one, or `None`.
+    ///
+    /// [`UnprefixedIdent`]: ./struct.UnprefixedIdent.html
+    pub fn as_unprefixed_mut(&mut self) -> Option<&mut UnprefixedIdent> {
+        if let Ident::Unprefixed(unprefixed) = self {
+            Some(unprefixed.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`Url`] if the identifier is one, or `None`.
+    ///
+    /// [`Url`]: ./struct.Url.html
+    pub fn as_url(&self) -> Option<&Url> {
+        if let Ident::Url(url) = self {
+            Some(url.as_ref())
+        } else {
+            None
+        }
+    }
+
+    /// Return a mutable reference to the [`Url`] if the identifier is one, or `None`.
+    ///
+    /// [`Url`]: ./struct.Url.html
+    pub fn as_url_mut(&mut self) -> Option<&mut Url> {
+        if let Ident::Url(url) = self {
+            Some(url.as_mut())
+        } else {
+            None
+        }
+    }
+}
+
 impl AsRef<Ident> for Ident {
     fn as_ref(&self) -> &Self {
         self

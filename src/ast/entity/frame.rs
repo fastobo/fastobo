@@ -28,7 +28,7 @@ pub enum EntityFrame {
 }
 
 impl EntityFrame {
-    /// Return the [`TermFrame`] if the entity frame is one, or `None`.
+    /// Return a reference to the [`TermFrame`] if the entity frame is one, or `None`.
     ///
     /// Use this function in conjunction with [`Iterator::flat_map`] to extract
     /// all term frames from an iterator of `EntityFrame` references:
@@ -43,34 +43,67 @@ impl EntityFrame {
     /// let terms: Vec<&TermFrame> = doc
     ///     .entities()
     ///     .iter()
-    ///     .flat_map(EntityFrame::as_term_frame)
+    ///     .flat_map(EntityFrame::as_term)
     ///     .collect();
     /// ```
-    pub fn as_term_frame(&self) -> Option<&TermFrame> {
-        if let EntityFrame::Term(frame) = &self {
+    pub fn as_term(&self) -> Option<&TermFrame> {
+        if let EntityFrame::Term(frame) = self {
             Some(frame.as_ref())
         } else {
             None
         }
     }
 
-    /// Return the [`TypedefFrame`] if the entity frame is one, or `None`.
+    /// Return a mutable reference to the [`TermFrame`] if the entity frame is one, or `None`.
+    ///
+    /// [`TermFrame`]: ./struct.TermFrame.html
+    pub fn as_term_mut(&mut self) -> Option<&mut TermFrame> {
+        if let EntityFrame::Term(frame) = self {
+            Some(frame.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`TypedefFrame`] if the entity frame is one, or `None`.
     ///
     /// [`TypedefFrame`]: ./struct.TypedefFrame.html
-    pub fn as_typedef_frame(&self) -> Option<&TypedefFrame> {
-        if let EntityFrame::Typedef(frame) = &self {
+    pub fn as_typedef(&self) -> Option<&TypedefFrame> {
+        if let EntityFrame::Typedef(frame) = self {
             Some(frame.as_ref())
         } else {
             None
         }
     }
 
-    /// Return the [`InstanceFrame`] if the entity frame is one, or `None`.
+    /// Return a mutable reference to the [`TypedefFrame`] if the entity frame is one, or `None`.
+    ///
+    /// [`TypedefFrame`]: ./struct.TypedefFrame.html
+    pub fn as_typedef_mut(&mut self) -> Option<&mut TypedefFrame> {
+        if let EntityFrame::Typedef(frame) = self {
+            Some(frame.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`InstanceFrame`] if the entity frame is one, or `None`.
     ///
     /// [`InstanceFrame`]: ./struct.InstanceFrame.html
-    pub fn as_instance_frame(&self) -> Option<&InstanceFrame> {
-        if let EntityFrame::Instance(frame) = &self {
+    pub fn as_instance(&self) -> Option<&InstanceFrame> {
+        if let EntityFrame::Instance(frame) = self {
             Some(frame.as_ref())
+        } else {
+            None
+        }
+    }
+
+    /// Return a mutable reference to the [`InstanceFrame`] if the entity frame is one, or `None`.
+    ///
+    /// [`InstanceFrame`]: ./struct.InstanceFrame.html
+    pub fn as_instance_mut(&mut self) -> Option<&mut InstanceFrame> {
+        if let EntityFrame::Instance(frame) = self {
+            Some(frame.as_mut())
         } else {
             None
         }

@@ -218,33 +218,33 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    fn as_term_frame() {
+    fn as_term() {
         let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
-        assert!(frame.as_term_frame().is_some());
+        assert!(frame.as_term().is_some());
         let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
-        assert!(frame.as_term_frame().is_none());
+        assert!(frame.as_term().is_none());
         let frame = EntityFrame::from_str("[Instance]\nid: TEST:002\n").unwrap();
-        assert!(frame.as_term_frame().is_none());
+        assert!(frame.as_term().is_none());
     }
 
     #[test]
-    fn as_typedef_frame() {
+    fn as_typedef() {
         let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
-        assert!(frame.as_typedef_frame().is_none());
+        assert!(frame.as_typedef().is_none());
         let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
-        assert!(frame.as_typedef_frame().is_some());
+        assert!(frame.as_typedef().is_some());
         let frame = EntityFrame::from_str("[Instance]\nid: TEST:002\n").unwrap();
-        assert!(frame.as_typedef_frame().is_none());
+        assert!(frame.as_typedef().is_none());
     }
 
     #[test]
-    fn as_instance_frame() {
+    fn as_instance() {
         let frame = EntityFrame::from_str("[Term]\nid: TEST:001\n").unwrap();
-        assert!(frame.as_instance_frame().is_none());
+        assert!(frame.as_instance().is_none());
         let frame = EntityFrame::from_str("[Typedef]\nid: TEST:002\n").unwrap();
-        assert!(frame.as_instance_frame().is_none());
+        assert!(frame.as_instance().is_none());
         let frame = EntityFrame::from_str("[Instance]\nid: TEST:002\n").unwrap();
-        assert!(frame.as_instance_frame().is_some());
+        assert!(frame.as_instance().is_some());
     }
 
     #[test]

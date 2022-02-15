@@ -18,6 +18,14 @@ macro_rules! ident_subclass {
             pub fn new(id: Ident) -> Self {
                 Self { id }
             }
+
+            pub fn as_id(&self) -> &Ident {
+                &self.id
+            }
+
+            pub fn as_id_mut(&mut self) -> &mut Ident {
+                &mut self.id
+            }
         }
 
         impl AsRef<Ident> for $name {

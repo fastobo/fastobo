@@ -223,11 +223,11 @@ impl<B: BufRead> TryFrom<&mut SequentialParser<B>> for OboDoc {
     type Error = Error;
     fn try_from(parser: &mut SequentialParser<B>) -> Result<Self, Self::Error> {
         // extract the header and create the doc
-        let header = parser.next().unwrap()?.into_header_frame().unwrap();
+        let header = parser.next().unwrap()?.into_header().unwrap();
 
         // extract the remaining entities
         let entities = parser
-            .map(|r| r.map(|f| f.into_entity_frame().unwrap()))
+            .map(|r| r.map(|f| f.into_entity().unwrap()))
             .collect::<Result<Vec<EntityFrame>, Error>>()?;
 
         // return the doc

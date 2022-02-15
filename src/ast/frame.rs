@@ -31,52 +31,96 @@ pub enum Frame {
 }
 
 impl Frame {
-    /// Return the [`HeaderFrame`] if the frame is one, or `None`.
+    /// Return a reference to the [`HeaderFrame`] if the frame is one, or `None`.
     ///
     /// [`HeaderFrame`]: ./struct.HeaderFrame.html
-    pub fn as_header_frame(&self) -> Option<&HeaderFrame> {
-        if let Frame::Header(frame) = &self {
+    pub fn as_header(&self) -> Option<&HeaderFrame> {
+        if let Frame::Header(frame) = self {
             Some(frame.as_ref())
         } else {
             None
         }
     }
 
-    /// Return the [`TermFrame`] if the frame is one, or `None`.
+    /// Return a mutable reference to the [`HeaderFrame`] if the frame is one, or `None`.
+    ///
+    /// [`HeaderFrame`]: ./struct.HeaderFrame.html
+    pub fn as_header_mut(&mut self) -> Option<&mut HeaderFrame> {
+        if let Frame::Header(frame) = self {
+            Some(frame.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`TermFrame`] if the frame is one, or `None`.
     ///
     /// [`TermFrame`]: ./struct.TermFrame.html
-    pub fn as_term_frame(&self) -> Option<&TermFrame> {
-        if let Frame::Term(frame) = &self {
+    pub fn as_term(&self) -> Option<&TermFrame> {
+        if let Frame::Term(frame) = self {
             Some(frame.as_ref())
         } else {
             None
         }
     }
 
-    /// Return the [`TypedefFrame`] if the frame is one, or `None`.
+    /// Return a mutable reference to the [`TermFrame`] if the frame is one, or `None`.
+    ///
+    /// [`TermFrame`]: ./struct.TermFrame.html
+    pub fn as_term_mut(&mut self) -> Option<&mut TermFrame> {
+        if let Frame::Term(frame) = self {
+            Some(frame.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`TypedefFrame`] if the frame is one, or `None`.
     ///
     /// [`TypedefFrame`]: ./struct.TypedefFrame.html
-    pub fn as_typedef_frame(&self) -> Option<&TypedefFrame> {
-        if let Frame::Typedef(frame) = &self {
+    pub fn as_typedef(&self) -> Option<&TypedefFrame> {
+        if let Frame::Typedef(frame) = self {
             Some(frame.as_ref())
         } else {
             None
         }
     }
 
-    /// Return the [`InstanceFrame`] if the frame is one, or `None`.
+    /// Return a reference to the [`TypedefFrame`] if the frame is one, or `None`.
+    ///
+    /// [`TypedefFrame`]: ./struct.TypedefFrame.html
+    pub fn as_typedef_mut(&mut self) -> Option<&mut TypedefFrame> {
+        if let Frame::Typedef(frame) = self {
+            Some(frame.as_mut())
+        } else {
+            None
+        }
+    }
+
+    /// Return a reference to the [`InstanceFrame`] if the frame is one, or `None`.
     ///
     /// [`InstanceFrame`]: ./struct.InstanceFrame.html
-    pub fn as_instance_frame(&self) -> Option<&InstanceFrame> {
-        if let Frame::Instance(frame) = &self {
+    pub fn as_instance(&self) -> Option<&InstanceFrame> {
+        if let Frame::Instance(frame) = self {
             Some(frame.as_ref())
+        } else {
+            None
+        }
+    }
+
+    /// Return a mutable reference to the [`InstanceFrame`] if the frame is one, or `None`.
+    ///
+    /// [`InstanceFrame`]: ./struct.InstanceFrame.html
+    pub fn as_instance_mut(&mut self) -> Option<&mut InstanceFrame> {
+        if let Frame::Instance(frame) = self {
+            Some(frame.as_mut())
         } else {
             None
         }
     }
 
     /// Attempt to convert the frame into a `HeaderFrame`.
-    pub fn into_header_frame(self) -> Option<HeaderFrame> {
+    pub fn into_header(self) -> Option<HeaderFrame> {
         if let Frame::Header(h) = self {
             Some(*h)
         } else {
@@ -85,7 +129,7 @@ impl Frame {
     }
 
     /// Attempt to convert the frame into an `EntityFrame`.
-    pub fn into_entity_frame(self) -> Option<EntityFrame> {
+    pub fn into_entity(self) -> Option<EntityFrame> {
         match self {
             Frame::Term(f) => Some(EntityFrame::Term(f)),
             Frame::Typedef(f) => Some(EntityFrame::Typedef(f)),

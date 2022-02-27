@@ -197,6 +197,22 @@ impl IntoIterator for QualifierList {
     }
 }
 
+impl<'a> IntoIterator for &'a QualifierList {
+    type Item = &'a Qualifier;
+    type IntoIter = <&'a Vec<Qualifier> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        (&self.qualifiers).into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut QualifierList {
+    type Item = &'a mut Qualifier;
+    type IntoIter = <&'a mut Vec<Qualifier> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        (&mut self.qualifiers).into_iter()
+    }
+}
+
 impl Orderable for QualifierList {
     fn sort(&mut self) {
         self.qualifiers.sort_unstable();

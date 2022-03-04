@@ -1,6 +1,6 @@
 //! Parser and parsing-related traits for the OBO format.
 
-use std::io::BufRead;
+use std::io::Read;
 use std::iter::Iterator;
 use std::num::NonZeroUsize;
 
@@ -27,7 +27,7 @@ pub use self::threaded::ThreadedParser;
 // ---
 
 /// The common interface for OBO parsers.
-pub trait Parser<B: BufRead>:
+pub trait Parser<B: Read>:
     From<B> + Iterator<Item = Result<Frame, Error>> + AsRef<B> + AsMut<B>
 {
     /// Create a new `Parser` reading from the reader.

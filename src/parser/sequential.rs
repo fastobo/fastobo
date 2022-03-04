@@ -1,7 +1,5 @@
 use std::convert::TryFrom;
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
+use std::io::Read;
 use std::iter::Iterator;
 
 use aho_corasick::AhoCorasick;
@@ -27,50 +25,51 @@ lazy_static! {
 }
 
 /// An iterator reading entity frames contained in an OBO stream sequentially.
-pub struct SequentialParser<B: BufRead> {
+#[derive(Debug)]
+pub struct SequentialParser<B: Read> {
     stream: B,
     buffer: Buffer,
     header: Option<Result<HeaderFrame, Error>>,
     cache: Cache,
 }
 
-impl<B: BufRead> AsRef<B> for SequentialParser<B> {
+impl<B: Read> AsRef<B> for SequentialParser<B> {
     fn as_ref(&self) -> &B {
         &self.stream
     }
 }
 
-impl<B: BufRead> AsRef<B> for Box<SequentialParser<B>> {
+impl<B: Read> AsRef<B> for Box<SequentialParser<B>> {
     fn as_ref(&self) -> &B {
         (**self).as_ref()
     }
 }
 
-impl<B: BufRead> AsMut<B> for SequentialParser<B> {
+impl<B: Read> AsMut<B> for SequentialParser<B> {
     fn as_mut(&mut self) -> &mut B {
         &mut self.stream
     }
 }
 
-impl<B: BufRead> AsMut<B> for Box<SequentialParser<B>> {
+impl<B: Read> AsMut<B> for Box<SequentialParser<B>> {
     fn as_mut(&mut self) -> &mut B {
         (**self).as_mut()
     }
 }
 
-impl<B: BufRead> From<B> for SequentialParser<B> {
+impl<B: Read> From<B> for SequentialParser<B> {
     fn from(reader: B) -> Self {
         <Self as Parser<B>>::new(reader)
     }
 }
 
-impl<B: BufRead> From<B> for Box<SequentialParser<B>> {
+impl<B: Read> From<B> for Box<SequentialParser<B>> {
     fn from(stream: B) -> Self {
         Box::new(SequentialParser::from(stream))
     }
 }
 
-impl<B: BufRead> Iterator for SequentialParser<B> {
+impl<B: Read> Iterator for SequentialParser<B> {
     type Item = Result<Frame, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -184,7 +183,7 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
     }
 }
 
-impl<B: BufRead> Parser<B> for SequentialParser<B> {
+impl<B: Read> Parser<B> for SequentialParser<B> {
     /// Create a new `SequentialParser` from the given stream.
     ///
     /// The constructor will parse the header frame right away, and return an
@@ -298,7 +297,7 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
     }
 }
 
-impl<B: BufRead> Parser<B> for Box<SequentialParser<B>> {
+impl<B: Read> Parser<B> for Box<SequentialParser<B>> {
     fn new(stream: B) -> Self {
         Box::new(SequentialParser::new(stream))
     }
@@ -313,14 +312,14 @@ impl<B: BufRead> Parser<B> for Box<SequentialParser<B>> {
     }
 }
 
-impl<B: BufRead> TryFrom<SequentialParser<B>> for OboDoc {
+impl<B: Read> TryFrom<SequentialParser<B>> for OboDoc {
     type Error = Error;
     fn try_from(mut parser: SequentialParser<B>) -> Result<Self, Self::Error> {
         OboDoc::try_from(&mut parser)
     }
 }
 
-impl<B: BufRead> TryFrom<&mut SequentialParser<B>> for OboDoc {
+impl<B: Read> TryFrom<&mut SequentialParser<B>> for OboDoc {
     type Error = Error;
     fn try_from(parser: &mut SequentialParser<B>) -> Result<Self, Self::Error> {
         // take the header if any was parsed successfully, or create an empty one
@@ -334,21 +333,9 @@ impl<B: BufRead> TryFrom<&mut SequentialParser<B>> for OboDoc {
     }
 }
 
-impl<B: BufRead> TryFrom<Box<SequentialParser<B>>> for OboDoc {
+impl<B: Read> TryFrom<Box<SequentialParser<B>>> for OboDoc {
     type Error = Error;
     fn try_from(mut reader: Box<SequentialParser<B>>) -> Result<Self, Self::Error> {
         OboDoc::try_from(&mut (*reader))
-    }
-}
-
-impl From<File> for SequentialParser<BufReader<File>> {
-    fn from(f: File) -> Self {
-        Self::new(BufReader::new(f))
-    }
-}
-
-impl From<File> for Box<SequentialParser<BufReader<File>>> {
-    fn from(f: File) -> Self {
-        Box::new(SequentialParser::new(BufReader::new(f)))
     }
 }

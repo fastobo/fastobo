@@ -1,6 +1,8 @@
 //! `Error` and `Result` types for this crate.
 
 use std::io::Error as IOError;
+use std::io::ErrorKind as IOErrorKind;
+use std::str::Utf8Error;
 
 use pest::error::Error as PestError;
 use thiserror::Error;
@@ -203,4 +205,12 @@ pub enum Error {
         #[from]
         error: ThreadingError,
     },
+}
+
+impl From<Utf8Error> for Error {
+    fn from(e: Utf8Error) -> Error {
+        Error::IOError {
+            error: IOError::new(IOErrorKind::InvalidData, e),
+        }
+    }
 }

@@ -45,8 +45,6 @@ All the following features are enabled by default, but can be disabled and
 cherry-picked using the `default-features = false` option in the `Cargo.toml`
 manifest of your project:
 
-* **`memchr`** - Use the [`memchr`](https://docs.rs/memchr/) library to improve
-  parser speed when searching for a particular character in a buffer.
 * **`threading`** - Use a multi-threaded parser (additionally depending on
   [`crossbeam-channel`](https://docs.rs/crossbeam-channel)), which can greatly
   improve the parser speed if parsing is CPU-bound.

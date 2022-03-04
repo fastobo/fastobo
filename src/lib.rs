@@ -3,6 +3,7 @@
 #![warn(clippy::all)]
 #![allow(clippy::module_inception)]
 
+extern crate aho_corasick;
 extern crate blanket;
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;

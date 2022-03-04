@@ -83,7 +83,11 @@ mod tests {
     use textwrap_macros::dedent;
 
     use super::*;
+    use crate::ast::HeaderClause;
+    use crate::ast::HeaderFrame;
+    use crate::ast::Line;
     use crate::ast::OboDoc;
+    use crate::ast::UnquotedString;
     use crate::error::SyntaxError;
     use crate::semantics::Identified;
 
@@ -95,6 +99,22 @@ mod tests {
                 let doc = res.expect("document should parse properly");
                 assert!(doc.header().is_empty());
                 assert!(doc.entities().is_empty());
+            }
+
+            #[test]
+            fn windows_eol() {
+                let res = OboDoc::try_from($constructor(Cursor::new(
+                    "format-version: 1.2\r\ndata-version: 0.1.0\r\n",
+                )));
+                let doc = res.expect("document should parse properly");
+                assert!(doc.entities().is_empty());
+                assert_eq!(
+                    doc.header(),
+                    &HeaderFrame::with_clauses(vec![
+                        HeaderClause::FormatVersion(Box::new("1.2".into())),
+                        HeaderClause::DataVersion(Box::new("0.1.0".into())),
+                    ])
+                );
             }
 
             #[test]

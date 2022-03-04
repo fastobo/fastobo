@@ -2,8 +2,6 @@
 //!
 //! [`circular`]: https://docs.rs/circular
 
-use std::ptr;
-
 use super::QuickFind;
 
 /// the Buffer contains the underlying memory and data positions
@@ -111,16 +109,9 @@ impl Buffer {
     /// Move the data at the beginning of the buffer.
     pub fn shift(&mut self) {
         if self.position > 0 {
-            unsafe {
-                let length = self.end - self.position;
-                ptr::copy(
-                    (&self.memory[self.position..self.end]).as_ptr(),
-                    (&mut self.memory[..length]).as_mut_ptr(),
-                    length,
-                );
-                self.position = 0;
-                self.end = length;
-            }
+            self.memory.copy_within(self.position..self.end, 0);
+            self.end -= self.position;
+            self.position = 0;
         }
     }
 

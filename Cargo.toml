@@ -35,7 +35,7 @@ features = [ "_doc" ]
 aho-corasick = "0.7.0"
 blanket = "0.2.0"
 thiserror = "1.0.0"
-fastobo-syntax = "0.8.0"
+fastobo-syntax = "0.7.3"
 fastobo-derive-internal = { version = "0.15.0", path = "derive" }
 lazy_static = "1.4.0"
 memchr = "2.2.1"

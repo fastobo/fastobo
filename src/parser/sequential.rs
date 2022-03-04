@@ -5,8 +5,8 @@ use std::io::BufReader;
 use std::iter::Iterator;
 
 use aho_corasick::AhoCorasick;
-use circular::Buffer;
 use lazy_static::lazy_static;
+use pest::Span;
 
 use crate::ast::EntityFrame;
 use crate::ast::Frame;
@@ -18,6 +18,7 @@ use crate::error::SyntaxError;
 use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
+use super::Buffer;
 use super::Cache;
 use super::FromPair;
 use super::Parser;
@@ -81,10 +82,9 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
         }
 
         // feed buffer until we find the end of a frame
-        let mut consumed = 0;
         let frame_end = loop {
             // if there is already data in the buffer, we may be able to use it
-            if self.buffer.available_data() > 0 {
+            if !self.buffer.empty() {
                 if let Some(m) = FRAME_HEADERS.earliest_find(&self.buffer.data()[1..]) {
                     break m.start() + 1;
                 }
@@ -105,6 +105,7 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
         };
 
         // parse a frame if there is one left
+        let mut consumed = 0;
         let frame = {
             // decode the buffer data
             let decoded = match std::str::from_utf8(&self.buffer.data()[..frame_end]) {
@@ -126,19 +127,18 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
                         }
                     },
                     Err(e) => {
+                        let mut offset = self.buffer.consumed();
+                        let mut line_offset = self.buffer.consumed_lines();
+
                         // in case of error, we want accurate reporting of the
                         // error location, so we re-tokenize line-by-line to
                         // find where the error occurred
                         match Lexer::tokenize(Rule::EntityFrame, decoded) {
                             Err(e) => {
-                                let err = SyntaxError::from(e);
+                                let err = SyntaxError::from(e).with_offsets(line_offset, offset);
                                 Some(Err(Error::from(err)))
                             }
                             Ok(mut pairs) => {
-                                // keep track of the remaining of the data, which
-                                // contains the error
-                                let rest = &decoded[pairs.as_str().as_bytes().len()..];
-                                println!("REST: {:?}", rest);
                                 // find which kind of frame we are parsing
                                 let pair = pairs.next().unwrap().into_inner().next().unwrap();
                                 let clause_rule = match pair.as_rule() {
@@ -147,15 +147,30 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
                                     Rule::InstanceFrame => Rule::InstanceClause,
                                     other => unreachable!("invalid rule: {:?}", other),
                                 };
-                                // parse remaining lines until we find the error
-                                for line in rest.lines() {
-                                    if let Err(e) = Lexer::tokenize_all(clause_rule, &line) {
-                                        let err = SyntaxError::from(e);
-                                        return Some(Err(Error::from(err)));
-                                    }
-                                }
 
-                                unreachable!()
+                                //
+                                let rest_offset = pair.as_str().trim_end().as_bytes().len();
+                                let rest = &decoded[rest_offset..];
+
+                                // record offset into the decoded text
+                                let mut lines = rest.split_inclusive('\n');
+                                offset += rest_offset;
+                                line_offset += (&decoded[..rest_offset]).quickcount(b'\n');
+
+                                // read header line-by-line to find the clause
+                                loop {
+                                    let line = lines.next().unwrap();
+                                    let trimmed = line.trim_end_matches('\n');
+                                    if !trimmed.trim().is_empty() {
+                                        if let Err(e) = Lexer::tokenize_all(clause_rule, trimmed) {
+                                            let err = SyntaxError::from(e)
+                                                .with_offsets(line_offset, offset);
+                                            break Some(Err(Error::from(err)));
+                                        }
+                                    }
+                                    line_offset += 1;
+                                    offset += line.as_bytes().len();
+                                }
                             }
                         }
                     }
@@ -188,7 +203,10 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
             match stream.read(buffer.space()) {
                 Err(e) => break Err(Error::from(e)),
                 Ok(0) if buffer.available_space() > 0 => {
-                    break Ok(buffer.available_data());
+                    break Ok(FRAME_HEADERS
+                        .earliest_find(&buffer.data())
+                        .map(|m| m.start())
+                        .unwrap_or(buffer.available_data()));
                 }
                 Ok(n) => {
                     buffer.fill(n);
@@ -198,8 +216,8 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
                 }
             }
             // stop reading if there is a full frame in here
-            if let Some(m) = FRAME_HEADERS.earliest_find(&buffer.data()[1..]) {
-                break Ok(m.start() + 1);
+            if let Some(m) = FRAME_HEADERS.earliest_find(&buffer.data()) {
+                break Ok(m.start());
             }
         };
 
@@ -227,29 +245,25 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
                                 }
                             },
                             Err(e) => {
-                                // in case of error, we want accurate reporting of the
-                                // error location, so we re-tokenize line-by-line to
-                                // find where the error occurred
-                                match Lexer::tokenize(Rule::HeaderFrame, decoded) {
-                                    Err(e) => {
-                                        let err = SyntaxError::from(e);
-                                        Some(Err(Error::from(err)))
+                                // record offset into the decoded text
+                                let mut lines = decoded.split_inclusive('\n');
+                                let mut offset = buffer.consumed();
+                                let mut line_offset = buffer.consumed_lines();
+                                // read header line-by-line to find the clause
+                                loop {
+                                    let line = lines.next().unwrap();
+                                    let trimmed = line.trim_end_matches('\n');
+                                    if !trimmed.trim().is_empty() {
+                                        if let Err(e) =
+                                            Lexer::tokenize_all(Rule::HeaderClause, trimmed)
+                                        {
+                                            let err = SyntaxError::from(e)
+                                                .with_offsets(line_offset, offset);
+                                            break Some(Err(Error::from(err)));
+                                        }
                                     }
-                                    Ok(mut pairs) => {
-                                        // keep track of the remaining of the data, which
-                                        // contains the error
-                                        let rest = &decoded[pairs.as_str().as_bytes().len()..];
-                                        println!("REST: {:?}", rest);
-                                        // parse remaining lines until we find the error
-                                        rest.lines()
-                                            .filter_map(|line| {
-                                                Lexer::tokenize_all(Rule::HeaderClause, &line).err()
-                                            })
-                                            .next()
-                                            .map(SyntaxError::from)
-                                            .map(Error::from)
-                                            .map(Err)
-                                    }
+                                    line_offset += 1;
+                                    offset += line.as_bytes().len();
                                 }
                             }
                         }

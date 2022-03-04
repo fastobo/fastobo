@@ -7,6 +7,7 @@ use std::num::NonZeroUsize;
 use crate::ast::Frame;
 use crate::error::Error;
 
+mod buffer;
 mod from_pair;
 mod from_slice;
 mod quickfind;
@@ -14,6 +15,7 @@ mod sequential;
 #[cfg(feature = "threading")]
 mod threaded;
 
+pub use self::buffer::Buffer;
 pub use self::from_pair::Cache;
 pub use self::from_pair::FromPair;
 pub use self::from_slice::FromSlice;
@@ -266,16 +268,20 @@ mod tests {
                     };
 
                     match pe.line_col {
-                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Span(_, _) => {
+                            panic!("position should be `pos` ({:?})", pe)
+                        }
                         LineColLocation::Pos((l, c)) => {
-                            assert_eq!(l, 3);
-                            assert_eq!(c, 6);
+                            assert_eq!(l, 3, "({:?})", pe);
+                            assert_eq!(c, 6, "({:?})", pe);
                         }
                     }
                     match pe.location {
-                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Span((_, _)) => {
+                            panic!("location should be `pos` ({:?})", pe)
+                        }
                         InputLocation::Pos(s) => {
-                            assert_eq!(s, 19);
+                            assert_eq!(s, 19, "({:?})", pe);
                         }
                     }
                 }
@@ -338,6 +344,37 @@ mod tests {
                         InputLocation::Span((_, _)) => panic!("location should be `pos`"),
                         InputLocation::Pos(s) => {
                             assert_eq!(s, 22);
+                        }
+                    }
+                }
+
+                #[test]
+                fn invalid_frame_def_indented_space() {
+                    let txt = "[Term]\nid: OK\n\n  \n   def: no quote\n";
+                    let res = OboDoc::try_from($constructor(Cursor::new(&txt)));
+                    let err = res.expect_err("document should fail to parse");
+
+                    let se = match err {
+                        Error::SyntaxError { error: se } => se,
+                        _ => panic!("error should be a SyntaxError"),
+                    };
+
+                    let pe = match se {
+                        SyntaxError::ParserError { error: pe } => pe,
+                        _ => panic!("syntax error should be a ParserError"),
+                    };
+
+                    match pe.line_col {
+                        LineColLocation::Span(_, _) => panic!("position should be `pos`"),
+                        LineColLocation::Pos((l, c)) => {
+                            assert_eq!(l, 5);
+                            assert_eq!(c, 9);
+                        }
+                    }
+                    match pe.location {
+                        InputLocation::Span((_, _)) => panic!("location should be `pos`"),
+                        InputLocation::Pos(s) => {
+                            assert_eq!(s, 26);
                         }
                     }
                 }

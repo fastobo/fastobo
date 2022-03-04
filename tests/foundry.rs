@@ -58,7 +58,6 @@ foundrytest!(xao);
 foundrytest!(bfo);
 foundrytest!(pato);
 foundrytest!(fao);
-foundrytest!(ceph);
 foundrytest!(wbbt);
 foundrytest!(ddanat);
 foundrytest!(ms);
@@ -79,14 +78,11 @@ foundrytest!(peco);
 foundrytest!(apo);
 foundrytest!(ehdaa2);
 foundrytest!(taxrank);
-foundrytest!(ddpheno);
 foundrytest!(wbphenotype);
 foundrytest!(fbdv);
 foundrytest!(omp);
 foundrytest!(mco);
-foundrytest!(mp);
 foundrytest!(poro);
-foundrytest!(fbcv);
 foundrytest!(zeco);
 foundrytest!(ro);
 foundrytest!(mi);
@@ -135,6 +131,26 @@ foundrytest!(
 );
 
 // --- Expected failures -----------------------------------------------------
+
+// Invalid headers
+foundrytest!(
+    #[ignore]
+    ddpheno
+);
+foundrytest!(
+    #[ignore]
+    ceph
+);
+foundrytest!(
+    #[ignore]
+    fbcv
+);
+
+// Invalid xref
+foundrytest!(
+    #[ignore]
+    mp
+);
 
 // Invalid namespace
 foundrytest!(

@@ -7,12 +7,10 @@ extern crate aho_corasick;
 extern crate blanket;
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
+extern crate memchr;
 extern crate ordered_float;
 extern crate pest;
 extern crate thiserror;
-
-#[cfg(feature = "memchr")]
-extern crate memchr;
 
 #[cfg(feature = "threading")]
 extern crate crossbeam_channel;

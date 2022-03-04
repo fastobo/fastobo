@@ -2,8 +2,6 @@
 //!
 //! [`circular`]: https://docs.rs/circular
 
-use std::io::Read;
-use std::io::Write;
 use std::ptr;
 
 use super::QuickFind;
@@ -30,9 +28,8 @@ pub struct Buffer {
 impl Buffer {
     /// Allocates a new buffer of maximum size `capacity`.
     pub fn with_capacity(capacity: usize) -> Buffer {
-        let mut v = vec![0; capacity];
         Buffer {
-            memory: v,
+            memory: vec![0; capacity],
             capacity: capacity,
             position: 0,
             end: 0,
@@ -164,9 +161,9 @@ impl Buffer {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::io::Write;
-
+    // use super::*;
+    // use std::io::Write;
+    //
     // #[test]
     // fn fill_and_consume() {
     //   let mut b = Buffer::with_capacity(10);

@@ -6,11 +6,9 @@ use std::iter::Iterator;
 
 use aho_corasick::AhoCorasick;
 use lazy_static::lazy_static;
-use pest::Span;
 
 use crate::ast::EntityFrame;
 use crate::ast::Frame;
-use crate::ast::HeaderClause;
 use crate::ast::HeaderFrame;
 use crate::ast::OboDoc;
 use crate::error::Error;
@@ -118,59 +116,58 @@ impl<B: BufRead> Iterator for SequentialParser<B> {
                 None
             } else {
                 // tokenize the entirety of the decoded data
-                match Lexer::tokenize_all(Rule::EntityFrame, decoded) {
-                    Ok(mut pairs) => unsafe {
+                if let Ok(mut pairs) = Lexer::tokenize_all(Rule::EntityFrame, decoded) {
+                    unsafe {
                         consumed = decoded.as_bytes().len();
                         match EntityFrame::from_pair_unchecked(pairs.next().unwrap(), &self.cache) {
                             Err(e) => Some(Err(Error::from(e))),
                             Ok(frame) => Some(Ok(Frame::from(frame))),
                         }
-                    },
-                    Err(e) => {
-                        let mut offset = self.buffer.consumed();
-                        let mut line_offset = self.buffer.consumed_lines();
+                    }
+                } else {
+                    let mut offset = self.buffer.consumed();
+                    let mut line_offset = self.buffer.consumed_lines();
 
-                        // in case of error, we want accurate reporting of the
-                        // error location, so we re-tokenize line-by-line to
-                        // find where the error occurred
-                        match Lexer::tokenize(Rule::EntityFrame, decoded) {
-                            Err(e) => {
-                                let err = SyntaxError::from(e).with_offsets(line_offset, offset);
-                                Some(Err(Error::from(err)))
-                            }
-                            Ok(mut pairs) => {
-                                // find which kind of frame we are parsing
-                                let pair = pairs.next().unwrap().into_inner().next().unwrap();
-                                let clause_rule = match pair.as_rule() {
-                                    Rule::TermFrame => Rule::TermClause,
-                                    Rule::TypedefFrame => Rule::TypedefClause,
-                                    Rule::InstanceFrame => Rule::InstanceClause,
-                                    other => unreachable!("invalid rule: {:?}", other),
-                                };
+                    // in case of error, we want accurate reporting of the
+                    // error location, so we re-tokenize line-by-line to
+                    // find where the error occurred
+                    match Lexer::tokenize(Rule::EntityFrame, decoded) {
+                        Err(e) => {
+                            let err = SyntaxError::from(e).with_offsets(line_offset, offset);
+                            Some(Err(Error::from(err)))
+                        }
+                        Ok(mut pairs) => {
+                            // find which kind of frame we are parsing
+                            let pair = pairs.next().unwrap().into_inner().next().unwrap();
+                            let clause_rule = match pair.as_rule() {
+                                Rule::TermFrame => Rule::TermClause,
+                                Rule::TypedefFrame => Rule::TypedefClause,
+                                Rule::InstanceFrame => Rule::InstanceClause,
+                                other => unreachable!("invalid rule: {:?}", other),
+                            };
 
-                                //
-                                let rest_offset = pair.as_str().trim_end().as_bytes().len();
-                                let rest = &decoded[rest_offset..];
+                            //
+                            let rest_offset = pair.as_str().trim_end().as_bytes().len();
+                            let rest = &decoded[rest_offset..];
 
-                                // record offset into the decoded text
-                                let mut lines = rest.split_inclusive('\n');
-                                offset += rest_offset;
-                                line_offset += (&decoded[..rest_offset]).quickcount(b'\n');
+                            // record offset into the decoded text
+                            let mut lines = rest.split_inclusive('\n');
+                            offset += rest_offset;
+                            line_offset += (&decoded[..rest_offset]).quickcount(b'\n');
 
-                                // read header line-by-line to find the clause
-                                loop {
-                                    let line = lines.next().unwrap();
-                                    let trimmed = line.trim_end_matches('\n');
-                                    if !trimmed.trim().is_empty() {
-                                        if let Err(e) = Lexer::tokenize_all(clause_rule, trimmed) {
-                                            let err = SyntaxError::from(e)
-                                                .with_offsets(line_offset, offset);
-                                            break Some(Err(Error::from(err)));
-                                        }
+                            // read header line-by-line to find the clause
+                            loop {
+                                let line = lines.next().unwrap();
+                                let trimmed = line.trim_end_matches('\n');
+                                if !trimmed.trim().is_empty() {
+                                    if let Err(e) = Lexer::tokenize_all(clause_rule, trimmed) {
+                                        let err =
+                                            SyntaxError::from(e).with_offsets(line_offset, offset);
+                                        break Some(Err(Error::from(err)));
                                     }
-                                    line_offset += 1;
-                                    offset += line.as_bytes().len();
                                 }
+                                line_offset += 1;
+                                offset += line.as_bytes().len();
                             }
                         }
                     }
@@ -233,8 +230,8 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
                     }
                     Ok(decoded) => {
                         // tokenize the entirety of the decoded data
-                        match Lexer::tokenize_all(Rule::HeaderFrame, decoded) {
-                            Ok(mut pairs) => unsafe {
+                        if let Ok(mut pairs) = Lexer::tokenize_all(Rule::HeaderFrame, decoded) {
+                            unsafe {
                                 consumed = decoded.as_bytes().len();
                                 match HeaderFrame::from_pair_unchecked(
                                     pairs.next().unwrap(),
@@ -243,28 +240,26 @@ impl<B: BufRead> Parser<B> for SequentialParser<B> {
                                     Err(e) => Some(Err(Error::from(e))),
                                     Ok(frame) => Some(Ok(frame)),
                                 }
-                            },
-                            Err(e) => {
-                                // record offset into the decoded text
-                                let mut lines = decoded.split_inclusive('\n');
-                                let mut offset = buffer.consumed();
-                                let mut line_offset = buffer.consumed_lines();
-                                // read header line-by-line to find the clause
-                                loop {
-                                    let line = lines.next().unwrap();
-                                    let trimmed = line.trim_end_matches('\n');
-                                    if !trimmed.trim().is_empty() {
-                                        if let Err(e) =
-                                            Lexer::tokenize_all(Rule::HeaderClause, trimmed)
-                                        {
-                                            let err = SyntaxError::from(e)
-                                                .with_offsets(line_offset, offset);
-                                            break Some(Err(Error::from(err)));
-                                        }
+                            }
+                        } else {
+                            // record offset into the decoded text
+                            let mut lines = decoded.split_inclusive('\n');
+                            let mut offset = buffer.consumed();
+                            let mut line_offset = buffer.consumed_lines();
+                            // read header line-by-line to find the clause
+                            loop {
+                                let line = lines.next().unwrap();
+                                let trimmed = line.trim_end_matches('\n');
+                                if !trimmed.trim().is_empty() {
+                                    if let Err(e) = Lexer::tokenize_all(Rule::HeaderClause, trimmed)
+                                    {
+                                        let err =
+                                            SyntaxError::from(e).with_offsets(line_offset, offset);
+                                        break Some(Err(Error::from(err)));
                                     }
-                                    line_offset += 1;
-                                    offset += line.as_bytes().len();
                                 }
+                                line_offset += 1;
+                                offset += line.as_bytes().len();
                             }
                         }
                     }

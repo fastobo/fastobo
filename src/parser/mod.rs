@@ -87,9 +87,7 @@ mod tests {
     use super::*;
     use crate::ast::HeaderClause;
     use crate::ast::HeaderFrame;
-    use crate::ast::Line;
     use crate::ast::OboDoc;
-    use crate::ast::UnquotedString;
     use crate::error::SyntaxError;
     use crate::semantics::Identified;
 

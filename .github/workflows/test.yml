@@ -35,7 +35,6 @@ jobs:
           - nightly
         feature:
           - default
-          - memchr
           - threading
           - smartstring
     steps:
@@ -66,7 +65,6 @@ jobs:
       matrix:
         feature:
           - default
-          - memchr
           - threading
           - smartstring
     steps:

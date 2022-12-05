@@ -16,9 +16,9 @@ impl FromStrDerive {
                 fn from_str(s: &str) -> Result<Self, Self::Err> {
                     use crate::error::Error;
                     use crate::syntax::Lexer;
-                    use crate::pest::error::ErrorVariant;
-                    use crate::pest::Parser;
-                    use crate::pest::Position;
+                    use crate::syntax::pest::error::ErrorVariant;
+                    use crate::syntax::pest::Parser;
+                    use crate::syntax::pest::Position;
 
                     // Parse the input string
                     let mut pairs = Lexer::tokenize(Self::RULE, s)?;
@@ -32,7 +32,7 @@ impl FromStrDerive {
                         let variant = ErrorVariant::CustomError {
                             message: "remaining input".to_string(),
                         };
-                        Err(crate::pest::error::Error::new_from_span(variant, span).into())
+                        Err(crate::syntax::pest::error::Error::new_from_span(variant, span).into())
                     } else {
                         let cache = crate::parser::Cache::default();
                         unsafe { <Self as FromPair>::from_pair_unchecked(pair, &cache) }

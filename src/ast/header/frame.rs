@@ -9,7 +9,6 @@ use std::ops::DerefMut;
 use std::result::Result;
 
 use fastobo_derive_internal::FromStr;
-use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::CardinalityError;
@@ -18,6 +17,7 @@ use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// The header frame, containing metadata about an OBO document.

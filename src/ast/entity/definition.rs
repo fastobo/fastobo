@@ -4,12 +4,12 @@ use std::fmt::Result as FmtResult;
 use std::fmt::Write;
 
 use fastobo_derive_internal::FromStr;
-use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// An entity textual definition, with optional cross-references supporting it.

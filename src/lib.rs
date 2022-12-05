@@ -7,7 +7,6 @@ extern crate blanket;
 extern crate fastobo_derive_internal;
 extern crate fastobo_syntax;
 extern crate ordered_float;
-extern crate pest;
 extern crate thiserror;
 
 #[cfg(feature = "memchr")]

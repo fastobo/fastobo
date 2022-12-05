@@ -164,8 +164,8 @@ mod tests {
             mod errloc {
                 use super::*;
 
-                use pest::error::InputLocation;
-                use pest::error::LineColLocation;
+                use crate::syntax::pest::error::InputLocation;
+                use crate::syntax::pest::error::LineColLocation;
 
                 #[test]
                 fn invalid_header_date() {

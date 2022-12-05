@@ -2,13 +2,13 @@ use std::str::FromStr;
 
 use fastobo_derive_internal::FromStr;
 use fastobo_derive_internal::OboClause;
-use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::OboClause;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// A clause appearing in a header frame.

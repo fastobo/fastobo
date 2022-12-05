@@ -6,7 +6,6 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 
 use fastobo_derive_internal::FromStr;
-use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::CardinalityError;
@@ -16,6 +15,7 @@ use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::OboFrame;
 use crate::semantics::Orderable;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// A term frame, describing a class.

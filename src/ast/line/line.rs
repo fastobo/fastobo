@@ -7,12 +7,11 @@ use std::fmt::Write;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
-use pest::iterators::Pair;
-
 use crate::ast::*;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// A line in an OBO file, possibly followed by qualifiers and a comment.

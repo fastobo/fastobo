@@ -2,5 +2,6 @@
 //!
 //! [`fastobo-syntax`]: https://crates.io/crates/fastobo-syntax
 
+pub use fastobo_syntax::pest;
 pub use fastobo_syntax::OboLexer as Lexer;
 pub use fastobo_syntax::Rule;

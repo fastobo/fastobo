@@ -5,7 +5,6 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
 use fastobo_derive_internal::FromStr;
-use pest::iterators::Pair;
 
 use super::Date;
 use super::DateTime;
@@ -15,6 +14,7 @@ use super::Time;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// A comprehensive ISO-8601 datetime.

@@ -3,13 +3,13 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
 use fastobo_derive_internal::FromStr;
-use pest::iterators::Pair;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 use super::escape;

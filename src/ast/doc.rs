@@ -5,7 +5,6 @@ use std::fmt::Write;
 use std::iter::FromIterator;
 
 use fastobo_derive_internal::FromStr;
-use pest::iterators::Pair;
 
 use crate::ast::*;
 use crate::error::CardinalityError;
@@ -14,6 +13,7 @@ use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::semantics::Identified;
 use crate::semantics::Orderable;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// A complete OBO document in format version 1.4.

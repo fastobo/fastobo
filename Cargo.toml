@@ -37,7 +37,6 @@ thiserror = "1.0.0"
 fastobo-syntax = "0.7.4"
 fastobo-derive-internal = { version = "0.15.0", path = "derive" }
 ordered-float = "2.0.0"
-pest = "=2.1.3"
 # feature = "memchr"
 memchr = { version = "2.2.1", optional = true }
 # feature = "threading"

@@ -2,12 +2,11 @@
 
 use std::io::Error as IOError;
 
-use pest::error::Error as PestError;
 use thiserror::Error;
 
-use pest::Span;
-
 use crate::ast::*;
+use crate::syntax::pest::error::Error as PestError;
+use crate::syntax::pest::Span;
 use crate::syntax::Rule;
 
 /// An error for cardinality violation.
@@ -91,8 +90,8 @@ impl SyntaxError {
     /// Update the line of the error, if needed.
     pub(crate) fn with_offsets(self, line_offset: usize, offset: usize) -> Self {
         use self::SyntaxError::*;
-        use pest::error::InputLocation;
-        use pest::error::LineColLocation;
+        use crate::syntax::pest::error::InputLocation;
+        use crate::syntax::pest::error::LineColLocation;
         match self {
             e @ UnexpectedRule { .. } => e,
             ParserError { mut error } => {

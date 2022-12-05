@@ -1,10 +1,9 @@
 use std::collections::HashSet;
 use std::str::FromStr;
 
-use pest::iterators::Pair;
-
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
+use crate::syntax::pest::iterators::Pair;
 use crate::syntax::Rule;
 
 /// A string cache to recycle memory for shared values.

@@ -3,15 +3,16 @@ use std::fmt::Formatter;
 use std::fmt::Result as FmtResult;
 
 use fastobo_derive_internal::FromStr;
-use pest::error::ErrorVariant;
-use pest::iterators::Pair;
-use pest::Position;
 
 use crate::ast::IdentType;
 use crate::error::SyntaxError;
 use crate::parser::Cache;
 use crate::parser::FromPair;
 use crate::parser::QuickFind;
+use crate::syntax::pest::error::Error as PestError;
+use crate::syntax::pest::error::ErrorVariant;
+use crate::syntax::pest::iterators::Pair;
+use crate::syntax::pest::Position;
 use crate::syntax::Lexer;
 use crate::syntax::Rule;
 
@@ -51,7 +52,7 @@ impl Url {
             let variant = ErrorVariant::CustomError {
                 message: "remaining input".to_string(),
             };
-            Err(pest::error::Error::new_from_span(variant, span).into())
+            Err(PestError::new_from_span(variant, span).into())
         } else {
             Ok(Url(u))
         }

@@ -94,8 +94,6 @@ foundrytest!(trans);
 foundrytest!(ecocore);
 foundrytest!(phipo);
 foundrytest!(to);
-foundrytest!(cl);
-foundrytest!(fypo);
 foundrytest!(doid);
 foundrytest!(xlmod);
 
@@ -135,6 +133,16 @@ foundrytest!(
 );
 
 // --- Expected failures -----------------------------------------------------
+
+// Syntax errors
+foundrytest!(
+    #[ignore]
+    cl
+);
+foundrytest!(
+    #[ignore]
+    fypo
+);
 
 // Invalid namespace
 foundrytest!(

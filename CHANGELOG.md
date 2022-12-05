@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.1...HEAD
+
+## [v0.15.1] - 2022-02-15
+[v0.15.1]: https://github.com/fastobo/fastobo/compare/v0.15.0...v0.15.1
+### Added
+- `IntoIterator` trait implementation for `&QualifierList` and `&mut QualifierList`.
+- `fastobo::syntax::pest` re-exporting the `pest` crate to use with `fastobo::syntax`.
+### Changed
+- Bump `smartstring` dependency to `v1.0`.
+- Bump `obofoundry` test dependency to `v0.10`.
+- Bump `fastobo-syntax` to `v0.7.4`.
+- Bump `darling` derive dependency to `v0.14`.
+- Bump `ordered-float` dependency to `v3.4.0`.
 
 ## [v0.15.0] - 2022-02-15
 [v0.15.0]: https://github.com/fastobo/fastobo/compare/v0.14.2...v0.15.0

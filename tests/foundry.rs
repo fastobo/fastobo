@@ -96,6 +96,9 @@ foundrytest!(phipo);
 foundrytest!(to);
 foundrytest!(doid);
 foundrytest!(xlmod);
+foundrytest!(symp);
+foundrytest!(exo);
+foundrytest!(eco);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -144,17 +147,6 @@ foundrytest!(
     fypo
 );
 
-// Invalid namespace
-foundrytest!(
-    #[ignore]
-    exo
-);
-
-// Invalid Xref
-foundrytest!(
-    #[ignore]
-    eco
-);
 foundrytest!(
     #[ignore]
     so
@@ -202,10 +194,7 @@ foundrytest!(
     #[ignore]
     hao
 );
-foundrytest!(
-    #[ignore]
-    symp
-);
+
 foundrytest!(
     #[ignore]
     zp

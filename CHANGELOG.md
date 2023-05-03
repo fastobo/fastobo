@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.1...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.2...HEAD
+
+## [v0.15.2] - 2023-05-04
+[v0.15.2]: https://github.com/fastobo/fastobo/compare/v0.15.1...v0.15.2
+### Changed
+- Bump `darling` derive dependency to `v0.20`.
+- Bump `syn` derive dependency to `v2.0`.
 
 ## [v0.15.1] - 2022-02-15
 [v0.15.1]: https://github.com/fastobo/fastobo/compare/v0.15.0...v0.15.1

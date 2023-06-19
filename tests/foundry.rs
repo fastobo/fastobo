@@ -98,7 +98,6 @@ foundrytest!(doid);
 foundrytest!(xlmod);
 foundrytest!(symp);
 foundrytest!(exo);
-foundrytest!(eco);
 
 // --- Too large to run casually ---------------------------------------------
 
@@ -156,6 +155,11 @@ foundrytest!(
     #[ignore]
     fix
 );
+foundrytest!(
+    #[ignore]
+    eco
+);
+
 // Invalid syntax caused by ChEBI
 foundrytest!(
     #[ignore]

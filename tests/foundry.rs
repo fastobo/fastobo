@@ -23,6 +23,18 @@ macro_rules! foundrytest {
         $(#[$attr])*
         #[test]
         fn $ont() {
+
+            let obsolete = FOUNDRY
+                .ontologies
+                .iter()
+                .find(|onto| onto.id == stringify!($ont))
+                .expect("could not find ontology")
+                .is_obsolete;
+
+            if obsolete {
+                panic!("obsolete ontology");
+            }
+
             // get the URL to the OBO product
             let url = &FOUNDRY
                 .ontologies
@@ -44,7 +56,9 @@ macro_rules! foundrytest {
 
             if peek.starts_with(b"format-version:") {
                 for item in fastobo::parser::DefaultParser::from(buf) {
-                    item.unwrap();
+                    if let Err(e) = item {
+                        panic!("parsing failed: {}", e);
+                    }
                 }
             } else {
                 panic!("not an OBO file ({})", url);
@@ -65,12 +79,9 @@ foundrytest!(ms);
 foundrytest!(cio);
 foundrytest!(zfs);
 foundrytest!(emapa);
-foundrytest!(xpo);
 foundrytest!(wbls);
 foundrytest!(olatdv);
-foundrytest!(planp);
 foundrytest!(fbbt);
-foundrytest!(pdumdv);
 foundrytest!(oba);
 foundrytest!(hp);
 foundrytest!(mmusdv);
@@ -84,55 +95,63 @@ foundrytest!(wbphenotype);
 foundrytest!(fbdv);
 foundrytest!(omp);
 foundrytest!(mco);
+foundrytest!(mmo);
 foundrytest!(mp);
 foundrytest!(poro);
 foundrytest!(fbcv);
 foundrytest!(zeco);
 foundrytest!(ro);
-foundrytest!(mi);
 foundrytest!(trans);
-foundrytest!(ecocore);
 foundrytest!(phipo);
-foundrytest!(to);
 foundrytest!(doid);
 foundrytest!(xlmod);
 foundrytest!(symp);
 foundrytest!(exo);
+foundrytest!(rs);
+foundrytest!(xco);
+foundrytest!(zfa);
+foundrytest!(pw);
+foundrytest!(fypo);
+foundrytest!(cmo);
 
 // --- Too large to run casually ---------------------------------------------
 
-foundrytest!(
-    #[ignore]
-    mondo
-);
-foundrytest!(
-    #[ignore]
-    ncbitaxon
-);
-foundrytest!(
-    #[ignore]
-    ncit
-);
-foundrytest!(
-    #[ignore]
-    go
-);
-foundrytest!(
-    #[ignore]
-    vto
-);
-foundrytest!(
-    #[ignore]
-    pr
-);
-foundrytest!(
-    #[ignore]
-    tto
-);
-foundrytest!(
-    #[ignore]
-    uberon
-);
+// foundrytest!(
+//     #[ignore]
+//     mondo
+// );
+// foundrytest!(
+//     #[ignore]
+//     ncbitaxon
+// );
+// foundrytest!(
+//     #[ignore]
+//     ncit
+// );
+// foundrytest!(
+//     #[ignore]
+//     go
+// );
+// foundrytest!(
+//     #[ignore]
+//     vto
+// );
+// foundrytest!(
+//     #[ignore]
+//     pr
+// );
+// foundrytest!(
+//     #[ignore]
+//     tto
+// );
+// foundrytest!(
+//     #[ignore]
+//     uberon
+// );
+// foundrytest!(
+//     #[ignore]
+//     chebi
+// );
 
 // --- Expected failures -----------------------------------------------------
 
@@ -143,14 +162,8 @@ foundrytest!(
 );
 foundrytest!(
     #[ignore]
-    fypo
-);
-
-foundrytest!(
-    #[ignore]
     so
 );
-
 foundrytest!(
     #[ignore]
     fix
@@ -159,6 +172,26 @@ foundrytest!(
     #[ignore]
     eco
 );
+foundrytest!(
+    #[ignore]
+    xpo
+);
+foundrytest!(
+    #[ignore]
+    mi
+);
+foundrytest!(
+    #[ignore]
+    pdumdv
+);
+foundrytest!(
+    #[ignore]
+    to
+);
+foundrytest!(
+    #[ignore]
+    ecocore
+);
 
 // Invalid syntax caused by ChEBI
 foundrytest!(
@@ -166,28 +199,10 @@ foundrytest!(
     sibo
 );
 
-// Invalid Xref syntax
-foundrytest!(
-    #[ignore]
-    chebi
-);
-
-foundrytest!(
-    #[ignore]
-    xco
-);
-foundrytest!(
-    #[ignore]
-    pw
-);
 // Invalid syntax (WIP)
 foundrytest!(
     #[ignore]
     envo
-);
-foundrytest!(
-    #[ignore]
-    mmo
 );
 // Invalid syntax
 foundrytest!(
@@ -210,25 +225,16 @@ foundrytest!(
 );
 foundrytest!(
     #[ignore]
-    zfa
+    planp
 );
+
 // Unescaped quotes in QuotedString
 foundrytest!(
     #[ignore]
     rnao
 );
-// Download error
-foundrytest!(
-    #[ignore]
-    rs
-);
 // Deprecated and unreachable
 foundrytest!(
     #[ignore]
     eo
-);
-// Invalid Qualifier List
-foundrytest!(
-    #[ignore]
-    cmo
 );

@@ -96,7 +96,7 @@ impl Display for IsoTime {
 }
 
 impl<'i> FromPair<'i> for IsoTime {
-    const RULE: Rule = Rule::Iso8601Time;
+    const RULE: Rule = Rule::ISO8601_Time;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
         cache: &Cache,
@@ -111,10 +111,10 @@ impl<'i> FromPair<'i> for IsoTime {
 
         if let Some(pair) = inner.next() {
             match pair.as_rule() {
-                Rule::Iso8601Fraction => {
+                Rule::ISO8601_Fraction => {
                     fraction = Some(f32::from_str(pair.as_str()).unwrap().into());
                 }
-                Rule::Iso8601TimeZone => {
+                Rule::ISO8601_TimeZone => {
                     timezone = IsoTimezone::from_pair_unchecked(pair, cache).map(Some)?;
                 }
                 _ => unreachable!(),

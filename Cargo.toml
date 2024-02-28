@@ -34,7 +34,7 @@ features = [ "_doc" ]
 [dependencies]
 blanket = "0.3.0"
 thiserror = "1.0.0"
-fastobo-syntax = "0.7.4"
+fastobo-syntax = { version = "0.8.1" }
 fastobo-derive-internal = { version = "0.15.0", path = "derive" }
 ordered-float = "3.4.0"
 # feature = "memchr"

@@ -33,15 +33,15 @@ impl Display for IsoTimezone {
 }
 
 impl<'i> FromPair<'i> for IsoTimezone {
-    const RULE: Rule = Rule::Iso8601TimeZone;
+    const RULE: Rule = Rule::ISO8601_TimeZone;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
         _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::Iso8601TimeZoneUtc => Ok(IsoTimezone::Utc),
-            Rule::Iso8601TimeZoneOffset => {
+            Rule::ISO8601_TimeZoneUtc => Ok(IsoTimezone::Utc),
+            Rule::ISO8601_TimeZoneOffset => {
                 let mut inner = inner.into_inner();
                 let sign = inner.next().unwrap();
                 let hh = inner.next().unwrap().as_str().parse::<u8>().unwrap();

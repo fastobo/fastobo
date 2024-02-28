@@ -102,8 +102,8 @@ impl<'i> FromPair<'i> for CreationDate {
     ) -> Result<Self, SyntaxError> {
         let inner = pair.into_inner().next().unwrap();
         match inner.as_rule() {
-            Rule::Iso8601DateTime => IsoDateTime::from_pair(inner, cache).map(From::from),
-            Rule::Iso8601Date => IsoDate::from_pair(inner, cache).map(From::from),
+            Rule::ISO8601_DateTime => IsoDateTime::from_pair(inner, cache).map(From::from),
+            Rule::ISO8601_Date => IsoDate::from_pair(inner, cache).map(From::from),
             rule => unreachable!("unexpected rule in CreationDate::from_pair: {:?}", rule),
         }
     }

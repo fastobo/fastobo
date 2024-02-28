@@ -105,7 +105,8 @@ impl<'i> FromPair<'i> for bool {
         pair: Pair<'i, Rule>,
         _cache: &Cache,
     ) -> Result<Self, SyntaxError> {
-        Ok(bool::from_str(pair.as_str()).expect("cannot fail."))
+        let inner = pair.into_inner().next().unwrap();
+        Ok(inner.as_rule() == Rule::BooleanTrue)
     }
 }
 

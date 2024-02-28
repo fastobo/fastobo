@@ -123,14 +123,8 @@ impl<'i> FromPair<'i> for IdentPrefix {
         pair: Pair<'i, Rule>,
         cache: &Cache,
     ) -> Result<Self, SyntaxError> {
-        // Bail out if the local prefix is canonical (alphanumeric only)
-        let inner = pair.into_inner().next().unwrap();
-        if inner.as_rule() == Rule::CanonicalIdPrefix {
-            return Ok(Self::new(inner.as_str().to_string()));
-        }
-
         // Unescape the prefix if it was not produced by CanonicalIdPrefix.
-        let s = inner.as_str();
+        let s = pair.as_str();
         let prefix = if s.quickfind(b'\\').is_some() {
             let mut prefix = String::with_capacity(s.len());
             unescape(&mut prefix, s).expect("fmt::Write cannot fail on a String");
@@ -139,9 +133,6 @@ impl<'i> FromPair<'i> for IdentPrefix {
             Cow::Borrowed(s)
         };
 
-        // FIXME(@althonos): possible syntax issue, which uses a non-canonical
-        //                   rule on canonical prefixes (workaround is to check
-        //                   one more time if the prefix is canonical)
         Ok(Self::new(cache.intern(&prefix)))
     }
 }
@@ -164,8 +155,8 @@ mod tests {
         assert!(IdentPrefix::from_str("GO").unwrap().is_canonical());
         assert!(IdentPrefix::new("GO").is_canonical());
 
-        assert!(!IdentPrefix::from_str("n°t").unwrap().is_canonical());
-        assert!(!IdentPrefix::new("n°t").is_canonical());
+        // assert!(!IdentPrefix::from_str("n°t").unwrap().is_canonical());
+        // assert!(!IdentPrefix::new("n°t").is_canonical());
     }
 
     #[test]

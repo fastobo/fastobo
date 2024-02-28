@@ -75,7 +75,7 @@ impl<'i> FromPair<'i> for Import {
         match inner.as_rule() {
             Rule::Id => Ident::from_pair_unchecked(inner, cache).map(From::from),
             Rule::Iri => Url::from_pair_unchecked(inner, cache).map(From::from),
-            _ => unreachable!(),
+            rule => unreachable!("{:?}", rule),
         }
     }
 }

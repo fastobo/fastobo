@@ -49,7 +49,7 @@ impl Display for IsoDate {
 }
 
 impl<'i> FromPair<'i> for IsoDate {
-    const RULE: Rule = Rule::Iso8601Date;
+    const RULE: Rule = Rule::ISO8601_Date;
     unsafe fn from_pair_unchecked(
         pair: Pair<'i, Rule>,
         _cache: &Cache,

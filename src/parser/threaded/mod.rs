@@ -8,6 +8,7 @@ use std::num::NonZeroUsize;
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
+use crossbeam_channel::Select;
 use crossbeam_channel::Sender;
 use crossbeam_channel::TryRecvError;
 use lazy_static::lazy_static;
@@ -175,7 +176,11 @@ impl<B: BufRead> Iterator for ThreadedParser<B> {
 
             // depending on the state, do something before polling
             match self.state {
-                State::Waiting => (),
+                State::Waiting => {
+                    let mut select = Select::new();
+                    select.recv(&self.r_item);
+                    select.ready();
+                }
                 State::AtEof => {
                     self.state = State::Waiting;
                     for consumer in self.consumers.iter_mut() {

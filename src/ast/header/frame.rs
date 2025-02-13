@@ -90,6 +90,20 @@ impl HeaderFrame {
         version.ok_or_else(|| CardinalityError::missing("data-version"))
     }
 
+    /// Get the declared ontology ID-space, if any is declared.
+    pub fn ontology(&self) -> Result<&UnquotedString, CardinalityError> {
+        let mut version: Option<&UnquotedString> = None;
+        for clause in &self.clauses {
+            if let HeaderClause::DataVersion(v) = clause {
+                match version {
+                    Some(_) => return Err(CardinalityError::duplicate("ontology")),
+                    None => version = Some(v),
+                }
+            }
+        }
+        version.ok_or_else(|| CardinalityError::missing("ontology"))
+    }
+
     /// Merge several OWL axioms into a single clause.
     pub fn merge_owl_axioms(&mut self) {
         let mut merged = Vec::new();

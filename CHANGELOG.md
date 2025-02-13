@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.2...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.3...HEAD
+
+## [v0.15.3] - 2025-02-13
+[v0.15.3]: https://github.com/fastobo/fastobo/compare/v0.15.2...v0.15.3
+### Added
+- `HeaderFrame::ontology` method to access the unique ontology ID space, if any.
+### Changed
+- Bump `fastobo-syntax` to `v0.8.1`.
+- Bump `blanket` to `v0.4.0`.
+- Bump `thiserror` to `v2.0`.
+### Fixed
+- Use `Select` from `crossbeam-channel` to block before receiving the final elements in the threaded parser.
+- Use blocking operations in worker threads to reduce aggressive polling.
 
 ## [v0.15.2] - 2023-05-04
 [v0.15.2]: https://github.com/fastobo/fastobo/compare/v0.15.1...v0.15.2

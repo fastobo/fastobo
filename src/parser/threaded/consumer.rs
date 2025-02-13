@@ -3,7 +3,7 @@ use std::thread::JoinHandle;
 use std::time::Duration;
 
 use crossbeam_channel::Receiver;
-use crossbeam_channel::RecvTimeoutError;
+use crossbeam_channel::RecvError;
 use crossbeam_channel::Sender;
 
 use crate::ast::EntityFrame;
@@ -76,13 +76,10 @@ impl Consumer {
         self.handle = Some(std::thread::spawn(move || {
             loop {
                 // get the string containing the entire frame
-                let msg = loop {
-                    match r_text.recv_timeout(Duration::from_micros(1)) {
-                        Ok(Some(text)) => break text,
-                        Ok(None) => return,
-                        Err(RecvTimeoutError::Timeout) => (),
-                        Err(RecvTimeoutError::Disconnected) => return,
-                    }
+                let msg = match r_text.recv() {
+                    Ok(Some(text)) => text,
+                    Ok(None) => return,
+                    Err(RecvError) => return,
                 };
 
                 // parse the string

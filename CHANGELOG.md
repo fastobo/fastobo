@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.3...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.4...HEAD
+
+## [v0.15.4] - 2025-02-13
+[v0.15.4]: https://github.com/fastobo/fastobo/compare/v0.15.3...v0.15.4
+### Fixed
+- `HeaderFrame::ontology` returning the data version instead of the ontology header clause.
 
 ## [v0.15.3] - 2025-02-13
 [v0.15.3]: https://github.com/fastobo/fastobo/compare/v0.15.2...v0.15.3

@@ -1,6 +1,5 @@
 use std::sync::Arc;
 use std::thread::JoinHandle;
-use std::time::Duration;
 
 use crossbeam_channel::Receiver;
 use crossbeam_channel::RecvError;

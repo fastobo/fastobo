@@ -94,7 +94,7 @@ impl HeaderFrame {
     pub fn ontology(&self) -> Result<&UnquotedString, CardinalityError> {
         let mut version: Option<&UnquotedString> = None;
         for clause in &self.clauses {
-            if let HeaderClause::DataVersion(v) = clause {
+            if let HeaderClause::Ontology(v) = clause {
                 match version {
                     Some(_) => return Err(CardinalityError::duplicate("ontology")),
                     None => version = Some(v),

@@ -22,7 +22,7 @@ repository = "fastobo/fastobo"
 status     = "actively-developed"
 
 [dependencies]
-darling = "0.20.1"
+darling = "0.21.3"
 syn = "2.0"
 heck = "0.5.0"
 quote = "1.0"

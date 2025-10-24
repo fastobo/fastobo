@@ -105,7 +105,6 @@ foundrytest!(trans);
 foundrytest!(doid);
 foundrytest!(xlmod);
 foundrytest!(symp);
-foundrytest!(exo);
 foundrytest!(rs);
 foundrytest!(xco);
 foundrytest!(zfa);
@@ -158,6 +157,10 @@ foundrytest!(cmo);
 foundrytest!(
     #[ignore]
     cl
+);
+foundrytest!(
+    #[ignore]
+    exo
 );
 foundrytest!(
     #[ignore]

@@ -47,11 +47,6 @@ jobs:
         profile: minimal
         toolchain: ${{ matrix.rust-toolchain }}
         override: true
-    - name: Setup cache for cargo
-      uses: actions/cache@v2
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-${{ matrix.rust-toolchain }}-${{ matrix.feature }}
     - name: Test with ${{ matrix.feature }} feature
       uses: actions-rs/cargo@v1
       with:
@@ -78,11 +73,6 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-    - name: Setup cache for cargo
-      uses: actions/cache@v2
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-${{ matrix.rust-toolchain }}-${{ matrix.feature }}
     - name: Measure code coverage with ${{ matrix.feature }} feature
       uses: actions-rs/tarpaulin@v0.1
       with:

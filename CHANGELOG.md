@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.4...HEAD
+[Unreleased]: https://github.com/fastobo/fastobo/compare/v0.15.5...HEAD
+
+## [v0.15.5] - 2025-10-25
+[v0.15.5]: https://github.com/fastobo/fastobo/compare/v0.15.4...v0.15.5
+### Added
+- `fastobo::ast::Comment` methods to access the inner string.
 
 ## [v0.15.4] - 2025-02-13
 [v0.15.4]: https://github.com/fastobo/fastobo/compare/v0.15.3...v0.15.4

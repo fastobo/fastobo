@@ -58,7 +58,7 @@ impl OboClauseVariant {
         }
     }
 
-    pub fn cardinality(&self) -> Cow<syn::Path> {
+    pub fn cardinality(&self) -> Cow<'_, syn::Path> {
         match &self.cardinality {
             Some(s) => Cow::Borrowed(s),
             None => Cow::Owned(parse_quote! { Any }),

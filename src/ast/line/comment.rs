@@ -18,6 +18,7 @@ pub struct Comment {
 }
 
 impl Comment {
+    /// Create a new `Comment` from a string.
     pub fn new<S>(value: S) -> Self
     where
         S: Into<StringType>,
@@ -25,6 +26,27 @@ impl Comment {
         Comment {
             value: value.into(),
         }
+    }
+
+    /// Extracts a string slice containing the `Comment` value.
+    pub fn as_str(&self) -> &str {
+        &self.value
+    }
+
+    /// Retrieve the underlying string from the `Comment`.
+    pub fn into_string(self) -> String {
+        self.value.into()
+    }
+
+    /// Retrieve the underlying string from the `Comment`.
+    pub fn into_inner(self) -> StringType {
+        self.value
+    }
+}
+
+impl AsRef<str> for Comment {
+    fn as_ref(&self) -> &str {
+        self.value.as_ref()
     }
 }
 
@@ -48,6 +70,25 @@ impl<'i> FromPair<'i> for Comment {
             .trim()
             .to_string();
         Ok(Comment::new(txt))
+    }
+}
+
+impl PartialEq<str> for Comment {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
+impl PartialEq<StringType> for Comment {
+    fn eq(&self, other: &StringType) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+
+#[cfg(feature = "smartstring")]
+impl PartialEq<String> for Comment {
+    fn eq(&self, other: &String) -> bool {
+        self.as_str() == other.as_str()
     }
 }
 
